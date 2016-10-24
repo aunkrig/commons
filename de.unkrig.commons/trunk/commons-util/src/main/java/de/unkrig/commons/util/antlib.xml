@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<antlib>
+   <taskdef name="simpleLogging" classname="de.unkrig.commons.util.tool.simplelogging.AntTask"/>
+   <taskdef name="logging"       classname="de.unkrig.commons.util.tool.logging.AntTask"/>
+   <taskdef name="log"           classname="de.unkrig.commons.util.tool.log.AntTask"/>
+</antlib>
