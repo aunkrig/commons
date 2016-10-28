@@ -8,28 +8,37 @@
   <packaging>pom</packaging>
 
   <name>commons-parent</name>
+
   <url>http://commons.unkrig.de/</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
   <description>de.unkrig.commons - A general-purpose Java class library</description>
+
   <organization>
   	<name>Arno Unkrig</name>
   	<url>http://unkrig.de/</url>
   </organization>
+
   <scm>
   	<url>https://svn.code.sf.net/p/loggifier/code</url>
   </scm>
+
+  <developers>
+    <developer>
+      <name>Arno Unkrig</name>
+      <email>arno@unkrig.de</email>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>New BSD License</name>
+      <url>http://unkrig.de/w/New_BSD_License</url>
+    </license>
+  </licenses>
 
   <build>
     <plugins>
