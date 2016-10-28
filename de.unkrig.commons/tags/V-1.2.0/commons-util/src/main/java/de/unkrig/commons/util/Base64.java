@@ -1,0 +1,170 @@
+
+/*
+ * de.unkrig.commons - A general-purpose Java class library
+ *
+ * Copyright (c) 2012, Arno Unkrig
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ *
+ *    1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
+ *       following disclaimer.
+ *    2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+ *       following disclaimer in the documentation and/or other materials provided with the distribution.
+ *    3. The name of the author may not be used to endorse or promote products derived from this software without
+ *       specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package de.unkrig.commons.util;
+
+import de.unkrig.commons.lang.AssertionUtil;
+
+/**
+ * A BASE64 encoder and a decoder.
+ *
+ * @see <a href="http://en.wikipedia.org/wiki/Base64">Wikipedia</a>
+ */
+public final
+class Base64 {
+
+    static { AssertionUtil.enableAssertionsForThisClass(); }
+
+    private Base64() {}
+
+    /**
+     * Encodes a series of bytes into a BASE64 string.
+     */
+    public static String
+    byteArrayToBase64(byte[] a) {
+        int          aLen                   = a.length;
+        int          numFullGroups          = aLen / 3;
+        int          numBytesInPartialGroup = aLen - 3 * numFullGroups;
+        int          resultLen              = 4 * ((aLen + 2) / 3);
+        StringBuffer result                 = new StringBuffer(resultLen);
+        char[]       intToAlpha             = Base64.INT_TO_BASE64;
+
+        int inCursor = 0;
+        for (int i = 0; i < numFullGroups; i++) {
+            final int byte0 = a[inCursor++] & 0xff;
+            final int byte1 = a[inCursor++] & 0xff;
+            final int byte2 = a[inCursor++] & 0xff;
+            result.append(intToAlpha[byte0 >> 2]);
+            result.append(intToAlpha[(byte0 << 4) & 0x3f | (byte1 >> 4)]);
+            result.append(intToAlpha[(byte1 << 2) & 0x3f | (byte2 >> 6)]);
+            result.append(intToAlpha[byte2 & 0x3f]);
+        }
+
+        if (numBytesInPartialGroup != 0) {
+            int byte0 = a[inCursor++] & 0xff;
+            result.append(intToAlpha[byte0 >> 2]);
+            if (numBytesInPartialGroup == 1) {
+                result.append(intToAlpha[(byte0 << 4) & 0x3f]);
+                result.append("==");
+            } else {
+                // assert numBytesInPartialGroup == 2;
+                int byte1 = a[inCursor++] & 0xff;
+                result.append(intToAlpha[(byte0 << 4) & 0x3f | (byte1 >> 4)]);
+                result.append(intToAlpha[(byte1 << 2) & 0x3f]);
+                result.append('=');
+            }
+        }
+
+        return result.toString();
+    }
+
+    /**
+     * This array is a lookup table that translates 6-bit positive integer index
+     * values into their "Base64 Alphabet" equivalents as specified in Table 1
+     * of RFC 2045.
+     */
+    private static final char[] INT_TO_BASE64 = {
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+        'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
+        'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3',
+        '4', '5', '6', '7', '8', '9', '+', '/',
+    };
+
+    /**
+     * Decodes a BASE64 string into a series of bytes.
+     */
+    public static byte[]
+    base64ToByteArray(String s) {
+        final byte[] alphaToInt = Base64.BASE64_TO_INT;
+        final int    sLen       = s.length();
+        final int    numGroups  = sLen / 4;
+        if (4 * numGroups != sLen) throw new IllegalArgumentException("String length must be a multiple of four.");
+
+        int missingBytesInLastGroup = 0;
+        int numFullGroups           = numGroups;
+
+        if (sLen != 0) {
+            if (s.charAt(sLen - 1) == '=') {
+                missingBytesInLastGroup++;
+                numFullGroups--;
+            }
+            if (s.charAt(sLen - 2) == '=') missingBytesInLastGroup++;
+        }
+        byte[] result = new byte[3 * numGroups - missingBytesInLastGroup];
+
+        int inCursor = 0, outCursor = 0;
+        for (int i = 0; i < numFullGroups; i++) {
+            final int ch0 = Base64.base64toInt(s.charAt(inCursor++), alphaToInt);
+            final int ch1 = Base64.base64toInt(s.charAt(inCursor++), alphaToInt);
+            final int ch2 = Base64.base64toInt(s.charAt(inCursor++), alphaToInt);
+            final int ch3 = Base64.base64toInt(s.charAt(inCursor++), alphaToInt);
+            result[outCursor++] = (byte) ((ch0 << 2) | (ch1 >> 4));
+            result[outCursor++] = (byte) ((ch1 << 4) | (ch2 >> 2));
+            result[outCursor++] = (byte) ((ch2 << 6) | ch3);
+        }
+
+        if (missingBytesInLastGroup != 0) {
+            int ch0 = Base64.base64toInt(s.charAt(inCursor++), alphaToInt);
+            int ch1 = Base64.base64toInt(s.charAt(inCursor++), alphaToInt);
+            result[outCursor++] = (byte) ((ch0 << 2) | (ch1 >> 4));
+
+            if (missingBytesInLastGroup == 1) {
+                int ch2 = Base64.base64toInt(s.charAt(inCursor++), alphaToInt);
+                result[outCursor++] = (byte) ((ch1 << 4) | (ch2 >> 2));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Translates the specified character, which is assumed to be in the
+     * "Base 64 Alphabet" into its equivalent 6-bit positive integer.
+     *
+     * @throw IllegalArgumentException or ArrayOutOfBoundsException if c is not
+     *        in the Base64 Alphabet.
+     */
+    private static int
+    base64toInt(char c, byte[] alphaToInt) {
+        int result = alphaToInt[c];
+        if (result < 0) throw new IllegalArgumentException("Illegal character " + c);
+        return result;
+    }
+
+    /**
+     * This array is a lookup table that translates unicode characters drawn
+     * from the "Base64 Alphabet" (as specified in Table 1 of RFC 2045) into
+     * their 6-bit positive integer equivalents. Characters that are not in the
+     * Base64 alphabet but fall within the bounds of the array are translated to
+     * -1.
+     */
+    private static final byte[] BASE64_TO_INT = {
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1,
+        -1, -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8,
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1, 26, 27, 28, 29,
+        30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
+    };
+}
