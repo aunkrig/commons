@@ -6,7 +6,6 @@
   <packaging>jar</packaging>
 
   <name>commons-reflect</name>
-  <url>http://commons.unkrig.de/</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -25,14 +24,7 @@
     	<version>1.2.0</version>
     </dependency>
   </dependencies>
-  <description>de.unkrig.commons - A general-purpose Java class library</description>
-  <organization>
-  	<name>Arno Unkrig</name>
-  	<url>http://unkrig.de</url>
-  </organization>
-  <scm>
-  	<url>https://svn.code.sf.net/p/loggifier/code</url>
-  </scm>
+
   <parent>
   	<groupId>de.unkrig.commons</groupId>
   	<artifactId>commons-parent</artifactId>
