@@ -44,7 +44,6 @@ import de.unkrig.commons.file.FileUtil;
 import de.unkrig.commons.file.contentsprocessing.ContentsProcessings;
 import de.unkrig.commons.file.contentsprocessing.ContentsProcessor;
 import de.unkrig.commons.file.fileprocessing.FileProcessings;
-import de.unkrig.commons.junit4.Files;
 import de.unkrig.commons.lang.protocol.PredicateUtil;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;

@@ -43,7 +43,6 @@ import de.unkrig.commons.io.pipe.Pipe;
 import de.unkrig.commons.io.pipe.PipeFactory;
 import de.unkrig.commons.io.pipe.PipeUtil;
 import de.unkrig.commons.io.pipe.PipeUtil.InputOutputStreams;
-import de.unkrig.commons.junit4.AssertIo;
 import de.unkrig.commons.lang.protocol.Producer;
 import de.unkrig.commons.lang.protocol.ProducerUtil;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;

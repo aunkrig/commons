@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package de.unkrig.commons.junit4;
+package test.pipe;
 
 import static org.junit.Assert.assertEquals;
 

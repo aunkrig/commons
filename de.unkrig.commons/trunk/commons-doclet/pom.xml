@@ -28,19 +28,19 @@
     <dependency>
     	<groupId>de.unkrig.commons</groupId>
     	<artifactId>commons-lang</artifactId>
-    	<version>1.2.0</version>
+    	<version>1.2.1</version>
     </dependency>
     <dependency>
     	<groupId>de.unkrig.commons</groupId>
     	<artifactId>commons-io</artifactId>
-    	<version>1.2.0</version>
+    	<version>1.2.1</version>
     </dependency>
   </dependencies>
 
   <parent>
   	<groupId>de.unkrig.commons</groupId>
   	<artifactId>commons-parent</artifactId>
-  	<version>1.2.0</version>
+  	<version>1.2.1</version>
   	<relativePath>../commons-parent</relativePath>
   </parent>
 </project>
