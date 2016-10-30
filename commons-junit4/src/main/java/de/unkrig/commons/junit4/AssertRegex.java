@@ -32,7 +32,6 @@ import java.util.regex.Pattern;
 
 import org.junit.Assert;
 
-import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -40,8 +39,6 @@ import de.unkrig.commons.nullanalysis.Nullable;
  */
 public final
 class AssertRegex {
-
-    static { AssertionUtil.enableAssertionsForThisClass(); }
 
     private AssertRegex() {}
 

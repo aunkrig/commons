@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package de.unkrig.commons.junit4;
+package test.fileprocessing;
 
 import java.io.BufferedInputStream;
 import java.io.File;
