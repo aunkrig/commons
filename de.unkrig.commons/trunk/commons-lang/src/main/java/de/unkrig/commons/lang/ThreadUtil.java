@@ -30,12 +30,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.unkrig.commons.lang.protocol.HardReference;
 import de.unkrig.commons.lang.protocol.RunnableWhichThrows;
 import de.unkrig.commons.lang.protocol.Stoppable;
+import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -260,4 +264,22 @@ class ThreadUtil {
         }
         for (Stoppable stoppable : stoppables) stoppable.stop();
     }
+
+    /**
+     * Produces daemon threads; handy for "{@code new} {@link ScheduledThreadPoolExecutor}{@code (... , ThreadFactory,
+     * ...)}", because with the default {@link ThreadFactory} the JVM won't terminate when it shuts down orderly (i.e.
+     * "{@code main()}" returns or "{@code System.exit()}" is invoked).
+     */
+    public static final ThreadFactory DAEMON_THREAD_FACTORY = new ThreadFactory() {
+
+        final ThreadFactory delegate = Executors.defaultThreadFactory();
+
+        @NotNullByDefault(false) @Override public Thread
+        newThread(Runnable r) {
+            Thread result = this.delegate.newThread(r);
+            result.setName("Daemon-" + result.getName());
+            result.setDaemon(true);
+            return result;
+        }
+    };
 }
