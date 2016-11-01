@@ -60,6 +60,7 @@ import java.util.zip.Checksum;
 
 import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.ExceptionUtil;
+import de.unkrig.commons.lang.ThreadUtil;
 import de.unkrig.commons.lang.protocol.Consumer;
 import de.unkrig.commons.lang.protocol.ConsumerUtil;
 import de.unkrig.commons.lang.protocol.ConsumerUtil.Produmer;
@@ -655,7 +656,8 @@ class IoUtil {
     }
 
     private static final ExecutorService EXECUTOR_SERVICE = new ScheduledThreadPoolExecutor(
-        3 * Runtime.getRuntime().availableProcessors()
+        3 * Runtime.getRuntime().availableProcessors(),
+        ThreadUtil.DAEMON_THREAD_FACTORY
     );
 
     /**
