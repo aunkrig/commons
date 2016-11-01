@@ -36,6 +36,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.unkrig.commons.lang.ThreadUtil;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
 import de.unkrig.commons.util.concurrent.ByteStreamSequentializer;
 
@@ -53,7 +54,10 @@ class ByteStreamSequentializerTest {
 
         ByteArrayOutputStream target = new ByteArrayOutputStream();
 
-        ByteStreamSequentializer s = new ByteStreamSequentializer(target, new ScheduledThreadPoolExecutor(100));
+        ByteStreamSequentializer s = new ByteStreamSequentializer(
+            target,
+            new ScheduledThreadPoolExecutor(100, ThreadUtil.DAEMON_THREAD_FACTORY)
+        );
 
         s.submit(new ConsumerWhichThrows<OutputStream, IOException>() {
 
