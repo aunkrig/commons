@@ -21,20 +21,20 @@
     <dependency>
     	<groupId>de.unkrig.commons</groupId>
     	<artifactId>commons-junit4</artifactId>
-    	<version>1.2.1</version>
+    	<version>1.2.2-SNAPSHOT</version>
     	<scope>test</scope>
     </dependency>
     <dependency>
     	<groupId>de.unkrig.commons</groupId>
     	<artifactId>commons-lang</artifactId>
-    	<version>1.2.1</version>
+    	<version>1.2.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
   <parent>
   	<groupId>de.unkrig.commons</groupId>
   	<artifactId>commons-parent</artifactId>
-  	<version>1.2.1</version>
+  	<version>1.2.2-SNAPSHOT</version>
   	<relativePath>../commons-parent</relativePath>
   </parent>
 </project>
