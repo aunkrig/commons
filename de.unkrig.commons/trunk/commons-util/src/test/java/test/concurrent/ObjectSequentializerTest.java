@@ -36,6 +36,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.unkrig.commons.lang.ThreadUtil;
 import de.unkrig.commons.lang.protocol.Consumer;
 import de.unkrig.commons.lang.protocol.ConsumerUtil;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
@@ -57,7 +58,7 @@ class ObjectSequentializerTest {
 
         ObjectSequentializer<Integer, RuntimeException> s = new ObjectSequentializer<Integer, RuntimeException>(
             ConsumerUtil.addToCollection(buffer),
-            new ScheduledThreadPoolExecutor(3)
+            new ScheduledThreadPoolExecutor(3, ThreadUtil.DAEMON_THREAD_FACTORY)
         );
 
         s.submit(new Consumer<ConsumerWhichThrows<? super Integer, ? extends RuntimeException>>() {
