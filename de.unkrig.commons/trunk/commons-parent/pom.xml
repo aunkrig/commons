@@ -83,20 +83,20 @@
       </plugin>
 
       <!-- Maven GPG plug-in: -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-gpg-plugin</artifactId>
-        <version>1.5</version>
-        <executions>
-          <execution>
-            <id>sign-artifacts</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>sign</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+<!--       <plugin> -->
+<!--         <groupId>org.apache.maven.plugins</groupId> -->
+<!--         <artifactId>maven-gpg-plugin</artifactId> -->
+<!--         <version>1.5</version> -->
+<!--         <executions> -->
+<!--           <execution> -->
+<!--             <id>sign-artifacts</id> -->
+<!--             <phase>verify</phase> -->
+<!--             <goals> -->
+<!--               <goal>sign</goal> -->
+<!--             </goals> -->
+<!--           </execution> -->
+<!--         </executions> -->
+<!--       </plugin> -->
 
       <!-- Javadoc plug-in: -->
       <plugin>
@@ -113,7 +113,6 @@
         </executions>
 
         <configuration>
-          <javadocExecutable>c:/Program Files/Java/jdk1.8.0_45/bin/javadoc.exe</javadocExecutable>
           <author>false</author>
           <use>false</use>
           <version>false</version>
