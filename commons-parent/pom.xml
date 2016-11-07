@@ -18,12 +18,12 @@
   <description>de.unkrig.commons - A general-purpose Java class library</description>
 
   <organization>
-  	<name>Arno Unkrig</name>
-  	<url>http://unkrig.de/</url>
+    <name>Arno Unkrig</name>
+    <url>http://unkrig.de/</url>
   </organization>
 
   <scm>
-  	<url>https://svn.code.sf.net/p/loggifier/code</url>
+    <url>https://svn.code.sf.net/p/loggifier/code</url>
   </scm>
 
   <developers>
@@ -82,22 +82,6 @@
         </configuration>
       </plugin>
 
-      <!-- Maven GPG plug-in: -->
-<!--       <plugin> -->
-<!--         <groupId>org.apache.maven.plugins</groupId> -->
-<!--         <artifactId>maven-gpg-plugin</artifactId> -->
-<!--         <version>1.5</version> -->
-<!--         <executions> -->
-<!--           <execution> -->
-<!--             <id>sign-artifacts</id> -->
-<!--             <phase>verify</phase> -->
-<!--             <goals> -->
-<!--               <goal>sign</goal> -->
-<!--             </goals> -->
-<!--           </execution> -->
-<!--         </executions> -->
-<!--       </plugin> -->
-
       <!-- Javadoc plug-in: -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -137,18 +121,43 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+
+    <!-- Signs all artifacts with GPG (oss.sonatype.org requires that). -->
+    <profile>
+      <id>have_gpg</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.5</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals><goal>sign</goal></goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
   <modules>
-  	<module>../commons-asm</module>
-  	<module>../commons-doclet</module>
-  	<module>../commons-file</module>
-  	<module>../commons-io</module>
-  	<module>../commons-junit4</module>
-  	<module>../commons-lang</module>
-  	<module>../commons-math</module>
-  	<module>../commons-net</module>
-  	<module>../commons-nullanalysis</module>
-  	<module>../commons-reflect</module>
-  	<module>../commons-text</module>
-  	<module>../commons-util</module>
+    <module>../commons-asm</module>
+    <module>../commons-doclet</module>
+    <module>../commons-file</module>
+    <module>../commons-io</module>
+    <module>../commons-junit4</module>
+    <module>../commons-lang</module>
+    <module>../commons-math</module>
+    <module>../commons-net</module>
+    <module>../commons-nullanalysis</module>
+    <module>../commons-reflect</module>
+    <module>../commons-text</module>
+    <module>../commons-util</module>
   </modules>
 </project>
