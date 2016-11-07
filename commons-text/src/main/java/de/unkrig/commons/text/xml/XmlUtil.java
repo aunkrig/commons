@@ -27,6 +27,7 @@
 package de.unkrig.commons.text.xml;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -87,7 +88,7 @@ class XmlUtil {
      */
     public static Document
     parse(DocumentBuilder documentBuilder, File inputFile, @Nullable String encoding)
-    throws ParserConfigurationException, SAXException, TransformerException {
+    throws ParserConfigurationException, SAXException, TransformerException, IOException {
 
         InputSource inputSource = new InputSource("file:" + inputFile.getAbsolutePath());
 
@@ -105,7 +106,7 @@ class XmlUtil {
      */
     public static Document
     parse(DocumentBuilder documentBuilder, InputSource inputSource)
-    throws ParserConfigurationException, SAXException, TransformerException {
+    throws ParserConfigurationException, SAXException, TransformerException, IOException {
 
         Transformer nullTransformer = TransformerFactory.newInstance().newTransformer();
         nullTransformer.setErrorListener(XmlUtil.SIMPLE_ERROR_LISTENER);
@@ -127,7 +128,7 @@ class XmlUtil {
         xmlReader = XmlUtil.anotateLocations(xmlReader, (EventTarget) document);
 
         // Create the SAXSource to use the annotator.
-        SAXSource   saxSource   = new SAXSource(xmlReader, inputSource);
+        SAXSource saxSource = new SAXSource(xmlReader, inputSource);
 
         // Finally read the XML into the DOM.
         try {
@@ -135,6 +136,7 @@ class XmlUtil {
         } catch (TransformerException te) {
             Throwable t = te.getException();
             if (t instanceof SAXException) throw (SAXException) t; // SUPPRESS CHECKSTYLE AvoidHidingCause
+            if (t instanceof IOException) throw (IOException) t; // SUPPRESS CHECKSTYLE AvoidHidingCause
             throw te;
         }
 
