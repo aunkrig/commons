@@ -4,7 +4,7 @@
 
   <groupId>de.unkrig.commons</groupId>
   <artifactId>commons-parent</artifactId>
-  <version>1.2.3</version>
+  <version>1.2.4-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>commons-parent</name>
@@ -39,6 +39,13 @@
       <url>http://unkrig.de/w/New_BSD_License</url>
     </license>
   </licenses>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <build>
     <plugins>
