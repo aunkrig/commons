@@ -75,7 +75,7 @@ class ClassLoaders {
 
         List<URL> result = new ArrayList<URL>();
         for (URL r : Collections.list(classLoader.getResources(name))) {
-            result.addAll(ClassLoaders.getResourceMap(r, name, includeDirectories).values());
+            result.addAll(ClassLoaders.getSubresourcesOf(r, name, includeDirectories).values());
         }
 
         return result.toArray(new URL[result.size()]);
@@ -91,7 +91,7 @@ class ClassLoaders {
      *   Otherwise, if the <var>name</var> <em>does</em> end with a slash, then this method returns a name-to-URL
      *   mapping of all resources who's names <em>begin</em> with the given <var>name</var>. Iff
      *   <var>includeDirectories</var> is {@code true}, then <var>name</var>, and all the subdirectories underneath,
-     *   are also included in the result set; their names all endig with a slash.
+     *   are also included in the result set; their names all ending with a slash.
      * </p>
      * <p>
      *   If multiple resources have the <var>name</var>, then the resources are retrieved from the <var>first</var>
@@ -112,29 +112,44 @@ class ClassLoaders {
         URL r = classLoader.getResource(name);
         if (r == null) return Collections.emptyMap();
 
-        return ClassLoaders.getResourceMap(r, name, includeDirectories);
+        return ClassLoaders.getSubresourcesOf(r, name, includeDirectories);
     }
 
-    private static Map<String, URL>
-    getResourceMap(URL r, String name, boolean includeDirectories) throws IOException {
+    /**
+     * Returns a name-to-URL mapping of all resources "under" a given root resource.
+     * <p>
+     *   If the <var>root</var> designates a "content resource" (as opposed to a "directory resource"), then the
+     *   method returns {@code Collections.singletonMap(name, rootName)}.
+     * </p>
+     * <p>
+     *   Otherwise, if the <var>root</var> designates a "directory resource", then this method returns a name-to-URL
+     *   mapping of all resources that are located "under" the root resource. Iff <var>includeDirectories</var> is
+     *   {@code true}, then <var>rootName</var>, and all the subdirectory resources underneath, are also included in
+     *   the result set; their names all ending with a slash.
+     * </p>
+     *
+     * @return Keys ending with a slash map to "directory resources", the other keys map to "content resources"
+     */
+    public static Map<String, URL>
+    getSubresourcesOf(URL root, String rootName, boolean includeDirectories) throws IOException {
 
-        String protocol = r.getProtocol();
+        String protocol = root.getProtocol();
         if (protocol.equalsIgnoreCase("jar")) {
 
-            JarURLConnection juc = (JarURLConnection) r.openConnection();
+            JarURLConnection juc = (JarURLConnection) root.openConnection();
             juc.setUseCaches(false);
 
             JarFile  jarFile  = juc.getJarFile();
             JarEntry jarEntry = juc.getJarEntry();
 
-            if (!jarEntry.isDirectory()) return Collections.singletonMap(name, r);
+            if (!jarEntry.isDirectory()) return Collections.singletonMap(rootName, root);
 
             Map<String, URL> result = new HashMap<String, URL>();
-            if (includeDirectories) result.put(name, r);
+            if (includeDirectories) result.put(rootName, root);
             for (JarEntry je : Collections.list(jarFile.entries())) {
-                if ((!je.isDirectory() || includeDirectories) && je.getName().startsWith(name)) {
+                if ((!je.isDirectory() || includeDirectories) && je.getName().startsWith(rootName)) {
                     result.put(
-                        je.getName().substring(name.length()),
+                        je.getName().substring(rootName.length()),
                         new URL("jar", null, "file:/" + juc.getJarFileURL().getFile() + "!/" + je.getName())
                     );
                 }
@@ -143,10 +158,10 @@ class ClassLoaders {
         }
 
         if (protocol.equalsIgnoreCase("file")) {
-            return ClassLoaders.getFileResources(r, name, includeDirectories);
+            return ClassLoaders.getFileResources(root, rootName, includeDirectories);
         }
 
-        return Collections.emptyMap();
+        return Collections.singletonMap(rootName, root);
     }
 
     private static Map<String, URL>
@@ -157,7 +172,7 @@ class ClassLoaders {
         if (file.isFile()) return Collections.singletonMap(name, fileUrl);
 
         if (file.isDirectory()) {
-            if (!name.endsWith("/")) name += '/';
+            if (!name.isEmpty() && !name.endsWith("/")) name += '/';
 
             Map<String, URL> result = new HashMap<String, URL>();
 
