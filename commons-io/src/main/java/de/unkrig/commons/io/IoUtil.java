@@ -45,11 +45,15 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -59,6 +63,7 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 import de.unkrig.commons.lang.AssertionUtil;
+import de.unkrig.commons.lang.ClassLoaders;
 import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.ThreadUtil;
 import de.unkrig.commons.lang.protocol.Consumer;
@@ -84,6 +89,54 @@ class IoUtil {
 
     private
     IoUtil() {}
+
+    /**
+     * Finds and returns a named resource along a "path", e.g. a Java "class path" or "source path".
+     *
+     * @param path Each element should designate either a directory or a JAR (or ZIP) file
+     * @return     {@code null} if {@code path == null}, or if the resource could not be found
+     */
+    @Nullable public static URL
+    findOnPath(@Nullable File[] path, String resourceName) throws IOException {
+
+        if (path == null) return null;
+
+        for (File directoryOrArchiveFile : path) {
+            if (directoryOrArchiveFile.isDirectory()) {
+
+                // The path entry is a directory; look for a file designated by the directory plus the resource name.
+                File file = new File(directoryOrArchiveFile, resourceName);
+                if (file.isFile()) {
+                    try {
+                        return file.toURI().toURL();
+                    } catch (MalformedURLException mue) {
+                        AssertionError ae = new AssertionError(resourceName);
+                        ae.initCause(mue);
+                        throw ae;
+                    }
+                }
+            } else
+            if (directoryOrArchiveFile.isFile()) {
+
+                // The path entry is a (regular) file; assume that the file is a JAR (or ZIP) archive file, and look
+                // for an archive entry with the name equal to the resource name.
+                URL url = new URL("jar", null, directoryOrArchiveFile.toURI().getPath() + "!/" + resourceName);
+                try {
+                    url.openConnection().connect();
+                } catch (FileNotFoundException fnfe) {
+                    return null;
+                }
+                return url;
+            } else
+            {
+
+                // The path entry designates neither a directory nor a JAR (or ZIP) archive.
+                ;
+            }
+        }
+
+        return null;
+    }
 
     /**
      * Reads the input stream until end-of-input and writes all data to the output stream. Closes none of the two
@@ -332,6 +385,46 @@ class IoUtil {
     }
 
     /**
+     * Copies the contents of the <var>inputStream</var> to the <var>outputFile</var>.
+     * <p>
+     *   The parent directory of the <var>outputFile</var> must already exist.
+     * </p>
+     *
+     * @return The number of bytes copied
+     */
+    public static long
+    copy(InputStream inputStream, boolean closeInputStream, File outputFile, CollisionStrategy collisionStrategy)
+    throws IOException {
+
+        if (!outputFile.exists()) return IoUtil.copy(inputStream, closeInputStream, outputFile);
+
+        // The outputFile already exists - we have a "collision".
+
+        switch (collisionStrategy) {
+
+        case LEAVE_OLD:
+            if (closeInputStream) inputStream.close();
+            return -1;
+
+        case OVERWRITE:
+            return IoUtil.copy(inputStream, closeInputStream, outputFile);
+
+        case IO_EXCEPTION:
+            throw new IOException("File \"" + outputFile + "\" already exists");
+
+        case IO_EXCEPTION_IF_DIFFERENT:
+            if (!IoUtil.isContentIdentical(inputStream, outputFile)) {
+                throw new IOException("File \"" + outputFile + "\" already exists with non-identical content");
+            }
+            if (closeInputStream) inputStream.close();
+            return -1;
+
+        default:
+            throw new AssertionError(collisionStrategy);
+        }
+    }
+
+    /**
      * Copies the contents of the <var>inputFile</var> to the <var>outputFile</var>.
      * <p>
      *   If the output file already exists, it is silently re-created (and its original content is lost).
@@ -400,7 +493,7 @@ class IoUtil {
     public static long
     copy(File inputFile, File outputFile, CollisionStrategy collisionStrategy) throws IOException {
 
-        if (!outputFile.exists())  return IoUtil.copy(inputFile, outputFile);
+        if (!outputFile.exists()) return IoUtil.copy(inputFile, outputFile);
 
         // The outputFile already exists - we have a "collision".
 
@@ -437,7 +530,7 @@ class IoUtil {
      *   of the <var>source</var> directory are recursively copied to the <var>destination</var> directory.
      * </p>
      * <p>
-     *   The parent directory for the <var>destinationy</var> must already exist.
+     *   The parent directory for the <var>destination</var> must already exist.
      * </p>
      */
     public static void
@@ -468,6 +561,73 @@ class IoUtil {
     }
 
     /**
+     * Copies a resource tree to a directory in the file system.
+     * <p>
+     *   Iff the <var>source</var> is a "content resource", then {@link IoUtil#copy(InputStream, boolean, File)} is
+     *   called.
+     * </p>
+     * <p>
+     *   Otherwise, the <var>destination</var> is created as a directory (if it did not exist), and all members
+     *   of the <var>source</var> directory are recursively copied to the <var>destination</var> directory.
+     * </p>
+     * <p>
+     *   The parent directory for the <var>destination</var> must already exist.
+     * </p>
+     */
+    public static void
+    copyTree(URL source, File destination, CollisionStrategy collisionStrategy) throws IOException {
+
+        Map<String, URL> rs = ClassLoaders.getSubresourcesOf(source, "", true);
+
+        if (rs.isEmpty()) return;
+
+        if (rs.size() == 1) {
+            IoUtil.copy(
+                rs.values().iterator().next().openStream(), // inputStream
+                true,                                       // closeInputStream
+                destination,                                // outputFile
+                collisionStrategy                           // collisionStrategy
+            );
+            return;
+        }
+
+        IoUtil.copySubtree(rs, "", destination, collisionStrategy);
+    }
+
+    private static void
+    copySubtree(Map<String, URL> rs, String namePrefix, File destinationDirectory, CollisionStrategy collisionStrategy)
+    throws IOException {
+
+        assert rs.get(namePrefix) != null;
+
+        if (!destinationDirectory.mkdir()) {
+            throw new IOException("Could not create destination directory \"" + destinationDirectory + "\"");
+        }
+
+        for (Entry<String, URL> e : rs.entrySet()) {
+            String name     = e.getKey();
+            URL    location = e.getValue();
+
+            if (!name.startsWith(namePrefix)) continue;
+
+            int npl = namePrefix.length();
+            if (name.length() == npl) continue;
+
+            int idx = name.indexOf('/', npl);
+            if (idx == -1) {
+                IoUtil.copy(
+                    location.openStream(),                              // inputStream
+                    true,                                               // closeInputStream
+                    new File(destinationDirectory, name.substring(npl)) // outputFile
+                );
+            } else
+            if (idx == name.length() - 1) {
+                IoUtil.copySubtree(rs, name, new File(destinationDirectory, name.substring(npl)), collisionStrategy);
+            }
+        }
+    }
+
+    /**
      * @return A {@code Comsumer<OutputStream>} which copies <var>inputStream</var> to its subject
      */
     public static ConsumerWhichThrows<OutputStream, IOException>
@@ -488,39 +648,62 @@ class IoUtil {
 
         if (file1.length() != file2.length()) return false;
 
-        InputStream is1 = new FileInputStream(file1);
+        InputStream fis1 = new FileInputStream(file1);
         try {
 
-            InputStream is2 = new FileInputStream(file2);
-            try {
-                byte[] buffer1 = new byte[4096], buffer2 = new byte[4096];
+            boolean result = IoUtil.isContentIdentical(fis1, file2);
 
-                for (;;) {
+            fis1.close();
 
-                    // Read next chunk from file1.
-                    int n1 = is1.read(buffer1);
-                    if (n1 == -1) break;
-                    for (int off = 0; off < n1;) {
-
-                        // Read next chunk from file2.
-                        int n2 = is2.read(buffer2, off, n1 - off);
-                        if (n2 == -1) return false;
-
-                        // Compare chunk contents.
-                        for (; n2 > 0; n2--, off++) {
-                            if (buffer2[off] != buffer1[off]) return false;
-                        }
-                    }
-                }
-
-                is2.close();
-            } finally {
-                try { is2.close(); } catch (Exception e) {}
-            }
-
-            is1.close();
+            return result;
         } finally {
-            try { is1.close(); } catch (Exception e) {}
+            try { fis1.close(); } catch (Exception e) {}
+        }
+    }
+
+    /**
+     * @return Whether the byte sequences produced by the <var>stream</var> is identical with the contents of the
+     *         <var>file</var>
+     */
+    private static boolean
+    isContentIdentical(InputStream stream, File file) throws FileNotFoundException, IOException {
+
+        InputStream fis = new FileInputStream(file);
+        try {
+            boolean result = IoUtil.isContentIdentical(stream, fis);
+
+            fis.close();
+
+            return result;
+        } finally {
+            try { fis.close(); } catch (Exception e) {}
+        }
+    }
+
+    /**
+     * @return Whether the byte sequences produced by the two streams are identical
+     */
+    private static boolean
+    isContentIdentical(InputStream stream1, InputStream stream2) throws IOException {
+
+        byte[] buffer1 = new byte[4096], buffer2 = new byte[4096];
+
+        for (;;) {
+
+            // Read next chunk from file1.
+            int n1 = stream1.read(buffer1);
+            if (n1 == -1) break;
+            for (int off = 0; off < n1;) {
+
+                // Read next chunk from file2.
+                int n2 = stream2.read(buffer2, off, n1 - off);
+                if (n2 == -1) return false;
+
+                // Compare chunk contents.
+                for (; n2 > 0; n2--, off++) {
+                    if (buffer2[off] != buffer1[off]) return false;
+                }
+            }
         }
 
         return true;
