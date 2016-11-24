@@ -96,26 +96,14 @@ class LevelFilteredPrinter extends AbstractPrinter {
     @Override public void
     error(@Nullable String message) { this.delegate.error(message); }
 
-    @Override public boolean
-    isWarnEnabled() { return this.printWarnings; }
-
     @Override public void
     warn(@Nullable String message) { if (this.printWarnings) this.delegate.warn(message); }
-
-    @Override public boolean
-    isInfoEnabled() { return this.printInfos; }
 
     @Override public void
     info(@Nullable String message) { if (this.printInfos) this.delegate.info(message); }
 
-    @Override public boolean
-    isVerboseEnabled() { return this.printVerbose; }
-
     @Override public void
     verbose(@Nullable String message) { if (this.printVerbose) this.delegate.verbose(message); }
-
-    @Override public boolean
-    isDebugEnabled() { return this.printDebug; }
 
     @Override public void
     debug(@Nullable String message) { if (this.printDebug) this.delegate.debug(message); }

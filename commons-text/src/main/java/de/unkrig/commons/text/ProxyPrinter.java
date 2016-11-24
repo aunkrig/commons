@@ -29,7 +29,8 @@ package de.unkrig.commons.text;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
- * A {@link Printer} that farwards all method calls to a <var>delegate</var> printer.
+ * An {@link AbstractPrinter} that farwards all method calls to a <var>delegate</var> printer. Can serve as a base
+ * class when you want to override only a few of {@link AbstractPrinter}'s methods.
  */
 public
 class ProxyPrinter extends AbstractPrinter {
@@ -41,14 +42,20 @@ class ProxyPrinter extends AbstractPrinter {
      */
     public ProxyPrinter(Printer delegate) { this.delegate = delegate; }
 
-    @Override public boolean isWarnEnabled()    { return this.delegate.isWarnEnabled();    }
-    @Override public boolean isInfoEnabled()    { return this.delegate.isInfoEnabled();    }
-    @Override public boolean isVerboseEnabled() { return this.delegate.isVerboseEnabled(); }
-    @Override public boolean isDebugEnabled()   { return this.delegate.isDebugEnabled();   }
+    @Override public void error(@Nullable String message)                                   { this.delegate.error(message);               }
+    @Override public void error(@Nullable String message, @Nullable Throwable t)            { this.delegate.error(message, t);            }
+    @Override public void error(String pattern, Object... arguments)                        { this.delegate.error(pattern, arguments);    }
+    @Override public void error(String pattern, @Nullable Throwable t, Object... arguments) { this.delegate.error(pattern, t, arguments); }
 
-    @Override public void error(@Nullable String message)   { this.delegate.error(message);   }
-    @Override public void warn(@Nullable String message)    { this.delegate.warn(message);    }
-    @Override public void info(@Nullable String message)    { this.delegate.info(message);    }
-    @Override public void verbose(@Nullable String message) { this.delegate.verbose(message); }
-    @Override public void debug(@Nullable String message)   { this.delegate.debug(message);   }
+    @Override public void warn(@Nullable String message)                                    { this.delegate.warn(message);                }
+    @Override public void warn(String pattern, Object... arguments)                         { this.delegate.warn(pattern, arguments);     }
+
+    @Override public void info(@Nullable String message)                                    { this.delegate.info(message);                }
+    @Override public void info(String pattern, Object... arguments)                         { this.delegate.info(pattern, arguments);     }
+
+    @Override public void verbose(@Nullable String message)                                 { this.delegate.verbose(message);             }
+    @Override public void verbose(String pattern, Object... arguments)                      { this.delegate.verbose(pattern, arguments);  }
+
+    @Override public void debug(@Nullable String message)                                   { this.delegate.debug(message);               }
+    @Override public void debug(String pattern, Object... arguments)                        { this.delegate.debug(pattern, arguments);    }
 }

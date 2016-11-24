@@ -107,7 +107,10 @@ class Printers {
 
     private Printers() {}
 
-    private static final Printer DEFAULT_PRINTER = new AbstractPrinter() {
+    /**
+     * Prints errors and warnings to {@link System#err}, and all other messages to {@link System#out}.
+     */
+    public static final AbstractPrinter DEFAULT_PRINTER = new AbstractPrinter() {
         @Override public void error(@Nullable String message)   { System.err.println(message); }
         @Override public void warn(@Nullable String message)    { System.err.println(message); }
         @Override public void info(@Nullable String message)    { System.out.println(message); }
@@ -115,30 +118,39 @@ class Printers {
         @Override public void debug(@Nullable String message)   { System.out.println(message); }
     };
 
-    private static final ThreadLocal<Printer> THREAD_LOCAL_PRINTER = new InheritableThreadLocal<Printer>() {
-        @Override protected Printer initialValue() { return Printers.DEFAULT_PRINTER; }
+    /**
+     * Prints errors and warnings to {@link System#err}, INFO messages to {@link System#out}, and ignores
+     * VERBOSE and DEBUG messages.
+     */
+    public static final AbstractPrinter NORMAL_PRINTER = new AbstractPrinter() {
+        @Override public void error(@Nullable String message)   { System.err.println(message); }
+        @Override public void warn(@Nullable String message)    { System.err.println(message); }
+        @Override public void info(@Nullable String message)    { System.out.println(message); }
+        @Override public void verbose(@Nullable String message) {                              }
+        @Override public void debug(@Nullable String message)   {                              }
     };
 
     /**
-     * @return the context printer for this thread
+     * Ignores all messages.
      */
-    public static Printer get() { return Printers.THREAD_LOCAL_PRINTER.get(); }
+    public static final AbstractPrinter MUTE_PRINTER = new AbstractPrinter() {
+        @Override public void error(@Nullable String message)   {}
+        @Override public void warn(@Nullable String message)    {}
+        @Override public void info(@Nullable String message)    {}
+        @Override public void verbose(@Nullable String message) {}
+        @Override public void debug(@Nullable String message)   {}
+    };
+
+    /**
+     * @deprecated Use {@link AbstractPrinter#getContextPrinter()} instead
+     */
+    @Deprecated public static Printer get() { return AbstractPrinter.getContextPrinter(); }
 
     /** Prints an error condition on the context printer. */
     public static void
     error(@Nullable String message) { Printers.get().error(message); }
 
-    /**
-     * Prints an error condition on the context printer.
-     *
-     * @see MessageFormat
-     */
-    public static void
-    error(String pattern, Object... arguments) { Printers.get().error(pattern, arguments); }
-
-    /** Prints an error condition on the context printer. */
-    public static void
-    error(@Nullable String message, Throwable t) { Printers.get().error(message, t); }
+    // ======================= MESSAGE PROCESSING =======================
 
     /**
      * Prints an error condition on the context printer.
@@ -146,11 +158,27 @@ class Printers {
      * @see MessageFormat
      */
     public static void
-    error(String pattern, Throwable t, Object... arguments) { Printers.get().error(pattern, t, arguments); }
+    error(String pattern, Object... arguments) { AbstractPrinter.getContextPrinter().error(pattern, arguments); }
 
-    /** Prints a warning condition on the context printer. */
+    /**
+     * Prints an error condition on the context printer.
+     */
     public static void
-    warn(@Nullable String message) { Printers.get().warn(message); }
+    error(@Nullable String message, Throwable t) { AbstractPrinter.getContextPrinter().error(message, t); }
+
+    /**
+     * Prints an error condition on the context printer.
+     *
+     * @see MessageFormat
+     */
+    public static void
+    error(String pattern, Throwable t, Object... arguments) { AbstractPrinter.getContextPrinter().error(pattern, t, arguments); }
+
+    /**
+     * Prints a warning condition on the context printer.
+     */
+    public static void
+    warn(@Nullable String message) { AbstractPrinter.getContextPrinter().warn(message); }
 
     /**
      * Prints a warning condition on the context printer.
@@ -158,11 +186,13 @@ class Printers {
      * @see MessageFormat
      */
     public static void
-    warn(String pattern, Object... arguments) { Printers.get().warn(pattern, arguments); }
+    warn(String pattern, Object... arguments) { AbstractPrinter.getContextPrinter().warn(pattern, arguments); }
 
-    /** Prints an informative ("normal") message on the context printer. */
+    /**
+     * Prints an informative ("normal") message on the context printer.
+     */
     public static void
-    info(@Nullable String message) { Printers.get().info(message); }
+    info(@Nullable String message) { AbstractPrinter.getContextPrinter().info(message); }
 
     /**
      * Prints an informative ("normal") message on the context printer.
@@ -170,11 +200,13 @@ class Printers {
      * @see MessageFormat
      */
     public static void
-    info(String pattern, Object... arguments) { Printers.get().info(pattern, arguments); }
+    info(String pattern, Object... arguments) { AbstractPrinter.getContextPrinter().info(pattern, arguments); }
 
-    /** Prints a verbose message on the context printer. */
+    /**
+     * Prints a verbose message on the context printer.
+     */
     public static void
-    verbose(@Nullable String message) { Printers.get().verbose(message); }
+    verbose(@Nullable String message) { AbstractPrinter.getContextPrinter().verbose(message); }
 
     /**
      * Prints a verbose message on the context printer.
@@ -182,11 +214,13 @@ class Printers {
      * @see MessageFormat
      */
     public static void
-    verbose(String pattern, Object... arguments) { Printers.get().verbose(pattern, arguments); }
+    verbose(String pattern, Object... arguments) { AbstractPrinter.getContextPrinter().verbose(pattern, arguments); }
 
-    /** Prints a debug message on the context printer. */
+    /**
+     * Prints a debug message on the context printer.
+     */
     public static void
-    debug(@Nullable String message) { Printers.get().debug(message); }
+    debug(@Nullable String message) { AbstractPrinter.getContextPrinter().debug(message); }
 
     /**
      * Prints a debug message on the context printer.
@@ -194,38 +228,28 @@ class Printers {
      * @see MessageFormat
      */
     public static void
-    debug(String pattern, Object... arguments) { Printers.get().debug(pattern, arguments); }
+    debug(String pattern, Object... arguments) { AbstractPrinter.getContextPrinter().debug(pattern, arguments); }
+
+    // ======================= MESSAGE PROCESSING =======================
 
     /**
-     * Replaces the context printer with the given {@code printer} while the {@code runnable} is running.
+     * @deprecated Use {@link AbstractPrinter#run(Runnable)} instead
      */
-    public static synchronized void
+    @Deprecated public static synchronized void
     withPrinter(Printer printer, Runnable runnable) {
 
-        final Printer oldThreadPrinter = Printers.get();
-
-        Printers.set(printer);
-        try {
-            runnable.run();
-        } finally {
-            Printers.set(oldThreadPrinter);
-        }
+        AbstractPrinter ap = printer instanceof AbstractPrinter ? (AbstractPrinter) printer : AbstractPrinter.fromPrinter(printer);
+        ap.run(runnable);
     }
 
     /**
-     * Replaces the context printer with the given {@code printer} while the {@code runnable} is running.
+     * @deprecated Use {@link AbstractPrinter#run(RunnableWhichThrows)} instead
      */
-    public static synchronized <EX extends Throwable> void
+    @Deprecated public static synchronized <EX extends Throwable> void
     withPrinter(Printer printer, RunnableWhichThrows<EX> runnable) throws EX {
 
-        final Printer oldThreadPrinter = Printers.get();
-
-        Printers.set(printer);
-        try {
-            runnable.run();
-        } finally {
-            Printers.set(oldThreadPrinter);
-        }
+        AbstractPrinter ap = printer instanceof AbstractPrinter ? (AbstractPrinter) printer : AbstractPrinter.fromPrinter(printer);
+        ap.run(runnable);
     }
 
     /**
@@ -246,7 +270,7 @@ class Printers {
         final PrintWriter pw = new PrintWriter(file);
         try {
 
-            Printers.redirectInfo(pw, runnable);
+            AbstractPrinter.getContextPrinter().run(runnable);
             pw.close();
         } finally {
             try { pw.close(); } catch (Exception e) {}
@@ -254,25 +278,12 @@ class Printers {
     }
 
     /**
-     * Runs the <var>runnable</var> with its INFO output redirected to the <var>writer</var>. Iff the <var>writer</var>
-     * is {@code null}, then the INFO output is <em>not</em> redirected.
+     * @deprecated Use {@link AbstractPrinter#redirectInfo(Writer)} instead
      */
+    @Deprecated
     public static <EX extends Throwable> void
     redirectInfo(@Nullable Writer writer, RunnableWhichThrows<EX> runnable) throws EX {
-
-        if (writer == null) {
-            runnable.run();
-            return;
-        }
-
-        final PrintWriter pw = writer instanceof PrintWriter ? (PrintWriter) writer : new PrintWriter(writer);
-
-        Printers.withPrinter(
-            new ProxyPrinter(Printers.get()) {
-                @Override public void info(@Nullable String message) { pw.println(message); }
-            },
-            runnable
-        );
+        AbstractPrinter.getContextPrinter().redirectInfo(writer).run(runnable);
     }
 
     /**
@@ -284,25 +295,6 @@ class Printers {
         @Nullable final ConsumerWhichThrows<? super String, ? extends RuntimeException> infoConsumer,
         RunnableWhichThrows<? extends EX>                                               runnable
     ) throws EX {
-
-        if (infoConsumer == null) {
-            runnable.run();
-            return;
-        }
-
-        Printers.withPrinter(
-            new ProxyPrinter(Printers.get()) {
-
-                @Override public void
-                info(@Nullable String message) { if (message != null) infoConsumer.consume(message); }
-            },
-            runnable
-        );
+        AbstractPrinter.getContextPrinter().redirectInfo(infoConsumer).run(runnable);
     }
-
-    /**
-     * Sets the context printer for this thread and all its (existing and future) child threads (unless they have set
-     * their own context printer, or until they set their own context printer).
-     */
-    private static void set(Printer printer) { Printers.THREAD_LOCAL_PRINTER.set(printer); }
 }
