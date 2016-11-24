@@ -32,6 +32,7 @@ import java.io.OutputStream;
 
 import de.unkrig.commons.io.ByteFilterInputStream;
 import de.unkrig.commons.lang.protocol.Predicate;
+import de.unkrig.commons.lang.protocol.PredicateUtil;
 
 /**
  * A {@link ContentsTransformer} that delegates contents transformation to one of two delegates, depending on whether
@@ -43,6 +44,32 @@ class SelectiveContentsTransformer implements ContentsTransformer {
     private final Predicate<? super String> namePredicate;
     private final ContentsTransformer       transformer;
     private final ContentsTransformer       delegate;
+
+    /**
+     * Equivalent with {@link SelectiveContentsTransformer#SelectiveContentsTransformer(Predicate, ContentsTransformer,
+     * ContentsTransformer)}, but conducts certain optimizations.
+     * <ul>
+     *   <li>When <var>namePredicate</var> is {@link PredicateUtil#always()}</li>
+     *   <li>When <var>namePredicate</var> is {@link PredicateUtil#never()}</li>
+     *   <li>When <var>transformer</var> is {@link ContentsTransformations#COPY}</li>
+     *   <li>When <var>delegate</var> is {@link ContentsTransformations#COPY}</li>
+     * </ul>
+     */
+    public static ContentsTransformer
+    create(
+        Predicate<? super String> namePredicate,
+        ContentsTransformer       transformer,
+        ContentsTransformer       delegate
+    ) {
+
+        if (namePredicate == PredicateUtil.always()) return ContentsTransformations.chain(transformer, delegate);
+
+        if (namePredicate == PredicateUtil.never()) return delegate;
+
+        if (transformer == ContentsTransformations.COPY) return delegate;
+
+        return new SelectiveContentsTransformer(namePredicate, transformer, delegate);
+    }
 
     /**
      * If the {@code namePredicate} does not match the node's name, then the {@code delegate} is called.
