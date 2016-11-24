@@ -70,11 +70,6 @@ interface Printer {
     // ---------------------------------------------------------------------------------------------------------------
 
     /**
-     * @return Whether the {@link #warn(String)} methods have any effect
-     */
-    boolean isWarnEnabled();
-
-    /**
      * Prints a warning condition.
      */
     void warn(@Nullable String message);
@@ -87,11 +82,6 @@ interface Printer {
     void warn(String pattern, Object... arguments);
 
     // ---------------------------------------------------------------------------------------------------------------
-
-    /**
-     * @return Whether the {@link #info(String)} methods have any effect
-     */
-    boolean isInfoEnabled();
 
     /**
      * Prints an informative ("normal") message.
@@ -108,11 +98,6 @@ interface Printer {
     // ---------------------------------------------------------------------------------------------------------------
 
     /**
-     * @return Whether the {@link #verbose(String)} methods have any effect
-     */
-    boolean isVerboseEnabled();
-
-    /**
      * Prints a verbose message.
      */
     void verbose(@Nullable String message);
@@ -125,11 +110,6 @@ interface Printer {
     void verbose(String pattern, Object... arguments);
 
     // ---------------------------------------------------------------------------------------------------------------
-
-    /**
-     * @return Whether the {@link #debug(String)} methods have any effect
-     */
-    boolean isDebugEnabled();
 
     /**
      * Prints a debug message.

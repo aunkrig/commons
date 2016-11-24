@@ -31,13 +31,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import junit.framework.TestCase;
 import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.protocol.RunnableWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.AbstractPrinter;
-import de.unkrig.commons.text.Printer;
-import de.unkrig.commons.text.Printers;
+import junit.framework.TestCase;
 
 /**
  * Utility methods related to JUNIT and {@code de.unkrig.commons.text}.
@@ -57,7 +55,7 @@ class AssertPrinters {
     public static <EX extends Exception> void
     assertMessages(RunnableWhichThrows<EX> runnable, String... expectedMessages) throws EX {
 
-        assertEquals(Arrays.asList(expectedMessages), recordMessages(runnable));
+        AssertPrinters.assertEquals(Arrays.asList(expectedMessages), AssertPrinters.recordMessages(runnable));
     }
 
     /**
@@ -68,7 +66,7 @@ class AssertPrinters {
     public static <EX extends Exception> void
     assertContainsMessages(RunnableWhichThrows<EX> runnable, String... expectedMessages) throws EX {
 
-        assertContainsAll(Arrays.asList(expectedMessages), recordMessages(runnable));
+        AssertPrinters.assertContainsAll(Arrays.asList(expectedMessages), AssertPrinters.recordMessages(runnable));
     }
 
     /**
@@ -78,11 +76,11 @@ class AssertPrinters {
      *
      * @return The printed messages, in chronological order
      */
-    private static <EX extends Exception> List<String>
+    public static <EX extends Exception> List<String>
     recordMessages(RunnableWhichThrows<EX> runnable) throws EX {
 
         final List<String> result   = new ArrayList<String>();
-        Printer            recorder = new AbstractPrinter() {
+        AbstractPrinter    recorder = new AbstractPrinter() {
             @Override public void error(@Nullable String message)   { result.add("E: " + message); }
             @Override public void warn(@Nullable String message)    { result.add("W: " + message); }
             @Override public void info(@Nullable String message)    { result.add("I: " + message); }
@@ -90,7 +88,7 @@ class AssertPrinters {
             @Override public void debug(@Nullable String message)   { result.add("D: " + message); }
         };
 
-        Printers.withPrinter(recorder, runnable);
+        recorder.run(runnable);
 
         return result;
     }
@@ -99,7 +97,7 @@ class AssertPrinters {
      * Asserts that the two lists are equal, element by element.
      */
     public static void
-    assertEquals(List<?> expected, List<?> actual) { assertEquals(null, expected, actual); }
+    assertEquals(List<?> expected, List<?> actual) { AssertPrinters.assertEquals(null, expected, actual); }
 
     /**
      * Asserts that the two lists are equal, element by element.
@@ -124,7 +122,7 @@ class AssertPrinters {
      * Asserts that <var>actual</var> contains all of <var>expected</var>.
      */
     public static void
-    assertContainsAll(Collection<?> expected, Collection<?> actual) { assertContainsAll(null, expected, actual); }
+    assertContainsAll(Collection<?> expected, Collection<?> actual) { AssertPrinters.assertContainsAll(null, expected, actual); }
 
     /**
      * Asserts that <var>actual</var> contains all of <var>expected</var>.
