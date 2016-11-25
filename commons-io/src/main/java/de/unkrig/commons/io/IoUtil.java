@@ -120,7 +120,7 @@ class IoUtil {
 
                 // The path entry is a (regular) file; assume that the file is a JAR (or ZIP) archive file, and look
                 // for an archive entry with the name equal to the resource name.
-                URL url = new URL("jar", null, directoryOrArchiveFile.toURI().getPath() + "!/" + resourceName);
+                URL url = new URL("jar", null, directoryOrArchiveFile.toURI() + "!/" + resourceName);
                 try {
                     url.openConnection().connect();
                 } catch (FileNotFoundException fnfe) {
