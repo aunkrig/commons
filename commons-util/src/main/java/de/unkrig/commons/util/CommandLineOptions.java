@@ -619,7 +619,10 @@ class CommandLineOptions {
 
         private Method
         methodFor(CommandLineOption option) {
-            return AssertionUtil.notNull(this.optionToMethod.get(option), option.toString());
+            return AssertionUtil.notNull(
+                this.optionToMethod.get(option),
+                option.toString() + "; available are " + this.optionToMethod.keySet()
+            );
         }
 
         /**
