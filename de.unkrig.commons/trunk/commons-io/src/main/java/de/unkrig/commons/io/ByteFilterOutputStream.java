@@ -2,7 +2,7 @@
 /*
  * de.unkrig.commons - A general-purpose Java class library
  *
- * Copyright (c) 2011, Arno Unkrig
+ * Copyright (c) 2016, Arno Unkrig
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -27,8 +27,9 @@
 package de.unkrig.commons.io;
 
 import java.io.FilterInputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
@@ -42,60 +43,53 @@ import de.unkrig.commons.nullanalysis.Nullable;
  * methods of this object.
  */
 public
-class ByteFilterInputStream extends FilterInputStream {
+class ByteFilterOutputStream extends FilterOutputStream {
 
     private final Thread               worker;
     @Nullable private IOException      byteFilterIOException;
     @Nullable private RuntimeException byteFilterRuntimeException;
 
     /**
-     * @see ByteFilterInputStream
+     * @see ByteFilterOutputStream
      */
     public
-    ByteFilterInputStream(final InputStream in, final ByteFilter<?> byteFilter) {
-        super(new PipedInputStream());
+    ByteFilterOutputStream(final ByteFilter<?> byteFilter, final OutputStream out) {
+        super(new PipedOutputStream());
 
-        final PipedOutputStream pos;
+        final PipedInputStream pis;
         try {
-            pos = new PipedOutputStream((PipedInputStream) this.in);
+            pis = new PipedInputStream((PipedOutputStream) this.out);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
-        this.worker = new Thread("ByteFilterInputStream") {
+        this.worker = new Thread("ByteFilterOutputStream") {
 
             @Override public void
             run() {
                 try {
-                    byteFilter.run(in, pos);
+                    byteFilter.run(pis, out);
                 } catch (IOException ioe) {
-                    ByteFilterInputStream.this.byteFilterIOException = ioe;
+                    ByteFilterOutputStream.this.byteFilterIOException = ioe;
                 } catch (RuntimeException re) {
-                    ByteFilterInputStream.this.byteFilterRuntimeException = re;
+                    ByteFilterOutputStream.this.byteFilterRuntimeException = re;
                 } finally {
 
-                    // This will signal "end-of-input" to the read side.
-                    try { pos.close(); } catch (IOException ioe) {}
+                    // This will signal "end-of-input" to the write side.
+                    try { out.close(); } catch (IOException ioe) {}
                 }
             }
         };
         this.worker.start();
     }
 
-    @Override public int
-    read() throws IOException {
-        byte[] buffer = new byte[1];
-        for (;;) {
-            int n = this.read(buffer, 0, 1);
-            if (n == -1) return -1;
-            if (n == 1) return 0xff & buffer[0];
-            if (n != 0) throw new IllegalStateException();
-        }
-    }
 
-    @NotNullByDefault(false) @Override public int
-    read(byte[] b, int off, int len) throws IOException {
+    @Override public void
+    write(int b) throws IOException { this.write(new byte[] { (byte) b }, 0, 1); }
 
-        final int n = this.in.read(b, off, len);
+    @NotNullByDefault(false) @Override public void
+    write(byte[] b, int off, int len) throws IOException {
+
+        this.out.write(b, off, len);
 
         if (this.byteFilterIOException != null) {
 
@@ -110,8 +104,6 @@ class ByteFilterInputStream extends FilterInputStream {
             // call stack of THIS thread as well.
             throw ExceptionUtil.wrap("ByteFilterInputStream", this.byteFilterRuntimeException);
         }
-
-        return n;
     }
 
     @Override public void
@@ -120,7 +112,7 @@ class ByteFilterInputStream extends FilterInputStream {
 
             // This will put the pipe into the "broken" state, and the worker thread is very likely to terminate
             // quickly.
-            this.in.close();
+            this.out.close();
         } finally {
             for (;;) {
                 try {
