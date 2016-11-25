@@ -1,65 +1,63 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-  <artifactId>commons-file</artifactId>
-  <packaging>jar</packaging>
+	<artifactId>commons-file</artifactId>
+	<packaging>jar</packaging>
 
-  <name>commons-file</name>
+	<name>commons-file</name>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 
-  <dependencies>
-    <dependency>
-    	<groupId>de.unkrig.commons</groupId>
-    	<artifactId>commons-lang</artifactId>
-    	<version>1.2.4-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-    	<groupId>de.unkrig.commons</groupId>
-    	<artifactId>commons-io</artifactId>
-    	<version>1.2.4-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-    	<groupId>de.unkrig.commons</groupId>
-    	<artifactId>commons-util</artifactId>
-    	<version>1.2.4-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-    	<groupId>de.unkrig.commons</groupId>
-    	<artifactId>commons-junit4</artifactId>
-    	<version>1.2.4-SNAPSHOT</version>
-    </dependency>
+	<dependencies>
+		<dependency>
+			<groupId>de.unkrig.commons</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>1.2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>de.unkrig.commons</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>1.2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>de.unkrig.commons</groupId>
+			<artifactId>commons-util</artifactId>
+			<version>1.2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>de.unkrig.commons</groupId>
+			<artifactId>commons-junit4</artifactId>
+			<version>1.2.4</version>
+		</dependency>
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-    	<groupId>org.apache.commons</groupId>
-    	<artifactId>commons-compress</artifactId>
-    	<version>1.9</version>
-    </dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.9</version>
+		</dependency>
 
-	<!--
-		For unknown reasons, apache common compress fails to declare the following dependency, although it definitely
-		depends on it.
-	-->
-    <dependency>
-    	<groupId>org.tukaani</groupId>
-    	<artifactId>xz</artifactId>
-    	<version>1.5</version>
-    </dependency>
-  </dependencies>
+		<!-- For unknown reasons, apache common compress fails to declare the following 
+			dependency, although it definitely depends on it. -->
+		<dependency>
+			<groupId>org.tukaani</groupId>
+			<artifactId>xz</artifactId>
+			<version>1.5</version>
+		</dependency>
+	</dependencies>
 
-  <parent>
-  	<groupId>de.unkrig.commons</groupId>
-  	<artifactId>commons-parent</artifactId>
-  	<version>1.2.4-SNAPSHOT</version>
-  	<relativePath>../commons-parent</relativePath>
-  </parent>
+	<parent>
+		<groupId>de.unkrig.commons</groupId>
+		<artifactId>commons-parent</artifactId>
+		<version>1.2.4</version>
+		<relativePath>../commons-parent</relativePath>
+	</parent>
 </project>
