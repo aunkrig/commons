@@ -49,6 +49,8 @@ import de.unkrig.commons.file.filetransformation.FileTransformations.NameAndCont
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormatFactory;
 import de.unkrig.commons.file.org.apache.commons.compress.compressors.CompressionFormat;
+import de.unkrig.commons.io.ByteFilterInputStream;
+import de.unkrig.commons.io.ByteFilterOutputStream;
 import de.unkrig.commons.io.IoUtil;
 import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.ExceptionUtil;
@@ -388,5 +390,57 @@ class ContentsTransformations {
                 return null;
             }
         };
+    }
+
+    /**
+     * Creates and returns a {@link ContentsTransformer}s that "chains" the two delegates.
+     * <p>
+     *   If neither of the two delegate transformers is {@link ContentsTransformations#COPY}, then the returned
+     *   transfomer, when executed, will create and later joind one background thread.
+     * </p>
+     */
+    public static ContentsTransformer
+    chain(final ContentsTransformer transformer1, final ContentsTransformer transformer2) {
+
+        if (transformer1 == ContentsTransformations.COPY) return transformer2;
+
+        if (transformer2 == ContentsTransformations.COPY) return transformer1;
+
+        return new ContentsTransformer() {
+
+            @Override public void
+            transform(final String name, InputStream is, OutputStream os) throws IOException {
+
+                transformer2.transform(
+                    name,
+                    new ByteFilterInputStream(is, new ContentsTransformerByteFilter(transformer1, name)),
+                    os
+                );
+            }
+        };
+    }
+
+    /**
+     * Creates and returns an {@link InputStream} that reads from the <var>delegate</var> and <em>through</em> the
+     * <var>transformer</var>
+     *
+     * @param name Designates the contents that is transformed; may be used by the <var>transformer</var> e.g. to
+     *             decide how to transform the contents
+     */
+    public static InputStream
+    asInputStream(InputStream delegate, ContentsTransformer transformer, String name) {
+        return new ByteFilterInputStream(delegate, new ContentsTransformerByteFilter(transformer, name));
+    }
+
+    /**
+     * Creates and returns an {@link OutputStream} that writes <em>through</em> the <var>transformer</var> and to the
+     * <var>delegate</var>.
+     *
+     * @param name Designates the contents that is transformed; may be used by the <var>transformer</var> e.g. to
+     *             decide how to transform the contents
+     */
+    public static OutputStream
+    asOutputStream(ContentsTransformer transformer, OutputStream delegate, String name) {
+        return new ByteFilterOutputStream(new ContentsTransformerByteFilter(transformer, name), delegate);
     }
 }
