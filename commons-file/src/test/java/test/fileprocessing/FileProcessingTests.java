@@ -125,6 +125,7 @@ class FileProcessingTests {
             pathPredicate,                                                       // pathPredicate,
             FileProcessings.recursiveCompressedAndArchiveFileProcessor(          // regularFileProcessor
                 PredicateUtil.<String>always(),                      // lookIntoFormat
+                PredicateUtil.<String>always(),                      // pathPredicate
                 ContentsProcessings.<Void>nopArchiveCombiner(),      // archiveEntryCombiner
                 pr,                                                  // contentsProcessor
                 exceptionHandler                                     // exceptionHandler
