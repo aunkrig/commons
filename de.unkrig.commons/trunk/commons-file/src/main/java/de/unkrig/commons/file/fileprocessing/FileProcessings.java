@@ -405,6 +405,7 @@ class FileProcessings {
     public static <T> FileProcessor<T>
     recursiveCompressedAndArchiveFileProcessor(
         final Predicate<? super String>     lookIntoFormat,
+        final Predicate<? super String>     pathPredicate,
         ArchiveCombiner<T>                  archiveEntryCombiner,
         final ContentsProcessor<T>          delegate,
         final ExceptionHandler<IOException> exceptionHandler
@@ -412,6 +413,7 @@ class FileProcessings {
 
         ContentsProcessor<T> tmp = ContentsProcessings.recursiveCompressedAndArchiveContentsProcessor(
             lookIntoFormat,
+            pathPredicate,
             archiveEntryCombiner,
             delegate,
             exceptionHandler
