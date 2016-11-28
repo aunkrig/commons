@@ -429,6 +429,9 @@ class ContentsTransformations {
      */
     public static InputStream
     asInputStream(InputStream delegate, ContentsTransformer transformer, String name) {
+
+        if (transformer == ContentsTransformations.COPY) return delegate;
+
         return new ByteFilterInputStream(delegate, new ContentsTransformerByteFilter(transformer, name));
     }
 
@@ -441,6 +444,9 @@ class ContentsTransformations {
      */
     public static OutputStream
     asOutputStream(ContentsTransformer transformer, OutputStream delegate, String name) {
+
+        if (transformer == ContentsTransformations.COPY) return delegate;
+
         return new ByteFilterOutputStream(new ContentsTransformerByteFilter(transformer, name), delegate);
     }
 }
