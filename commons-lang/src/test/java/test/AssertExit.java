@@ -55,7 +55,7 @@ class AssertExit {
      */
     public static <EX extends Exception> void
     assertExitStatusEqual(int expected, RunnableWhichThrows<EX> runnable) throws EX {
-        assertExitStatusEqual(null, expected, runnable);
+        AssertExit.assertExitStatusEqual(null, expected, runnable);
     }
 
     /**
@@ -64,7 +64,7 @@ class AssertExit {
      */
     public static <EX extends Exception> void
     assertExitStatusNotEqual(int notExpected, RunnableWhichThrows<EX> runnable) throws EX {
-        assertExitStatusNotEqual(null, notExpected, runnable);
+        AssertExit.assertExitStatusNotEqual(null, notExpected, runnable);
     }
 
     /**
@@ -75,7 +75,7 @@ class AssertExit {
      */
     public static <EX extends Exception> void
     assertExitStatusEqual(@Nullable String message, int expected, RunnableWhichThrows<EX> runnable) throws EX {
-        assertExit(message, PredicateUtil.equal(expected), runnable);
+        AssertExit.assertExit(message, PredicateUtil.equal(expected), runnable);
     }
 
     /**
@@ -84,7 +84,7 @@ class AssertExit {
      */
     public static <EX extends Exception> void
     assertExitStatusNotEqual(@Nullable String message, int notExpected, RunnableWhichThrows<EX> runnable) throws EX {
-        assertExit(message, PredicateUtil.notEqual(notExpected), runnable);
+        AssertExit.assertExit(message, PredicateUtil.notEqual(notExpected), runnable);
     }
 
     /**
