@@ -57,7 +57,7 @@ class SelectiveFileProcessor<T> implements FileProcessor<T> {
     @Override @Nullable public T
     process(String path, File file) throws IOException, InterruptedException {
 
-        if (this.pathPredicate.evaluate(file.getPath())) {
+        if (this.pathPredicate.evaluate(path)) {
             return this.delegate1.process(path, file);
         } else {
             return this.delegate2.process(path, file);
