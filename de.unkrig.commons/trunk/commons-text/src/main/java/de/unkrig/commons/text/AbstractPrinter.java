@@ -65,7 +65,9 @@ class AbstractPrinter implements Printer {
      * Wraps a {@link Printer} as an {@link AbstractPrinter}.
      */
     public static AbstractPrinter
-    fromPrinter(final Printer printer) { return new ProxyPrinter(printer); }
+    fromPrinter(final Printer printer) {
+        return printer instanceof AbstractPrinter ? (AbstractPrinter) printer : new ProxyPrinter(printer);
+        }
 
     @Override public void
     error(@Nullable String message, @Nullable Throwable t) {
