@@ -48,13 +48,18 @@ class AssertionUtil {
      *   disabled by default and hardly any runtime environment provides a simple way to enable them.
      * </p>
      * <p>
-     *   Notice that the assertion status of a top-level type or member type is shared with the local and anonymous
-     *   class that its methods declare, but <em>not</em> with the member types it declares. In other words: This
-     *   method should be called for local classes and anonymous classes.
-     * </ul>
+     *   Notice that the assertion status of a top-level class or member class is shared with the local and anonymous
+     *   class that its methods declare, but <em>not</em> with the member classes it declares. In other words: This
+     *   method should not only be called for top-level class declarations, but also for each and every <em>member</em>
+     *   class declaration.
+     * </p>
      * <p>
-     *   {@link #enableAssertionsForThisClass()} is an even more elegant way to enable assertions for classes as they
-     *   are loaded and initialized.
+     *   (Notice that assertions cannot be used in interfaces, because interfaces cannot declare non-abstract
+     *   methods, nor initializers.)
+     * </p>
+     * <p>
+     *   {@link #enableAssertionsForThisClass()} is an even more elegant way to enable assertions for classes
+     *   as they are loaded and initialized.
      * </p>
      */
     public static void
@@ -82,8 +87,8 @@ class AssertionUtil {
     }
 
     /**
-     * Enables assertions for the class that invokes this method, regardless of the "enable assertions" command line
-     * options that the JVM was started with.
+     * Enables assertions for the class that invokes this method, and for all all the local and anonymous classes that
+     * its methods declare, regardless of the "enable assertions" command line options that the JVM was started with.
      * <pre>
      *     public class MyClass {
      *
@@ -92,17 +97,8 @@ class AssertionUtil {
      *         // ...
      *     }
      * </pre>
-     * <p>
-     *   Adding such static initializers to all classes makes assertions much more helpful, because unfortunately
-     *   assertions are disabled by default and hardly any runtime environment provides a simple way to enable them.
-     * </p>
-     * <p>
-     *   Must only be called from the static initializer of a class.
-     * </p>
-     * <p>
-     *   Should not be called from local and anonymous classes, because these share the assertion state with the
-     *   enclosing (non-local, non-anonymous) type.
-     * </p>
+     *
+     * @see #enableAssertionsFor(Class)
      */
     public static void
     enableAssertionsForThisClass() {
