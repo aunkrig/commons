@@ -27,14 +27,19 @@
 package de.unkrig.commons.text;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.text.MessageFormat;
+import java.util.EnumSet;
 
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
 import de.unkrig.commons.lang.protocol.RunnableWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
+import de.unkrig.commons.text.AbstractPrinter.Level;
 
 /**
  * A super-simple API for managing output of different kinds. Basically an alternative for "{@code
@@ -253,24 +258,47 @@ class Printers {
     }
 
     /**
-     * Runs the <var>runnable</var> with its INFO output redirected into the <var>file</var>. If the <var>runnable</var>
-     * throws an exception, then the <var>file</var> is closed, but <em>not</em> deleted.
+     * Runs the <var>runnable</var> with messages of the given <var>level</var> redirected into the <var>file</var>.
+     * If the <var>runnable</var> throws an exception, then the <var>file</var> is closed, but <em>not</em> deleted.
      * <p>
-     *    Iff the <var>file</var> is {@code null}, then the INFO output is <em>not</em> redirected.
-     *  </p>
+     *   Iff <var>level</var> {@code == null ||} <var>file</var> {@code == null}, then messages are <em>not</em>
+     *   redirected.
+     * </p>
+     * <p>
+     *   If the <var>runnable</var> completes abruptly, then the <var>file</var> is closed, but not deleted.
+     * </p>
+     *
+     * @throws IOException The <var>file</var> could not be created
      */
     public static <EX extends Throwable> void
-    redirectInfoToFile(@Nullable File file, RunnableWhichThrows<EX> runnable) throws IOException, EX {
+    redirectToFile(
+        @Nullable final Level         level,
+        @Nullable File                file,
+        @Nullable Charset             charset,
+        final RunnableWhichThrows<EX> runnable
+    ) throws IOException, EX {
 
-        if (file == null) {
+        if (level == null || file == null) {
             runnable.run();
             return;
         }
 
-        final PrintWriter pw = new PrintWriter(file);
+        FileOutputStream os = new FileOutputStream(file);
+        final PrintWriter pw = new PrintWriter(
+            charset == null
+            ? new OutputStreamWriter(os)
+            : new OutputStreamWriter(os, charset)
+        );
         try {
 
-            AbstractPrinter.getContextPrinter().run(runnable);
+            final Printer delegate = AbstractPrinter.getContextPrinter();
+            new AbstractPrinter() {
+                @Override public void error(@Nullable String message)   { if (level == Level.ERROR)   { pw.println(message); } else { delegate.error(message);   } }
+                @Override public void warn(@Nullable String message)    { if (level == Level.WARN)    { pw.println(message); } else { delegate.warn(message);    } }
+                @Override public void info(@Nullable String message)    { if (level == Level.INFO)    { pw.println(message); } else { delegate.info(message);    } }
+                @Override public void verbose(@Nullable String message) { if (level == Level.VERBOSE) { pw.println(message); } else { delegate.verbose(message); } }
+                @Override public void debug(@Nullable String message)   { if (level == Level.DEBUG)   { pw.println(message); } else { delegate.debug(message);   } }
+            }.run(runnable);
             pw.close();
         } finally {
             try { pw.close(); } catch (Exception e) {}
@@ -278,19 +306,77 @@ class Printers {
     }
 
     /**
+     * Runs the <var>runnable</var> with messages of the given <var>levels</var> redirected into the <var>file</var>.
+     * If the <var>runnable</var> throws an exception, then the <var>file</var> is closed, but <em>not</em> deleted.
+     * <p>
+     *   Iff <var>levels</var> {@code == null ||} <var>levels</var>{@code .isEmpty() ||} <var>file</var> {@code ==
+     *   null}, then messages are <em>not</em> redirected.
+     * </p>
+     * <p>
+     *   If the <var>runnable</var> completes abruptly, then the <var>file</var> is closed, but not deleted.
+     * </p>
+     *
+     * @param charset      If {@code null}, then the default character encoding is used
+     * @param delegate     Prints the <em>other</em> messages
+     * @throws IOException The <var>file</var> could not be created
+     */
+    public static <EX extends Throwable> void
+    redirectToFile(
+        @Nullable final EnumSet<Level> levels,
+        @Nullable File                 file,
+        @Nullable Charset              charset,
+        @Nullable Printer              delegate,
+        final RunnableWhichThrows<EX>  runnable
+    ) throws IOException, EX {
+
+        final Printer delegate2 = delegate != null ? delegate : AbstractPrinter.getContextPrinter();
+
+        if (levels == null || levels.isEmpty() || file == null) {
+            AbstractPrinter.fromPrinter(delegate2).run(runnable);
+            return;
+        }
+
+        FileOutputStream os = new FileOutputStream(file);
+        try {
+
+            final PrintWriter pw = new PrintWriter(
+                charset == null
+                ? new OutputStreamWriter(os)
+                : new OutputStreamWriter(os, charset)
+            );
+            new AbstractPrinter() {
+                @Override public void error(@Nullable String message)   { if (levels.contains(Level.ERROR))   { pw.println(message); } else { delegate2.error(message);   } }
+                @Override public void warn(@Nullable String message)    { if (levels.contains(Level.WARN))    { pw.println(message); } else { delegate2.warn(message);    } }
+                @Override public void info(@Nullable String message)    { if (levels.contains(Level.INFO))    { pw.println(message); } else { delegate2.info(message);    } }
+                @Override public void verbose(@Nullable String message) { if (levels.contains(Level.VERBOSE)) { pw.println(message); } else { delegate2.verbose(message); } }
+                @Override public void debug(@Nullable String message)   { if (levels.contains(Level.DEBUG))   { pw.println(message); } else { delegate2.debug(message);   } }
+            }.run(runnable);
+            pw.close();
+        } finally {
+            try { os.close(); } catch (Exception e) {}
+        }
+    }
+
+    /**
+     * @deprecated Use {@link Printers#redirectToFile(Level, File, Charset, RunnableWhichThrows)}
+     */
+    @Deprecated public static <EX extends Throwable> void
+    redirectInfoToFile(@Nullable File file, @Nullable Charset charset, RunnableWhichThrows<EX> runnable)
+    throws IOException, EX { Printers.redirectToFile(Level.INFO, file, charset, runnable); }
+
+    /**
      * @deprecated Use {@link AbstractPrinter#redirectInfo(Writer)} instead
      */
-    @Deprecated
-    public static <EX extends Throwable> void
+    @Deprecated public static <EX extends Throwable> void
     redirectInfo(@Nullable Writer writer, RunnableWhichThrows<EX> runnable) throws EX {
         AbstractPrinter.getContextPrinter().redirectInfo(writer).run(runnable);
     }
 
     /**
-     * Runs the <var>runnable</var> with its INFO output redirected to the <var>infoConsumer</var>. Iff the
-     * <var>infoConsumer</var> is {@code null}, then the INFO output is <em>not</em> redirected.
+     * @deprecated Use {@link AbstractPrinter#redirect(de.unkrig.commons.text.AbstractPrinter.Level,
+     *             ConsumerWhichThrows)} instead
      */
-    public static <EX extends Throwable> void
+    @Deprecated public static <EX extends Throwable> void
     redirectInfo(
         @Nullable final ConsumerWhichThrows<? super String, ? extends RuntimeException> infoConsumer,
         RunnableWhichThrows<? extends EX>                                               runnable
