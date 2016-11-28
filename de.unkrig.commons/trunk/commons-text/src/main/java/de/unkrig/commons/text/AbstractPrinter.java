@@ -34,14 +34,18 @@ import java.util.EnumSet;
 
 import javax.swing.text.AbstractWriter;
 
+import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.protocol.Consumer;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
+import de.unkrig.commons.lang.protocol.RunnableUtil;
 import de.unkrig.commons.lang.protocol.RunnableWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /** A basic implementation of the {@link Printer} interface. */
 public abstract
 class AbstractPrinter implements Printer {
+
+    static { AssertionUtil.enableAssertionsForThisClass(); }
 
     public enum Level { ERROR, WARN, INFO, VERBOSE, DEBUG }
 
@@ -124,16 +128,7 @@ class AbstractPrinter implements Printer {
      * restores the original context printer.
      */
     public final void
-    run(Runnable runnable) {
-
-        final AbstractPrinter oldThreadPrinter = AbstractPrinter.getContextPrinter();
-        AbstractPrinter.set(this);
-        try {
-            runnable.run();
-        } finally {
-            AbstractPrinter.set(oldThreadPrinter);
-        }
-    }
+    run(Runnable runnable) { this.run(RunnableUtil.<RuntimeException>asRunnableWhichThrows(runnable)); }
 
     /**
      * Sets the current thread's context printer to {@code this}, runs the <var>runnable</var>, and eventually
@@ -142,13 +137,12 @@ class AbstractPrinter implements Printer {
     public final <EX extends Throwable> void
     run(RunnableWhichThrows<EX> runnable) throws EX {
 
-        final AbstractPrinter oldThreadPrinter = AbstractPrinter.getContextPrinter();
-        AbstractPrinter.set(this);
+        final AbstractPrinter previousThreadPrinter = AbstractPrinter.setContextPrinter(this);
         try {
-
             runnable.run();
         } finally {
-            AbstractPrinter.set(oldThreadPrinter);
+            AbstractPrinter next = AbstractPrinter.setContextPrinter(previousThreadPrinter);
+            assert next == this;
         }
     }
 
@@ -354,7 +348,13 @@ class AbstractPrinter implements Printer {
     /**
      * Sets the context printer for this thread and all its (existing and future) child threads (unless they have set
      * their own context printer, or until they set their own context printer).
+     *
+     * @return The context printer that was in effect <em>before</em> this method was invoked
      */
-    private static void
-    set(AbstractPrinter printer) { AbstractPrinter.THREAD_LOCAL_PRINTER.set(printer); }
+    private static AbstractPrinter
+    setContextPrinter(AbstractPrinter printer) {
+        AbstractPrinter previous = AbstractPrinter.THREAD_LOCAL_PRINTER.get();
+        AbstractPrinter.THREAD_LOCAL_PRINTER.set(printer);
+        return previous;
+    }
 }
