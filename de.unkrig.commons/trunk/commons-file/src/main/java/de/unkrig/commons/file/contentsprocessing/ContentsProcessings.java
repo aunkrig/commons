@@ -179,6 +179,7 @@ class ContentsProcessings {
     public static <T> ContentsProcessor<T>
     compressedAndArchiveContentsProcessor(
         final Predicate<? super String>     lookIntoFormat,
+        final Predicate<? super String>     pathPredicate,
         final ContentsProcessor<T>          archiveContentsProcessor,
         final ArchiveCombiner<T>            archiveEntryCombiner,
         final ContentsProcessor<T>          compressedContentsProcessor,
@@ -186,7 +187,7 @@ class ContentsProcessings {
         final ExceptionHandler<IOException> exceptionHandler
     ) {
 
-        return new ContentsProcessor<T>() {
+        final ContentsProcessor<T> cp = new ContentsProcessor<T>() {
 
             @Override @Nullable public T
             process(
@@ -226,6 +227,22 @@ class ContentsProcessings {
             @Override public String
             toString() { return "compressedAndArchiveContentsProcessor"; }
         };
+
+
+        return new ContentsProcessor<T>() {
+
+            @Override @Nullable public T
+            process(
+                String path,
+                InputStream inputStream,
+                long size,
+                long crc32,
+                ProducerWhichThrows<? extends InputStream, ? extends IOException> opener
+            ) throws IOException {
+
+                return pathPredicate.evaluate(path) ? cp.process(path, inputStream, size, crc32, opener) : null;
+            }
+        };
     }
 
     /**
@@ -241,6 +258,7 @@ class ContentsProcessings {
     public static <T> ContentsProcessor<T>
     recursiveCompressedAndArchiveContentsProcessor(
         final Predicate<? super String> lookIntoFormat,
+        final Predicate<? super String> pathPredicate,
         final ArchiveCombiner<T>        archiveEntryCombiner,
         final ContentsProcessor<T>      normalContentsProcessor,
         ExceptionHandler<IOException>   exceptionHandler
@@ -266,6 +284,7 @@ class ContentsProcessings {
 
         ContentsProcessor<T> result = ContentsProcessings.compressedAndArchiveContentsProcessor(
             lookIntoFormat,          // lookIntoFormat
+            pathPredicate,           // pathPredicate
             tmp,                     // archiveContentsProcessor
             archiveEntryCombiner,    // archiveEntryCombiner
             tmp,                     // compressedContentsProcessor
