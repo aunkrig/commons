@@ -255,7 +255,7 @@ class Glob implements Predicate<String> {
             @Override public boolean
             matches(String subject) {
                 Matcher matcher = regex.matcher(subject);
-                if (subject.endsWith("/") || subject.endsWith("!")) {
+                if (subject.isEmpty() || subject.endsWith("/") || subject.endsWith("!")) {
 
                     // Subcomponent match (e.g. subject 'a/b/c/d' vs. glob 'a/b/')?
                     return matcher.matches() || matcher.hitEnd();
