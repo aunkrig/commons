@@ -36,6 +36,8 @@ class AssertionUtilTest {
 
     static { AssertionUtil.enableAssertionsForThisClass(); }
 
+    static { AssertionUtilTest.class.getClassLoader().setDefaultAssertionStatus(false); }
+
     /**
      * Verifies that enabling assertions is only permitted from <em>class initializers</em> (and not from instance
      * initializers, methods and constructors).
