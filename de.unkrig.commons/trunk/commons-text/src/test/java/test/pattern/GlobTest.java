@@ -26,15 +26,13 @@
 
 package test.pattern;
 
-import static de.unkrig.commons.text.pattern.Glob.INCLUDES_EXCLUDES;
-import static de.unkrig.commons.text.pattern.Glob.compile;
-import static de.unkrig.commons.text.pattern.Pattern2.WILDCARD;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 
+import org.junit.Assert;
 import org.junit.Test;
+
+import de.unkrig.commons.text.pattern.Glob;
+import de.unkrig.commons.text.pattern.Pattern2;
 
 //CHECKSTYLE JavadocMethod:OFF
 //CHECKSTYLE JavadocType:OFF
@@ -45,138 +43,138 @@ class GlobTest {
     @Test public void
     testCompile() {
         // CHECKSTYLE L_PAREN__METH_INVOCATION:OFF
-        assertTrue (compile("", WILDCARD).matches(""));
-        assertFalse(compile("x", WILDCARD).matches(""));
-        assertFalse(compile("?", WILDCARD).matches(""));
-        assertTrue (compile("*", WILDCARD).matches(""));
+        Assert.assertTrue (Glob.compile("x", Pattern2.WILDCARD).matches("x"));
+        Assert.assertFalse(Glob.compile("x", Pattern2.WILDCARD).matches("y"));
+        Assert.assertTrue (Glob.compile("xxx", Pattern2.WILDCARD).matches("xxx"));
+        Assert.assertFalse(Glob.compile("xxx", Pattern2.WILDCARD).matches("xx"));
+        Assert.assertFalse(Glob.compile("xxx", Pattern2.WILDCARD).matches("xxxx"));
+        Assert.assertFalse(Glob.compile("xxx", Pattern2.WILDCARD).matches("xxy"));
+        Assert.assertFalse(Glob.compile("xxx", Pattern2.WILDCARD).matches("yxx"));
+        Assert.assertFalse(Glob.compile("xxx", Pattern2.WILDCARD).matches("xyx"));
 
-        assertTrue (compile("x", WILDCARD).matches("x"));
-        assertFalse(compile("x", WILDCARD).matches("y"));
-        assertTrue (compile("xxx", WILDCARD).matches("xxx"));
-        assertFalse(compile("xxx", WILDCARD).matches("xx"));
-        assertFalse(compile("xxx", WILDCARD).matches("xxxx"));
-        assertFalse(compile("xxx", WILDCARD).matches("xxy"));
-        assertFalse(compile("xxx", WILDCARD).matches("yxx"));
-        assertFalse(compile("xxx", WILDCARD).matches("xyx"));
+        Assert.assertTrue (Glob.compile("?xx", Pattern2.WILDCARD).matches("xxx"));
+        Assert.assertTrue (Glob.compile("?xx", Pattern2.WILDCARD).matches("axx"));
+        Assert.assertFalse(Glob.compile("?xx", Pattern2.WILDCARD).matches("aax"));
+        Assert.assertFalse(Glob.compile("?xx", Pattern2.WILDCARD).matches("xx"));
+        Assert.assertFalse(Glob.compile("?xx", Pattern2.WILDCARD).matches("xxxx"));
+        Assert.assertTrue (Glob.compile("x?x", Pattern2.WILDCARD).matches("xxx"));
+        Assert.assertTrue (Glob.compile("x?x", Pattern2.WILDCARD).matches("xax"));
+        Assert.assertFalse(Glob.compile("x?x", Pattern2.WILDCARD).matches("aax"));
+        Assert.assertFalse(Glob.compile("x?x", Pattern2.WILDCARD).matches("xx"));
+        Assert.assertFalse(Glob.compile("x?x", Pattern2.WILDCARD).matches("xxxx"));
+        Assert.assertTrue (Glob.compile("xx?", Pattern2.WILDCARD).matches("xxx"));
+        Assert.assertTrue (Glob.compile("xx?", Pattern2.WILDCARD).matches("xxa"));
+        Assert.assertFalse(Glob.compile("xx?", Pattern2.WILDCARD).matches("xaa"));
+        Assert.assertFalse(Glob.compile("xx?", Pattern2.WILDCARD).matches("xx"));
+        Assert.assertFalse(Glob.compile("xx?", Pattern2.WILDCARD).matches("xxxx"));
 
-        assertTrue (compile("?xx", WILDCARD).matches("xxx"));
-        assertTrue (compile("?xx", WILDCARD).matches("axx"));
-        assertFalse(compile("?xx", WILDCARD).matches("aax"));
-        assertFalse(compile("?xx", WILDCARD).matches("xx"));
-        assertFalse(compile("?xx", WILDCARD).matches("xxxx"));
-        assertTrue (compile("x?x", WILDCARD).matches("xxx"));
-        assertTrue (compile("x?x", WILDCARD).matches("xax"));
-        assertFalse(compile("x?x", WILDCARD).matches("aax"));
-        assertFalse(compile("x?x", WILDCARD).matches("xx"));
-        assertFalse(compile("x?x", WILDCARD).matches("xxxx"));
-        assertTrue (compile("xx?", WILDCARD).matches("xxx"));
-        assertTrue (compile("xx?", WILDCARD).matches("xxa"));
-        assertFalse(compile("xx?", WILDCARD).matches("xaa"));
-        assertFalse(compile("xx?", WILDCARD).matches("xx"));
-        assertFalse(compile("xx?", WILDCARD).matches("xxxx"));
+        Assert.assertTrue (Glob.compile("*xx", Pattern2.WILDCARD).matches("XXxx"));
+        Assert.assertFalse(Glob.compile("*xx", Pattern2.WILDCARD).matches("XXx"));
+        Assert.assertTrue (Glob.compile("x*x", Pattern2.WILDCARD).matches("xXXx"));
+        Assert.assertTrue (Glob.compile("xx*", Pattern2.WILDCARD).matches("xxXX"));
+        Assert.assertTrue (Glob.compile("x*x", Pattern2.WILDCARD).matches("xx"));
+        Assert.assertTrue (Glob.compile("x*x", Pattern2.WILDCARD).matches("xAx"));
+        Assert.assertTrue (Glob.compile("x*x", Pattern2.WILDCARD).matches("xAAx"));
+        Assert.assertTrue (Glob.compile("x*x", Pattern2.WILDCARD).matches("xAAAx"));
+        Assert.assertTrue (Glob.compile("x*x", Pattern2.WILDCARD).matches("xAAAx"));
+        Assert.assertFalse(Glob.compile("x*x", Pattern2.WILDCARD).matches("xA/Ax"));
+        Assert.assertFalse(Glob.compile("x*x", Pattern2.WILDCARD).matches("xA" + File.separatorChar + "Ax"));
+        Assert.assertFalse(Glob.compile("x*x", Pattern2.WILDCARD).matches("xA!Ax"));
+        Assert.assertTrue (Glob.compile("x**x", Pattern2.WILDCARD).matches("xAAAx"));
+        Assert.assertTrue (Glob.compile("x**x", Pattern2.WILDCARD).matches("xA/Ax"));
+        Assert.assertTrue (Glob.compile("x**x", Pattern2.WILDCARD).matches("xA" + File.separatorChar + "Ax"));
+        Assert.assertFalse(Glob.compile("x**x", Pattern2.WILDCARD).matches("xA!Ax"));
+        Assert.assertTrue (Glob.compile("x***x", Pattern2.WILDCARD).matches("xAAAx"));
+        Assert.assertTrue (Glob.compile("x***x", Pattern2.WILDCARD).matches("xA/Ax"));
+        Assert.assertTrue (Glob.compile("x***x", Pattern2.WILDCARD).matches("xA" + File.separatorChar + "Ax"));
+        Assert.assertTrue (Glob.compile("x***x", Pattern2.WILDCARD).matches("xA!Ax"));
 
-        assertTrue (compile("*xx", WILDCARD).matches("XXxx"));
-        assertFalse(compile("*xx", WILDCARD).matches("XXx"));
-        assertTrue (compile("x*x", WILDCARD).matches("xXXx"));
-        assertTrue (compile("xx*", WILDCARD).matches("xxXX"));
-        assertTrue (compile("x*x", WILDCARD).matches("xx"));
-        assertTrue (compile("x*x", WILDCARD).matches("xAx"));
-        assertTrue (compile("x*x", WILDCARD).matches("xAAx"));
-        assertTrue (compile("x*x", WILDCARD).matches("xAAAx"));
-        assertTrue (compile("x*x", WILDCARD).matches("xAAAx"));
-        assertFalse(compile("x*x", WILDCARD).matches("xA/Ax"));
-        assertFalse(compile("x*x", WILDCARD).matches("xA" + File.separatorChar + "Ax"));
-        assertFalse(compile("x*x", WILDCARD).matches("xA!Ax"));
-        assertTrue (compile("x**x", WILDCARD).matches("xAAAx"));
-        assertTrue (compile("x**x", WILDCARD).matches("xA/Ax"));
-        assertTrue (compile("x**x", WILDCARD).matches("xA" + File.separatorChar + "Ax"));
-        assertFalse(compile("x**x", WILDCARD).matches("xA!Ax"));
-        assertTrue (compile("x***x", WILDCARD).matches("xAAAx"));
-        assertTrue (compile("x***x", WILDCARD).matches("xA/Ax"));
-        assertTrue (compile("x***x", WILDCARD).matches("xA" + File.separatorChar + "Ax"));
-        assertTrue (compile("x***x", WILDCARD).matches("xA!Ax"));
+        Assert.assertTrue (Glob.compile("[ab]", Pattern2.WILDCARD).matches("a"));
+        Assert.assertTrue (Glob.compile("[ab]", Pattern2.WILDCARD).matches("b"));
+        Assert.assertFalse(Glob.compile("[ab]", Pattern2.WILDCARD).matches("c"));
+        Assert.assertTrue (Glob.compile("[ab]", Pattern2.WILDCARD).matches("")); // <= Container match
+        Assert.assertFalse(Glob.compile("[^ab]", Pattern2.WILDCARD).matches("a"));
+        Assert.assertFalse(Glob.compile("[^ab]", Pattern2.WILDCARD).matches("b"));
+        Assert.assertTrue (Glob.compile("[^ab]", Pattern2.WILDCARD).matches("c"));
+        Assert.assertFalse(Glob.compile("[h-j]", Pattern2.WILDCARD).matches("g"));
+        Assert.assertTrue (Glob.compile("[h-j]", Pattern2.WILDCARD).matches("h"));
+        Assert.assertTrue (Glob.compile("[h-j]", Pattern2.WILDCARD).matches("i"));
+        Assert.assertTrue (Glob.compile("[h-j]", Pattern2.WILDCARD).matches("j"));
+        Assert.assertFalse(Glob.compile("[h-j]", Pattern2.WILDCARD).matches("k"));
+        Assert.assertTrue (Glob.compile("[^h-j]", Pattern2.WILDCARD).matches("g"));
+        Assert.assertFalse(Glob.compile("[^h-j]", Pattern2.WILDCARD).matches("h"));
+        Assert.assertFalse(Glob.compile("[^h-j]", Pattern2.WILDCARD).matches("i"));
+        Assert.assertFalse(Glob.compile("[^h-j]", Pattern2.WILDCARD).matches("j"));
+        Assert.assertTrue (Glob.compile("[^h-j]", Pattern2.WILDCARD).matches("k"));
 
-        assertTrue (compile("[ab]", WILDCARD).matches("a"));
-        assertTrue (compile("[ab]", WILDCARD).matches("b"));
-        assertFalse(compile("[ab]", WILDCARD).matches("c"));
-        assertFalse(compile("[ab]", WILDCARD).matches(""));
-        assertFalse(compile("[^ab]", WILDCARD).matches("a"));
-        assertFalse(compile("[^ab]", WILDCARD).matches("b"));
-        assertTrue (compile("[^ab]", WILDCARD).matches("c"));
-        assertFalse(compile("[h-j]", WILDCARD).matches("g"));
-        assertTrue (compile("[h-j]", WILDCARD).matches("h"));
-        assertTrue (compile("[h-j]", WILDCARD).matches("i"));
-        assertTrue (compile("[h-j]", WILDCARD).matches("j"));
-        assertFalse(compile("[h-j]", WILDCARD).matches("k"));
-        assertTrue (compile("[^h-j]", WILDCARD).matches("g"));
-        assertFalse(compile("[^h-j]", WILDCARD).matches("h"));
-        assertFalse(compile("[^h-j]", WILDCARD).matches("i"));
-        assertFalse(compile("[^h-j]", WILDCARD).matches("j"));
-        assertTrue (compile("[^h-j]", WILDCARD).matches("k"));
+        Assert.assertTrue (Glob.compile("aaa(bb|cc){0,1}ddd", Pattern2.WILDCARD).matches("aaaddd"));
+        Assert.assertTrue (Glob.compile("aaa(bb|cc){0,1}ddd", Pattern2.WILDCARD).matches("aaabbddd"));
+        Assert.assertTrue (Glob.compile("aaa(bb|cc){0,1}ddd", Pattern2.WILDCARD).matches("aaaccddd"));
+        Assert.assertFalse(Glob.compile("aaa(bb|cc){0,1}ddd", Pattern2.WILDCARD).matches("aaaxddd"));
+        Assert.assertFalse(Glob.compile("aaa(bb|cc){0,1}ddd", Pattern2.WILDCARD).matches("aaabddd"));
+        Assert.assertFalse(Glob.compile("aaa(bb|cc){0,1}ddd", Pattern2.WILDCARD).matches("aaabcddd"));
+        Assert.assertFalse(Glob.compile("aaa(bb|cc){0,1}ddd", Pattern2.WILDCARD).matches("aaabbbddd"));
+        Assert.assertFalse(Glob.compile("aaa(bb|cc){0,1}ddd", Pattern2.WILDCARD).matches("aaabbbbddd"));
+        Assert.assertFalse(Glob.compile("aaa(bb|cc){0,1}ddd", Pattern2.WILDCARD).matches("aaabbccddd"));
+        Assert.assertTrue (Glob.compile("aaa(bb|cc){0,}ddd", Pattern2.WILDCARD).matches("aaaddd"));
+        Assert.assertTrue (Glob.compile("aaa(bb|cc){0,}ddd", Pattern2.WILDCARD).matches("aaabbddd"));
+        Assert.assertTrue (Glob.compile("aaa(bb|cc){0,}ddd", Pattern2.WILDCARD).matches("aaaccbbddd"));
+        Assert.assertTrue (Glob.compile("aaa(bb|cc){0,}ddd", Pattern2.WILDCARD).matches("aaabbccbbddd"));
+        Assert.assertFalse(Glob.compile("aaa(bb|cc){0,}ddd", Pattern2.WILDCARD).matches("aaabbccbbbddd"));
+        Assert.assertTrue (Glob.compile("aaa(bb|cc){1,}ddd", Pattern2.WILDCARD).matches("aaabbddd"));
+        Assert.assertTrue (Glob.compile("aaa(bb|cc){1,}ddd", Pattern2.WILDCARD).matches("aaaccddd"));
+        Assert.assertTrue (Glob.compile("aaa(bb|cc){1,}ddd", Pattern2.WILDCARD).matches("aaaccbbddd"));
+        Assert.assertFalse(Glob.compile("aaa(bb|cc){1,}ddd", Pattern2.WILDCARD).matches("aaaddd"));
+        Assert.assertFalse(Glob.compile("aaa(bb|cc){1,}ddd", Pattern2.WILDCARD).matches("aaabccbddd"));
+        Assert.assertTrue (Glob.compile("aaa(bb|cc)ddd", Pattern2.WILDCARD).matches("aaabbddd"));
+        Assert.assertTrue (Glob.compile("aaa(bb|cc)ddd", Pattern2.WILDCARD).matches("aaaccddd"));
+        Assert.assertFalse(Glob.compile("aaa(bb|cc)ddd", Pattern2.WILDCARD).matches("aaaddd"));
+        Assert.assertFalse(Glob.compile("aaa(bb|cc)ddd", Pattern2.WILDCARD).matches("aaabbbbddd"));
 
-        assertTrue (compile("aaa(bb|cc){0,1}ddd", WILDCARD).matches("aaaddd"));
-        assertTrue (compile("aaa(bb|cc){0,1}ddd", WILDCARD).matches("aaabbddd"));
-        assertTrue (compile("aaa(bb|cc){0,1}ddd", WILDCARD).matches("aaaccddd"));
-        assertFalse(compile("aaa(bb|cc){0,1}ddd", WILDCARD).matches("aaaxddd"));
-        assertFalse(compile("aaa(bb|cc){0,1}ddd", WILDCARD).matches("aaabddd"));
-        assertFalse(compile("aaa(bb|cc){0,1}ddd", WILDCARD).matches("aaabcddd"));
-        assertFalse(compile("aaa(bb|cc){0,1}ddd", WILDCARD).matches("aaabbbddd"));
-        assertFalse(compile("aaa(bb|cc){0,1}ddd", WILDCARD).matches("aaabbbbddd"));
-        assertFalse(compile("aaa(bb|cc){0,1}ddd", WILDCARD).matches("aaabbccddd"));
-        assertTrue (compile("aaa(bb|cc){0,}ddd", WILDCARD).matches("aaaddd"));
-        assertTrue (compile("aaa(bb|cc){0,}ddd", WILDCARD).matches("aaabbddd"));
-        assertTrue (compile("aaa(bb|cc){0,}ddd", WILDCARD).matches("aaaccbbddd"));
-        assertTrue (compile("aaa(bb|cc){0,}ddd", WILDCARD).matches("aaabbccbbddd"));
-        assertFalse(compile("aaa(bb|cc){0,}ddd", WILDCARD).matches("aaabbccbbbddd"));
-        assertTrue (compile("aaa(bb|cc){1,}ddd", WILDCARD).matches("aaabbddd"));
-        assertTrue (compile("aaa(bb|cc){1,}ddd", WILDCARD).matches("aaaccddd"));
-        assertTrue (compile("aaa(bb|cc){1,}ddd", WILDCARD).matches("aaaccbbddd"));
-        assertFalse(compile("aaa(bb|cc){1,}ddd", WILDCARD).matches("aaaddd"));
-        assertFalse(compile("aaa(bb|cc){1,}ddd", WILDCARD).matches("aaabccbddd"));
-        assertTrue (compile("aaa(bb|cc)ddd", WILDCARD).matches("aaabbddd"));
-        assertTrue (compile("aaa(bb|cc)ddd", WILDCARD).matches("aaaccddd"));
-        assertFalse(compile("aaa(bb|cc)ddd", WILDCARD).matches("aaaddd"));
-        assertFalse(compile("aaa(bb|cc)ddd", WILDCARD).matches("aaabbbbddd"));
+        Assert.assertTrue (Glob.compile("aaa\\*ddd",     Pattern2.WILDCARD).matches("aaa*ddd"));
+        Assert.assertTrue (Glob.compile("aaa\\[a-b]ddd", Pattern2.WILDCARD).matches("aaa[a-b]ddd"));
 
-        assertTrue (compile("aaa\\*ddd",     WILDCARD).matches("aaa*ddd"));
-        assertTrue (compile("aaa\\[a-b]ddd", WILDCARD).matches("aaa[a-b]ddd"));
-
-        assertTrue (compile("a/b", WILDCARD).matches("a" + File.separatorChar + "b"));
+        Assert.assertTrue (Glob.compile("a/b", Pattern2.WILDCARD).matches("a" + File.separatorChar + "b"));
 
         // Container matches.
-        assertTrue (compile("a/b/c", WILDCARD).matches("a/b/"));
-        assertTrue (compile("a/b!c", WILDCARD).matches("a/b!"));
-        assertTrue (compile("**",    WILDCARD).matches("a/b/"));
-        assertFalse(compile("*",     WILDCARD).matches("a/b/"));
+        Assert.assertTrue (Glob.compile("", Pattern2.WILDCARD).matches(""));
+        Assert.assertTrue (Glob.compile("x", Pattern2.WILDCARD).matches(""));
+        Assert.assertTrue (Glob.compile("?", Pattern2.WILDCARD).matches(""));
+        Assert.assertTrue (Glob.compile("*", Pattern2.WILDCARD).matches(""));
+
+        Assert.assertTrue (Glob.compile("a/b/c", Pattern2.WILDCARD).matches("a/b/"));
+        Assert.assertTrue (Glob.compile("a/b!c", Pattern2.WILDCARD).matches("a/b!"));
+        Assert.assertTrue (Glob.compile("**",    Pattern2.WILDCARD).matches("a/b/"));
+        Assert.assertFalse(Glob.compile("*",     Pattern2.WILDCARD).matches("a/b/"));
         // CHECKSTYLE L_PAREN__METH_INVOCATION:ON
     }
 
     @Test public void
     testAlternatives() {
         // CHECKSTYLE L_PAREN__METH_INVOCATION:OFF
-        assertTrue (compile("x", WILDCARD | INCLUDES_EXCLUDES).matches("x"));
-        assertFalse(compile("x", WILDCARD | INCLUDES_EXCLUDES).matches("y"));
-        assertTrue (compile("*", WILDCARD | INCLUDES_EXCLUDES).matches(""));
-        assertTrue (compile("*", WILDCARD | INCLUDES_EXCLUDES).matches("xxx"));
+        Assert.assertTrue (Glob.compile("x", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("x"));
+        Assert.assertFalse(Glob.compile("x", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("y"));
+        Assert.assertTrue (Glob.compile("*", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches(""));
+        Assert.assertTrue (Glob.compile("*", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("xxx"));
 
-        assertTrue (compile("a,b,c", WILDCARD | INCLUDES_EXCLUDES).matches("a"));
-        assertTrue (compile("a,b,c", WILDCARD | INCLUDES_EXCLUDES).matches("b"));
-        assertTrue (compile("a,b,c", WILDCARD | INCLUDES_EXCLUDES).matches("c"));
-        assertFalse(compile("a,b,c", WILDCARD | INCLUDES_EXCLUDES).matches("d"));
+        Assert.assertTrue (Glob.compile("a,b,c", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("a"));
+        Assert.assertTrue (Glob.compile("a,b,c", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("b"));
+        Assert.assertTrue (Glob.compile("a,b,c", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("c"));
+        Assert.assertFalse(Glob.compile("a,b,c", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("d"));
 
-        assertFalse(compile("a,b",   WILDCARD | INCLUDES_EXCLUDES).matches("a,b"));
-        assertTrue (compile("a\\,b", WILDCARD | INCLUDES_EXCLUDES).matches("a,b"));
+        Assert.assertFalse(Glob.compile("a,b",   Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("a,b"));
+        Assert.assertTrue (Glob.compile("a\\,b", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("a,b"));
 
-        assertFalse(compile("a*~aa*,aaaa", WILDCARD | INCLUDES_EXCLUDES).matches(""));
-        assertTrue (compile("a*~aa*,aaaa", WILDCARD | INCLUDES_EXCLUDES).matches("a"));
-        assertFalse(compile("a*~aa*,aaaa", WILDCARD | INCLUDES_EXCLUDES).matches("aa"));
-        assertFalse(compile("a*~aa*,aaaa", WILDCARD | INCLUDES_EXCLUDES).matches("aaa"));
-        assertTrue (compile("a*~aa*,aaaa", WILDCARD | INCLUDES_EXCLUDES).matches("aaaa"));
-        assertFalse(compile("a*~aa*,aaaa", WILDCARD | INCLUDES_EXCLUDES).matches("aaaaa"));
+        Assert.assertTrue (Glob.compile("a*~aa*,aaaa", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("")); // <= Container match
+        Assert.assertTrue (Glob.compile("a*~aa*,aaaa", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("a"));
+        Assert.assertFalse(Glob.compile("a*~aa*,aaaa", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("aa"));
+        Assert.assertFalse(Glob.compile("a*~aa*,aaaa", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("aaa"));
+        Assert.assertTrue (Glob.compile("a*~aa*,aaaa", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("aaaa"));
+        Assert.assertFalse(Glob.compile("a*~aa*,aaaa", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("aaaaa"));
 
         // Container matches.
-        assertTrue (compile("~a/a",    WILDCARD | INCLUDES_EXCLUDES).matches("a/"));
-        assertTrue (compile("~a/**a*", WILDCARD | INCLUDES_EXCLUDES).matches("a/a/"));
+        Assert.assertTrue (Glob.compile("~a/a",    Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("a/"));
+        Assert.assertTrue (Glob.compile("~a/**a*", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("a/a/"));
         // CHECKSTYLE L_PAREN__METH_INVOCATION:ON
     }
 }
