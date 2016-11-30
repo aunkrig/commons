@@ -93,7 +93,7 @@ class ByteFilterOutputStream extends FilterOutputStream {
 
         if (this.byteFilterIOException != null) {
 
-            // Wrap because the byteFileIOException comes from a different thread, and we want to document the call
+            // Wrap because the byteFilterIOException comes from a different thread, and we want to document the call
             // stack of THIS thread as well.
             throw ExceptionUtil.wrap("ByteFilterInputStream", this.byteFilterIOException);
         }
@@ -126,7 +126,7 @@ class ByteFilterOutputStream extends FilterOutputStream {
 
         if (this.byteFilterIOException != null) {
 
-            // Wrap because the byteFileIOException comes from a different thread, and we want to document the call
+            // Wrap because the byteFilterIOException comes from a different thread, and we want to document the call
             // stack of THIS thread as well.
             throw ExceptionUtil.wrap("ByteFilterInputStream", this.byteFilterIOException);
         }
