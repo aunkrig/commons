@@ -34,6 +34,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilterInputStream;
 import java.io.FilterOutputStream;
+import java.io.FilterReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -1845,6 +1846,48 @@ class IoUtil {
                 }
 
                 return count;
+            }
+        };
+    }
+
+    /**
+     * @return A {@link Reader} for which {@link Reader#read(char[], int, int)} returns at most 1
+     */
+    public static Reader
+    singlingFilterReader(Reader delegate) {
+
+        return new FilterReader(delegate) {
+
+            @NotNullByDefault(false) @Override public int
+            read(char[] cbuf, int off, int len) throws IOException {
+                return this.in.read(cbuf, off, len <= 0 ? 0 : 1);
+            }
+
+            @NotNullByDefault(false) @Override public int
+            read(CharBuffer target) throws IOException {
+
+                if (target.remaining() == 0) return 0;
+
+                int c = this.read();
+                if (c == -1) return -1;
+
+                target.put((char) c);
+                return 1;
+            }
+        };
+    }
+
+    /**
+     * @return An {@link InputStream} for which {@link InputStream#read(byte[], int, int)} returns at most 1
+     */
+    public static InputStream
+    singlingFilterInputStream(InputStream delegate) {
+
+        return new FilterInputStream(delegate) {
+
+            @NotNullByDefault(false) @Override public int
+            read(byte[] cbuf, int off, int len) throws IOException {
+                return this.in.read(cbuf, off, len <= 0 ? 0 : 1);
             }
         };
     }
