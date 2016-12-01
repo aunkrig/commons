@@ -45,6 +45,7 @@ public final
 class PatternUtil {
 
     private static final Logger LOGGER = Logger.getLogger(PatternUtil.class.getName());
+    private static final int LOOKBEHIND_LIMIT = 10;
 
     private PatternUtil() {}
 
@@ -252,94 +253,97 @@ class PatternUtil {
         int        replacementCount = 0;
         CharBuffer cb               = CharBuffer.allocate(initialBufferCapacity);
 
-        for (;;) {
+        for (int from = 0;;) {
 
-            // Fill the buffer as far as possible (limited by the buffer capacity or by EOI).
-            while (cb.hasRemaining() && in.read(cb) != -1);
-            if (cb.position() == 0) break; // End-of-input.
+            // The CB is now in "fill mode".
+            if (!cb.hasRemaining()) {
+
+                // We hit the end; enlarge the buffer.
+                PatternUtil.LOGGER.finest("Increasing buffer size");
+                cb.flip();
+                cb = CharBuffer.allocate(cb.capacity() * 2).append(cb);
+            }
+
+            boolean atEoi = false;
+            do {
+                if (in.read(cb) == -1) {
+                    atEoi = true;
+                    break;
+                }
+            } while (cb.hasRemaining());
+
             cb.flip();
+            // The CB is now in "drain mode".
 
             // Find the next match.
-            Matcher m     = pattern.matcher(cb);
-            boolean found = m.find();
+            Matcher m = pattern.matcher(cb);
+            if (m.find(from)) {
+                String replacement = replacer.call(m);
 
-            while (m.hitEnd()) {
+                if (replacement == null) {
 
-                // We hit the end; read more data until we don't hit the end any more.
-                if (cb.limit() < cb.capacity()) {
+                    PatternUtil.LOGGER.log(Level.CONFIG, "Leaving match ''{0}'' unreplaced", m.group());
 
-                    // There's room left in the CharBuffer; fill it.
-                    cb.compact();
-                    if (in.read(cb) == -1) {
-
-                        // End-of-input.
-                        cb.flip();
-                        break;
-                    }
-                    while (cb.hasRemaining() && in.read(cb) != -1);
-                    cb.flip();
+                    // Copy the text BEFORE the match AND the match to the output stream.
+                    out.append(cb, from, m.end());
                 } else {
-                    PatternUtil.LOGGER.finest("Increasing buffer size");
-                    cb = CharBuffer.allocate(cb.capacity() * 2).append(cb);
-                    if (in.read(cb) == -1) {
 
-                        // End-of-input.
-                        cb.flip();
-                        m     = pattern.matcher(cb);
-                        found = m.find();
-                        break;
-                    }
-                    while (cb.hasRemaining() && in.read(cb) != -1);
-                    cb.flip();
+                    PatternUtil.LOGGER.log(
+                        Level.CONFIG,
+                        "Replacing match ''{0}'' with ''{1}''",
+                        new Object[] { m.group(), replacement }
+                    );
+
+                    // Copy the text BEFORE the match to the output stream.
+                    out.append(cb, from, m.start());
+
+                    // Copy the replacement to the output stream.
+                    out.append(replacement);
+
+                    replacementCount++;
                 }
+                from = m.end();
 
-                m     = pattern.matcher(cb);
-                found = m.find();
-            }
+                // Very special case: We have a zero-length match. To avoid an endless sequence of matches, advance
+                // "from" by one.
+                if (m.start() == m.end()) {
+                    if (m.end() == cb.limit()) break;
+                    out.write(cb.charAt(from++));
+                }
+            } else
+            if (!atEoi && m.hitEnd()) {
 
-            if (!found) {
+                // We hit the end; enlarge the buffer.
+                PatternUtil.LOGGER.finest("Increasing buffer size");
+                cb.flip();
+                cb = CharBuffer.allocate(cb.capacity() * 2).append(cb);
+                continue; // We're now in "fill mode".
+            } else
+            {
+
+                // No match.
+                cb.position(from);
                 out.append(cb);
-                cb.clear();
-                continue;
+                from = cb.position();
+
+                if (atEoi) break;
             }
 
-            if (m.end() == 0) {
+            // Now switch the CB back to "fill mode".
 
-                // Start-of-input match.
-                if (cb.limit() == 0) break;
-                out.append(cb.get());
-                cb.compact();
-                continue;
-            }
-
-            String replacement = replacer.call(m);
-
-            if (replacement == null) {
-
-                PatternUtil.LOGGER.log(Level.CONFIG, "Leaving match ''{0}'' unreplaced", m.group());
-
-                out.append(cb, 0, m.end());
-            } else {
-
-                PatternUtil.LOGGER.log(
-                    Level.CONFIG,
-                    "Replacing match ''{0}'' with ''{1}''",
-                    new Object[] { m.group(), replacement }
-                );
-
-                out.append(cb, 0, m.start());
-                out.append(replacement);
-
-                replacementCount++;
-            }
-            cb.position(m.end());
-            cb.compact();
-
-            // If the CharBuffer was enlarged (due to 'hitEnd()'), shrink it to its initial size (if possible).
+            if (from <= PatternUtil.LOOKBEHIND_LIMIT) {
+                cb.position(cb.limit());
+                cb.limit(cb.capacity());
+            } else
             if (cb.capacity() > initialBufferCapacity && cb.position() <= initialBufferCapacity) {
                 PatternUtil.LOGGER.finest("Restoring initial buffer size");
                 cb.flip();
                 cb = CharBuffer.allocate(initialBufferCapacity).append(cb);
+            } else
+            {
+                cb.position(from - PatternUtil.LOOKBEHIND_LIMIT);
+                cb.compact();
+                from = PatternUtil.LOOKBEHIND_LIMIT;
             }
         }
 
