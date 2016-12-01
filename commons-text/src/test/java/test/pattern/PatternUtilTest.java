@@ -75,13 +75,14 @@ class PatternUtilTest extends TestCase {
 
     @Test public void
     test4() throws IOException {
-        this.assertReplaceAllEquals("xxxAxxx\nxxxBxxx",     "xxxAxxx\nxxxBxxx", "A.*B",     "C");
-        this.assertReplaceAllEquals("xxxCxxx",              "xxxAxxx\nxxxBxxx", "A.*\n.*B", "C");
-        this.assertReplaceAllEquals("xxxCxxx",              "xxxAxxx\nxxxBxxx", "(?s)A.*B", "C"); // "(?s)" = DOTALL
-        this.assertReplaceAllEquals("[xxxAxxx]\n[xxxBxxx]", "xxxAxxx\nxxxBxxx", ".+",       "[$0]");
-        this.assertReplaceAllEquals("[xxxAxxx]\n[xxxBxxx]", "xxxAxxx\nxxxBxxx", ".*",       "[$0]");
-        this.assertReplaceAllEquals("[xxx]",                "xxx",              ".*",       "[$0]");
-        this.assertReplaceAllEquals("[xxxAxxx\nxxxBxxx]",   "xxxAxxx\nxxxBxxx", "(?s).*",   "[$0]"); // "(?s)" = DOTALL
+        this.assertReplaceAllEquals("xxxAxxx\nxxxBxxx",         "xxxAxxx\nxxxBxxx", "A.*B",     "C");
+        this.assertReplaceAllEquals("xxxCxxx",                  "xxxAxxx\nxxxBxxx", "A.*\n.*B", "C");
+        this.assertReplaceAllEquals("xxxCxxx",                  "xxxAxxx\nxxxBxxx", "(?s)A.*B", "C"); // "(?s)" = DOTALL
+        this.assertReplaceAllEquals("[xxxAxxx]\n[xxxBxxx]",     "xxxAxxx\nxxxBxxx", ".+",       "[$0]");
+        this.assertReplaceAllEquals("_xxxAxxx___\n_xxxBxxx___", "xxxAxxx\nxxxBxxx", ".*",       "_$0_");
+        this.assertReplaceAllEquals("_xxx___",                  "xxx",              ".*",       "_$0_");
+        this.assertReplaceAllEquals("[xxxAxxx\nxxxBxxx][]",     "xxxAxxx\nxxxBxxx", "(?s).*",   "[$0]"); // "(?s)" = DOTALL
+        this.assertReplaceAllEquals("aaa\nBbb\nccc",            "aaa\nbbb\nccc",    "(?m)^b",   "B"); // "(?m)" = MULTILINE
     }
 
     @Test public void
@@ -140,6 +141,8 @@ class PatternUtilTest extends TestCase {
         Assert.assertEquals("line1\nline2\nline3", PatternUtilTest.readAll(r));
     }
 
+    // ---------------------------------------------------------------
+
     private static String
     readAll(Reader r) throws IOException {
         StringWriter sw = new StringWriter();
@@ -149,6 +152,11 @@ class PatternUtilTest extends TestCase {
 
     public void
     assertReplaceAllEquals(String expected, String subject, String regex, String replacement) throws IOException {
+
+        // First of all, verify that "java.util.regex.Pattern" actually yields the SAME result.
+        Assert.assertEquals(expected, Pattern.compile(regex).matcher(subject).replaceAll(replacement));
+
+        // Now, test "PatternUtil.replaceAll()".
         StringWriter sw = new StringWriter();
         PatternUtil.replaceAll(new StringReader(subject), Pattern.compile(regex), replacement, sw);
         TestCase.assertEquals(expected, sw.toString());
