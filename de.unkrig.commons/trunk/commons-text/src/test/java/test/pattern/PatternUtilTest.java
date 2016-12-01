@@ -28,13 +28,19 @@ package test.pattern;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.regex.Pattern;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.unkrig.commons.io.CharFilter;
+import de.unkrig.commons.io.CharFilterReader;
+import de.unkrig.commons.io.IoUtil;
+import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.pattern.PatternUtil;
 import junit.framework.TestCase;
 
@@ -116,6 +122,29 @@ class PatternUtilTest extends TestCase {
                 PatternUtil.replacementStringReplacer("x$01x")
             )
         );
+    }
+
+    @Test public void
+    testReplacementWithCharFilterReader() throws IOException {
+        Reader r = new CharFilterReader(
+            new StringReader("line1\nline2 \t// COMMENT\nline3"),
+                new CharFilter<Void>() {
+
+                @Override @Nullable public Void
+                run(Reader in, Writer out) throws IOException {
+                    PatternUtil.replaceAll(in, Pattern.compile("\\s*//.*$", Pattern.MULTILINE), "", out); // Strip C++-style comments.
+                    return null;
+                }
+            }
+        );
+        Assert.assertEquals("line1\nline2\nline3", PatternUtilTest.readAll(r));
+    }
+
+    private static String
+    readAll(Reader r) throws IOException {
+        StringWriter sw = new StringWriter();
+        IoUtil.copy(r, true, sw, false);
+        return sw.toString();
     }
 
     public void
