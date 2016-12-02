@@ -44,9 +44,9 @@ import de.unkrig.commons.io.CharFilter;
 import de.unkrig.commons.io.CharFilterReader;
 import de.unkrig.commons.io.IoUtil;
 import de.unkrig.commons.lang.StringUtil;
-import de.unkrig.commons.lang.protocol.Transformer;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.pattern.PatternUtil;
+import de.unkrig.commons.text.pattern.PatternUtil.AllReplacer;
 import junit.framework.TestCase;
 
 // CHECKSTYLE JavadocMethod:OFF
@@ -156,11 +156,11 @@ class PatternUtilTest extends TestCase {
         try {
             char[] buffer = new char[300];
 
-            StringBuilder               orig      = new StringBuilder();
-            StringBuilder               patched   = new StringBuilder();
-            StringBuilder               repatched = new StringBuilder();
-            Transformer<String, String> patcher   = PatternUtil.replaceAll(Pattern.compile("StringBuilder"), "STRING_"+"BUILDER");
-            Transformer<String, String> repatcher = PatternUtil.replaceAll(Pattern.compile("ST"+"RING_BUILDER"), "StringBuilder");
+            StringBuilder orig      = new StringBuilder();
+            StringBuilder patched   = new StringBuilder();
+            StringBuilder repatched = new StringBuilder();
+            AllReplacer   patcher   = PatternUtil.replaceAll(Pattern.compile("StringBuilder"), "STRING_"+"BUILDER");
+            AllReplacer   repatcher = PatternUtil.replaceAll(Pattern.compile("ST"+"RING_BUILDER"), "StringBuilder");
             for (;;) {
                 int n = r.read(buffer);
                 if (n == -1) break;
@@ -212,16 +212,20 @@ class PatternUtilTest extends TestCase {
     public void
     assertReplaceAllEquals(String expected, String subject, String regex, String replacementString) throws IOException {
 
+        Pattern pattern = Pattern.compile(regex);
+
         // First of all, verify that "java.util.regex.Pattern" actually yields the SAME result.
-        Assert.assertEquals(expected, Pattern.compile(regex).matcher(subject).replaceAll(replacementString));
+        Assert.assertEquals(expected, pattern.matcher(subject).replaceAll(replacementString));
 
         // Now, test "PatternUtil.replaceAll()".
-        StringWriter sw = new StringWriter();
-        PatternUtil.replaceAll(new StringReader(subject), Pattern.compile(regex), replacementString, sw);
-        TestCase.assertEquals(expected, sw.toString());
+        {
+            StringWriter sw = new StringWriter();
+            PatternUtil.replaceAll(new StringReader(subject), pattern, replacementString, sw);
+            TestCase.assertEquals(expected, sw.toString());
+        }
 
         // Then, test "PatternUtil.replaceAll()".
-        Transformer<String, String> t = PatternUtil.replaceAll(Pattern.compile(regex), replacementString);
+        AllReplacer t = PatternUtil.replaceAll(pattern, replacementString);
         TestCase.assertEquals(expected, t.transform(subject) + t.transform(""));
 
         StringBuilder sb = new StringBuilder();
@@ -234,9 +238,16 @@ class PatternUtilTest extends TestCase {
             expected,
             PatternUtilTest.readAll(PatternUtil.replaceAllFilterReader(
                 new StringReader(subject),
-                Pattern.compile(regex),
+                pattern,
                 PatternUtil.replacementStringMatchReplacer(replacementString)
             ))
         );
+
+        // Then, test the "replaceAllFilterWriter()".
+        StringWriter sw = new StringWriter();
+        Writer w = PatternUtil.replaceAllFilterWriter(pattern, PatternUtil.replacementStringMatchReplacer(replacementString), sw);
+        w.write(subject);
+        w.close();
+        Assert.assertEquals(expected, sw.toString());
     }
 }

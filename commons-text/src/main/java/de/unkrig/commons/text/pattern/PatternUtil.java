@@ -27,6 +27,7 @@
 package de.unkrig.commons.text.pattern;
 
 import java.io.FilterReader;
+import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -34,8 +35,11 @@ import java.nio.CharBuffer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.text.Segment;
+
 import de.unkrig.commons.lang.protocol.Function;
 import de.unkrig.commons.lang.protocol.Transformer;
+import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -389,15 +393,69 @@ class PatternUtil {
         };
     }
 
+    /**
+     * Creates and returns a {@link FilterWriter} which replaces matches of the <var>pattern</var> within the character
+     * stream on-the-fly with the <var>matchReplacer</var>.
+     */
+    public static Writer
+    replaceAllFilterWriter(final Pattern pattern, final Function<Matcher, String> matchReplacer, Writer delegate) {
+
+        return new FilterWriter(delegate) {
+
+            final AllReplacer allReplacer = PatternUtil.replaceAll(pattern, matchReplacer);
+
+            @Override public void
+            write(int c) throws IOException {
+                this.write(new char[] { (char) c }, 0, 1);
+            }
+
+            @Override public void
+            write(@Nullable char[] cbuf, int off, int len) throws IOException {
+                this.append(new Segment(cbuf, off, len));
+            }
+
+            @Override public void
+            write(@Nullable String str, int off, int len) throws IOException {
+                this.append(str, off, len);
+            }
+
+            @Override public void
+            flush() throws IOException {
+                this.out.write(this.allReplacer.flush());
+                this.out.flush();
+            }
+
+            @Override public void
+            close() throws IOException {
+                this.out.write(this.allReplacer.flush());
+                this.out.close();
+            }
+
+            @NotNullByDefault(false) @Override public Writer
+            append(CharSequence csq) throws IOException {
+                if (csq.length() > 0) {
+                    this.out.write(this.allReplacer.transform(csq));
+                }
+                return this;
+            }
+
+            @NotNullByDefault(false) @Override public Writer
+            append(CharSequence csq, int start, int end) throws IOException {
+                this.append(csq.subSequence(start, end));
+                return this;
+            }
+        };
+    }
+
     public
-    interface AllReplacer extends Transformer<String, String> {
+    interface AllReplacer extends Transformer<CharSequence, String> {
 
         /**
          * Substitutes all matches in the <var>subject</var> and returns it. If there is a "partial match" at the
          * end of the subject, then only a prefix of the result is returned, and the suffix is processed as part of
          * following invocations.
          */
-        @Override String transform(String subject);
+        @Override String transform(CharSequence subject);
 
         /**
          * Executes any pending substitutions and returns the result. Eventually this replacer is in its initial
@@ -460,9 +518,9 @@ class PatternUtil {
             private int substitutionCount;
 
             @Override public String
-            transform(String in) {
+            transform(CharSequence in) {
 
-                if (in.isEmpty()) return this.flush();
+                if (in.length() == 0) return this.flush();
 
                 this.buffer.append(in);
 
