@@ -26,16 +26,16 @@
 
 package de.unkrig.commons.text.pattern;
 
+import java.io.FilterReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.CharBuffer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.unkrig.commons.lang.protocol.Function;
+import de.unkrig.commons.lang.protocol.Transformer;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -44,7 +44,6 @@ import de.unkrig.commons.nullanalysis.Nullable;
 public final
 class PatternUtil {
 
-    private static final Logger LOGGER = Logger.getLogger(PatternUtil.class.getName());
     private static final int LOOKBEHIND_LIMIT = 10;
 
     private PatternUtil() {}
@@ -57,46 +56,57 @@ class PatternUtil {
      *   Thus the <var>pattern</var> should have been compiled with the {@link Pattern#MULTILINE} flag.
      * </p>
      *
-     * @see Matcher#appendReplacement(StringBuffer, String) For the format of the <var>replacementString</var>
+     * @return The number of replacements that were executed
+     * @see    Matcher#appendReplacement(StringBuffer, String) For the format of the <var>replacementString</var>
      */
-    public static void
+    public static int
     replaceAll(Reader in, Pattern pattern, String replacementString, Writer out) throws IOException {
 
-        PatternUtil.replaceAll(
+        return PatternUtil.replaceAll(
             in,
             pattern,
-            PatternUtil.replacementStringReplacer(replacementString),
+            PatternUtil.replacementStringMatchReplacer(replacementString),
             out,
             8192
         );
     }
 
+    /** @deprecated Use {@link #constantMatchReplacer(String)} instead */
+    @Deprecated public static Function<Matcher, String>
+    constantReplacer(@Nullable final String string) { return PatternUtil.constantMatchReplacer(string); }
+
     /**
-     * Return a replacer which always returns the given <var>string</var>.
+     * Returns a match replacer which always returns the given <var>string</var>.
      * <p>
-     *   Opposed to {@link #replacementStringReplacer(String)}, "{@code $}" and "{@code \}" have no special meaning.
+     *   Opposed to {@link #replacementStringMatchReplacer(String)}, "{@code $}" and "{@code \}" have no special
+     *   meaning.
      * </p>
      *
-     * @see #replacementStringReplacer(String)
-     * @see #systemPropertyReplacer()
+     * @see #replacementStringMatchReplacer(String)
+     * @see #systemPropertyMatchReplacer()
      */
     public static Function<Matcher, String>
-    constantReplacer(@Nullable final String string) {
+    constantMatchReplacer(@Nullable final String string) {
 
         return new Function<Matcher, String>() {
             @Override @Nullable public String call(@Nullable Matcher match) { return string; }
         };
     }
 
+    /** @deprecated Use {@link #replacementStringMatchReplacer(String)} instead */
+    @Deprecated public static Function<Matcher, String>
+    replacementStringReplacer(final String replacementString) {
+        return PatternUtil.replacementStringMatchReplacer(replacementString);
+    }
+
     /**
-     * @return                                              A replacer which forms the replacement from the match and
-     *                                                      the given <var>replacementString</var>
-     * @see Matcher#appendReplacement(StringBuffer, String) For the format of the <var>replacementString</var>
-     * @see #constantReplacer(String)
-     * @see #systemPropertyReplacer()
+     * @return A match replacer which forms the replacement from the match and the given <var>replacementString</var>
+     * @see    Matcher#appendReplacement(StringBuffer, String) For the format of the <var>replacementString</var>
+     * @see    #constantMatchReplacer(String)
+     * @see    #systemPropertyMatchReplacer()
      */
     public static Function<Matcher, String>
-    replacementStringReplacer(final String replacementString) {
+    replacementStringMatchReplacer(final String replacementString) {
 
         return new Function<Matcher, String>() {
 
@@ -150,23 +160,27 @@ class PatternUtil {
         };
     }
 
+    /** @deprecated Use {@link #systemPropertyMatchReplacer()} instead */
+    @Deprecated public static Function<Matcher, String>
+    systemPropertyReplacer() { return PatternUtil.systemPropertyMatchReplacer(); }
+
     /**
-     * Returns a replacer which returns the value of the system property named by group #1 of the match.
+     * Returns a match replacer which returns the value of the system property named by group #1 of the match.
      * <p>
      *   Example:
      * </p>
      * <pre>
      *   PatternUtil.replaceAll(
      *       Pattern.compile("\\$\\{([^}]+)}").matcher("file.separator is ${file.separator}"),
-     *       PatternUtil.systemPropertyReplacer()
+     *       PatternUtil.systemPropertyMatchReplacer()
      *   )
      * </pre>
      *
-     * @see #constantReplacer(String)
-     * @see #replacementStringReplacer(String)
+     * @see #constantMatchReplacer(String)
+     * @see #replacementStringMatchReplacer(String)
      */
     public static Function<Matcher, String>
-    systemPropertyReplacer() {
+    systemPropertyMatchReplacer() {
 
         return new Function<Matcher, String>() {
 
@@ -191,7 +205,7 @@ class PatternUtil {
         return PatternUtil.replaceAll(
             in,                                                   // in
             Pattern.compile("\\$\\{([^}]+)}", Pattern.MULTILINE), // pattern
-            PatternUtil.systemPropertyReplacer(),                 // replacer
+            PatternUtil.systemPropertyMatchReplacer(),            // matchReplacer
             out,                                                  // out
             4096                                                  // initialBufferCapacity
         );
@@ -199,18 +213,18 @@ class PatternUtil {
 
     /**
      * The generalized form of {@link Matcher#replaceAll(String)}: The replacement for a match is not formed from a
-     * "replacement string" (with variables "$0", "$1", ...), but is computed by the <var>replacer</var>. If the
-     * replacer returns {@code null} for a match, then the match is <em>not</em> replaced.
+     * "replacement string" (with variables "$0", "$1", ...), but is computed by the <var>matchReplacer</var>. If the
+     * <var>matchReplacer</var> returns {@code null} for a match, then the match is <em>not</em> replaced.
      */
     public static String
-    replaceAll(Matcher matcher, Function<Matcher, String> replacer) {
+    replaceAll(Matcher matcher, Function<Matcher, String> matchReplacer) {
 
         matcher.reset();
 
         StringBuffer sb = new StringBuffer();
         for (boolean result = matcher.find(); result; result = matcher.find()) {
 
-            String replacement = replacer.call(matcher);
+            String replacement = matchReplacer.call(matcher);
 
             if (replacement == null) continue;
 
@@ -227,8 +241,8 @@ class PatternUtil {
 
     /**
      * Reads characters from <var>in</var>, finds all matches of <var>pattern</var>, replaces each match with the
-     * result of the <var>replacer</var>, and writes the result to <var>out</var>. If the replacer returns {@code null}
-     * for a match, then the match is <em>not</em> replaced.
+     * result of the <var>matchReplacer</var>, and writes the result to <var>out</var>. If the <var>matchReplacer</var>
+     * returns {@code null} for a match, then the match is <em>not</em> replaced.
      * <p>
      *   The pattern search is stream-oriented, not line-oriented, i.e. matches are found even across line boundaries.
      *   Therefore the <var>pattern</var> should have been compiled with the {@link Pattern#MULTILINE} flag.
@@ -245,114 +259,293 @@ class PatternUtil {
      * @return                      The number of replacements that were executed
      */
     public static int
-    replaceAll(Reader in, Pattern pattern, Function<Matcher, String> replacer, Writer out, int initialBufferCapacity)
-    throws IOException {
+    replaceAll(
+        Reader                    in,
+        Pattern                   pattern,
+        Function<Matcher, String> matchReplacer,
+        Writer                    out,
+        int                       initialBufferCapacity
+    ) throws IOException {
 
-        PatternUtil.LOGGER.log(Level.FINE, "Replace all matches of ''{0}''", pattern);
+        AllReplacer allReplacer = PatternUtil.replaceAll(pattern, matchReplacer);
 
-        int        replacementCount = 0;
-        CharBuffer cb               = CharBuffer.allocate(initialBufferCapacity);
-
-        for (int from = 0;;) {
-
-            // The CB is now in "fill mode".
-            if (!cb.hasRemaining()) {
-
-                // We hit the end; enlarge the buffer.
-                PatternUtil.LOGGER.finest("Increasing buffer size");
-                cb.flip();
-                cb = CharBuffer.allocate(cb.capacity() * 2).append(cb);
-            }
-
-            boolean atEoi = false;
-            do {
-                if (in.read(cb) == -1) {
-                    atEoi = true;
-                    break;
-                }
-            } while (cb.hasRemaining());
-
-            cb.flip();
-            // The CB is now in "drain mode".
-
-            // Find the next match.
-            Matcher m = pattern.matcher(cb);
-            if (m.find(from)) {
-                String replacement = replacer.call(m);
-
-                if (replacement == null) {
-
-                    PatternUtil.LOGGER.log(Level.CONFIG, "Leaving match ''{0}'' unreplaced", m.group());
-
-                    // Copy the text BEFORE the match AND the match to the output stream.
-                    out.append(cb, from, m.end());
-                } else {
-
-                    PatternUtil.LOGGER.log(
-                        Level.CONFIG,
-                        "Replacing match ''{0}'' with ''{1}''",
-                        new Object[] { m.group(), replacement }
-                    );
-
-                    // Copy the text BEFORE the match to the output stream.
-                    out.append(cb, from, m.start());
-
-                    // Copy the replacement to the output stream.
-                    out.append(replacement);
-
-                    replacementCount++;
-                }
-                from = m.end();
-
-                // Very special case: We have a zero-length match. To avoid an endless sequence of matches, advance
-                // "from" by one.
-                if (m.start() == m.end()) {
-                    if (m.end() == cb.limit()) break;
-                    out.write(cb.charAt(from++));
-                }
-            } else
-            if (!atEoi && m.hitEnd()) {
-
-                // We hit the end; enlarge the buffer.
-                PatternUtil.LOGGER.finest("Increasing buffer size");
-                cb.flip();
-                cb = CharBuffer.allocate(cb.capacity() * 2).append(cb);
-                continue; // We're now in "fill mode".
-            } else
-            {
-
-                // No match.
-                cb.position(from);
-                out.append(cb);
-                from = cb.position();
-
-                if (atEoi) break;
-            }
-
-            // Now switch the CB back to "fill mode".
-
-            if (from <= PatternUtil.LOOKBEHIND_LIMIT) {
-                cb.position(cb.limit());
-                cb.limit(cb.capacity());
-            } else
-            if (cb.capacity() > initialBufferCapacity && cb.position() <= initialBufferCapacity) {
-                PatternUtil.LOGGER.finest("Restoring initial buffer size");
-                cb.flip();
-                cb = CharBuffer.allocate(initialBufferCapacity).append(cb);
-            } else
-            {
-                cb.position(from - PatternUtil.LOOKBEHIND_LIMIT);
-                cb.compact();
-                from = PatternUtil.LOOKBEHIND_LIMIT;
-            }
+        char[] buffer = new char[initialBufferCapacity];
+        for (;;) {
+            int n = in.read(buffer);
+            if (n == -1) break;
+            out.write(allReplacer.transform(new String(buffer, 0, n)));
         }
 
-        PatternUtil.LOGGER.log(
-            Level.FINE,
-            "Replaced {0,choice,0#no matches|1#one match|1<{0} matches} of ''{1}''",
-            new Object[] { replacementCount, pattern }
-        );
+        out.write(allReplacer.flush());
 
-        return replacementCount;
+        return allReplacer.substitutionCount();
+    }
+
+    /**
+     * Creates and returns a {@link FilterReader} which replaces matches of the <var>pattern</var> within the character
+     * stream on-the-fly with the <var>matchReplacer</var>.
+     */
+    public static Reader
+    replaceAllFilterReader(Reader delegate, final Pattern pattern, final Function<Matcher, String> matchReplacer) {
+
+        return new FilterReader(delegate) {
+
+            AllReplacer allReplacer = PatternUtil.replaceAll(pattern, matchReplacer);
+
+            /**
+             * Sometimes we have "too many" characters than we can return, so we set them aside in this buffer.
+             */
+            String buffer = "";
+
+            @Override public int
+            read() throws IOException {
+
+                if (!this.buffer.isEmpty()) {
+                    char c = this.buffer.charAt(0);
+                    this.buffer = this.buffer.substring(1);
+                    return c;
+                }
+
+                int c = this.in.read();
+                if (c == -1) {
+                    String s = this.allReplacer.flush();
+                    if (s.isEmpty()) return -1;
+                    char c2 = s.charAt(0);
+                    this.buffer = s.substring(1);
+                    return c2;
+                }
+
+                String s = this.allReplacer.transform(new String(new char[] { (char) c }));
+                if (s.isEmpty()) return -1;
+                char c2 = s.charAt(0);
+                this.buffer = s.substring(1);
+                return c2;
+            }
+
+            @Override public int
+            read(@Nullable char[] cbuf, int off, int len) throws IOException {
+
+                String s;
+                while (this.buffer.isEmpty()) {
+                    char[] ca = new char[1024];
+
+                    int n = this.in.read(ca);
+                    if (n < 0) {
+                        this.buffer = this.allReplacer.transform("");
+                        if (this.buffer.isEmpty()) return -1;
+                        break;
+                    } else
+                    if (n == 0) {
+                        return 0;
+                    } else
+                    if (n > 0) {
+                        this.buffer = this.allReplacer.transform(new String(ca, 0, n));
+                    }
+                }
+
+                int bl = this.buffer.length();
+                if (bl < len) {
+                    System.arraycopy(this.buffer.toCharArray(), 0, cbuf, off, bl);
+                    this.buffer = "";
+                    return bl;
+                } else {
+                    System.arraycopy(this.buffer.toCharArray(), 0, cbuf, off, len);
+                    this.buffer = this.buffer.substring(len);
+                    return len;
+                }
+            }
+
+            @Override public long
+            skip(long n) throws IOException {
+
+                if (n < 0L) throw new IllegalArgumentException("skip value is negative");
+
+                int nn = (int) Math.min(n, MAX_SKIP_BUFFER_SIZE);
+
+                char[] skipb = this.skipBuffer;
+                if (skipb == null || skipb.length < nn) skipb = (this.skipBuffer = new char[nn]);
+
+                int nc;
+                for (long r = n; r > 0; r -= nc) {
+                    nc = this.read(skipb, 0, (int) Math.min(r, nn));
+                    if (nc == -1) return n - r;
+                }
+                return 0;
+            }
+            private static final int MAX_SKIP_BUFFER_SIZE = 8192;
+            @Nullable private char[] skipBuffer;
+
+            @Override public boolean
+            ready() { return !this.buffer.isEmpty(); }
+
+            @Override public boolean
+            markSupported() { return false; }
+
+            @Override public void
+            mark(int readAheadLimit) throws IOException { throw new IOException("mark() not supported"); }
+
+            @Override public void
+            reset() throws IOException { throw new IOException("reset() not supported"); }
+        };
+    }
+
+    public
+    interface AllReplacer extends Transformer<String, String> {
+
+        /**
+         * Substitutes all matches in the <var>subject</var> and returns it. If there is a "partial match" at the
+         * end of the subject, then only a prefix of the result is returned, and the suffix is processed as part of
+         * following invocations.
+         */
+        @Override String transform(String subject);
+
+        /**
+         * Executes any pending substitutions and returns the result. Eventually this replacer is in its initial
+         * state, except that its {@link #substitutionCount()} is not reset to zero.
+         */
+        String flush();
+
+        /**
+         * @return The number of substitutions executed so far, i.e. the number of invocations of the
+         *         <var>matchReplacer</var> that returned a non-{@code null} value
+         */
+        int substitutionCount();
+    }
+
+    /**
+     * Replaces pattern matches in a stream of strings.
+     * <p>
+     *   As the returned transformer <em>consumes</em> a sequence of strings, it <em>produces</em> a sequence of
+     *   strings, and the concatenation of the consumed strings equals the concatenation of the produced strings,
+     *   except that all matches of the <var>pattern</var> are substituted with the <var>replacementString</var>.
+     * </p>
+     * <p>
+     *   Iff the input to the transformer is {@code ""} (the empty string), then the "rest" of any pending matches is
+     *   returned.
+     * </p>
+     */
+    public static AllReplacer
+    replaceAll(Pattern pattern, String replacementString) {
+        return PatternUtil.replaceAll(pattern, PatternUtil.replacementStringMatchReplacer(replacementString));
+    }
+
+    /**
+     * Replaces pattern matches in a stream of strings.
+     * <p>
+     *   As the returned transformer <em>consumes</em> a sequence of strings, it <em>produces</em> a sequence of
+     *   strings, and the concatenation of the consumed strings equals the concatenation of the produced strings,
+     *   except that all matches of the <var>pattern</var> are substituted with the replacements generated by the
+     *   <var>matchReplacer</var>.
+     * </p>
+     * <p>
+     *   Iff the input to the transformer is {@code ""} (the empty string), then the "rest" of any pending matches is
+     *   returned.
+     * </p>
+     */
+    public static AllReplacer
+    replaceAll(final Pattern pattern, final Function<Matcher, String> matchReplacer) {
+
+        return new AllReplacer() {
+
+            /**
+             * Contains a suffix of the input char sequence.
+             */
+            StringBuilder buffer = new StringBuilder();
+
+            /**
+             * Offset in {@link #buffer}
+             */
+            int start;
+
+            private int substitutionCount;
+
+            @Override public String
+            transform(String in) {
+
+                if (in.isEmpty()) return this.flush();
+
+                this.buffer.append(in);
+
+                StringBuilder result = new StringBuilder();
+                Matcher m = pattern.matcher(this.buffer);
+                if (m.find(this.start) && !m.hitEnd()) {
+                    do {
+
+                        String replacement = matchReplacer.call(m);
+                        if (replacement != null) {
+                            result.append(this.buffer, this.start, m.start()).append(replacement);
+                            this.start = m.end();
+                            this.substitutionCount++;
+                        }
+
+                        if (m.start() == m.end()) {
+
+                            // Special case: Zero-length match.
+                            if (this.start == this.buffer.length()) break;
+                            result.append(this.buffer.charAt(this.start++));
+                        }
+                    } while (m.find(this.start) &&!m.hitEnd());
+                }
+
+                if (m.hitEnd()) {
+                    if (this.start > PatternUtil.LOOKBEHIND_LIMIT) {
+                        this.buffer.delete(0, this.start - PatternUtil.LOOKBEHIND_LIMIT);
+                        this.start = PatternUtil.LOOKBEHIND_LIMIT;
+                    }
+                } else {
+                    result.append(this.buffer.substring(this.start));
+                    if (this.buffer.length() <= PatternUtil.LOOKBEHIND_LIMIT) {
+                        this.start = this.buffer.length();
+                    } else {
+                        this.buffer.delete(0, this.buffer.length() - PatternUtil.LOOKBEHIND_LIMIT);
+                        this.start = PatternUtil.LOOKBEHIND_LIMIT;
+                    }
+                }
+
+                return result.toString();
+            }
+
+            @Override public String
+            flush() {
+
+                if (this.buffer.length() == 0) return "";
+
+                Matcher m = pattern.matcher(this.buffer);
+                if (!m.find(this.start)) {
+
+                    // No match in "the rest" - just return "the rest".
+                    String result = this.buffer.substring(this.start);
+                    this.buffer.setLength(0);
+                    this.start = 0;
+                    return result;
+                }
+
+                StringBuilder result = new StringBuilder();
+                do {
+
+                    String replacement = matchReplacer.call(m);
+                    if (replacement != null) {
+                        result.append(this.buffer, this.start, m.start()).append(replacement);
+                        this.start = m.end();
+                        this.substitutionCount++;
+                    }
+
+                    if (m.start() == m.end()) {
+
+                        // Special case: Zero-length match.
+                        if (this.start == this.buffer.length()) break;
+                        result.append(this.buffer.charAt(this.start++));
+                    }
+                } while (m.find(this.start));
+
+                result.append(this.buffer, this.start, this.buffer.length());
+                this.buffer.setLength(0);
+                this.start = 0;
+                return result.toString();
+            }
+
+            @Override
+            public int substitutionCount() { return this.substitutionCount; }
+        };
     }
 }
