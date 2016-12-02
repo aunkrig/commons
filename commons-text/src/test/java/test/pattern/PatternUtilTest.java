@@ -27,11 +27,14 @@
 package test.pattern;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.regex.Pattern;
 
 import org.junit.Assert;
@@ -40,6 +43,8 @@ import org.junit.Test;
 import de.unkrig.commons.io.CharFilter;
 import de.unkrig.commons.io.CharFilterReader;
 import de.unkrig.commons.io.IoUtil;
+import de.unkrig.commons.lang.StringUtil;
+import de.unkrig.commons.lang.protocol.Transformer;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.pattern.PatternUtil;
 import junit.framework.TestCase;
@@ -91,7 +96,7 @@ class PatternUtilTest extends TestCase {
             "file.separator is " + File.separator,
             PatternUtil.replaceAll(
                 Pattern.compile("\\$\\{([^}]+)}").matcher("file.separator is ${file.separator}"),
-                PatternUtil.systemPropertyReplacer()
+                PatternUtil.systemPropertyMatchReplacer()
             )
         );
     }
@@ -102,7 +107,7 @@ class PatternUtilTest extends TestCase {
             "H$1llo world",
             PatternUtil.replaceAll(
                 Pattern.compile("e").matcher("Hello world"),
-                PatternUtil.constantReplacer("$1")
+                PatternUtil.constantMatchReplacer("$1")
             )
         );
     }
@@ -113,14 +118,14 @@ class PatternUtilTest extends TestCase {
             "Hxe1xllo world",
             PatternUtil.replaceAll(
                 Pattern.compile("e").matcher("Hello world"),
-                PatternUtil.replacementStringReplacer("x$01x")
+                PatternUtil.replacementStringMatchReplacer("x$01x")
             )
         );
         Assert.assertEquals(
             "Hxexllo world",
             PatternUtil.replaceAll(
                 Pattern.compile("(e)").matcher("Hello world"),
-                PatternUtil.replacementStringReplacer("x$01x")
+                PatternUtil.replacementStringMatchReplacer("x$01x")
             )
         );
     }
@@ -141,6 +146,60 @@ class PatternUtilTest extends TestCase {
         Assert.assertEquals("line1\nline2\nline3", PatternUtilTest.readAll(r));
     }
 
+    /**
+     * Reads THIS source file, executes a transformation, then a reverse stransformation, then checks that the result
+     * equals the original.
+     */
+    @Test public void
+    test5() throws IOException {
+        Reader r = new InputStreamReader(new FileInputStream("src/test/java/" + this.getClass().getName().replace('.', '/') + ".java"), Charset.forName("UTF-8"));
+        try {
+            char[] buffer = new char[300];
+
+            StringBuilder               orig      = new StringBuilder();
+            StringBuilder               patched   = new StringBuilder();
+            StringBuilder               repatched = new StringBuilder();
+            Transformer<String, String> patcher   = PatternUtil.replaceAll(Pattern.compile("StringBuilder"), "STRING_"+"BUILDER");
+            Transformer<String, String> repatcher = PatternUtil.replaceAll(Pattern.compile("ST"+"RING_BUILDER"), "StringBuilder");
+            for (;;) {
+                int n = r.read(buffer);
+                if (n == -1) break;
+                String s = new String(buffer, 0, n);
+
+                orig.append(s);
+
+                s = patcher.transform(s);
+                if (!s.isEmpty()) {
+                    patched.append(s);
+
+                    s = repatcher.transform(s);
+                    if (!s.isEmpty()) {
+                        repatched.append(s);
+                    }
+                }
+            }
+            r.close();
+
+            String s = patcher.transform("");
+            if (!s.isEmpty()) {
+                patched.append(s);
+                repatched.append(repatcher.transform(s));
+            }
+            repatched.append(repatcher.transform(""));
+
+            Assert.assertNotEquals(orig.toString(), patched.toString());
+            Assert.assertNotEquals(patched.toString(), repatched.toString());
+            Assert.assertEquals(orig.toString(), repatched.toString());
+
+            String x = patcher.transform(orig.toString()) + patcher.transform("");
+            Assert.assertEquals(patched.toString(), x);
+            x = repatcher.transform(x) + repatcher.transform("");
+            Assert.assertEquals(orig.toString(), x);
+        } finally {
+            try { r.close(); } catch (Exception e) {}
+        }
+    }
+
     // ---------------------------------------------------------------
 
     private static String
@@ -151,14 +210,33 @@ class PatternUtilTest extends TestCase {
     }
 
     public void
-    assertReplaceAllEquals(String expected, String subject, String regex, String replacement) throws IOException {
+    assertReplaceAllEquals(String expected, String subject, String regex, String replacementString) throws IOException {
 
         // First of all, verify that "java.util.regex.Pattern" actually yields the SAME result.
-        Assert.assertEquals(expected, Pattern.compile(regex).matcher(subject).replaceAll(replacement));
+        Assert.assertEquals(expected, Pattern.compile(regex).matcher(subject).replaceAll(replacementString));
 
         // Now, test "PatternUtil.replaceAll()".
         StringWriter sw = new StringWriter();
-        PatternUtil.replaceAll(new StringReader(subject), Pattern.compile(regex), replacement, sw);
+        PatternUtil.replaceAll(new StringReader(subject), Pattern.compile(regex), replacementString, sw);
         TestCase.assertEquals(expected, sw.toString());
+
+        // Then, test "PatternUtil.replaceAll()".
+        Transformer<String, String> t = PatternUtil.replaceAll(Pattern.compile(regex), replacementString);
+        TestCase.assertEquals(expected, t.transform(subject) + t.transform(""));
+
+        StringBuilder sb = new StringBuilder();
+        for (Character c : StringUtil.asIterable(subject)) sb.append(t.transform(new String(new char[] { c })));
+        sb.append(t.transform(""));
+        TestCase.assertEquals(expected, sb.toString());
+
+        // Then, test the "replaceAllFilterReader()".
+        Assert.assertEquals(
+            expected,
+            PatternUtilTest.readAll(PatternUtil.replaceAllFilterReader(
+                new StringReader(subject),
+                Pattern.compile(regex),
+                PatternUtil.replacementStringMatchReplacer(replacementString)
+            ))
+        );
     }
 }
