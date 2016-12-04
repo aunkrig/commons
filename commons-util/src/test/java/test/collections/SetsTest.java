@@ -42,7 +42,7 @@ import de.unkrig.commons.util.collections.Sets;
 public
 class SetsTest {
 
-    @Test public void
+    @SuppressWarnings("unchecked") @Test public void
     test() {
         Assert.assertEquals(
             Arrays.<Set<String>>asList(
