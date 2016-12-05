@@ -51,7 +51,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 
 import de.unkrig.commons.io.HexOutputStream;
-import de.unkrig.commons.io.IoUtil;
+import de.unkrig.commons.io.InputStreams;
+import de.unkrig.commons.io.OutputStreams;
 import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.ThreadUtil;
 import de.unkrig.commons.lang.protocol.RunnableWhichThrows;
@@ -318,7 +319,7 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
                 {
                     InputStream in = clientSocket.getInputStream();
                     if (LOGGER.isLoggable(FINEST)) {
-                        in = IoUtil.wye(
+                        in = InputStreams.wye(
                             in,
                             new HexOutputStream(LogUtil.logWriter(LOGGER, FINEST, "<From Client< "))
                         );
@@ -330,7 +331,7 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
                 {
                     OutputStream out = clientSocket.getOutputStream();
                     if (LOGGER.isLoggable(FINEST)) {
-                        out = IoUtil.tee(
+                        out = OutputStreams.tee(
                             out,
                             new HexOutputStream(LogUtil.logWriter(LOGGER, FINEST, ">To   Client> "))
                         );

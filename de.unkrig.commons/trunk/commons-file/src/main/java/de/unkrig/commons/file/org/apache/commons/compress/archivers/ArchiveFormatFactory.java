@@ -55,8 +55,8 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.compressors.FileNameUtil;
 import org.apache.commons.compress.utils.IOUtils;
 
-import de.unkrig.commons.io.IoUtil;
 import de.unkrig.commons.io.MarkableFileInputStream;
+import de.unkrig.commons.io.OutputStreams;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -236,7 +236,7 @@ class ArchiveFormatFactory {
         for (ArchiveFormat af : ArchiveFormatFactory.ALL_ARCHIVE_FORMATS.values()) {
             try {
                 if (
-                    af.archiveOutputStream(IoUtil.NULL_OUTPUT_STREAM).getClass()
+                    af.archiveOutputStream(OutputStreams.DISCARD).getClass()
                     == archiveOutputStream.getClass()
                 ) return af;
             } catch (StreamingNotSupportedException e) {

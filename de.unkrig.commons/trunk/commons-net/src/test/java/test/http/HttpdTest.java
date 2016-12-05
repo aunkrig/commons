@@ -40,7 +40,7 @@ import javax.net.ssl.SSLContext;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.unkrig.commons.io.IoUtil;
+import de.unkrig.commons.io.InputStreams;
 import de.unkrig.commons.lang.ThreadUtil;
 import de.unkrig.commons.net.http.HttpProxy;
 import de.unkrig.commons.net.security.KeyStores;
@@ -220,7 +220,7 @@ class HttpdTest {
 
     private static void
     assertContentsEqual(String expected, InputStream actual) throws IOException {
-        String actualText = new String(IoUtil.readAll(actual));
+        String actualText = new String(InputStreams.readAll(actual));
         if (Pattern.matches(expected, actualText)) return;
         Assert.assertEquals(expected, actualText);
     }

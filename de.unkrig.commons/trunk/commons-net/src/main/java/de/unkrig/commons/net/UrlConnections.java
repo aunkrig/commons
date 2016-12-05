@@ -41,7 +41,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import de.unkrig.commons.io.IoUtil;
+import de.unkrig.commons.io.Readers;
 import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.nullanalysis.Nullable;
 
@@ -186,7 +186,7 @@ class UrlConnections {
 
         InputStream errorStream = httpConn.getErrorStream();
         if (errorStream != null) {
-            sb.append(IoUtil.readAll(new InputStreamReader(errorStream, Charset.forName("ISO-8859-1"))));
+            sb.append(Readers.readAll(new InputStreamReader(errorStream, Charset.forName("ISO-8859-1"))));
         }
 
         return new IOException(sb.toString(), cause);

@@ -49,7 +49,7 @@ import java.nio.charset.Charset;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.unkrig.commons.io.IoUtil;
+import de.unkrig.commons.io.Readers;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.text.scanner.AbstractScanner.Token;
 import de.unkrig.commons.text.scanner.DocumentScanner;
@@ -109,7 +109,7 @@ class JavaScannerTest {
 
             r = JavaScanner.unicodeEscapesDecodingReader(r);
 
-            raw = IoUtil.readAll(r, true);
+            raw = Readers.readAll(r, true);
         }
 
         String scannedUnscanned;

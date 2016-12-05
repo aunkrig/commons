@@ -35,7 +35,10 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.swing.text.Segment;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -44,9 +47,11 @@ import de.unkrig.commons.io.CharFilter;
 import de.unkrig.commons.io.CharFilterReader;
 import de.unkrig.commons.io.IoUtil;
 import de.unkrig.commons.lang.StringUtil;
+import de.unkrig.commons.lang.protocol.Function;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.pattern.PatternUtil;
-import de.unkrig.commons.text.pattern.PatternUtil.AllReplacer;
+import de.unkrig.commons.text.pattern.Substitutor;
+import junit.framework.ComparisonFailure;
 import junit.framework.TestCase;
 
 // CHECKSTYLE JavadocMethod:OFF
@@ -82,21 +87,21 @@ class PatternUtilTest extends TestCase {
     test4() throws IOException {
         this.assertReplaceAllEquals("xxxAxxx\nxxxBxxx",         "xxxAxxx\nxxxBxxx", "A.*B",     "C");
         this.assertReplaceAllEquals("xxxCxxx",                  "xxxAxxx\nxxxBxxx", "A.*\n.*B", "C");
-        this.assertReplaceAllEquals("xxxCxxx",                  "xxxAxxx\nxxxBxxx", "(?s)A.*B", "C"); // "(?s)" = DOTALL
+        this.assertReplaceAllEquals("xxxCxxx",                  "xxxAxxx\nxxxBxxx", "(?s)A.*B", "C");    // "(?s)" = DOTALL
         this.assertReplaceAllEquals("[xxxAxxx]\n[xxxBxxx]",     "xxxAxxx\nxxxBxxx", ".+",       "[$0]");
         this.assertReplaceAllEquals("_xxxAxxx___\n_xxxBxxx___", "xxxAxxx\nxxxBxxx", ".*",       "_$0_");
         this.assertReplaceAllEquals("_xxx___",                  "xxx",              ".*",       "_$0_");
         this.assertReplaceAllEquals("[xxxAxxx\nxxxBxxx][]",     "xxxAxxx\nxxxBxxx", "(?s).*",   "[$0]"); // "(?s)" = DOTALL
-        this.assertReplaceAllEquals("aaa\nBbb\nccc",            "aaa\nbbb\nccc",    "(?m)^b",   "B"); // "(?m)" = MULTILINE
+        this.assertReplaceAllEquals("aaa\nBbb\nccc",            "aaa\nbbb\nccc",    "(?m)^b",   "B");    // "(?m)" = MULTILINE
     }
 
     @Test public void
     testSystemPropertyReplacer() {
         Assert.assertEquals(
             "file.separator is " + File.separator,
-            PatternUtil.replaceAll(
+            PatternUtil.replaceSome(
                 Pattern.compile("\\$\\{([^}]+)}").matcher("file.separator is ${file.separator}"),
-                PatternUtil.systemPropertyMatchReplacer()
+                PatternUtil.SYSTEM_PROPERTY_MATCH_REPLACER
             )
         );
     }
@@ -105,7 +110,7 @@ class PatternUtilTest extends TestCase {
     testConstantReplacer() {
         Assert.assertEquals(
             "H$1llo world",
-            PatternUtil.replaceAll(
+            PatternUtil.replaceSome(
                 Pattern.compile("e").matcher("Hello world"),
                 PatternUtil.constantMatchReplacer("$1")
             )
@@ -116,14 +121,14 @@ class PatternUtilTest extends TestCase {
     testReplacementStringReplacer() {
         Assert.assertEquals(
             "Hxe1xllo world",
-            PatternUtil.replaceAll(
+            PatternUtil.replaceSome(
                 Pattern.compile("e").matcher("Hello world"),
                 PatternUtil.replacementStringMatchReplacer("x$01x")
             )
         );
         Assert.assertEquals(
             "Hxexllo world",
-            PatternUtil.replaceAll(
+            PatternUtil.replaceSome(
                 Pattern.compile("(e)").matcher("Hello world"),
                 PatternUtil.replacementStringMatchReplacer("x$01x")
             )
@@ -159,29 +164,29 @@ class PatternUtilTest extends TestCase {
             StringBuilder orig      = new StringBuilder();
             StringBuilder patched   = new StringBuilder();
             StringBuilder repatched = new StringBuilder();
-            AllReplacer   patcher   = PatternUtil.replaceAll(Pattern.compile("StringBuilder"), "STRING_"+"BUILDER");
-            AllReplacer   repatcher = PatternUtil.replaceAll(Pattern.compile("ST"+"RING_BUILDER"), "StringBuilder");
+            Substitutor   patcher   = PatternUtil.substitutor(Pattern.compile("StringBuilder"), "STRING_"+"BUILDER");
+            Substitutor   repatcher = PatternUtil.substitutor(Pattern.compile("ST"+"RING_BUILDER"), "StringBuilder");
             for (;;) {
                 int n = r.read(buffer);
                 if (n == -1) break;
-                String s = new String(buffer, 0, n);
+                CharSequence s = new Segment(buffer, 0, n);
 
                 orig.append(s);
 
                 s = patcher.transform(s);
-                if (!s.isEmpty()) {
+                if (s.length() > 0) {
                     patched.append(s);
 
                     s = repatcher.transform(s);
-                    if (!s.isEmpty()) {
+                    if (s.length() > 0) {
                         repatched.append(s);
                     }
                 }
             }
             r.close();
 
-            String s = patcher.transform("");
-            if (!s.isEmpty()) {
+            CharSequence s = patcher.transform("");
+            if (s.length() > 0) {
                 patched.append(s);
                 repatched.append(repatcher.transform(s));
             }
@@ -191,13 +196,40 @@ class PatternUtilTest extends TestCase {
             Assert.assertNotEquals(patched.toString(), repatched.toString());
             Assert.assertEquals(orig.toString(), repatched.toString());
 
-            String x = patcher.transform(orig.toString()) + patcher.transform("");
+            String x = patcher.transform(orig).toString() + patcher.transform("");
             Assert.assertEquals(patched.toString(), x);
-            x = repatcher.transform(x) + repatcher.transform("");
+            x = repatcher.transform(x).toString() + repatcher.transform("");
             Assert.assertEquals(orig.toString(), x);
         } finally {
             try { r.close(); } catch (Exception e) {}
         }
+    }
+
+    @Test public void
+    testOverlappingMatches() throws IOException {
+        this.assertReplaceAllEquals("BaaaBaaaBaaaBaaaBaaaBaaaBaaaBaaa", "aaaaaaaa", "a", "Baaa");
+        PatternUtilTest.assertReplaceNoneEquals("aaaaaaaa",                        "aaaaaaaa", "a");
+    }
+
+    @Test public void
+    testLongLookbehind9() throws IOException {
+        this.assertReplaceAllEquals("abcdefghijklmnopqrSt", "abcdefghijklmnopqrst", "(?<=jklmnopqr)s", "S");
+    }
+
+    @Test public void
+    testLongLookbehind10() throws IOException {
+        this.assertReplaceAllEquals("abcdefghijklmnopqrSt", "abcdefghijklmnopqrst", "(?<=ijklmnopqr)s", "S");
+    }
+
+    @Test public void
+    testLongLookbehind11() throws IOException {
+
+        // The "Substitutor" has a limit look-behind (by default 10); so it cannot recognize the following 11-char
+        // lookbehind.
+        try {
+            this.assertReplaceAllEquals("abcdefghijklmnopqrSt", "abcdefghijklmnopqrst", "(?<=hijklmnopqr)s", "S");
+            TestCase.fail();
+        } catch (ComparisonFailure cf) {}
     }
 
     // ---------------------------------------------------------------
@@ -217,17 +249,18 @@ class PatternUtilTest extends TestCase {
         // First of all, verify that "java.util.regex.Pattern" actually yields the SAME result.
         Assert.assertEquals(expected, pattern.matcher(subject).replaceAll(replacementString));
 
-        // Now, test "PatternUtil.replaceAll()".
+        // Now, test "PatternUtil.replaceAll(Reader, ...)".
         {
             StringWriter sw = new StringWriter();
             PatternUtil.replaceAll(new StringReader(subject), pattern, replacementString, sw);
             TestCase.assertEquals(expected, sw.toString());
         }
 
-        // Then, test "PatternUtil.replaceAll()".
-        AllReplacer t = PatternUtil.replaceAll(pattern, replacementString);
-        TestCase.assertEquals(expected, t.transform(subject) + t.transform(""));
+        // Then, test "Substitutor".
+        Substitutor t = PatternUtil.substitutor(pattern, replacementString);
+        TestCase.assertEquals(expected, t.transform(subject).toString() + t.transform(""));
 
+        // Test the "Substitutor" with a sequence of single-character strings.
         StringBuilder sb = new StringBuilder();
         for (Character c : StringUtil.asIterable(subject)) sb.append(t.transform(new String(new char[] { c })));
         sb.append(t.transform(""));
@@ -249,5 +282,15 @@ class PatternUtilTest extends TestCase {
         w.write(subject);
         w.close();
         Assert.assertEquals(expected, sw.toString());
+    }
+
+    private static void
+    assertReplaceNoneEquals(String expected, String subject, String regex) {
+        Assert.assertEquals(expected, PatternUtil.replaceSome(
+            Pattern.compile(regex).matcher(subject),
+            new Function<Matcher, CharSequence>() {
+                @Override @Nullable public CharSequence call(@Nullable Matcher argument) { return null; }
+            }
+        ));
     }
 }

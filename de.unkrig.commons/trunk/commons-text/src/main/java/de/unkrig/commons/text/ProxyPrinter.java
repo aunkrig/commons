@@ -38,6 +38,13 @@ class ProxyPrinter extends AbstractPrinter {
     private final Printer delegate;
 
     /**
+     * Uses the {@link AbstractPrinter#getContextPrinter()} as the delegate.
+     *
+     * @see ProxyPrinter
+     */
+    public ProxyPrinter() { this(AbstractPrinter.getContextPrinter());  }
+
+    /**
      * @see ProxyPrinter
      */
     public ProxyPrinter(Printer delegate) { this.delegate = delegate; }

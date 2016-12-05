@@ -51,8 +51,8 @@ import org.apache.commons.compress.compressors.snappy.SnappyCompressorInputStrea
 import org.apache.commons.compress.utils.IOUtils;
 
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormatFactory;
-import de.unkrig.commons.io.IoUtil;
 import de.unkrig.commons.io.MarkableFileInputStream;
+import de.unkrig.commons.io.OutputStreams;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -230,7 +230,7 @@ class CompressionFormatFactory {
         for (CompressionFormat cf : CompressionFormatFactory.ALL_COMPRESSION_FORMATS.values()) {
             try {
                 if (
-                    cf.compressorOutputStream(IoUtil.NULL_OUTPUT_STREAM).getClass()
+                    cf.compressorOutputStream(OutputStreams.DISCARD).getClass()
                     == compressorOutputStream.getClass()
                 ) return cf;
             } catch (CompressorException ce) {

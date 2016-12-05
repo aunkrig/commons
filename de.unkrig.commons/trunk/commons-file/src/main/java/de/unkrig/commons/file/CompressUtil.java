@@ -41,7 +41,7 @@ import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveForma
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormatFactory;
 import de.unkrig.commons.file.org.apache.commons.compress.compressors.CompressionFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.compressors.CompressionFormatFactory;
-import de.unkrig.commons.io.IoUtil;
+import de.unkrig.commons.io.InputStreams;
 import de.unkrig.commons.io.MarkableFileInputStream;
 import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.ExceptionUtil;
@@ -189,7 +189,7 @@ class CompressUtil {
 
             ArchiveInputStream ais;
             try {
-                ais = archiveFormat.archiveInputStream(IoUtil.unclosableInputStream(inputStream));
+                ais = archiveFormat.archiveInputStream(InputStreams.unclosable(inputStream));
             } catch (ArchiveException ae) {
                 throw new IOException(archiveFormat.getName(), ae);
             }
@@ -206,7 +206,7 @@ class CompressUtil {
             }
 
             return compressorHandler.handleCompressor(
-                compressionFormat.compressorInputStream(IoUtil.unclosableInputStream(inputStream)),
+                compressionFormat.compressorInputStream(InputStreams.unclosable(inputStream)),
                 compressionFormat
             );
         }
