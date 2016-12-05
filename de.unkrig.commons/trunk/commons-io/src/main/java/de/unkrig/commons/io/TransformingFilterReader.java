@@ -64,7 +64,7 @@ class TransformingFilterReader extends FilterReader {
         final Transformer<? super CharSequence, ? extends CharSequence> transformer
     ) {
 
-        if (transformer == TransformerUtil.identity()) return delegate;
+        if (transformer == TransformerUtil.<CharSequence, CharSequence>identity()) return delegate;
 
         if (transformer == StringTransformers.TO_EMPTY) return Readers.EMPTY_READER;
 

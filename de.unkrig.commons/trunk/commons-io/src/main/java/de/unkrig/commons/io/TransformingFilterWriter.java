@@ -57,7 +57,9 @@ class TransformingFilterWriter extends Writer {
     public static Writer
     create(Transformer<? super CharSequence, ? extends CharSequence> transformer, Appendable delegate) {
 
-        if (transformer == TransformerUtil.identity()) return Writers.fromAppendable(delegate);
+        if (transformer == TransformerUtil.<CharSequence, CharSequence>identity()) {
+            return Writers.fromAppendable(delegate);
+        }
 
         if (transformer == StringTransformers.TO_EMPTY) return Writers.DISCARD;
 
