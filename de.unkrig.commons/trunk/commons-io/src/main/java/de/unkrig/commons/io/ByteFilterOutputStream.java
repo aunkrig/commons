@@ -39,8 +39,8 @@ import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * A {@link FilterInputStream} that transforms the byte stream through a {@link ByteFilter}. Any {@link IOException}
- * and {@link RuntimeException} that {@link ByteFilter#run} throws is caught and rethrown by the {@link #read}
- * methods of this object.
+ * and {@link RuntimeException} that {@link ByteFilter#run} throws is caught and rethrown by the {@link #write(byte[],
+ * int, int)} methods of this object.
  */
 public
 class ByteFilterOutputStream extends FilterOutputStream {
