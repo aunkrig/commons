@@ -35,7 +35,7 @@ import de.unkrig.commons.nullanalysis.NotNullByDefault;
 /**
  * An {@link OutputStream} that counts the number of bytes written to it.
  *
- * @deprecated Use {@link IoUtil#lengthWritten(de.unkrig.commons.lang.protocol.Consumer)} and {@link
+ * @deprecated Use {@link OutputStreams#lengthWritten(de.unkrig.commons.lang.protocol.Consumer)} and {@link
  *             ConsumerUtil#cumulate(de.unkrig.commons.lang.protocol.Consumer, long)} instead.
  */
 @Deprecated @NotNullByDefault(false) public

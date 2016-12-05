@@ -35,7 +35,7 @@ import de.unkrig.commons.nullanalysis.NotNullByDefault;
 /**
  * A {@link FilterOutputStream} which ignores all invocations of {@link #close()}.
  *
- * @deprecated Use {@link IoUtil#unclosableOutputStream(OutputStream)}
+ * @deprecated Use {@link OutputStreams#unclosable(OutputStream)}
  */
 @Deprecated @NotNullByDefault(false) public
 class UnclosableOutputStream extends FilterOutputStream {

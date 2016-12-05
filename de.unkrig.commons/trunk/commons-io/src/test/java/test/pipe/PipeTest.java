@@ -38,6 +38,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import de.unkrig.commons.io.InputStreams;
 import de.unkrig.commons.io.IoUtil;
 import de.unkrig.commons.io.pipe.Pipe;
 import de.unkrig.commons.io.pipe.PipeFactory;
@@ -147,7 +148,7 @@ class PipeTest {
 
         InputStream  is  = ioss.getInputStream();
         OutputStream os  = ioss.getOutputStream();
-        InputStream  ris = IoUtil.byteProducerInputStream(ProducerUtil.randomByteProducer(PipeTest.MY_SEED));
+        InputStream  ris = InputStreams.byteProducerInputStream(ProducerUtil.randomByteProducer(PipeTest.MY_SEED));
         OutputStream ros = AssertIo.assertEqualData(ProducerUtil.randomByteProducer(PipeTest.MY_SEED));
 
         final int n1 = 50;
@@ -178,7 +179,7 @@ class PipeTest {
         }
         InputStream  is  = ioss.getInputStream();
         OutputStream os  = ioss.getOutputStream();
-        InputStream  ris = IoUtil.byteProducerInputStream(new MyByteProducer());
+        InputStream  ris = InputStreams.byteProducerInputStream(new MyByteProducer());
         OutputStream ros = AssertIo.assertEqualData(new MyByteProducer());
 
         IoUtil.copy(ris, os, 7);

@@ -26,32 +26,24 @@
 
 package de.unkrig.commons.io;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FilterInputStream;
-import java.io.FilterOutputStream;
-import java.io.FilterReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PipedReader;
 import java.io.PipedWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -60,21 +52,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.CRC32;
-import java.util.zip.Checksum;
+
+import javax.swing.text.Segment;
 
 import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.ClassLoaders;
 import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.ThreadUtil;
 import de.unkrig.commons.lang.protocol.Consumer;
-import de.unkrig.commons.lang.protocol.ConsumerUtil;
-import de.unkrig.commons.lang.protocol.ConsumerUtil.Produmer;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
 import de.unkrig.commons.lang.protocol.Producer;
-import de.unkrig.commons.lang.protocol.ProducerUtil;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.lang.protocol.RunnableWhichThrows;
+import de.unkrig.commons.lang.protocol.Transformer;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
@@ -341,6 +331,30 @@ class IoUtil {
             outputFile.delete();
             throw re;
         }
+    }
+
+    /**
+     * Reads chunks from <var>in</var>, repeatedly, (until end-of-input), transforms each chunk through the
+     * <var>transformer</var>, and writes the results to <var>out</var>.
+     *
+     * @param bufferCapacity The number of chars that are read per chunk
+     */
+    public static void
+    copyAndTransform(
+        Reader                                                    in,
+        Transformer<? super CharSequence, ? extends CharSequence> transformer,
+        Appendable                                                out,
+        int                                                       bufferCapacity
+    ) throws IOException {
+
+        char[] buffer = new char[bufferCapacity];
+        for (;;) {
+            int n = in.read(buffer);
+            if (n == -1) break;
+            out.append(transformer.transform(new Segment(buffer, 0, n)));
+        }
+
+        out.append(transformer.transform(""));
     }
 
     /**
@@ -710,121 +724,20 @@ class IoUtil {
         return true;
     }
 
-    /**
-     * Creates and returns an {@link OutputStream} that delegates all work to the given <var>delegates</var>:
-     * <ul>
-     *   <li>
-     *     The {@link OutputStream#write(byte[], int, int) write()} methods write the given data to all the delegates;
-     *     if any of these throw an {@link IOException}, it is rethrown, and it is undefined whether all the data was
-     *     written to all the delegates.
-     *   </li>
-     *   <li>
-     *     {@link OutputStream#flush() flush()} flushes the delegates; throws the first {@link IOException} that any
-     *     of the delegates throws.
-     *   </li>
-     *   <li>
-     *     {@link OutputStream#close() close()} attempts to close <i>all</i> the <var>delegates</var>; if any of these
-     *     throw {@link IOException}s, one of them is rethrown.
-     *   </li>
-     * </ul>
-     */
-    @NotNullByDefault(false) public static OutputStream
-    tee(final OutputStream... delegates) {
-        return new OutputStream() {
+    /** @deprecated Use {@link OutputStreams#tee(OutputStream...)} instead */
+    @Deprecated @NotNullByDefault(false) public static OutputStream
+    tee(final OutputStream... delegates) { return OutputStreams.tee(delegates); }
 
-            @Override public void
-            close() throws IOException {
-                IOException caughtIOException = null;
-                for (OutputStream delegate : delegates) {
-                    try {
-                        delegate.close();
-                    } catch (IOException ioe) {
-                        caughtIOException = ioe;
-                    }
-                }
-                if (caughtIOException != null) throw caughtIOException;
-            }
+    /** @deprecated Use {@link InputStreams#wye(InputStream,OutputStream)} instead*/
+    @Deprecated public static InputStream
+    wye(InputStream in, final OutputStream out) { return InputStreams.wye(in, out); }
 
-            @Override public void
-            flush() throws IOException {
-                for (OutputStream delegate : delegates) delegate.flush();
-            }
-
-            @Override public void
-            write(byte[] b, int off, int len) throws IOException {
-                // Overriding this method is not strictly necessary, because "OutputStream.write(byte[], int, int)"
-                // calls "OutputStream.write(int)", but "delegate.write(byte[], int, int)" is probably more
-                // efficient. However, the behavior is different when one of the delegates throws an exception
-                // while being written to.
-                for (OutputStream delegate : delegates) delegate.write(b, off, len);
-            }
-
-            @Override public void
-            write(int b) throws IOException {
-                for (OutputStream delegate : delegates) delegate.write(b);
-            }
-        };
-    }
-
-    /**
-     * Creates and returns a {@link FilterInputStream} that duplicates all bytes read through it and writes them to
-     * an {@link OutputStream}.
-     * <p>
-     *   The {@link OutputStream} is flushed on end-of-input and calls to {@link InputStream#available()}.
-     * </p>
-     */
-    public static InputStream
-    wye(InputStream in, final OutputStream out) {
-
-        return new FilterInputStream(in) {
-
-            @Override public int
-            read() throws IOException {
-                int b = super.read();
-                if (b == -1) {
-                    out.flush();
-                } else {
-                    out.write(b);
-                }
-                return b;
-            }
-
-            @Override public int
-            read(@Nullable byte[] b, int off, int len) throws IOException {
-                int count = super.read(b, off, len);
-                if (count > 0) out.write(b, off, count);
-                if (count == 0) out.flush();
-                return count;
-            }
-
-
-            @Override public int
-            available() throws IOException {
-                out.flush();
-                return this.in.available();
-            }
-        };
-    }
-
-    /**
-     * Invokes <var>writeContents</var>{@code .consume()} with an output stream subject that writes the data through to
-     * the given <var>outputStream</var>.
-     *
-     * @return The number of bytes that were written through
-     */
-    public static long
+    /** @deprecated Use {@link OutputStreams#writeAndCount(ConsumerWhichThrows<? super OutputStream, ? extends IOException>,OutputStream)} instead */
+    @Deprecated public static long
     writeAndCount(
         ConsumerWhichThrows<? super OutputStream, ? extends IOException> writeContents,
         OutputStream                                                     outputStream
-    ) throws IOException {
-
-        Produmer<Long, Long> count = ConsumerUtil.store();
-
-        writeContents.consume(IoUtil.tee(outputStream, IoUtil.lengthWritten(ConsumerUtil.cumulate(count, 0L))));
-
-        Long result = count.produce();
-        return result == null ? 0L : result;
-    }
+    ) throws IOException { return OutputStreams.writeAndCount(writeContents, outputStream); }
 
     /**
      * An entity which writes characters to a {@link Writer}.
@@ -928,518 +841,108 @@ class IoUtil {
         return callables;
     }
 
-    /**
-     * @return All bytes that the given {@link InputStream} produces
-     */
-    public static byte[]
-    readAll(InputStream is) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        IoUtil.copy(is, baos);
-        return baos.toByteArray();
-    }
+    /** @deprecated Use {@link InputStreams#readAll(InputStream)} instead */
+    @Deprecated public static byte[]
+    readAll(InputStream is) throws IOException { return InputStreams.readAll(is); }
 
-    /**
-     * @return All bytes that the given {@link InputStream} produces, decoded into a string
-     */
-    public static String
+    /** @deprecated Use {@link InputStreams#readAll(InputStream,Charset,boolean)} instead */
+    @Deprecated public static String
     readAll(InputStream inputStream, Charset charset, boolean closeInputStream) throws IOException {
-
-        StringWriter sw = new StringWriter();
-        IoUtil.copy(
-            new InputStreamReader(inputStream, charset),
-            closeInputStream,
-            sw,
-            false
-        );
-        return sw.toString();
+        return InputStreams.readAll(inputStream, charset, closeInputStream);
     }
 
-    /**
-     * Skips <var>n</var> bytes on the <var>inputStream</var>. Notice that {@link InputStream#skip(long)} sometimes
-     * skips less than the requested number of bytes for no good reason, e.g. {@link BufferedInputStream#skip(long)}
-     * is known for that. <em>This</em> method tries "harder" to skip exactly the requested number of bytes.
-     *
-     * @return                     The number of bytes that were skipped
-     * @see InputStream#skip(long)
-     */
-    public static long
-    skip(InputStream inputStream, long n) throws IOException {
+    /** @deprecated Use {@link InputStreams#skip(InputStream,long)} instead */
+    @Deprecated public static long
+    skip(InputStream inputStream, long n) throws IOException { return InputStreams.skip(inputStream, n); }
 
-        long result = 0;
-        while (result < n) {
-            long skipped = inputStream.skip(n - result);
-            if (skipped == 0) return result;
-            result += skipped;
-        }
+    /** @deprecated Use {@link InputStreams#skipAll(InputStream)} instead */
+    @Deprecated public static long
+    skipAll(InputStream inputStream) throws IOException { return InputStreams.skipAll(inputStream); }
 
-        return result;
-    }
-
-    /**
-     * Skips all remaining data on the <var>inputStream</var>.
-     *
-     * @return                     The number of bytes that were skipped
-     * @see InputStream#skip(long)
-     */
-    public static long
-    skipAll(InputStream inputStream) throws IOException {
-
-        long result = 0;
-        for (;;) {
-            long skipped = inputStream.skip(Long.MAX_VALUE);
-            if (skipped == 0) return result;
-            result += skipped;
-        }
-    }
-
-    /**
-     * Creates and returns an {@link OutputStream} which writes at most <var>byteCountLimits</var>{@code .produce()}
-     * bytes to <var>delegates</var>{@code .produce()} before closing it and writing the next
-     * <var>byteCountLimits</var>{@code .produce()} bytes to <var>delegates</var>{@code .produce()}, and so on.
-     *
-     * @param delegates       Must produce a (non-{@code null}) series of {@link OutputStream}s
-     * @param byteCountLimits Must produce a (non-{@code null}) series of {@link Long}s
-     */
-    public static OutputStream
+    /** @deprecated Use {@link OutputStreams#split(ProducerWhichThrows<? extends OutputStream, ? extends IOException>,Producer<? extends Long>)} instead */
+    @Deprecated public static OutputStream
     split(
         final ProducerWhichThrows<? extends OutputStream, ? extends IOException> delegates,
         final Producer<? extends Long>                                           byteCountLimits
-    ) throws IOException {
+    ) throws IOException { return OutputStreams.split(delegates, byteCountLimits); }
 
-        return new OutputStream() {
+    /** @deprecated Use {@link InputStreams#EMPTY} instead */
+    @Deprecated public static final InputStream
+    EMPTY_INPUT_STREAM = InputStreams.EMPTY;
 
-            /** Current delegate to write to. */
-            private OutputStream delegate = AssertionUtil.notNull(delegates.produce(), "'delegates' produced <null>");
+    /** @deprecated Use {@link OutputStreams#DISCARD} instead */
+    @Deprecated public static final OutputStream
+    NULL_OUTPUT_STREAM = OutputStreams.DISCARD;
 
-            /** Number of remaining bytes to be written. */
-            private long delegateByteCount = AssertionUtil.notNull(
-                byteCountLimits.produce(),
-                "'byteCountLimits' produced <null>"
-            );
+    /** @deprecated Use {@link InputStreams#constantInputStream(byte)} instead */
+    @Deprecated public static InputStream
+    constantInputStream(final byte b) { return InputStreams.constantInputStream(b); }
 
-            @Override public void
-            write(int b) throws IOException { this.write(new byte[] { (byte) b }, 0, 1); }
+    /** @deprecated Use {@link InputStreams#ZERO} instead */
+    @Deprecated public static final InputStream
+    ZERO_INPUT_STREAM = InputStreams.ZERO;
 
-            @Override public synchronized void
-            write(@Nullable byte[] b, int off, int len) throws IOException {
+    /** @deprecated Use {@link InputStreams#unclosable(InputStream)} instead */
+    @Deprecated public static InputStream
+    unclosableInputStream(InputStream delegate) { return InputStreams.unclosable(delegate); }
 
-                while (len > this.delegateByteCount) {
-                    this.delegate.write(b, off, (int) this.delegateByteCount);
-                    this.delegate.close();
-                    off += this.delegateByteCount;
-                    len -= this.delegateByteCount;
+    /** @deprecated Use {@link OutputStreams#unclosable(OutputStream)} instead */
+    @Deprecated public static OutputStream
+    unclosableOutputStream(OutputStream delegate) { return OutputStreams.unclosable(delegate); }
 
-                    this.delegate = AssertionUtil.notNull(
-                        delegates.produce(),
-                        "'delegates' produced <null>"
-                    );
-                    this.delegateByteCount = AssertionUtil.notNull(
-                        byteCountLimits.produce(),
-                        "'byteCountLimits' produced <null>"
-                    );
-                }
-
-                this.delegate.write(b, off, len);
-                this.delegateByteCount -= len;
-            }
-
-            @Override public void
-            flush() throws IOException { this.delegate.flush(); }
-
-            @Override public void
-            close() throws IOException { this.delegate.close(); }
-        };
-    }
-
-    /** An {@link InputStream} that produces exactly 0 bytes. */
-    public static final InputStream
-    EMPTY_INPUT_STREAM = new InputStream() {
-        @Override public int read()                                       { return -1; }
-        @Override public int read(@Nullable byte[] buf, int off, int len) { return -1; }
-    };
-
-    /** An {@link OutputStream} that discards all bytes written to it. */
-    public static final OutputStream
-    NULL_OUTPUT_STREAM = new OutputStream() {
-        @Override public void write(@Nullable byte[] b, int off, int len) {}
-        @Override public void write(int b)                                {}
-    };
-
-    /**
-     * @return An input stream that reads an endless stream of bytes of value <var>b</var>
-     */
-    public static InputStream
-    constantInputStream(final byte b) {
-        return new InputStream() {
-
-            @Override public int
-            read() { return 0; }
-
-            @Override public int
-            read(@Nullable byte[] buf, int off, int len) { Arrays.fill(buf,  off, len, b); return len; }
-        };
-    }
-
-    /**
-     * An input stream that reads an endless stream of zeros.
-     */
-    public static final InputStream
-    ZERO_INPUT_STREAM = IoUtil.constantInputStream((byte) 0);
-
-    /**
-     * @return An {@link InputStream} which ignores all invocations of {@link InputStream#close()}
-     */
-    public static InputStream
-    unclosableInputStream(InputStream delegate) {
-
-        return new FilterInputStream(delegate) { @Override public void close() {} };
-    }
-
-    /**
-     * @return An {@link OutputStream} which ignores all invocations of {@link OutputStream#close()}
-     */
-    public static OutputStream
-    unclosableOutputStream(OutputStream delegate) {
-
-        return new FilterOutputStream(delegate) {
-
-            @Override public void
-            close() {}
-
-            @Override public void
-            write(@Nullable byte[] b, int off, int len) throws IOException { this.out.write(b, off, len); }
-        };
-    }
-
-    /**
-     * Writes <var>count</var> bytes of value <var>b</var> to the given <var>outputStream</var>.
-     */
-    public static void
+    /** @deprecated Use {@link OutputStreams#fill(OutputStream,byte,long)} instead */
+    @Deprecated public static void
     fill(OutputStream outputStream, byte b, long count) throws IOException {
-
-        if (count > 8192) {
-            byte[] ba = new byte[8192];
-            if (b != 0) Arrays.fill(ba, b);
-            do {
-                outputStream.write(ba);
-                count -= 8192;
-            } while (count > 8192);
-        }
-
-        byte[] ba = new byte[(int) count];
-        Arrays.fill(ba, b);
-        outputStream.write(ba);
+        OutputStreams.fill(outputStream, b, count);
     }
 
-    /**
-     * @return An input stream which reads the data produced by the <var>delegate</var> byte producer; {@code null}
-     *         products are returned as 'end-of-input'
-     */
-    public static InputStream
+    /** @deprecated Use {@link InputStreams#byteProducerInputStream(ProducerWhichThrows<? extends Byte, ? extends IOException>)} instead */
+    @Deprecated public static InputStream
     byteProducerInputStream(final ProducerWhichThrows<? extends Byte, ? extends IOException> delegate) {
-
-        return new InputStream() {
-
-            @Override public int
-            read() throws IOException {
-                Byte b = delegate.produce();
-                return b != null ? 0xff & b : -1;
-            }
-        };
+        return InputStreams.byteProducerInputStream(delegate);
     }
 
-    /**
-     * @return An input stream which reads the data produced by the <var>delegate</var> byte producer; {@code null}
-     *         products are returned as 'end-of-input'
-     */
-    public static InputStream
+    /** @deprecated Use {@link InputStreams#byteProducerInputStream(Producer<? extends Byte>)} instead */
+    @Deprecated public static InputStream
     byteProducerInputStream(final Producer<? extends Byte> delegate) {
-
-        return IoUtil.byteProducerInputStream(ProducerUtil.<Byte, IOException>asProducerWhichThrows(delegate));
+        return InputStreams.byteProducerInputStream(delegate);
     }
 
-    /**
-     * @return An input stream which reads and endless stream of random bytes
-     */
-    public static InputStream
-    randomInputStream(final long seed) {
+    /** @deprecated Use {@link InputStreams#randomInputStream(long)} instead */
+    @Deprecated public static InputStream
+    randomInputStream(final long seed) { return InputStreams.randomInputStream(seed); }
 
-        return IoUtil.byteProducerInputStream(ProducerUtil.randomByteProducer(seed));
-    }
-
-    /**
-     * @return An output stream which feeds the data to the <var>delegate</var> byte consumer
-     */
-    public static OutputStream
+    /** @deprecated Use {@link OutputStreams#byteConsumerOutputStream(ConsumerWhichThrows<? super Byte, ? extends IOException>)} instead */
+    @Deprecated public static OutputStream
     byteConsumerOutputStream(final ConsumerWhichThrows<? super Byte, ? extends IOException> delegate) {
-
-        return new OutputStream() {
-
-            @Override public void
-            write(int b) throws IOException { delegate.consume((byte) b); }
-        };
+        return OutputStreams.byteConsumerOutputStream(delegate);
     }
 
-    /**
-     * @return All characters that the given {@link Reader} produces
-     */
-    public static String
-    readAll(Reader reader) throws IOException {
-        return IoUtil.readAll(reader, false);
-    }
+    /** @deprecated Use {@link Readers#readAll(Reader)} instead */
+    @Deprecated public static String
+    readAll(Reader reader) throws IOException { return Readers.readAll(reader); }
 
-    /**
-     * @param closeReader Whether the <var>reader</var> should be closed before the method returns
-     * @return            All characters that the given {@link Reader} produces
-     */
-    public static String
-    readAll(Reader reader, boolean closeReader) throws IOException {
+    /** @deprecated Use {@link Readers#readAll(Reader,boolean)} instead */
+    @Deprecated public static String
+    readAll(Reader reader, boolean closeReader) throws IOException { return Readers.readAll(reader, closeReader); }
 
-        char[]        buf = new char[4096];
-        StringBuilder sb  = new StringBuilder();
+    /** @deprecated Use {@link InputStreams#deleteOnClose(InputStream,File)} instead */
+    @Deprecated protected static InputStream
+    deleteOnClose(InputStream delegate, final File file) { return InputStreams.deleteOnClose(delegate, file); }
 
-        try {
-
-            for (;;) {
-                int n = reader.read(buf);
-                if (n == -1) break;
-                sb.append(buf, 0, n);
-            }
-
-            if (closeReader) reader.close();
-
-            return sb.toString();
-        } finally {
-            if (closeReader) {
-                try { reader.close(); } catch (Exception e) {}
-            }
-        }
-    }
-
-    /**
-     * @return An {@link InputStream} which first closes the <var>delegate</var>, and then attempts to delete the
-     *         <var>file</var>
-     */
-    protected static InputStream
-    deleteOnClose(InputStream delegate, final File file) {
-
-        return new FilterInputStream(delegate) {
-
-            @Override public void
-            close() throws IOException {
-                super.close();
-                file.delete();
-            }
-        };
-    }
-
-    /**
-     * Creates and returns an array of <var>n</var> {@link OutputStream}s.
-     * <p>
-     *   Iff exactly the same bytes are written to all of these streams, and then all the streams are closed, then
-     *   <var>whenIdentical</var> will be run (exactly once).
-     * </p>
-     * <p>
-     *   Otherwise, when the first non-identical byte is written to one of the streams, or at the latest when that
-     *   stream is closed, <var>whenNotIdentical</var> will be run (possibly more than once).
-     * </p>
-     */
-    public static OutputStream[]
+    /** @deprecated Use {@link OutputStreams#compareOutput(int,Runnable,Runnable)} instead */
+    @Deprecated public static OutputStream[]
     compareOutput(final int n, final Runnable whenIdentical, final Runnable whenNotIdentical) {
-
-        /**
-         * Logs checksums of the first n1, n2, n3, ... bytes written.
-         * <p>
-         *   This class is used to compare the data written to multiple output streams without storing the entire data
-         *   in memory.
-         * </p>
-         * <p>
-         *   n1, n2, n3, ... is an exponentially growing series, starting with a very small value.
-         * </p>
-         */
-        abstract
-        class ChecksumOutputStream extends OutputStream {
-
-            /** The checksum of the bytes written to this stream so far. */
-            private final Checksum checksum  = new CRC32();
-
-            /** The number of bytes written to this stream so far. */
-            private long count;
-
-            /**
-             * {@code checksums[i]} is the checksum of the first {@code THRESHOLD[i]} that were written to this stream.
-             * <p>
-             *   After this stream was closed, {@code checksums[idx - 1]} is the checksum of <b>all</b> bytes that were
-             *   written to this stream.
-             * </p>
-             */
-            protected final long[] checksums = new long[IoUtil.THRESHOLDS.length];
-
-            /** The number of checksums in the {@link #checksums} array. */
-            protected int idx;
-
-            /**
-             * Indicates that this stream is closed and that {@code checksums[idx - 1]} is the checksum of <b>all</b>
-             * bytes that were written to this stream.
-             */
-            private boolean closed;
-
-            @Override public void
-            write(int b) throws IOException {
-                if (this.closed) throw new IOException("Stream is closed");
-
-                if (this.count == IoUtil.THRESHOLDS[this.idx]) this.pushChecksum();
-                this.checksum.update(b);
-                this.count++;
-            }
-
-            @Override public void
-            write(@Nullable byte[] b, int off, int len) throws IOException {
-                assert b != null;
-                if (this.closed) throw new IOException("Stream is closed");
-
-                while (this.count + len > IoUtil.THRESHOLDS[this.idx]) {
-                    int part = (int) Math.min(Integer.MAX_VALUE, IoUtil.THRESHOLDS[this.idx] - this.count);
-                    this.checksum.update(b, off, part);
-                    this.count = IoUtil.THRESHOLDS[this.idx];
-                    this.pushChecksum();
-                    off += part;
-                    len -= part;
-                }
-
-                this.checksum.update(b, off, len);
-                this.count += len;
-            }
-
-            private void
-            pushChecksum() {
-                this.checksums[this.idx] = this.checksum.getValue();
-                this.checksumWasPushed(this.idx);
-                this.idx++;
-            }
-
-            /**
-             * Is called when another checksum is entered in {@link #checksums}.
-             *
-             * @param idx The index in {@link #checksums} where the checksum was stored
-             */
-            abstract void checksumWasPushed(int idx);
-
-            @Override public void
-            close() {
-                if (this.closed) return;
-                this.pushChecksum();
-                this.closed = true;
-                this.wasClosed();
-            }
-
-            /**
-             * Is called after this stream has been closed (for the first time).
-             */
-            abstract void wasClosed();
-        }
-
-        final ChecksumOutputStream[] result = new ChecksumOutputStream[n];
-        for (int i = 0; i < n; i++) {
-            result[i] = new ChecksumOutputStream() {
-
-                @Override void
-                checksumWasPushed(int idx) {
-                    for (int i = 0; i < n; i++) {
-                        if (result[i].idx == idx + 1 && result[i].checksums[idx] != this.checksums[idx]) {
-                            whenNotIdentical.run();
-                            return;
-                        }
-                    }
-                }
-
-                @Override void
-                wasClosed() {
-                    for (int i = 0; i < n; i++) {
-                        if (!result[i].closed) return;
-                        if (
-                            result[i].idx != this.idx
-                            || result[i].checksums[this.idx - 1] != this.checksums[this.idx - 1]
-                        ) {
-                            whenNotIdentical.run();
-                            return;
-                        }
-                    }
-                    whenIdentical.run();
-                }
-            };
-        }
-
-        return result;
-    }
-    private static final long[] THRESHOLDS;
-
-    static {
-        THRESHOLDS = new long[126];
-        long x = 2;
-        for (int i = 0; i < IoUtil.THRESHOLDS.length; x <<= 1) {
-            IoUtil.THRESHOLDS[i++] = x;
-            IoUtil.THRESHOLDS[i++] = x + (x >> 1);
-        }
+        return OutputStreams.compareOutput(n, whenIdentical, whenNotIdentical);
     }
 
-    /**
-     * Creates and returns an {@link OutputStream} which ignores the data written to it and only honors the
-     * <i>number of bytes written</i>:
-     * <p>
-     *   Every time data is written to the {@link OutputStream}, it invokes the {@link Consumer#consume(Object)
-     *   consume()} method on the <var>delegate</var> with the number of bytes written (not the <i>cumulated</i> number
-     *   of bytes written!).
-     * </p>
-     */
-    public static OutputStream
-    lengthWritten(final Consumer<? super Integer> delegate) {
+    /** @deprecated Use {@link OutputStreams#lengthWritten(Consumer<? super Integer>)} instead */
+    @Deprecated public static OutputStream
+    lengthWritten(final Consumer<? super Integer> delegate) { return OutputStreams.lengthWritten(delegate); }
 
-        return new OutputStream() {
-
-            @Override public void
-            write(int b) { delegate.consume(1); }
-
-            @Override public void
-            write(@Nullable byte[] b, int off, int len) { delegate.consume(len); }
-        };
-    }
-
-    /**
-     * Wraps the given {@link CharSequence} in a {@link Reader} - much more efficient than "{@code new
-     * StringReader(cs.toString)}".
-     */
-    public static Reader
-    asReader(final CharSequence cs) {
-        return new Reader() {
-
-            int pos;
-
-            @Override public int
-            read() { return this.pos >= cs.length() ? -1 : cs.charAt(this.pos++); }
-
-            @Override public int
-            read(@Nullable char[] cbuf, int off, int len) {
-                assert cbuf != null;
-
-                if (len <= 0) return 0;
-
-                if (this.pos >= cs.length()) return -1;
-
-                int end = cs.length();
-                if (this.pos + len > end) {
-                    len = end - this.pos;
-                } else {
-                    end = this.pos + len;
-                }
-                for (int i = this.pos; i < end; cbuf[off++] = cs.charAt(i++));
-                return len;
-            }
-
-            @Override public void
-            close() {}
-        };
-    }
+    /** @deprecated Use {@link Readers#asReader(CharSequence)} instead */
+    @Deprecated public static Reader
+    asReader(final CharSequence cs) { return Readers.asReader(cs); }
 
     /**
      * Copies the contents of a resource to the given <var>outputStream</var>.
@@ -1811,84 +1314,17 @@ class IoUtil {
         return count;
     }
 
-    /**
-     * Creates and returns an {@link InputStream} that reads from the <var>delegate</var> and invokes the
-     * <var>runnable</var> on the <em>first</em> end-of-input condition.
-     */
-    public static InputStream
+    /** @deprecated Use {@link InputStreams#onEndOfInput(InputStream,Runnable)} instead */
+    @Deprecated public static InputStream
     onEndOfInput(InputStream delegate, final Runnable runnable) {
-
-        return new FilterInputStream(delegate) {
-
-            boolean hadEndOfInput;
-
-            @Override public int
-            read() throws IOException {
-
-                int b = super.read();
-
-                if (b == -1 && !this.hadEndOfInput) {
-                    this.hadEndOfInput = true;
-                    runnable.run();
-                }
-
-                return b;
-            }
-
-            @Override public int
-            read(@Nullable byte[] b, int off, int len) throws IOException {
-
-                int count = super.read(b, off, len);
-
-                if (count == -1 && !this.hadEndOfInput) {
-                    this.hadEndOfInput = true;
-                    runnable.run();
-                }
-
-                return count;
-            }
-        };
+        return InputStreams.onEndOfInput(delegate, runnable);
     }
 
-    /**
-     * @return A {@link Reader} for which {@link Reader#read(char[], int, int)} returns at most 1
-     */
-    public static Reader
-    singlingFilterReader(Reader delegate) {
+    /** @deprecated Use {@link Readers#singlingFilterReader(Reader)} instead */
+    @Deprecated public static Reader
+    singlingFilterReader(Reader delegate) { return Readers.singlingFilterReader(delegate); }
 
-        return new FilterReader(delegate) {
-
-            @NotNullByDefault(false) @Override public int
-            read(char[] cbuf, int off, int len) throws IOException {
-                return this.in.read(cbuf, off, len <= 0 ? 0 : 1);
-            }
-
-            @NotNullByDefault(false) @Override public int
-            read(CharBuffer target) throws IOException {
-
-                if (target.remaining() == 0) return 0;
-
-                int c = this.read();
-                if (c == -1) return -1;
-
-                target.put((char) c);
-                return 1;
-            }
-        };
-    }
-
-    /**
-     * @return An {@link InputStream} for which {@link InputStream#read(byte[], int, int)} returns at most 1
-     */
-    public static InputStream
-    singlingFilterInputStream(InputStream delegate) {
-
-        return new FilterInputStream(delegate) {
-
-            @NotNullByDefault(false) @Override public int
-            read(byte[] cbuf, int off, int len) throws IOException {
-                return this.in.read(cbuf, off, len <= 0 ? 0 : 1);
-            }
-        };
-    }
+    /** @deprecated Use {@link InputStreams#singlingFilterInputStream(InputStream)} instead */
+    @Deprecated public static InputStream
+    singlingFilterInputStream(InputStream delegate) { return InputStreams.singlingFilterInputStream(delegate); }
 }

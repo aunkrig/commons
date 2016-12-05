@@ -39,7 +39,7 @@ import de.unkrig.commons.nullanalysis.NotNullByDefault;
  *   The {@link OutputStream} is flushed on end-of-input and calls to {@link #available()}.
  * </p>
  *
- * @deprecated Prefer delegation over inheritance and use {@link IoUtil#wye(InputStream, OutputStream)}
+ * @deprecated Prefer delegation over inheritance and use {@link InputStreams#wye(InputStream, OutputStream)}
  *             instead
  */
 @Deprecated @NotNullByDefault(false) public

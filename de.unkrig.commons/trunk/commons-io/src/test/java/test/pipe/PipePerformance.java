@@ -39,7 +39,7 @@ import java.util.Locale;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.unkrig.commons.io.IoUtil;
+import de.unkrig.commons.io.OutputStreams;
 import de.unkrig.commons.io.pipe.Pipe;
 import de.unkrig.commons.io.pipe.PipeFactory;
 import de.unkrig.commons.io.pipe.PipeUtil;
@@ -182,7 +182,7 @@ class PipePerformance {
                 long n = 0;
                 for (int i = 0; i < 1000/*00*/; i++) {
                     try {
-                        IoUtil.fill(os, (byte) 0, 10000);
+                        OutputStreams.fill(os, (byte) 0, 10000);
                         os.flush();
                         is.skip(10000);
 
