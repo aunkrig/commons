@@ -396,7 +396,7 @@ class ContentsTransformations {
      * Creates and returns a {@link ContentsTransformer}s that "chains" the two delegates.
      * <p>
      *   If neither of the two delegate transformers is {@link ContentsTransformations#COPY}, then the returned
-     *   transfomer, when executed, will create and later joind one background thread.
+     *   transfomer, when executed, will create and later joined one background thread.
      * </p>
      */
     public static ContentsTransformer
