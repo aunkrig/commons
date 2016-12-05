@@ -39,8 +39,8 @@ import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * A {@link FilterReader} that transforms the char stream through a {@link CharFilter}. Any {@link IOException}
- * and {@link RuntimeException} that {@link CharFilter#run} throws is caught and rethrown by the {@link #read}
- * methods of this object.
+ * and {@link RuntimeException} that {@link CharFilter#run} throws is caught and rethrown by the {@link #write(char[],
+ * int, int)} methods of this object.
  */
 public
 class CharFilterWriter extends FilterWriter {

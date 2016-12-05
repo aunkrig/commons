@@ -27,11 +27,13 @@
 package test;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -143,5 +145,26 @@ class IoUtilTest {
             }
         }
         Assert.assertEquals(expected, lines);
+    }
+
+    @Test public void
+    findOnPathTest() throws IOException {
+        Assert.assertEquals(
+            new File(System.getProperty("user.dir")).toURI() + "target/test-classes/test/IoUtilTest.class",
+            String.valueOf(IoUtil.findOnPath(
+                new File[] { new File("target/test-classes") },
+                this.getClass().getName().replace('.', '/') + ".class"
+            ))
+        );
+
+        URL loc = IoUtil.findOnPath(
+            new File[] { new File("../commons-lang/target/commons-lang-1.2.6-SNAPSHOT.jar") },
+            "de/unkrig/commons/lang/AssertionUtil.class"
+        );
+        Assert.assertEquals(
+            "jar:" + new File(System.getProperty("user.dir")).toURI() + "../commons-lang/target/commons-lang-1.2.6-SNAPSHOT.jar!/de/unkrig/commons/lang/AssertionUtil.class",
+            String.valueOf(loc)
+        );
+        if (loc != null) loc.openStream().close();
     }
 }

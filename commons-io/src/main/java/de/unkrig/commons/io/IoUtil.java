@@ -84,8 +84,9 @@ class IoUtil {
     /**
      * Finds and returns a named resource along a "path", e.g. a Java "class path" or "source path".
      *
-     * @param path Each element should designate either a directory or a JAR (or ZIP) file
-     * @return     {@code null} if {@code path == null}, or if the resource could not be found
+     * @param path         Each element should designate either a directory or a JAR (or ZIP) file
+     * @param resourceName Must not start with a "/"
+     * @return             {@code null} if {@code path == null}, or if the resource could not be found
      */
     @Nullable public static URL
     findOnPath(@Nullable File[] path, String resourceName) throws IOException {
@@ -728,11 +729,11 @@ class IoUtil {
     @Deprecated @NotNullByDefault(false) public static OutputStream
     tee(final OutputStream... delegates) { return OutputStreams.tee(delegates); }
 
-    /** @deprecated Use {@link InputStreams#wye(InputStream,OutputStream)} instead*/
+    /** @deprecated Use {@link InputStreams#wye(InputStream, OutputStream)} instead*/
     @Deprecated public static InputStream
     wye(InputStream in, final OutputStream out) { return InputStreams.wye(in, out); }
 
-    /** @deprecated Use {@link OutputStreams#writeAndCount(ConsumerWhichThrows<? super OutputStream, ? extends IOException>,OutputStream)} instead */
+    /** @deprecated Use {@link OutputStreams#writeAndCount(ConsumerWhichThrows, OutputStream)} instead */
     @Deprecated public static long
     writeAndCount(
         ConsumerWhichThrows<? super OutputStream, ? extends IOException> writeContents,
@@ -845,13 +846,13 @@ class IoUtil {
     @Deprecated public static byte[]
     readAll(InputStream is) throws IOException { return InputStreams.readAll(is); }
 
-    /** @deprecated Use {@link InputStreams#readAll(InputStream,Charset,boolean)} instead */
+    /** @deprecated Use {@link InputStreams#readAll(InputStream, Charset, boolean)} instead */
     @Deprecated public static String
     readAll(InputStream inputStream, Charset charset, boolean closeInputStream) throws IOException {
         return InputStreams.readAll(inputStream, charset, closeInputStream);
     }
 
-    /** @deprecated Use {@link InputStreams#skip(InputStream,long)} instead */
+    /** @deprecated Use {@link InputStreams#skip(InputStream, long)} instead */
     @Deprecated public static long
     skip(InputStream inputStream, long n) throws IOException { return InputStreams.skip(inputStream, n); }
 
@@ -859,7 +860,7 @@ class IoUtil {
     @Deprecated public static long
     skipAll(InputStream inputStream) throws IOException { return InputStreams.skipAll(inputStream); }
 
-    /** @deprecated Use {@link OutputStreams#split(ProducerWhichThrows<? extends OutputStream, ? extends IOException>,Producer<? extends Long>)} instead */
+    /** @deprecated Use {@link OutputStreams#split(ProducerWhichThrows, Producer)} instead */
     @Deprecated public static OutputStream
     split(
         final ProducerWhichThrows<? extends OutputStream, ? extends IOException> delegates,
@@ -890,19 +891,19 @@ class IoUtil {
     @Deprecated public static OutputStream
     unclosableOutputStream(OutputStream delegate) { return OutputStreams.unclosable(delegate); }
 
-    /** @deprecated Use {@link OutputStreams#fill(OutputStream,byte,long)} instead */
+    /** @deprecated Use {@link OutputStreams#fill(OutputStream, byte, long)} instead */
     @Deprecated public static void
     fill(OutputStream outputStream, byte b, long count) throws IOException {
         OutputStreams.fill(outputStream, b, count);
     }
 
-    /** @deprecated Use {@link InputStreams#byteProducerInputStream(ProducerWhichThrows<? extends Byte, ? extends IOException>)} instead */
+    /** @deprecated Use {@link InputStreams#byteProducerInputStream(ProducerWhichThrows)} instead */
     @Deprecated public static InputStream
     byteProducerInputStream(final ProducerWhichThrows<? extends Byte, ? extends IOException> delegate) {
         return InputStreams.byteProducerInputStream(delegate);
     }
 
-    /** @deprecated Use {@link InputStreams#byteProducerInputStream(Producer<? extends Byte>)} instead */
+    /** @deprecated Use {@link InputStreams#byteProducerInputStream(Producer)} instead */
     @Deprecated public static InputStream
     byteProducerInputStream(final Producer<? extends Byte> delegate) {
         return InputStreams.byteProducerInputStream(delegate);
@@ -912,7 +913,7 @@ class IoUtil {
     @Deprecated public static InputStream
     randomInputStream(final long seed) { return InputStreams.randomInputStream(seed); }
 
-    /** @deprecated Use {@link OutputStreams#byteConsumerOutputStream(ConsumerWhichThrows<? super Byte, ? extends IOException>)} instead */
+    /** @deprecated Use {@link OutputStreams#byteConsumerOutputStream(ConsumerWhichThrows)} instead */
     @Deprecated public static OutputStream
     byteConsumerOutputStream(final ConsumerWhichThrows<? super Byte, ? extends IOException> delegate) {
         return OutputStreams.byteConsumerOutputStream(delegate);
@@ -922,21 +923,21 @@ class IoUtil {
     @Deprecated public static String
     readAll(Reader reader) throws IOException { return Readers.readAll(reader); }
 
-    /** @deprecated Use {@link Readers#readAll(Reader,boolean)} instead */
+    /** @deprecated Use {@link Readers#readAll(Reader, boolean)} instead */
     @Deprecated public static String
     readAll(Reader reader, boolean closeReader) throws IOException { return Readers.readAll(reader, closeReader); }
 
-    /** @deprecated Use {@link InputStreams#deleteOnClose(InputStream,File)} instead */
+    /** @deprecated Use {@link InputStreams#deleteOnClose(InputStream, File)} instead */
     @Deprecated protected static InputStream
     deleteOnClose(InputStream delegate, final File file) { return InputStreams.deleteOnClose(delegate, file); }
 
-    /** @deprecated Use {@link OutputStreams#compareOutput(int,Runnable,Runnable)} instead */
+    /** @deprecated Use {@link OutputStreams#compareOutput(int, Runnable, Runnable)} instead */
     @Deprecated public static OutputStream[]
     compareOutput(final int n, final Runnable whenIdentical, final Runnable whenNotIdentical) {
         return OutputStreams.compareOutput(n, whenIdentical, whenNotIdentical);
     }
 
-    /** @deprecated Use {@link OutputStreams#lengthWritten(Consumer<? super Integer>)} instead */
+    /** @deprecated Use {@link OutputStreams#lengthWritten(Consumer)} instead */
     @Deprecated public static OutputStream
     lengthWritten(final Consumer<? super Integer> delegate) { return OutputStreams.lengthWritten(delegate); }
 
@@ -951,6 +952,7 @@ class IoUtil {
      *   {@link ClassLoader#getResourceAsStream(String)}.
      * </p>
      *
+     * @param resourceName      Must not start with a "/"
      * @param closeOutputStream Whether the <var>outputStream</var> should be closed after the content of the resource
      *                          has been copied
      */
@@ -971,6 +973,7 @@ class IoUtil {
      *   Class#getResourceAsStream(String)}.
      * </p>
      *
+     * @param resourceName      Must not start with a "/"
      * @param closeOutputStream Whether the <var>outputStream</var> should be closed after the content of the resource
      *                          has been copied
      */
@@ -991,6 +994,7 @@ class IoUtil {
      *   {@link ClassLoader#getResourceAsStream(String)}.
      * </p>
      *
+     * @param resourceName                   Must not start with a "/"
      * @param createMissingParentDirectories Whether to create any missing parent directories for the <var>toFile</var>
      */
     public static void
@@ -1021,6 +1025,7 @@ class IoUtil {
      *   Class#getResourceAsStream(String)}.
      * </p>
      *
+     * @param resourceName                   Must not start with a "/"
      * @param createMissingParentDirectories Whether to create any missing parent directories for the <var>toFile</var>
      */
     public static void
@@ -1314,7 +1319,7 @@ class IoUtil {
         return count;
     }
 
-    /** @deprecated Use {@link InputStreams#onEndOfInput(InputStream,Runnable)} instead */
+    /** @deprecated Use {@link InputStreams#onEndOfInput(InputStream, Runnable)} instead */
     @Deprecated public static InputStream
     onEndOfInput(InputStream delegate, final Runnable runnable) {
         return InputStreams.onEndOfInput(delegate, runnable);
