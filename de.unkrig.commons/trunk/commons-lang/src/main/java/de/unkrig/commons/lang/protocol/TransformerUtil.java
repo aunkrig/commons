@@ -59,6 +59,28 @@ class TransformerUtil {
     };
 
     /**
+     * @return A transformer that feeds subjects through a chain of delegate transformers
+     */
+    public static <T> Transformer<T, T>
+    chain(final Transformer<T, T>... transformers) {
+
+        if (transformers.length == 0) return TransformerUtil.identity();
+
+        if (transformers.length == 1) return transformers[0];
+
+        return new Transformer<T, T>() {
+
+            @Override public T
+            transform(T in) {
+                for (Transformer<T, T> transformer : transformers) {
+                    in = transformer.transform(in);
+                }
+                return in;
+            }
+        };
+    }
+
+    /**
      * Converts a {@link Transformer} into a {@link TransformerWhichThrows}.
      * <p>
      *   That is possible iff:
