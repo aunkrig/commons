@@ -40,7 +40,7 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 
-import de.unkrig.commons.io.IoUtil;
+import de.unkrig.commons.io.OutputStreams;
 import de.unkrig.commons.lang.protocol.ConsumerUtil;
 import de.unkrig.commons.lang.protocol.ConsumerUtil.Produmer;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
@@ -507,9 +507,9 @@ class ArchivingFileHandler extends AbstractStreamHandler {
 
         this.byteCount = ConsumerUtil.store();
 
-        this.setOutputStream(IoUtil.tee(
+        this.setOutputStream(OutputStreams.tee(
             new FileOutputStream(this.currentFile, true),
-            IoUtil.lengthWritten(ConsumerUtil.cumulate(this.byteCount, 0L))
+            OutputStreams.lengthWritten(ConsumerUtil.cumulate(this.byteCount, 0L))
         ));
     }
 

@@ -36,7 +36,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import de.unkrig.commons.io.IoUtil;
+import de.unkrig.commons.io.InputStreams;
 import de.unkrig.commons.net.http.io.ChunkedInputStream;
 import de.unkrig.commons.net.http.io.ChunkedOutputStream;
 
@@ -73,6 +73,6 @@ class TestChunkedIo {
             cis = new ChunkedInputStream(new ByteArrayInputStream(baos.toByteArray()));
         }
 
-        assertArrayEquals(bytes, IoUtil.readAll(cis));
+        assertArrayEquals(bytes, InputStreams.readAll(cis));
     }
 }

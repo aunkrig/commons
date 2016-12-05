@@ -45,6 +45,7 @@ import org.apache.commons.compress.compressors.FileNameUtil;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormatFactory;
 import de.unkrig.commons.io.IoUtil;
+import de.unkrig.commons.io.OutputStreams;
 import de.unkrig.commons.io.pipe.PipeFactory;
 import de.unkrig.commons.io.pipe.PipeUtil;
 import de.unkrig.commons.io.pipe.PipeUtil.InputOutputStreams;
@@ -105,7 +106,7 @@ class ArArchiveFormat implements ArchiveFormat {
 
         InputOutputStreams ios = PipeUtil.asInputOutputStreams(PipeFactory.elasticPipe());
         try {
-            long count = IoUtil.writeAndCount(writeContents, ios.getOutputStream());
+            long count = OutputStreams.writeAndCount(writeContents, ios.getOutputStream());
             ios.getOutputStream().close();
 
             archiveOutputStream.putArchiveEntry(new ArArchiveEntry(name, count));
@@ -152,7 +153,7 @@ class ArArchiveFormat implements ArchiveFormat {
         // Copy the contents to a temporary storage in order to count the bytes.
         InputOutputStreams ios = PipeUtil.asInputOutputStreams(PipeFactory.elasticPipe());
         try {
-            long count = IoUtil.writeAndCount(writeContents, ios.getOutputStream());
+            long count = OutputStreams.writeAndCount(writeContents, ios.getOutputStream());
             ios.getOutputStream().close();
 
             ArArchiveEntry naae = new ArArchiveEntry(

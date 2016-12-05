@@ -43,6 +43,14 @@ class LevelFilteredPrinter extends AbstractPrinter {
     private final Printer delegate;
 
     /**
+     * Uses the {@link AbstractPrinter#getContextPrinter()} as the delegate.
+     *
+     * @see LevelFilteredPrinter
+     */
+    public
+    LevelFilteredPrinter() { this(AbstractPrinter.getContextPrinter());  }
+
+    /**
      * @see LevelFilteredPrinter
      */
     public

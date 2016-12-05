@@ -44,7 +44,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.unkrig.commons.io.FixedLengthInputStream;
-import de.unkrig.commons.io.IoUtil;
+import de.unkrig.commons.io.InputStreams;
 import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
 import de.unkrig.commons.net.http.HttpMessage;
@@ -281,7 +281,7 @@ class FileServlett extends AbstractServlett {
         long contentLength = to - from;
 
         FileInputStream is = new FileInputStream(file);
-        if (IoUtil.skip(is, from) != from) throw new IOException("Cannot skip " + from + " bytes of \"" + file + "\"");
+        if (InputStreams.skip(is, from) != from) throw new IOException("Cannot skip " + from + " bytes of \"" + file + "\"");
 
         // Create the response.
         HttpResponse httpResponse = HttpResponse.response(

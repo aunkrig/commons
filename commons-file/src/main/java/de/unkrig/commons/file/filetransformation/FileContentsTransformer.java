@@ -34,8 +34,10 @@ import java.io.OutputStream;
 
 import de.unkrig.commons.file.FileUtil;
 import de.unkrig.commons.file.contentstransformation.ContentsTransformer;
+import de.unkrig.commons.io.InputStreams;
 import de.unkrig.commons.io.IoUtil;
 import de.unkrig.commons.io.MarkableFileInputStream;
+import de.unkrig.commons.io.OutputStreams;
 import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.protocol.RunnableUtil;
@@ -215,9 +217,9 @@ class FileContentsTransformer implements FileTransformer {
 
         try {
 
-            OutputStream[] oss = IoUtil.compareOutput(2, RunnableUtil.NOP, FileTransformer.THROW_NOT_IDENTICAL);
+            OutputStream[] oss = OutputStreams.compareOutput(2, RunnableUtil.NOP, FileTransformer.THROW_NOT_IDENTICAL);
 
-            contentsTransformer.transform(path, IoUtil.wye(inputStream, oss[0]), oss[1]);
+            contentsTransformer.transform(path, InputStreams.wye(inputStream, oss[0]), oss[1]);
 
             oss[0].close();
             oss[1].close();

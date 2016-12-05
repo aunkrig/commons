@@ -65,8 +65,11 @@ import java.util.zip.GZIPOutputStream;
 import de.unkrig.commons.io.FixedLengthInputStream;
 import de.unkrig.commons.io.FixedLengthOutputStream;
 import de.unkrig.commons.io.HexOutputStream;
+import de.unkrig.commons.io.InputStreams;
 import de.unkrig.commons.io.IoUtil;
 import de.unkrig.commons.io.Multiplexer;
+import de.unkrig.commons.io.OutputStreams;
+import de.unkrig.commons.io.Readers;
 import de.unkrig.commons.io.WriterOutputStream;
 import de.unkrig.commons.io.XMLFormatterWriter;
 import de.unkrig.commons.lang.protocol.ConsumerUtil;
@@ -195,7 +198,7 @@ class HttpMessage {
         string(Charset charset) { return ""; }
 
         @Override public InputStream
-        inputStream() { return IoUtil.EMPTY_INPUT_STREAM; }
+        inputStream() { return InputStreams.EMPTY; }
 
         @Override public void
         write(OutputStream stream) {}
@@ -252,7 +255,7 @@ class HttpMessage {
 
             // Determine the raw message body size.
             if (LOGGER.isLoggable(FINE)) {
-                in = IoUtil.wye(in, IoUtil.lengthWritten(ConsumerUtil.cumulate(rawByteCount, 0)));
+                in = InputStreams.wye(in, OutputStreams.lengthWritten(ConsumerUtil.cumulate(rawByteCount, 0)));
             }
 
             // Insert a logging Wye-Reader if logging is enabled.
@@ -266,7 +269,7 @@ class HttpMessage {
                     if ("text/xml".equalsIgnoreCase(phv.getToken())) isXml = true;
                 }
                 Writer logWriter = LogUtil.logWriter(LOGGER, FINE, ">>> ");
-                in = IoUtil.wye(in, (
+                in = InputStreams.wye(in, (
                     isXml
                     ? new WriterOutputStream(new XMLFormatterWriter(logWriter))
                     : new HexOutputStream(logWriter)
@@ -301,12 +304,12 @@ class HttpMessage {
 
             // Track the decoded message body size.
             if (LOGGER.isLoggable(FINE)) {
-                in = IoUtil.wye(in, IoUtil.lengthWritten(ConsumerUtil.cumulate(decodedByteCount, 0)));
+                in = InputStreams.wye(in, OutputStreams.lengthWritten(ConsumerUtil.cumulate(decodedByteCount, 0)));
             }
 
             // Report on the raw and on the decoded message body size.
             if (LOGGER.isLoggable(FINE)) {
-                in = IoUtil.onEndOfInput(in, new Runnable() {
+                in = InputStreams.onEndOfInput(in, new Runnable() {
 
                     @Override public void
                     run() {
@@ -564,7 +567,7 @@ class HttpMessage {
             string(Charset charset) throws IOException {
                 InputStream in3 = this.in2;
                 if (in3 == null) throw new IllegalStateException();
-                final String result = IoUtil.readAll(new InputStreamReader(in3, charset));
+                final String result = Readers.readAll(new InputStreamReader(in3, charset));
                 try { in3.close(); } catch (Exception e) {}
                 this.in2 = null;
                 return result;
@@ -591,8 +594,8 @@ class HttpMessage {
             dispose() {
                 InputStream in3 = this.in2;
                 if (in3 != null) {
-                    try { IoUtil.skipAll(in3); } catch (Exception e) {}
-                    try { in3.close();         } catch (Exception e) {}
+                    try { InputStreams.skipAll(in3); } catch (Exception e) {}
+                    try { in3.close();               } catch (Exception e) {}
                 }
                 this.in2 = null;
             }
@@ -623,7 +626,7 @@ class HttpMessage {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 w3.consume(baos);
                 this.writer2 = null;
-                return IoUtil.readAll(new InputStreamReader(new ByteArrayInputStream(baos.toByteArray()), charset));
+                return Readers.readAll(new InputStreamReader(new ByteArrayInputStream(baos.toByteArray()), charset));
             }
 
             @Override public InputStream
@@ -708,7 +711,7 @@ class HttpMessage {
 
                 // Chunked transfer encoding.
                 this.writeHeaders(prefix, out);
-                OutputStream cos = new ChunkedOutputStream(IoUtil.unclosableOutputStream(out));
+                OutputStream cos = new ChunkedOutputStream(OutputStreams.unclosable(out));
                 this.writeBody(prefix, cos);
                 cos.close();
                 return;
@@ -723,7 +726,7 @@ class HttpMessage {
                 // Content length known.
                 this.writeHeaders(prefix, out);
                 FixedLengthOutputStream flos = new FixedLengthOutputStream(
-                    IoUtil.unclosableOutputStream(out),
+                    OutputStreams.unclosable(out),
                     contentLength
                 );
                 this.writeBody(prefix, flos);
@@ -795,7 +798,7 @@ class HttpMessage {
         if (LOGGER.isLoggable(FINE)) {
             LOGGER.fine(prefix + "Writing message body:");
             Writer lw = LogUtil.logWriter(LOGGER, FINE, prefix);
-            out = IoUtil.tee(out, (
+            out = OutputStreams.tee(out, (
                 isXml
                 ? new WriterOutputStream(new XMLFormatterWriter(lw))
                 : new HexOutputStream(lw)
@@ -967,7 +970,7 @@ class HttpMessage {
                         if ("text/xml".equalsIgnoreCase(phv.getToken())) isXml = true;
                     }
                     Writer logWriter = LogUtil.logWriter(LOGGER, FINE, ">>> ");
-                    in = IoUtil.wye(in, (
+                    in = InputStreams.wye(in, (
                         isXml
                         ? new WriterOutputStream(new XMLFormatterWriter(logWriter))
                         : new HexOutputStream(logWriter)

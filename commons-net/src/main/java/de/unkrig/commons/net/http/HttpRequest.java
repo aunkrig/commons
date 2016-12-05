@@ -51,10 +51,10 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.unkrig.commons.io.IoUtil;
 import de.unkrig.commons.io.Multiplexer;
 import de.unkrig.commons.io.PercentEncodingInputStream;
 import de.unkrig.commons.io.PercentEncodingOutputStream;
+import de.unkrig.commons.io.Readers;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
 import de.unkrig.commons.lang.protocol.RunnableWhichThrows;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
@@ -294,7 +294,7 @@ class HttpRequest extends HttpMessage {
 
         String query;
         if (this.method == Method.POST || this.method == Method.PUT) {
-            query = IoUtil.readAll(new InputStreamReader(
+            query = Readers.readAll(new InputStreamReader(
                 this.removeBody().inputStream(),
                 this.getCharset()
             ));
@@ -464,11 +464,11 @@ class HttpRequest extends HttpMessage {
 
             // According to https://tools.ietf.org/html/rfc3986#section-2.5, "... the data should first be encoded as
             // octets according to the UTF-8 character encoding".
-            return IoUtil.readAll(new InputStreamReader(is, CHARSET_UTF_8));
+            return Readers.readAll(new InputStreamReader(is, CHARSET_UTF_8));
         } catch (MalformedInputException mie) {
 
             // Bytes could not be UTF-8-decoded, so fall back to ISO 8859-1.
-            return IoUtil.readAll(new InputStreamReader(is, CHARSET_ISO_8859_1));
+            return Readers.readAll(new InputStreamReader(is, CHARSET_ISO_8859_1));
         }
     }
 

@@ -42,8 +42,9 @@ import java.util.HashSet;
 import java.util.logging.Logger;
 
 import de.unkrig.commons.io.FileBufferedChannel;
-import de.unkrig.commons.io.IoUtil;
+import de.unkrig.commons.io.InputStreams;
 import de.unkrig.commons.io.Multiplexer;
+import de.unkrig.commons.io.OutputStreams;
 import de.unkrig.commons.lang.protocol.ConsumerUtil;
 import de.unkrig.commons.lang.protocol.ConsumerUtil.Produmer;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
@@ -158,8 +159,8 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
                 requestSize  = ConsumerUtil.store();
                 responseSize = ConsumerUtil.store();
 
-                out = IoUtil.tee(out, IoUtil.lengthWritten(ConsumerUtil.cumulate(responseSize, 0)));
-                in  = IoUtil.wye(in, IoUtil.lengthWritten(ConsumerUtil.cumulate(requestSize, 0)));
+                out = OutputStreams.tee(out, OutputStreams.lengthWritten(ConsumerUtil.cumulate(responseSize, 0)));
+                in  = InputStreams.wye(in, OutputStreams.lengthWritten(ConsumerUtil.cumulate(requestSize, 0)));
             }
 
             this.stoppables.add(stoppable);

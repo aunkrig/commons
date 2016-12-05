@@ -46,6 +46,7 @@ import org.apache.commons.compress.compressors.FileNameUtil;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormatFactory;
 import de.unkrig.commons.io.IoUtil;
+import de.unkrig.commons.io.OutputStreams;
 import de.unkrig.commons.io.pipe.PipeUtil;
 import de.unkrig.commons.io.pipe.PipeUtil.FillerAndDrainer;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
@@ -111,7 +112,7 @@ class TarArchiveFormat implements ArchiveFormat {
 
             @Override public void
             fill(OutputStream os) throws IOException {
-                this.count = IoUtil.writeAndCount(writeContents, os);
+                this.count = OutputStreams.writeAndCount(writeContents, os);
             }
 
             @Override public void
@@ -158,7 +159,7 @@ class TarArchiveFormat implements ArchiveFormat {
             @Override public void
             fill(OutputStream os) throws IOException {
 
-                if (!archiveEntry.isDirectory()) this.count = IoUtil.writeAndCount(writeContents, os);
+                if (!archiveEntry.isDirectory()) this.count = OutputStreams.writeAndCount(writeContents, os);
             }
 
             @Override public void

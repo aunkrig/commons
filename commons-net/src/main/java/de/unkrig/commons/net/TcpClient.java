@@ -39,7 +39,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.unkrig.commons.io.HexOutputStream;
-import de.unkrig.commons.io.IoUtil;
+import de.unkrig.commons.io.InputStreams;
+import de.unkrig.commons.io.OutputStreams;
 import de.unkrig.commons.util.logging.LogUtil;
 
 /**
@@ -87,12 +88,12 @@ class TcpClient implements Closeable {
         boolean logData = LOGGER.isLoggable(FINEST);
         this.fromServer = (
             logData
-            ? IoUtil.wye(in, new HexOutputStream(LogUtil.logWriter(LOGGER, FINEST, "<From Server< ")))
+            ? InputStreams.wye(in, new HexOutputStream(LogUtil.logWriter(LOGGER, FINEST, "<From Server< ")))
             : in
         );
         this.toServer = (
             logData
-            ? IoUtil.tee(out, new HexOutputStream(LogUtil.logWriter(LOGGER, FINEST, ">To   Server> ")))
+            ? OutputStreams.tee(out, new HexOutputStream(LogUtil.logWriter(LOGGER, FINEST, ">To   Server> ")))
             : out
         );
     }

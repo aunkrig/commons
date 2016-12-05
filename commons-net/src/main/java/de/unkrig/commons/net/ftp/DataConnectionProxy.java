@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 
 import de.unkrig.commons.io.HexOutputStream;
 import de.unkrig.commons.io.IoUtil;
+import de.unkrig.commons.io.OutputStreams;
 import de.unkrig.commons.lang.ThreadUtil;
 import de.unkrig.commons.lang.protocol.Stoppable;
 import de.unkrig.commons.net.ReverseProxy;
@@ -144,11 +145,11 @@ class DataConnectionProxy {
                             Stoppable         stoppable
                         ) throws IOException {
                             ThreadUtil.parallel(
-                                IoUtil.copyRunnable(clientIn, IoUtil.tee(
+                                IoUtil.copyRunnable(clientIn, OutputStreams.tee(
                                     serverOut,
                                     new HexOutputStream(LogUtil.logWriter(LOGGER, FINER, "> "))
                                 )),
-                                IoUtil.copyRunnable(serverIn, IoUtil.tee(
+                                IoUtil.copyRunnable(serverIn, OutputStreams.tee(
                                     clientOut,
                                     new HexOutputStream(LogUtil.logWriter(LOGGER, FINER, "< "))
                                 )),

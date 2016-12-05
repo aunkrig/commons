@@ -35,6 +35,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import de.unkrig.commons.io.IoUtil;
+import de.unkrig.commons.io.OutputStreams;
 import de.unkrig.commons.io.ProxyOutputStream;
 import de.unkrig.commons.io.pipe.Pipe;
 import de.unkrig.commons.io.pipe.PipeFactory;
@@ -122,7 +123,7 @@ class ByteStreamSequentializer {
 
                 // Run the task.
                 try {
-                    task.consume(IoUtil.unclosableOutputStream(previousTarget));
+                    task.consume(OutputStreams.unclosable(previousTarget));
                 } catch (Exception ex) {
                     throw ex;
                 } catch (Error er) {     // SUPPRESS CHECKSTYLE IllegalCatch
