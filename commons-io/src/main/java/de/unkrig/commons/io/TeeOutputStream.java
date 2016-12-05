@@ -34,7 +34,7 @@ import de.unkrig.commons.nullanalysis.NotNullByDefault;
 /**
  * An {@link OutputStream} which writes the data written to it to <i>two</i> delegate {@link OutputStream}s.
  *
- * @deprecated Prefer delegation over inheritance and use {@link IoUtil#tee(OutputStream...)} instead.
+ * @deprecated Prefer delegation over inheritance and use {@link OutputStreams#tee(OutputStream...)} instead.
  */
 @Deprecated @NotNullByDefault(false) public
 class TeeOutputStream extends OutputStream {

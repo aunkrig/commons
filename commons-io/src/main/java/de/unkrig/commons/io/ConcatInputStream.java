@@ -43,7 +43,7 @@ class ConcatInputStream extends InputStream {
     private final boolean                         closeStreams;
 
     /** {@code null} means 'end of input'. */
-    @Nullable private InputStream current = IoUtil.EMPTY_INPUT_STREAM;
+    @Nullable private InputStream current = InputStreams.EMPTY;
 
     /**
      * @param delegates    A {@code null} product means 'end-of-input'

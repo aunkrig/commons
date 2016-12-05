@@ -28,7 +28,6 @@ package test;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -144,71 +143,5 @@ class IoUtilTest {
             }
         }
         Assert.assertEquals(expected, lines);
-    }
-
-    @Test public void
-    testCompareOutput1() throws IOException {
-
-        final boolean[] definitelyIdentical    = new boolean[1];
-        final boolean[] definitelyNotIdentical = new boolean[1];
-
-        OutputStream[] oss = IoUtil.compareOutput(
-            2,
-            new Runnable() { @Override public void run() { definitelyIdentical[0]    = true; } },
-            new Runnable() { @Override public void run() { definitelyNotIdentical[0] = true; } }
-        );
-
-        oss[0].write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
-        Assert.assertTrue(!definitelyIdentical[0] && !definitelyNotIdentical[0]);
-        oss[0].close();
-        Assert.assertTrue(!definitelyIdentical[0] && !definitelyNotIdentical[0]);
-        oss[1].write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
-        Assert.assertTrue(!definitelyIdentical[0] && !definitelyNotIdentical[0]);
-        oss[1].close();
-        Assert.assertTrue(definitelyIdentical[0] && !definitelyNotIdentical[0]);
-    }
-
-    @Test public void
-    testCompareOutput2() throws IOException {
-
-        final boolean[] definitelyIdentical    = new boolean[1];
-        final boolean[] definitelyNotIdentical = new boolean[1];
-
-        OutputStream[] oss = IoUtil.compareOutput(
-            2,
-            new Runnable() { @Override public void run() { definitelyIdentical[0]    = true; } },
-            new Runnable() { @Override public void run() { definitelyNotIdentical[0] = true; } }
-        );
-
-        oss[0].write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
-        Assert.assertTrue(!definitelyIdentical[0] && !definitelyNotIdentical[0]);
-        oss[1].write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 99 });
-        Assert.assertTrue(!definitelyIdentical[0]);
-        oss[0].close();
-        Assert.assertTrue(!definitelyIdentical[0]);
-        oss[1].close();
-        Assert.assertTrue(!definitelyIdentical[0] && definitelyNotIdentical[0]);
-    }
-
-    @Test public void
-    testCompareOutput3() throws IOException {
-
-        final boolean[] definitelyIdentical    = new boolean[1];
-        final boolean[] definitelyNotIdentical = new boolean[1];
-
-        OutputStream[] oss = IoUtil.compareOutput(
-            2,
-            new Runnable() { @Override public void run() { definitelyIdentical[0]    = true; } },
-            new Runnable() { @Override public void run() { definitelyNotIdentical[0] = true; } }
-        );
-
-        oss[0].write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
-        Assert.assertTrue(!definitelyIdentical[0] && !definitelyNotIdentical[0]);
-        oss[1].write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 });
-        Assert.assertTrue(!definitelyIdentical[0] && !definitelyNotIdentical[0]);
-        oss[0].close();
-        Assert.assertTrue(!definitelyIdentical[0]);
-        oss[1].close();
-        Assert.assertTrue(!definitelyIdentical[0] && definitelyNotIdentical[0]);
     }
 }

@@ -32,7 +32,7 @@ import java.io.InputStream;
 /**
  * A {@link FilterInputStream} which ignores all invocations of {@link #close()}.
  *
- * @deprecated Use {@link IoUtil#unclosableInputStream(InputStream)}
+ * @deprecated Use {@link InputStreams#unclosable(InputStream)}
  */
 @Deprecated public
 class UnclosableInputStream extends FilterInputStream {
