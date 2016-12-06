@@ -27,8 +27,10 @@ import de.unkrig.commons.lang.protocol.Transformer;
  *   limited; by default to {@value #DEFAULT_LOOKBEHIND_LIMIT}.
  * </p>
  * <p>
- *   Also bear in mind that, specifically with using "greedy quantifiers", it may happen quite easily that the entire
- *   input must be read into memory, only to find that there is no match. Example: "a.*b"
+ *   Also bear in mind that, specifically when using "greedy quantifiers", that it may happen quite easily that the
+ *   entire input must be read into memory, only to find that there is no match. E.g. the pattern {@code "a.*b"}, as
+ *   soon as it hits the letter "a", will load all the remaining text into memory, because there might still come
+ *   (another) "b".
  * </p>
  */
 public
