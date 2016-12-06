@@ -30,8 +30,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintStream;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -879,7 +879,7 @@ class CommandLineOptions {
     /**
      * Reads (and decodes) the contents of a resource, replaces all occurrences of
      * "<code>${</code><var>system-property-name</var><code>}</code>" with the value of the designated system property,
-     * and writes the result to the <var>printStream</var>.
+     * and writes the result to the <var>outputStream</var> (typically {@code System.out}).
      * <p>
      *   The resource is found through the <var>baseClass</var>'s class loader and the name {@code
      *   "}<var>package-name</var>{@code /}<var>simple-class-name</var>{@code .}<var>relativeResourceName</var>{@code
@@ -901,20 +901,21 @@ class CommandLineOptions {
         Class<?>          baseClass,
         String            relativeResourceName,
         @Nullable Charset resourceCharset,
-        PrintStream       printStream
+        OutputStream      outputStream
     ) throws IOException {
 
         String resourceName = baseClass.getSimpleName() + "." + relativeResourceName;
 
         InputStream is = baseClass.getResourceAsStream(resourceName);
         if (is == null) throw new FileNotFoundException(resourceName);
-
         try {
-            Writer w = new OutputStreamWriter(printStream);
-            PatternUtil.replaceSystemProperties(
-                resourceCharset == null ? new InputStreamReader(is) : new InputStreamReader(is, resourceCharset),
-                w
-            );
+
+            Writer w = new OutputStreamWriter(outputStream);
+
+            InputStreamReader
+            r = resourceCharset == null ? new InputStreamReader(is) : new InputStreamReader(is, resourceCharset);
+
+            PatternUtil.replaceSystemProperties(r, w);
             w.flush();
         } finally {
             is.close();
