@@ -37,10 +37,6 @@ import de.unkrig.commons.lang.StringUtil;
 import de.unkrig.commons.text.pattern.PatternUtil;
 import de.unkrig.commons.text.pattern.Substitutor;
 
-/**
- * @author Arno
- *
- */
 public class SubstitutorTest {
 
     @Test public void
