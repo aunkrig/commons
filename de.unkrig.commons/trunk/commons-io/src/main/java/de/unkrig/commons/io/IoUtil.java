@@ -115,14 +115,16 @@ class IoUtil {
                 URL url = new URL("jar", null, directoryOrArchiveFile.toURI() + "!/" + resourceName);
                 try {
                     url.openConnection().connect();
+                    return url;
                 } catch (FileNotFoundException fnfe) {
-                    return null;
+
+                    // A resource with that name does not exist in the archive.
+                    ;
                 }
-                return url;
             } else
             {
 
-                // The path entry designates neither a directory nor a JAR (or ZIP) archive.
+                // The path entry designates neither an existing directory nor a JAR (or ZIP) archive.
                 ;
             }
         }
