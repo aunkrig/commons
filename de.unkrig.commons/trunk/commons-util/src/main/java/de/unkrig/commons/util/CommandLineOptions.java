@@ -41,14 +41,13 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.regex.Pattern;
 
 import de.unkrig.commons.lang.AssertionUtil;
@@ -266,34 +265,32 @@ class CommandLineOptions {
 
         // CONFIGURATION
 
-        /** Option name => {@link CommandLineOption} */
-        private final Map<String, CommandLineOption> allOptions = new LinkedHashMap<String, CommandLineOption>();
+        /** Option name => {@link Method} */
+        private final Map<String, Method> allOptions = new LinkedHashMap<String, Method>();
 
         /** The options that must appear at most once. */
-        private final Set<CommandLineOption> singularOptions = new IdentityHashSet<CommandLineOption>();
+        private final Set<Method> singularOptions = new HashSet<Method>();
 
         /** The options that must appear at least once. */
-        private final List<CommandLineOption> requiredOptions = new ArrayList<CommandLineOption>();
+        private final List<Method> requiredOptions = new ArrayList<Method>();
 
         /** The option groups with cardinality 1 or less. */
-        private final Set<CommandLineOptionGroup> singularOptionGroups = new IdentityHashSet<CommandLineOptionGroup>();
+        private final Set<Class<?>> singularOptionGroups = new HashSet<Class<?>>();
 
         /** The option groups with cardinality 0 or more. */
-        private final List<CommandLineOptionGroup> requiredOptionGroups = new ArrayList<CommandLineOptionGroup>();
+        private final List<Class<?>> requiredOptionGroups = new ArrayList<Class<?>>();
 
-        private final Map<CommandLineOption, Set<CommandLineOptionGroup>>
-        optionToGroups = new IdentityHashMap<CommandLineOption, Set<CommandLineOptionGroup>>();
-
-        private final Map<CommandLineOption, Method>
-        optionToMethod = new IdentityHashMap<CommandLineOption, Method>();
+        /** Maps option methods to the set of groups that each is a member of. */
+        private final Map<Method, Set<Class<?>>>
+        optionToOptionGroups = new HashMap<Method, Set<Class<?>>>();
 
         // PARSING STATE
 
         /** Options that were parsed so far. */
-        private final Set<CommandLineOption> actualOptions = new IdentityHashSet<CommandLineOption>();
+        private final Set<Method> actualOptions = new HashSet<Method>();
 
         /** Options groups that were parsed so far. */
-        private final Set<CommandLineOptionGroup> actualOptionGroups = new IdentityHashSet<CommandLineOptionGroup>();
+        private final Set<Class<?>> actualOptionGroups = new HashSet<Class<?>>();
 
         /**
          * Analyzes the <var>targetClass</var> for any command line option setters.
@@ -313,14 +310,12 @@ class CommandLineOptions {
 
             for (Method m : methods) {
 
-                CommandLineOption option = CommandLineOptions.getOption(m);
-                if (option == null) continue;
-
-                this.optionToMethod.put(option, m);
+                CommandLineOption clo = m.getAnnotation(CommandLineOption.class);
+                if (clo == null) continue;
 
                 // Determine the "names" of the command-line option - either from the "name" element of the
                 // "@CommandLineOption" annotation, or from the method name.
-                String[] names = option.name();
+                String[] names = clo.name();
                 if (names.length == 0) {
                     String n = m.getName();
                     if (n.startsWith("set")) {
@@ -338,44 +333,44 @@ class CommandLineOptions {
                         ? new String[] { name }
                         : new String[] { "-" + name, "--" + name }
                     )) {
-                        CommandLineOption prev = this.allOptions.put(name2, option);
-                        assert prev == null : "Two methods map to option \"" + name2 + "\"";
+                        Method prev = this.allOptions.put(name2, m);
+                        assert prev == null : "Two methods map to option \"" + name2 + "\": \"" + prev + "\" and \"" + m + "\"";
                     }
                 }
 
                 // Process the option cardinality.
                 {
-                    CommandLineOption.Cardinality c = option.cardinality();
+                    CommandLineOption.Cardinality c = clo.cardinality();
 
                     if (c == CommandLineOption.Cardinality.MANDATORY || c == CommandLineOption.Cardinality.OPTIONAL) {
-                        this.singularOptions.add(option);
+                        this.singularOptions.add(m);
                     }
 
                     if (
                         c == CommandLineOption.Cardinality.MANDATORY
                         || c == CommandLineOption.Cardinality.ONCE_OR_MORE
                     ) {
-                        this.requiredOptions.add(option);
+                        this.requiredOptions.add(m);
                     }
                 }
 
-                // Process the group cardinality.
-                for (Class<?> groupClass : option.group()) {
-                    CommandLineOptionGroup optionGroup = groupClass.getAnnotation(CommandLineOptionGroup.class);
-                    if (optionGroup == null) {
+                // Process the option group cardinality.
+                for (Class<?> optionGroup : clo.group()) {
+                    CommandLineOptionGroup clog = optionGroup.getAnnotation(CommandLineOptionGroup.class);
+                    if (clog == null) {
                         throw new AssertionError(
-                            "Group class \""
-                            + groupClass
+                            "Option group class \""
+                            + optionGroup
                             + "\" lacks the \"@CommandLineOptionGroup\" annotation"
                         );
                     }
 
-                    Set<CommandLineOptionGroup> clogs = this.optionToGroups.get(option);
-                    if (clogs == null) this.optionToGroups.put(option, (clogs = new HashSet<CommandLineOptionGroup>()));
+                    Set<Class<?>> optionGroups = this.optionToOptionGroups.get(m);
+                    if (optionGroups == null) this.optionToOptionGroups.put(m, (optionGroups = new HashSet<Class<?>>()));
 
-                    clogs.add(optionGroup);
+                    optionGroups.add(optionGroup);
 
-                    CommandLineOptionGroup.Cardinality c = optionGroup.cardinality();
+                    CommandLineOptionGroup.Cardinality c = clog.cardinality();
                     if (
                         c == CommandLineOptionGroup.Cardinality.EXACTLY_ONE
                         || c == CommandLineOptionGroup.Cardinality.ZERO_OR_ONE
@@ -403,14 +398,14 @@ class CommandLineOptions {
             while (this.parseNextOption(ss, target));
 
             // Verify that all "required" options were parsed.
-            for (CommandLineOption option : this.requiredOptions) {
+            for (Method option : this.requiredOptions) {
 
                 if (!this.actualOptions.contains(option)) {
                     throw new RequiredOptionMissing(option, this.optionNames(option));
                 }
             }
 
-            for (CommandLineOptionGroup optionGroup : this.requiredOptionGroups) {
+            for (Class<?> optionGroup : this.requiredOptionGroups) {
 
                 if (!this.actualOptionGroups.contains(optionGroup)) {
                     throw new RequiredOptionGroupMissing(optionGroup, this.optionNames(optionGroup));
@@ -422,12 +417,12 @@ class CommandLineOptions {
          * @return All names of the <em>option</em>
          */
         private String[]
-        optionNames(CommandLineOption option) {
+        optionNames(Method option) {
 
             List<String> result = new ArrayList<String>();
-            for (Entry<String, CommandLineOption> e : this.allOptions.entrySet()) {
-                final String            optionName = e.getKey();
-                final CommandLineOption o          = e.getValue();
+            for (Entry<String, Method> e : this.allOptions.entrySet()) {
+                final String optionName = e.getKey();
+                final Method o          = e.getValue();
 
                 if (o != option) continue;
 
@@ -438,18 +433,18 @@ class CommandLineOptions {
         }
 
         /**
-         * @return All names of all options that are members of the group
+         * @return All names of all options that are members of the <var>optionGroup</var>
          */
         private String[]
-        optionNames(CommandLineOptionGroup optionGroup) {
+        optionNames(Class<?> optionGroup) {
 
             List<String> result = new ArrayList<String>();
-            for (Entry<String, CommandLineOption> e : this.allOptions.entrySet()) {
-                final String            optionName = e.getKey();
-                final CommandLineOption option     = e.getValue();
+            for (Entry<String, Method> e : this.allOptions.entrySet()) {
+                final String optionName = e.getKey();
+                final Method option     = e.getValue();
 
-                for (Class<?> g : option.group()) {
-                    if (g.getAnnotation(CommandLineOptionGroup.class) == optionGroup) {
+                for (Class<?> g : option.getAnnotation(CommandLineOption.class).group()) {
+                    if (g == optionGroup) {
                         result.add(optionName);
                         break;
                     }
@@ -495,7 +490,7 @@ class CommandLineOptions {
                 {
                     String firstOptionName = "-" + firstOptionLetter;
 
-                    CommandLineOption firstOption = this.getOption(firstOptionName, target.getClass());
+                    Method firstOption = this.getOptionByName(firstOptionName);
                     if (firstOption == null) break COMPACT_OPTIONS;
 
                     // Only now that we have verified that the first letter can be interpreted as a single-letter
@@ -513,7 +508,7 @@ class CommandLineOptions {
 
                     String optionName = "-" + followingOptionLetters.charAt(i);
 
-                    CommandLineOption optionMethod = this.getOption(optionName, target.getClass());
+                    Method optionMethod = this.getOptionByName(optionName);
                     if (optionMethod == null) {
                         throw new UnrecognizedOption(optionName);
                     }
@@ -545,7 +540,7 @@ class CommandLineOptions {
                 throw new AssertionError(uee);
             }
 
-            CommandLineOption option = this.getOption(optionName, target.getClass());
+            Method option = this.getOptionByName(optionName);
             if (option == null) return false;
 
             try {
@@ -565,64 +560,12 @@ class CommandLineOptions {
         }
 
         /**
-         * Determines the method of {@code target.getClass()} that is applicable for the given <var>option</var>. The
-         * rules for matching are as follows:
-         * <ul>
-         *   <li>The method must be annotated with {@link CommandLineOption @CommandLineOption}.</li>
-         *   <li>
-         *     If that annotation has the "{@code name}" element:
-         *     <ul>
-         *       <li>
-         *         If the {@code name} value starts with "-":
-         *         <ul>
-         *           <li>
-         *             The <var>option</var> equals the {@code name} value.
-         *           </li>
-         *         </ul>
-         *       </li>
-         *       <li>
-         *         Otherwise, if the {@code name} value does not start with "-":
-         *         <ul>
-         *           <li>
-         *             The <var>option</var> equals {@code "-"+name} or {@code "--"+name}
-         *           </li>
-         *         </ul>
-         *       </li>
-         *     </ul>
-         *     Example:
-         *     <br />
-         *     <code>@CommandLineOption(name = { "alpha", "-beta" }) public void method() { ...</code>
-         *     <br />
-         *     matches if <var>option</var> is {@code "-alpha"}, {@code "--alpha"} and {@code "-beta"}.
-         *   </li>
-         *   <li>
-         *     Otherwise, if that annotation does not have the "{@code name}" element:
-         *     <ul>
-         *       <li>
-         *         The method name, with an optional "set" or "add" prefix removed, then converted to {@link
-         *         Phrase#toLowerCaseHyphenated() lower-case-hyphenated}, then prefixed with "-" and "--", equals the
-         *         <var>option</var>.
-         *         <br />
-         *         Example: Method name "setFooBar()" matches if <var>option</var> is "-foo-bar" or "--foo-bar".
-         *       </li>
-         *     </ul>
-         *   </li>
-         * </ul>
-         *
          * @return {@code Null} iff there is no applicable method
          */
-        @Nullable public CommandLineOption
-        getOption(String optionName, Class<?> targetClass) {
+        @Nullable public Method
+        getOptionByName(String optionName) {
 
             return this.allOptions.get(optionName);
-        }
-
-        private Method
-        methodFor(CommandLineOption option) {
-            return AssertionUtil.notNull(
-                this.optionToMethod.get(option),
-                option.toString() + "; available are " + this.optionToMethod.keySet()
-            );
         }
 
         /**
@@ -642,7 +585,7 @@ class CommandLineOptions {
         public void
         applyCommandLineOption(
             String            optionName,
-            CommandLineOption option,
+            Method            option,
             StringStream<EX>  stringStream,
             @Nullable Object  target
         ) throws CommandLineOptionException, EX  {
@@ -651,18 +594,17 @@ class CommandLineOptions {
                 throw new DuplicateOption(option, optionName, this.optionNames(option));
             }
 
-            Set<CommandLineOptionGroup> clogs = this.optionToGroups.get(option);
-            if (clogs != null) // assert clogs != null;
-
-            for (CommandLineOptionGroup optionGroup : clogs) {
-                if (this.singularOptionGroups.contains(optionGroup) && this.actualOptionGroups.contains(optionGroup)) {
-                    throw new ConflictingOptions(optionGroup, option, optionName);
+            Set<Class<?>> optionGroups = this.optionToOptionGroups.get(option);
+            if (optionGroups != null) {
+                for (Class<?> optionGroup : optionGroups) {
+                    if (this.singularOptionGroups.contains(optionGroup) && this.actualOptionGroups.contains(optionGroup)) {
+                        throw new ConflictingOptions(optionGroup, option, optionName);
+                    }
                 }
             }
 
-            Method         method                      = this.methodFor(option);
-            Class<?>[]     methodParametersTypes       = method.getParameterTypes();
-            Annotation[][] methodParametersAnnotations = method.getParameterAnnotations();
+            Class<?>[]     methodParametersTypes       = option.getParameterTypes();
+            Annotation[][] methodParametersAnnotations = option.getParameterAnnotations();
 
             assert methodParametersTypes.length == methodParametersAnnotations.length;
 
@@ -683,16 +625,17 @@ class CommandLineOptions {
 
             // Now that the "methodArgs" array is filled, invoke the method.
             try {
-                method.invoke(target, methodArgs);
+                option.invoke(target, methodArgs);
             } catch (Exception e) {
                 throw new AssertionError(e);
             }
 
             this.actualOptions.add(option);
 
-            if (clogs != null) //
-            for (CommandLineOptionGroup optionGroup : clogs) {
-                this.actualOptionGroups.add(optionGroup);
+            if (optionGroups != null) {
+                for (Class<?> optionGroup : optionGroups) {
+                    this.actualOptionGroups.add(optionGroup);
+                }
             }
         }
 
@@ -800,21 +743,56 @@ class CommandLineOptions {
     }
 
     /**
-     * Determines the method of <var>targetClass</var> that is applicable for the given <var>optionName</var>.
+     * Determines the method of {@code target.getClass()} that is applicable for the given <var>optionName</var>. The
+     * rules for matching are as follows:
+     * <ul>
+     *   <li>The method must be annotated with {@link CommandLineOption @CommandLineOption}.</li>
+     *   <li>
+     *     If that annotation has the "{@code name}" element:
+     *     <ul>
+     *       <li>
+     *         If the {@code name} value starts with "-":
+     *         <ul>
+     *           <li>
+     *             The <var>optionName</var> equals the {@code name} value.
+     *           </li>
+     *         </ul>
+     *       </li>
+     *       <li>
+     *         Otherwise, if the {@code name} value does not start with "-":
+     *         <ul>
+     *           <li>
+     *             The <var>optionName</var> equals {@code "-"+name} or {@code "--"+name}
+     *           </li>
+     *         </ul>
+     *       </li>
+     *     </ul>
+     *     Example:
+     *     <br />
+     *     <code>@CommandLineOption(name = { "alpha", "-beta" }) public void method() { ...</code>
+     *     <br />
+     *     matches if <var>optionName</var> is {@code "-alpha"}, {@code "--alpha"} and {@code "-beta"}.
+     *   </li>
+     *   <li>
+     *     Otherwise, if that annotation does not have the "{@code name}" element:
+     *     <ul>
+     *       <li>
+     *         The method name, with an optional "set" or "add" prefix removed, then converted to {@link
+     *         Phrase#toLowerCaseHyphenated() lower-case-hyphenated}, then prefixed with "-" and "--", equals the
+     *         <var>optionName</var>.
+     *         <br />
+     *         Example: Method name "setFooBar()" matches if <var>optionName</var> is "-foo-bar" or "--foo-bar".
+     *       </li>
+     *     </ul>
+     *   </li>
+     * </ul>
      *
-     * @return                                                                        {@code null} iff there is no
-     *                                                                                applicable method
-     * @see de.unkrig.commons.util.CommandLineOptions.Parser#getOption(String, Class)
+     * @return {@code null} iff there is no applicable method
      */
     @Nullable public static Method
     getMethodForOption(String optionName, Class<?> targetClass) {
 
-        Parser<RuntimeException> parser = new Parser<RuntimeException>(targetClass);
-
-        CommandLineOption option = parser.getOption(optionName, targetClass);
-        if (option == null) return null;
-
-        return parser.methodFor(option);
+        return new Parser<RuntimeException>(targetClass).getOptionByName(optionName);
     }
 
     /**
@@ -832,16 +810,13 @@ class CommandLineOptions {
     public static int
     applyCommandLineOption(
         String           optionName,
-        Method           method,
+        Method           option,
         String[]         args,
         int              optionArgumentIndex,
         @Nullable Object target
     ) throws CommandLineOptionException {
 
-        CommandLineOption option = CommandLineOptions.getOption(method);
-        assert option != null;
-
-        Class<? extends Object> targetClass = target != null ? target.getClass() : method.getDeclaringClass();
+        Class<? extends Object> targetClass = target != null ? target.getClass() : option.getDeclaringClass();
 
         FromArrayProducer<String> fap = ProducerUtil.fromArray(args, optionArgumentIndex, args.length);
 
@@ -854,27 +829,6 @@ class CommandLineOptions {
 
         return fap.index();
     }
-
-    /**
-     * @return The singleton {@link CommandLineOption} for the <var>method</var>, or {@code null} iff the
-     *         <var>method</var> has no {@link CommandLineOption} annotation
-     */
-    @Nullable private static CommandLineOption
-    getOption(Method method) {
-
-        synchronized (CommandLineOptions.METHOD_TO_OPTION) {
-
-            CommandLineOption option = CommandLineOptions.METHOD_TO_OPTION.get(method);
-            if (option != null) return option;
-            if (CommandLineOptions.METHOD_TO_OPTION.containsKey(method)) return null;
-
-            option = method.getAnnotation(CommandLineOption.class);
-            CommandLineOptions.METHOD_TO_OPTION.put(method, option);
-            return option;
-        }
-    }
-    private static final Map<Method, CommandLineOption>
-    METHOD_TO_OPTION = new WeakHashMap<Method, CommandLineOption>();
 
     /**
      * Reads (and decodes) the contents of a resource, replaces all occurrences of

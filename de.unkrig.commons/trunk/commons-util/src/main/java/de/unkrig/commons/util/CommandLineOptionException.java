@@ -28,6 +28,8 @@ package de.unkrig.commons.util;
 
 import static de.unkrig.commons.util.annotation.CommandLineOptionGroup.Cardinality.EXACTLY_ONE;
 
+import java.lang.reflect.Method;
+
 import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.util.annotation.CommandLineOption;
 import de.unkrig.commons.util.annotation.CommandLineOptionGroup;
@@ -114,11 +116,11 @@ class CommandLineOptionException extends Exception {
 
         private static final long serialVersionUID = 1L;
 
-        private final CommandLineOption option;
-        private final String[]          optionNames;
+        private final Method   option;
+        private final String[] optionNames;
 
         protected
-        RequiredOptionMissing(CommandLineOption option, String[] optionNames) {
+        RequiredOptionMissing(Method option, String[] optionNames) {
             super((
                 optionNames.length == 1
                 ? "Required command line option \"" + optionNames[0] + "\" is missing"
@@ -133,7 +135,7 @@ class CommandLineOptionException extends Exception {
             this.optionNames = optionNames;
         }
 
-        public CommandLineOption
+        public Method
         getOption() { return this.option; }
 
         /**
@@ -156,13 +158,13 @@ class CommandLineOptionException extends Exception {
 
         private static final long serialVersionUID = 1L;
 
-        private final CommandLineOptionGroup optionGroup;
-        private final String[]               optionNames;
+        private final Class<?> optionGroup;
+        private final String[] optionNames;
 
         protected
-        RequiredOptionGroupMissing(CommandLineOptionGroup optionGroup, String[] optionNames) {
+        RequiredOptionGroupMissing(Class<?> optionGroup, String[] optionNames) {
             super((
-                optionGroup.cardinality() == EXACTLY_ONE
+                optionGroup.getAnnotation(CommandLineOptionGroup.class).cardinality() == EXACTLY_ONE
                 ? "Exactly one of " + CommandLineOptionException.join(optionNames) + " must be specified"
                 : "One or more of " + CommandLineOptionException.join(optionNames) + " must be specified"
             ));
@@ -171,7 +173,7 @@ class CommandLineOptionException extends Exception {
             this.optionNames = optionNames;
         }
 
-        public CommandLineOptionGroup
+        public Class<?>
         getOptionGroup() { return this.optionGroup; }
 
         /**
@@ -189,15 +191,15 @@ class CommandLineOptionException extends Exception {
 
         private static final long serialVersionUID = 1L;
 
-        private final CommandLineOption option;
-        private final String            optionName;
-        private final int               argumentIndex;
+        private final Method option;
+        private final String optionName;
+        private final int    argumentIndex;
 
         /**
          * @param argumentIndex 0=First method argument, ...
          */
         protected
-        OptionArgumentMissing(CommandLineOption option, String optionName, int argumentIndex) {
+        OptionArgumentMissing(Method option, String optionName, int argumentIndex) {
             super("Argument #" + (argumentIndex + 1) + " for command line option \"" + optionName + "\" is missing");
 
             this.option        = option;
@@ -205,9 +207,9 @@ class CommandLineOptionException extends Exception {
             this.argumentIndex = argumentIndex;
         }
 
-        public CommandLineOption getOption()        { return this.option;        }
-        public String            getOptionName()    { return this.optionName;    }
-        public int               getArgumentIndex() { return this.argumentIndex; }
+        public Method getOption()        { return this.option;        }
+        public String getOptionName()    { return this.optionName;    }
+        public int    getArgumentIndex() { return this.argumentIndex; }
     }
 
     /**
@@ -221,12 +223,12 @@ class CommandLineOptionException extends Exception {
 
         private static final long serialVersionUID = 1L;
 
-        private final CommandLineOption option;
-        private final String            optionName;
-        private final String[]          optionNames;
+        private final Method   option;
+        private final String   optionName;
+        private final String[] optionNames;
 
         protected
-        DuplicateOption(CommandLineOption option, String optionName, String[] optionNames) {
+        DuplicateOption(Method option, String optionName, String[] optionNames) {
             super("Option \"" + optionName + "\" must appear at most once");
 
             this.option      = option;
@@ -234,7 +236,7 @@ class CommandLineOptionException extends Exception {
             this.optionNames = optionNames;
         }
 
-        public CommandLineOption
+        public Method
         getOption() { return this.option; }
 
         /**
@@ -260,12 +262,12 @@ class CommandLineOptionException extends Exception {
 
         private static final long serialVersionUID = 1L;
 
-        private final CommandLineOptionGroup optionGroup;
-        private final CommandLineOption      option;
-        private final String                 optionName;
+        private final Class<?> optionGroup;
+        private final Method   option;
+        private final String   optionName;
 
         protected
-        ConflictingOptions(CommandLineOptionGroup optionGroup, CommandLineOption option, String optionName) {
+        ConflictingOptions(Class<?> optionGroup, Method option, String optionName) {
             super("Option \"" + optionName + "\" is exclusive with a preceding option");
 
             this.optionGroup = optionGroup;
@@ -273,9 +275,9 @@ class CommandLineOptionException extends Exception {
             this.optionName  = optionName;
         }
 
-        public CommandLineOptionGroup getOptionGroup() { return this.optionGroup; }
-        public CommandLineOption      getOption()      { return this.option;      }
-        public String                 getOptionName()  { return this.optionName;  }
+        public Class<?> getOptionGroup() { return this.optionGroup; }
+        public Method   getOption()      { return this.option;      }
+        public String   getOptionName()  { return this.optionName;  }
     }
 
     /**
