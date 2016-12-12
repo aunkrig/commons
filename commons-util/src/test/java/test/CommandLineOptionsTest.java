@@ -150,7 +150,6 @@ class CommandLineOptionsTest {
             Assert.assertEquals("Argument #3 for command line option \"-bar2\" is missing", oam.getMessage());
             Assert.assertEquals(oam.getOptionName(), "-bar2");
             Assert.assertEquals(oam.getArgumentIndex(), 2);
-            Assert.assertEquals(oam.getOption().cardinality(), CommandLineOption.Cardinality.OPTIONAL);
         }
     }
 
