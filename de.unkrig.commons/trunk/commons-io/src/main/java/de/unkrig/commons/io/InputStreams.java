@@ -88,7 +88,7 @@ public class InputStreams {
             read(@Nullable byte[] b, int off, int len) throws IOException {
                 int count = super.read(b, off, len);
                 if (count > 0) out.write(b, off, count);
-                if (count == 0) out.flush();
+                if (count == -1) out.flush();
                 return count;
             }
 
