@@ -27,6 +27,7 @@
 package de.unkrig.commons.text.scanner;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +45,7 @@ import de.unkrig.commons.nullanalysis.Nullable;
  *   changes state. Initially the scanner is in the default state.
  * </p>
  * <p>
- *   The non-default states are defined by the {@code S} type parameter.
+ *   The non-default states are defined by the <var>S</var> type parameter.
  * </p>
  * <p>
  *   For an example usage, see {@link JavaScanner}.
@@ -86,7 +87,7 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
     }
 
     /**
-     * Adds a rule that applies iff the scanner is in the the given {@code state}. The scanner returns to the default
+     * Adds a rule that applies iff the scanner is in the given <var>state</var>. The scanner returns to the default
      * state after the rule has matched.
      *
      * @param state {@code null} means "any state"
@@ -94,11 +95,23 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
      */
     public void
     addRule(@Nullable S state, String regex, TT tokenType) {
-        this.addRule(state, regex, tokenType, this.defaultStateRules);
+        this.addRule(state == null ? null : EnumSet.of(state), regex, tokenType, this.defaultStateRules);
     }
 
     /**
-     * Adds a rule that applies iff the scanner is in the the given {@code state}.
+     * Adds a rule that applies iff the scanner is in one of the given <var>states</var>. The scanner returns to the
+     * default state after the rule has matched.
+     *
+     * @param states {@code null} means "any state"
+     * @see Pattern
+     */
+    public void
+    addRule(@Nullable EnumSet<S> states, String regex, TT tokenType) {
+        this.addRule(states, regex, tokenType, this.defaultStateRules);
+    }
+
+    /**
+     * Adds a rule that applies iff the scanner is in the given <var>state</var>.
      *
      * @param state     {@code null} means "any state"
      * @param nextState The new current state after the rule has matched
@@ -106,7 +119,19 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
      */
     public void
     addRule(@Nullable S state, String regex, TT tokenType, S nextState) {
-        this.addRule(state, regex, tokenType, this.nonDefaultStateRules.get(nextState));
+        this.addRule(EnumSet.of(state), regex, tokenType, this.nonDefaultStateRules.get(nextState));
+    }
+
+    /**
+     * Adds a rule that applies iff the scanner is in one of the the given <var>states</var>.
+     *
+     * @param states    {@code null} means "any state"
+     * @param nextState The new current state after the rule has matched
+     * @see Pattern
+     */
+    public void
+    addRule(@Nullable EnumSet<S> states, String regex, TT tokenType, S nextState) {
+        this.addRule(states, regex, tokenType, this.nonDefaultStateRules.get(nextState));
     }
 
     /**
@@ -148,15 +173,15 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
     }
 
     /**
-     * @param state {@code null} means "any state"
+     * @param states {@code null} means "any state"
      */
     private void
-    addRule(@Nullable S state, String regex, TT tokenType, List<Rule<TT, S>> nextRules) {
+    addRule(@Nullable EnumSet<S> states, String regex, TT tokenType, List<Rule<TT, S>> nextRules) {
 
         Rule<TT, S> rule = new Rule<TT, S>(regex, tokenType, nextRules);
 
-        if (state != null) {
-            this.nonDefaultStateRules.get(state).add(rule);
+        if (states != null) {
+            for (S s : states) this.nonDefaultStateRules.get(s).add(rule);
         } else
         {
             for (List<Rule<TT, S>> rules : this.nonDefaultStateRules.values()) rules.add(rule);
