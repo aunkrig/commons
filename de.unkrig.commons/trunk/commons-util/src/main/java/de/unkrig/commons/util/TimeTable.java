@@ -157,8 +157,8 @@ class TimeTable {
             ScannerState.IN_TIME_PATTERN
         );
 
-        scanner.addRule(null, "\\w+", TokenType.IDENTIFIER);
-        scanner.addRule(null, " +", TokenType.SPACE);
+        scanner.addRule(scanner.ANY_STATE, "\\w+", TokenType.IDENTIFIER);
+        scanner.addRule(scanner.ANY_STATE, " +",   TokenType.SPACE);
         scanner.setInput(s);
 
         try {
