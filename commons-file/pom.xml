@@ -15,22 +15,22 @@
 		<dependency>
 			<groupId>de.unkrig.commons</groupId>
 			<artifactId>commons-lang</artifactId>
-			<version>1.2.7</version>
+			<version>1.2.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>de.unkrig.commons</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>1.2.7</version>
+			<version>1.2.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>de.unkrig.commons</groupId>
 			<artifactId>commons-util</artifactId>
-			<version>1.2.7</version>
+			<version>1.2.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>de.unkrig.commons</groupId>
 			<artifactId>commons-junit4</artifactId>
-			<version>1.2.7</version>
+			<version>1.2.8-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -57,7 +57,7 @@
 	<parent>
 		<groupId>de.unkrig.commons</groupId>
 		<artifactId>commons-parent</artifactId>
-		<version>1.2.7</version>
+		<version>1.2.8-SNAPSHOT</version>
 		<relativePath>../commons-parent</relativePath>
 	</parent>
 </project>
