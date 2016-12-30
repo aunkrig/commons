@@ -37,7 +37,7 @@ class Characters {
     private Characters() {}
 
     public static final Predicate<Character>
-    POSIX_LOWER = new Predicate<Character>() {
+    IS_POSIX_LOWER = new Predicate<Character>() {
 
         @Override public boolean
         evaluate(Character subject) {
@@ -47,7 +47,7 @@ class Characters {
     };
 
     public static final Predicate<Character>
-    POSIX_UPPER = new Predicate<Character>() {
+    IS_POSIX_UPPER = new Predicate<Character>() {
 
         @Override public boolean
         evaluate(Character subject) {
@@ -57,12 +57,12 @@ class Characters {
     };
 
     public static final Predicate<Character>
-    POSIX_ASCII = new Predicate<Character>() {
+    IS_POSIX_ASCII = new Predicate<Character>() {
         @Override public boolean evaluate(Character subject) { return subject <= 0x7f; }
     };
 
     public static final Predicate<Character>
-    POSIX_ALPHA = new Predicate<Character>() {
+    IS_POSIX_ALPHA = new Predicate<Character>() {
 
         @Override public boolean
         evaluate(Character subject) {
@@ -72,7 +72,7 @@ class Characters {
     };
 
     public static final Predicate<Character>
-    POSIX_DIGIT = new Predicate<Character>() {
+    IS_POSIX_DIGIT = new Predicate<Character>() {
 
         @Override public boolean
         evaluate(Character subject) {
@@ -82,7 +82,7 @@ class Characters {
     };
 
     public static final Predicate<Character>
-    POSIX_ALNUM = new Predicate<Character>() {
+    IS_POSIX_ALNUM = new Predicate<Character>() {
 
         @Override public boolean
         evaluate(Character subject) {
@@ -92,7 +92,7 @@ class Characters {
     };
 
     public static final Predicate<Character>
-    POSIX_PUNCT = new Predicate<Character>() {
+    IS_POSIX_PUNCT = new Predicate<Character>() {
 
         @Override public boolean
         evaluate(Character subject) {
@@ -107,23 +107,29 @@ class Characters {
     };
 
     public static final Predicate<Character>
-    POSIX_GRAPH = new Predicate<Character>() {
-
-        @Override public boolean
-        evaluate(Character subject) { return Characters.POSIX_ALNUM.evaluate(subject) || Characters.POSIX_PUNCT.evaluate(subject); }
-    };
-
-    public static final Predicate<Character>
-    POSIX_PRINT = new Predicate<Character>() {
+    IS_POSIX_GRAPH = new Predicate<Character>() {
 
         @Override public boolean
         evaluate(Character subject) {
-            return subject == ' ' || Characters.POSIX_ALNUM.evaluate(subject) || Characters.POSIX_PUNCT.evaluate(subject);
+            return Characters.IS_POSIX_ALNUM.evaluate(subject) || Characters.IS_POSIX_PUNCT.evaluate(subject);
         }
     };
 
     public static final Predicate<Character>
-    POSIX_BLANK = new Predicate<Character>() {
+    IS_POSIX_PRINT = new Predicate<Character>() {
+
+        @Override public boolean
+        evaluate(Character subject) {
+            return (
+                subject == ' '
+                || Characters.IS_POSIX_ALNUM.evaluate(subject)
+                || Characters.IS_POSIX_PUNCT.evaluate(subject)
+            );
+        }
+    };
+
+    public static final Predicate<Character>
+    IS_POSIX_BLANK = new Predicate<Character>() {
 
         @Override public boolean
         evaluate(Character subject) {
@@ -133,7 +139,7 @@ class Characters {
     };
 
     public static final Predicate<Character>
-    POSIX_CNTRL = new Predicate<Character>() {
+    IS_POSIX_CNTRL = new Predicate<Character>() {
 
         @Override public boolean
         evaluate(Character subject) {
@@ -143,7 +149,7 @@ class Characters {
     };
 
     public static final Predicate<Character>
-    POSIX_XDIGIT = new Predicate<Character>() {
+    IS_POSIX_XDIGIT = new Predicate<Character>() {
 
         @Override public boolean
         evaluate(Character subject) {
@@ -153,12 +159,32 @@ class Characters {
     };
 
     public static final Predicate<Character>
-    POSIX_SPACE = new Predicate<Character>() {
+    IS_POSIX_SPACE = new Predicate<Character>() {
 
         @Override public boolean
         evaluate(Character subject) {
             char c = subject;
             return c >= 'a' && c <= 'z';
         }
+    };
+
+    public static final Predicate<Character>
+    IS_JAVA_LOWER_CASE = new Predicate<Character>() {
+        @Override public boolean evaluate(Character subject) { return Character.isLowerCase(subject); }
+    };
+
+    public static final Predicate<Character>
+    IS_JAVA_UPPER_CASE = new Predicate<Character>() {
+        @Override public boolean evaluate(Character subject) { return Character.isUpperCase(subject); }
+    };
+
+    public static final Predicate<Character>
+    IS_JAVA_WHITESPACE = new Predicate<Character>() {
+        @Override public boolean evaluate(Character subject) { return Character.isWhitespace(subject); }
+    };
+
+    public static final Predicate<Character>
+    IS_JAVA_MIRRORED = new Predicate<Character>() {
+        @Override public boolean evaluate(Character subject) { return Character.isMirrored(subject); }
     };
 }
