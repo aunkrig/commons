@@ -169,22 +169,22 @@ class Characters {
     };
 
     public static final Predicate<Character>
-    IS_JAVA_LOWER_CASE = new Predicate<Character>() {
+    IS_LOWER_CASE = new Predicate<Character>() {
         @Override public boolean evaluate(Character subject) { return Character.isLowerCase(subject); }
     };
 
     public static final Predicate<Character>
-    IS_JAVA_UPPER_CASE = new Predicate<Character>() {
+    IS_UPPER_CASE = new Predicate<Character>() {
         @Override public boolean evaluate(Character subject) { return Character.isUpperCase(subject); }
     };
 
     public static final Predicate<Character>
-    IS_JAVA_WHITESPACE = new Predicate<Character>() {
+    IS_WHITESPACE = new Predicate<Character>() {
         @Override public boolean evaluate(Character subject) { return Character.isWhitespace(subject); }
     };
 
     public static final Predicate<Character>
-    IS_JAVA_MIRRORED = new Predicate<Character>() {
+    IS_MIRRORED = new Predicate<Character>() {
         @Override public boolean evaluate(Character subject) { return Character.isMirrored(subject); }
     };
 }
