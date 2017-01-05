@@ -283,9 +283,9 @@ class AbstractParser<TT extends Enum<TT>> {
      *   An element of <var>tokenTypeOrText</var> matches iff:
      * </p>
      * <ul>
+     *   <li>the element is {@code null} and the scanner is at end-of-input</li>
      *   <li>the element equals the next token's type, or</li>
      *   <li>the element equals the next token's text, or</li>
-     *   <li>the element is {@code null} and the scanner is at end-of-input</li>
      * </ul>
      *
      * @return                The index of the first element of <var>tokenTypeOrText</var> that matches
@@ -294,8 +294,14 @@ class AbstractParser<TT extends Enum<TT>> {
      */
     public int
     read(Object... tokenTypeOrText) throws ParseException {
-        Token<TT> c = this.peek();
-        if (c == null) {
+
+        Token<TT> t = this.peek();
+
+        if (t == null) {
+            for (int i = 0; i < tokenTypeOrText.length; i++) {
+                Object ttot = tokenTypeOrText[i];
+                if (ttot == null) return i;
+            }
             throw new ParseException(
                 "One of " + Arrays.toString(tokenTypeOrText) + " expected instead of end-of-input"
             );
@@ -303,12 +309,13 @@ class AbstractParser<TT extends Enum<TT>> {
 
         for (int i = 0; i < tokenTypeOrText.length; i++) {
             Object ttot = tokenTypeOrText[i];
-            if (c.type.equals(ttot) || c.text.equals(ttot)) {
+            if (ttot != null && t.type.equals(ttot) || t.text.equals(ttot)) {
                 this.current = null;
                 return i;
             }
         }
-        throw new ParseException("One of " + Arrays.toString(tokenTypeOrText) + " expected instead of '" + c + "'");
+
+        throw new ParseException("One of " + Arrays.toString(tokenTypeOrText) + " expected instead of '" + t + "'");
     }
 
     /**
