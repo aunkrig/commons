@@ -29,7 +29,7 @@ package de.unkrig.commons.util.collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import de.unkrig.commons.lang.protocol.Predicate;
+import de.unkrig.commons.lang.protocol.PredicateWhichThrows;
 import de.unkrig.commons.lang.protocol.Transformer;
 import de.unkrig.commons.nullanalysis.Nullable;
 
@@ -65,7 +65,10 @@ class IteratorUtil {
      * Returns an iterator which skips the elements of the <var>delegate</var> which do not qualifiy.
      */
     public static <T> Iterator<T>
-    filter(final Iterator<? extends T> delegate, final Predicate<? super T> qualifies) {
+    filter(
+        final Iterator<? extends T>                                       delegate,
+        final PredicateWhichThrows<? super T, ? extends RuntimeException> qualifies
+    ) {
 
         return new Iterator<T>() {
 
@@ -193,5 +196,15 @@ class IteratorUtil {
             @Override public int
             index() { return this.index; }
         };
+    }
+
+    /**
+     * Retrieves, counts and discards all elements remaining on the <var>iterator</var>
+     */
+    public static int
+    elementCount(Iterator<Integer> iterator) {
+        int n = 0;
+        for (; iterator.hasNext(); iterator.next()) n++;
+        return n;
     }
 }
