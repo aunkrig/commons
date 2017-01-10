@@ -31,6 +31,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -117,8 +118,9 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
     }
 
     /**
-     * Adds a rule that applies iff <var>states</var>{@code ==null}, or the scanner is in one of the given non-default
-     * <var>states</var>. The scanner returns to the default state after the rule has matched.
+     * Adds a rule that applies iff <var>states</var>{@code ==} {@link #ANY_STATE}, or the scanner is in one of the
+     * given non-default <var>states</var>, or the <var>states</var> contain {@code null} and the scanner is in the
+     * default state. The scanner returns to the default state after the rule has matched.
      *
      * @see Pattern
      */
@@ -147,8 +149,9 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
     }
 
     /**
-     * Adds a rule that applies iff <var>states</var>{@code == null}, or if the scanner is in one of the the given
-     * non-default <var>states</var>.
+     * Adds a rule that applies iff <var>states</var>{@code ==} {@link #ANY_STATE}, or if the scanner is in one of the
+     * the given non-default <var>states</var>, or the <var>states</var> contain {@code null} and the scanner is in the
+     * default state.
      *
      * @param nextState The new current state after the rule has matched, or {@link #REMAIN}
      * @see Pattern
@@ -181,6 +184,33 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
                 }
             }
         }
+    }
+
+    /**
+     * @return The current state of this scanner; {@code null} for the default state
+     */
+    @Nullable public S
+    getCurrentState() {
+
+        if (this.currentStateRules == this.defaultStateRules) return null;
+
+        for (Entry<S, List<Rule<TT, S>>> e : this.nonDefaultStateRules.entrySet()) {
+            S                 state = e.getKey();
+            List<Rule<TT, S>> rules = e.getValue();
+
+            if (rules == this.currentStateRules) return state;
+        }
+
+        throw new AssertionError(this.currentStateRules);
+    }
+
+    /**
+     * @param newState The new state of this scanner; {@code null} for the default state
+     */
+    public void
+    setCurrentState(@Nullable S newState) {
+
+        this.currentStateRules = newState == null ? this.defaultStateRules : this.nonDefaultStateRules.get(newState);
     }
 
     /**
