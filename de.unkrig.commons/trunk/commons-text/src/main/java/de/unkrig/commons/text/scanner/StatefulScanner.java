@@ -59,6 +59,8 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
 
     @Nullable public final EnumSet<S> ANY_STATE = null;
 
+    @Nullable public final S REMAIN = null;
+
     public
     StatefulScanner(Class<S> states) {
         this.defaultStateRules    = new ArrayList<Rule<TT, S>>();
@@ -136,7 +138,7 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
     /**
      * Adds a rule that applies iff the scanner is in the given non-default <var>state</var>.
      *
-     * @param nextState The new state after the rule has matched; {@code null} means "remain in current state"
+     * @param nextState The new state after the rule has matched, or {@link #REMAIN}
      * @see Pattern
      */
     public void
@@ -148,7 +150,7 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
      * Adds a rule that applies iff <var>states</var>{@code == null}, or if the scanner is in one of the the given
      * non-default <var>states</var>.
      *
-     * @param nextState The new current state after the rule has matched; {@code null} means "remain in current state"
+     * @param nextState The new current state after the rule has matched, or {@link #REMAIN}
      * @see Pattern
      */
     public void
