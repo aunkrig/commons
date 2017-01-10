@@ -26,7 +26,12 @@
 
 package de.unkrig.commons.text.scanner;
 
+import java.util.Collection;
+
 import de.unkrig.commons.lang.AssertionUtil;
+import de.unkrig.commons.lang.protocol.Predicate;
+import de.unkrig.commons.lang.protocol.ProducerUtil;
+import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 
 /**
  * A scanner that produces {@link Token}s.
@@ -88,6 +93,26 @@ class AbstractScanner<TT extends Enum<TT>> implements StringScanner<TT> {
     @Override public int
     getPreviousTokenOffset() {
         return this.previousTokenOffset;
+    }
+
+    /**
+     * Creates and returns a producer which skips tokens of the <var>suppressedTokenType</var>.
+     */
+    public ProducerWhichThrows<Token<TT>, ScanException>
+    suppress(final TT suppressedTokenType) {
+        return ProducerUtil.filter(this, new Predicate<Token<TT>>() {
+            @Override public boolean evaluate(Token<TT> token) { return token.type != suppressedTokenType; }
+        });
+    }
+
+    /**
+     * Creates and returns a producer which skips tokens of the <var>suppressedTokenTypes</var>.
+     */
+    public ProducerWhichThrows<Token<TT>, ScanException>
+    suppress(final Collection<TT> suppressedTokenTypes) {
+        return ProducerUtil.filter(this, new Predicate<Token<TT>>() {
+            @Override public boolean evaluate(Token<TT> token) { return !suppressedTokenTypes.contains(token.type); }
+        });
     }
 
     @Override public String
