@@ -378,6 +378,50 @@ class ProducerUtil {
     }
 
     /**
+     * Returns a producer which, when invoked, calls the <var>delegate</var>, and returns its product iff the
+     * <var>predicate</var> evaluates to {@code true}.
+     */
+    public static <T, EX extends Throwable> ProducerWhichThrows<T, EX>
+    filter(
+        final ProducerWhichThrows<? extends T, ? extends EX> delegate,
+        final PredicateWhichThrows<? super T, ? extends EX>  predicate
+    ) {
+
+        return new ProducerWhichThrows<T, EX>() {
+
+            @Override @Nullable public T
+            produce() throws EX {
+
+                for (;;) {
+                    T product = delegate.produce();
+                    if (product == null) return null;
+                    if (predicate.evaluate(product)) return product;
+                }
+            }
+        };
+    }
+
+    public static <T, EX extends Throwable> ProducerWhichThrows<T, EX>
+    filter(
+        final ProducerWhichThrows<? extends T, ? extends EX> delegate,
+        final Predicate<? super T>                           predicate
+    ) {
+
+        return new ProducerWhichThrows<T, EX>() {
+
+            @Override @Nullable public T
+            produce() throws EX {
+
+                for (;;) {
+                    T product = delegate.produce();
+                    if (product == null) return null;
+                    if (predicate.evaluate(product)) return product;
+                }
+            }
+        };
+    }
+
+    /**
      * Discards the elements that the <var>delegate</var> produces while they are <var>compressable</var>. After that,
      * it produces the elements that the <var>delegate</var> produces and are <i>not</i> <var>compressable</var>, and
      * reduces sequences of one or more <var>compressable</var> elements to <var>compressed</var>.
