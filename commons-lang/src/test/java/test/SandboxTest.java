@@ -26,6 +26,7 @@
 
 package test;
 
+import java.security.AccessControlException;
 import java.security.AllPermission;
 import java.security.Permissions;
 import java.util.PropertyPermission;
@@ -57,6 +58,16 @@ class SandboxTest {
             SandboxTest.assertMatchesRegex(
                 "access denied \\(\\[?\"?java.util.PropertyPermission\"? \"?foo\"? \"?read\"?\\]?\\)",
                 se.getMessage()
+            );
+        }
+
+        try {
+            r.run();
+            Assert.fail("AccessControlException expected");
+        } catch (AccessControlException ace) {
+            SandboxTest.assertMatchesRegex(
+                "access denied \\(\\[?\"?java.util.PropertyPermission\"? \"?foo\"? \"?read\"?\\]?\\)",
+                ace.getMessage()
             );
         }
     }
