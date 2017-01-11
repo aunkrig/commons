@@ -274,4 +274,152 @@ class Characters {
     IS_MIRRORED = new Predicate<Integer>() {
         @Override public boolean evaluate(Integer subject) { return Character.isMirrored(subject); }
     };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_LOWER = new Predicate<Integer>() {
+        @Override public boolean evaluate(Integer subject) { return Character.isLowerCase(subject); }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_UPPER = new Predicate<Integer>() {
+        @Override public boolean evaluate(Integer subject) { return Character.isUpperCase(subject); }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_ALPHA = new Predicate<Integer>() {
+
+        @Override public boolean
+        evaluate(Integer subject) {
+
+            // "Character.isAlphabetic()" is only available since Java 1.7.
+            int type = Character.getType(subject);
+            return (
+                type == Character.UPPERCASE_LETTER
+                || type == Character.LOWERCASE_LETTER
+                || type == Character.TITLECASE_LETTER
+                || type == Character.MODIFIER_LETTER
+                || type == Character.OTHER_LETTER
+                || type == Character.LETTER_NUMBER
+            );
+        }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_DIGIT = new Predicate<Integer>() {
+        @Override public boolean evaluate(Integer subject) { return Character.isDigit(subject); }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_ALNUM = new Predicate<Integer>() {
+
+        @Override public boolean
+        evaluate(Integer subject) {
+            return Characters.IS_UNICODE_ALPHA.evaluate(subject) || Characters.IS_UNICODE_DIGIT.evaluate(subject);
+        }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_PUNCT = new Predicate<Integer>() {
+
+        @Override public boolean
+        evaluate(Integer subject) {
+
+            // See "UnicodeProp.PUNCTUATION"
+            int type = Character.getType(subject);
+            return (
+                type == Character.CONNECTOR_PUNCTUATION
+                || type == Character.DASH_PUNCTUATION
+                || type == Character.START_PUNCTUATION
+                || type == Character.END_PUNCTUATION
+                || type == Character.OTHER_PUNCTUATION
+                || type == Character.INITIAL_QUOTE_PUNCTUATION
+                || type == Character.FINAL_QUOTE_PUNCTUATION
+            );
+        }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_GRAPH = new Predicate<Integer>() {
+
+        @Override public boolean
+        evaluate(Integer subject) {
+
+            // See "UnicodeProp.GRAPH"
+            int type = Character.getType(subject);
+            return (
+                type == Character.SPACE_SEPARATOR
+                || type == Character.LINE_SEPARATOR
+                || type == Character.PARAGRAPH_SEPARATOR
+                || type == Character.CONTROL
+                || type == Character.SURROGATE
+                || type == Character.UNASSIGNED
+            );
+        }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_PRINT = new Predicate<Integer>() {
+
+        @Override public boolean
+        evaluate(Integer subject) {
+
+            // See "UnicodeProp.PRINT"
+            return (
+                (Characters.IS_UNICODE_GRAPH.evaluate(subject) || Characters.IS_UNICODE_BLANK.evaluate(subject))
+                && !Characters.IS_UNICODE_CNTRL.evaluate(subject)
+            );
+        }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_BLANK = new Predicate<Integer>() {
+
+        @Override public boolean
+        evaluate(Integer subject) {
+            return Character.getType(subject) == Character.SPACE_SEPARATOR || subject == 0x9;
+        }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_CNTRL = new Predicate<Integer>() {
+
+        @Override public boolean
+        evaluate(Integer subject) { return Character.getType(subject) == Character.CONTROL; }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_HEX_DIGIT = new Predicate<Integer>() {
+
+        @Override public boolean
+        evaluate(Integer subject) {
+
+            // See "UnicodeProp.HEX_DIGIT"
+            return (
+                Character.isDigit(subject)
+                || (subject >= '0'    && subject <= '9')
+                || (subject >= 'A'    && subject <= 'F')
+                || (subject >= 'a'    && subject <= 'f')
+                || (subject >= 0xFF10 && subject <= 0xFF19)
+                || (subject >= 0xFF21 && subject <= 0xFF26)
+                || (subject >= 0xFF41 && subject <= 0xFF46)
+            );
+        }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_WHITE_SPACE = new Predicate<Integer>() {
+
+        @Override public boolean
+        evaluate(Integer subject) {
+
+            int type = Character.getType(subject);
+            return (
+                type == Character.SPACE_SEPARATOR
+                || type == Character.LINE_SEPARATOR
+                || type == Character.PARAGRAPH_SEPARATOR
+                || (subject >= 0x9 && subject <= 0xd)
+                || (subject == 0x85)
+            );
+        }
+    };
 }
