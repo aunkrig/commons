@@ -82,6 +82,15 @@ class ClassLoaders {
     }
 
     /**
+     * Equivalent with {@link #getSubresources(ClassLoader, String, boolean, boolean)} with the <var>recurse</var>
+     * parameter set to {@code true}.
+     */
+    public static Map<String, URL>
+    getSubresources(@Nullable ClassLoader classLoader, String name, boolean includeDirectories) throws IOException {
+        return ClassLoaders.getSubresources(classLoader, name, includeDirectories, true);
+    }
+
+    /**
      * Returns a name-to-URL mapping of all resources "under" a given directory name.
      * <p>
      *   Iff the <var>name</var> does not end with a slash, then calling this method is equivalent with calling
@@ -89,9 +98,10 @@ class ClassLoaders {
      * </p>
      * <p>
      *   Otherwise, if the <var>name</var> <em>does</em> end with a slash, then this method returns a name-to-URL
-     *   mapping of all resources who's names <em>begin</em> with the given <var>name</var>. Iff
-     *   <var>includeDirectories</var> is {@code true}, then <var>name</var>, and all the subdirectories underneath,
-     *   are also included in the result set; their names all ending with a slash.
+     *   mapping of all content resources who's names <em>begin</em> with the given <var>name</var>.
+     *   Iff <var>recurse</var> is {@code false}, then only <em>immediate</em> subresources are included.
+     *   Iff <var>includeDirectories</var> is {@code true}, then also directory resources are included in the result
+     *   set; their names all ending with a slash.
      * </p>
      * <p>
      *   If multiple resources have the <var>name</var>, then the resources are retrieved from the <var>first</var>
@@ -104,15 +114,54 @@ class ClassLoaders {
      *                    resources"
      */
     public static Map<String, URL>
-    getSubresources(@Nullable ClassLoader classLoader, String name, boolean includeDirectories) throws IOException {
+    getSubresources(@Nullable ClassLoader classLoader, String name, boolean includeDirectories, boolean recurse)
+    throws IOException {
 
         if (classLoader == null) classLoader = ClassLoader.getSystemClassLoader();
         assert classLoader != null;
 
         URL r = classLoader.getResource(name);
-        if (r == null) return Collections.emptyMap();
+        if (r == null) {
+            if (name.startsWith("java/") && name.endsWith("/")) {
 
-        return ClassLoaders.getSubresourcesOf(r, name, includeDirectories);
+                // The "rt.jar" (the basic source of the BOOTCLASS) lacks directory entries; to work around this we
+                // have to get well-known resource. After that, we can list the JAR.
+                r = classLoader.getResource("java/lang/Object.class");
+                if (r != null) {
+                    String protocol = r.getProtocol();
+                    if ("jar".equalsIgnoreCase(protocol)) {
+
+                        JarURLConnection juc = (JarURLConnection) r.openConnection();
+                        juc.setUseCaches(false);
+
+                        URL      jarFileUrl = juc.getJarFileURL();
+                        JarFile  jarFile    = juc.getJarFile();
+
+                        Map<String, URL> result = ClassLoaders.getSubresources(
+                            jarFileUrl,
+                            jarFile,
+                            name,
+                            includeDirectories,
+                            recurse
+                        );
+
+                        return result;
+                    }
+                }
+            }
+            return Collections.emptyMap();
+        }
+
+        return ClassLoaders.getSubresourcesOf(r, name, includeDirectories, recurse);
+    }
+
+    /**
+     * Equivalent with {@link #getSubresourcesOf(URL, String, boolean, boolean)} with the <var>recurse</var>
+     * parameter set to {@code true}.
+     */
+    public static Map<String, URL>
+    getSubresourcesOf(URL root, String rootName, boolean includeDirectories) throws IOException {
+        return ClassLoaders.getSubresourcesOf(root, rootName, includeDirectories, true);
     }
 
     /**
@@ -123,68 +172,97 @@ class ClassLoaders {
      * </p>
      * <p>
      *   Otherwise, if the <var>root</var> designates a "directory resource", then this method returns a name-to-URL
-     *   mapping of all resources that are located "under" the root resource. Iff <var>includeDirectories</var> is
-     *   {@code true}, then <var>rootName</var>, and all the subdirectory resources underneath, are also included in
-     *   the result set; their names all ending with a slash.
+     *   mapping of all content resources that are located "under" the root resource.
+     *   Iff <var>recurse</var> is {@code false}, then only <em>immediate</em> subresources are included.
+     *   Iff <var>includeDirectories</var> is {@code true}, then directory resources are also included in the result
+     *   set; their names all ending with a slash.
      * </p>
      *
      * @return Keys ending with a slash map to "directory resources", the other keys map to "content resources"
      */
     public static Map<String, URL>
-    getSubresourcesOf(URL root, String rootName, boolean includeDirectories) throws IOException {
+    getSubresourcesOf(URL root, String rootName, boolean includeDirectories, boolean recurse) throws IOException {
 
         String protocol = root.getProtocol();
-        if (protocol.equalsIgnoreCase("jar")) {
+        if ("jar".equalsIgnoreCase(protocol)) {
 
             JarURLConnection juc = (JarURLConnection) root.openConnection();
             juc.setUseCaches(false);
 
-            JarFile  jarFile  = juc.getJarFile();
-            JarEntry jarEntry = juc.getJarEntry();
+            if (!juc.getJarEntry().isDirectory()) return Collections.singletonMap(rootName, root);
 
-            if (!jarEntry.isDirectory()) return Collections.singletonMap(rootName, root);
+            URL     jarFileUrl = juc.getJarFileURL();
+            JarFile jarFile    = juc.getJarFile();
 
-            Map<String, URL> result = new HashMap<String, URL>();
+            Map<String, URL> result = ClassLoaders.getSubresources(
+                jarFileUrl,
+                jarFile,
+                rootName,
+                includeDirectories,
+                recurse
+            );
+
             if (includeDirectories) result.put(rootName, root);
-            for (JarEntry je : Collections.list(jarFile.entries())) {
-                if ((!je.isDirectory() || includeDirectories) && je.getName().startsWith(rootName)) {
-                    result.put(
-                        je.getName().substring(rootName.length()),
-                        new URL("jar", null, "file:/" + juc.getJarFileURL().getFile() + "!/" + je.getName())
-                    );
-                }
-            }
+
             return result;
         }
 
-        if (protocol.equalsIgnoreCase("file")) {
-            return ClassLoaders.getFileResources(root, rootName, includeDirectories);
+        if ("file".equalsIgnoreCase(protocol)) {
+            return ClassLoaders.getFileResources(root, rootName, includeDirectories, recurse);
         }
 
         return Collections.singletonMap(rootName, root);
     }
 
     private static Map<String, URL>
-    getFileResources(URL fileUrl, String name, boolean includeDirectories) {
+    getSubresources(URL jarFileUrl, JarFile jarFile, String namePrefix, boolean includeDirectories, boolean recurse) {
+
+        Map<String, URL> result = new HashMap<String, URL>();
+        for (JarEntry je : Collections.list(jarFile.entries())) {
+            if (
+                (!je.isDirectory() || includeDirectories)
+                && je.getName().startsWith(namePrefix)
+                && (recurse || je.getName().indexOf('/', namePrefix.length()) == -1)
+            ) {
+
+                URL url;
+                try {
+                    url = new URL("jar", null, jarFileUrl.toString() + "!/" + je.getName());
+                } catch (MalformedURLException mue) {
+                    throw new AssertionError(mue);
+                }
+
+                result.put(je.getName(), url);
+            }
+        }
+        return result;
+    }
+
+    private static Map<String, URL>
+    getFileResources(URL fileUrl, String namePrefix, boolean includeDirectories, boolean recurse) {
 
         File file = new File(fileUrl.getFile());
 
-        if (file.isFile()) return Collections.singletonMap(name, fileUrl);
+        if (file.isFile()) return Collections.singletonMap(namePrefix, fileUrl);
 
         if (file.isDirectory()) {
-            if (!name.isEmpty() && !name.endsWith("/")) name += '/';
+            if (!namePrefix.isEmpty() && !namePrefix.endsWith("/")) namePrefix += '/';
 
             Map<String, URL> result = new HashMap<String, URL>();
 
-            if (includeDirectories) result.put(name, fileUrl);
+            if (includeDirectories) result.put(namePrefix, fileUrl);
 
             for (File member : file.listFiles()) {
-                result.putAll(ClassLoaders.getFileResources(
-                    ClassLoaders.fileUrl(member),
-                    name + member.getName(),
-                    includeDirectories
-                ));
+                String memberName = namePrefix + member.getName();
+                URL    memberUrl  = ClassLoaders.fileUrl(member);
+
+                if (recurse) {
+                    result.putAll(ClassLoaders.getFileResources(memberUrl, memberName, includeDirectories, recurse));
+                } else {
+                    if (member.isFile()) result.put(memberName, memberUrl);
+                }
             }
+
             return result;
         }
 
