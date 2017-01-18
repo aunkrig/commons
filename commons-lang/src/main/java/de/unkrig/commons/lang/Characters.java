@@ -26,7 +26,13 @@
 
 package de.unkrig.commons.lang;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
 import de.unkrig.commons.lang.protocol.Predicate;
+import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * Extensions for the JRE's {@link Character} class.
@@ -286,6 +292,16 @@ class Characters {
     };
 
     public static final Predicate<Integer>
+    IS_UNICODE_TITLE = new Predicate<Integer>() {
+        @Override public boolean evaluate(Integer subject) { return Character.isTitleCase(subject); }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_LETTER = new Predicate<Integer>() {
+        @Override public boolean evaluate(Integer subject) { return Character.isLetter(subject); }
+    };
+
+    public static final Predicate<Integer>
     IS_UNICODE_ALPHA = new Predicate<Integer>() {
 
         @Override public boolean
@@ -300,7 +316,7 @@ class Characters {
                 || type == Character.MODIFIER_LETTER
                 || type == Character.OTHER_LETTER
                 || type == Character.LETTER_NUMBER
-            );
+                );
         }
     };
 
@@ -407,6 +423,20 @@ class Characters {
     };
 
     public static final Predicate<Integer>
+    IS_UNICODE_ASSIGNED = new Predicate<Integer>() {
+
+        @Override public boolean
+        evaluate(Integer subject) { return Character.getType(subject) != Character.UNASSIGNED; }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_NONCHARACTER = new Predicate<Integer>() {
+
+        @Override public boolean
+        evaluate(Integer subject) { return (subject & 0xfffe) == 0xfffe || (subject >= 0xfdd0 && subject <= 0xfdef); }
+    };
+
+    public static final Predicate<Integer>
     IS_UNICODE_WHITE_SPACE = new Predicate<Integer>() {
 
         @Override public boolean
@@ -422,4 +452,89 @@ class Characters {
             );
         }
     };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_WORD = new Predicate<Integer>() {
+
+        @Override public boolean
+        evaluate(Integer subject) {
+
+            if (Characters.IS_UNICODE_ALPHA.evaluate(subject) || Characters.IS_UNICODE_JOIN_CONTROL.evaluate(subject)) return true;
+
+            int type = Character.getType(subject);
+            return (
+                type == Character.NON_SPACING_MARK
+                || type == Character.ENCLOSING_MARK
+                || type == Character.COMBINING_SPACING_MARK
+                || type == Character.DECIMAL_DIGIT_NUMBER
+                || type == Character.CONNECTOR_PUNCTUATION
+            );
+        }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_JOIN_CONTROL = new Predicate<Integer>() {
+        @Override public boolean evaluate(Integer subject) { return subject == 0x200C || subject == 0x200D; }
+    };
+
+    @Nullable public static Predicate<Integer>
+    unicodePropertyFromName(String name) {
+        return Characters.UNICODE_PROPERTIES.get(name.toUpperCase(Locale.US));
+    }
+    private static final Map<String /*name*/, Predicate<Integer>> UNICODE_PROPERTIES;
+    static {
+        Map<String /*name*/, Predicate<Integer>> m = new HashMap<String, Predicate<Integer>>();
+
+        m.put("ALPHABETIC",              Characters.IS_UNICODE_ALPHA);
+        m.put("LETTER",                  Characters.IS_UNICODE_LETTER);
+//        m.put("IDEOGRAPHIC",             Characters.IS_UNICODE_IDEOGRAPHIC);
+        m.put("LOWERCASE",               Characters.IS_UNICODE_LOWER);
+        m.put("UPPERCASE",               Characters.IS_UNICODE_UPPER);
+        m.put("TITLECASE",               Characters.IS_UNICODE_TITLE);
+        m.put("WHITE_SPACE",             Characters.IS_UNICODE_WHITE_SPACE);
+        m.put("CONTROL",                 Characters.IS_UNICODE_CNTRL);
+        m.put("PUNCTUATION",             Characters.IS_UNICODE_PUNCT);
+        m.put("HEX_DIGIT",               Characters.IS_UNICODE_HEX_DIGIT);
+        m.put("ASSIGNED",                Characters.IS_UNICODE_ASSIGNED);
+        m.put("NONCHARACTER_CODE_POINT", Characters.IS_UNICODE_NONCHARACTER);
+        m.put("DIGIT",                   Characters.IS_UNICODE_DIGIT);
+        m.put("ALNUM",                   Characters.IS_UNICODE_ALNUM);
+        m.put("BLANK",                   Characters.IS_UNICODE_BLANK);
+        m.put("GRAPH",                   Characters.IS_UNICODE_GRAPH);
+        m.put("PRINT",                   Characters.IS_UNICODE_PRINT);
+        m.put("WORD",                    Characters.IS_UNICODE_WORD);
+        m.put("JOIN_CONTROL",            Characters.IS_UNICODE_JOIN_CONTROL);
+
+        // Aliases.
+        m.put("WHITESPACE",            m.get("WHITE_SPACE"));
+        m.put("HEXDIGIT",              m.get("HEX_DIGIT"));
+        m.put("NONCHARACTERCODEPOINT", m.get("NONCHARACTER_CODE_POINT"));
+        m.put("JOINCONTROL",           m.get("JOIN_CONTROL"));
+
+        UNICODE_PROPERTIES = Collections.unmodifiableMap(m);
+    }
+
+    @Nullable public static Predicate<Integer>
+    unicodePropertyFromPosixName(String name) {
+        return Characters.UNICODE_PROPERTIES2.get(name.toUpperCase(Locale.US));
+    }
+    private static final Map<String /*name*/, Predicate<Integer>> UNICODE_PROPERTIES2;
+    static {
+        Map<String /*name*/, Predicate<Integer>> m = new HashMap<String, Predicate<Integer>>();
+
+        m.put("ALPHA", Characters.IS_UNICODE_ALPHA);
+        m.put("LOWER", Characters.IS_UNICODE_LOWER);
+        m.put("UPPER", Characters.IS_UNICODE_UPPER);
+        m.put("SPACE", Characters.IS_UNICODE_WHITE_SPACE);
+        m.put("PUNCT", Characters.IS_UNICODE_PUNCT);
+        m.put("XDIGIT",Characters.IS_UNICODE_HEX_DIGIT);
+        m.put("ALNUM", Characters.IS_UNICODE_ALNUM);
+        m.put("CNTRL", Characters.IS_UNICODE_CNTRL);
+        m.put("DIGIT", Characters.IS_UNICODE_DIGIT);
+        m.put("BLANK", Characters.IS_UNICODE_BLANK);
+        m.put("GRAPH", Characters.IS_UNICODE_GRAPH);
+        m.put("PRINT", Characters.IS_UNICODE_PRINT);
+
+        UNICODE_PROPERTIES2 = Collections.unmodifiableMap(m);
+    }
 }
