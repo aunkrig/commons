@@ -45,6 +45,15 @@ class SecureString implements CharSequence {
     @Nullable private char[] contents;
 
     public
+    SecureString(String that) {
+
+        int    len = that.length();
+        char[] ca  = (this.contents = new char[len]);
+
+        for (int i = 0; i < len; i++) ca[i] = that.charAt(i);
+    }
+
+    public
     SecureString(CharSequence that) {
 
         int    len = that.length();
