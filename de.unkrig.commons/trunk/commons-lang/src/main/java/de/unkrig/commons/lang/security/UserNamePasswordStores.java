@@ -99,6 +99,8 @@ class UserNamePasswordStores {
 
         final Properties properties = new Properties();
 
+        propertiesFile.createNewFile();
+
         InputStream is = new FileInputStream(propertiesFile);
         try {
 
