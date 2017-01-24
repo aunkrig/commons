@@ -39,11 +39,7 @@ import de.unkrig.commons.nullanalysis.Nullable;
 public
 interface SecureProperties {
 
-    /**
-     * Calling this method with a <var>value</var> {@code == null} has the same effect as invoking {@link
-     * #remove(String) remove(<var>key</var>)}.
-     */
-    void setProperty(String key, @Nullable CharSequence value);
+    void setProperty(String key, CharSequence value);
 
     @Nullable SecureString getProperty(String key);
 
@@ -57,7 +53,7 @@ interface SecureProperties {
 
     void put(String name, CharSequence value);
 
-    void remove(String name);
+    void removeProperty(String name);
 
     void putAll(Map<? extends String, ? extends CharSequence> t);
 

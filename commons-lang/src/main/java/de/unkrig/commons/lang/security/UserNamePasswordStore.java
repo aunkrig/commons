@@ -26,6 +26,7 @@
 
 package de.unkrig.commons.lang.security;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 import de.unkrig.commons.nullanalysis.Nullable;
@@ -37,26 +38,38 @@ public
 interface UserNamePasswordStore {
 
     /**
-     * @return The least recently {@link #put(String, String, SecureString) put} <var>userName</var> for the
+     * @return The least recently {@link #put(String, String, CharSequence) put} <var>userName</var> for the
      *         <var>key</var>, or {@code null} if a user name for the given <var>key</var> is not in this store
      */
     @Nullable String
     getUserName(String key);
 
     /**
-     * @return The least recently {@link #put(String, String, SecureString) put} <var>password</var> for the
-     *         <var>key</var>, or {@code null} if a password for the given <var>key</var> is not in this store
+     * @return The least recently {@link #put(String, String, CharSequence) put} <var>password</var> for the
+     *         <var>key</var>, or {@code null} if a password for the given <var>key</var> is not in this store;
+     *         the caller is responsible for {@link Closeable#close() closing} the returned secure string
      */
     @Nullable SecureString
     getPassword(String key);
 
     /**
-     * Updates the user name and password for the given <var>key</var>. Depending on whether this store is
-     * persistent or not, the new values will not or will be forgotten when the JVM exits.
-     *
-     * @param userName {@code null} to remove the user name for the given <var>key</var> from this store
-     * @param password {@code null} to remove the password for the given <var>key</var> from this store
+     * Updates the <var>userName</var> and removes the password for the given <var>key</var>. Depending on whether this
+     * store is persistent or not, the new values will not or will be forgotten when the JVM exits.
      */
     void
-    put(String key, @Nullable String userName, @Nullable SecureString password) throws IOException;
+    put(String key, String userName) throws IOException;
+
+    /**
+     * Updates the <var>userName</var> and the <var>password</var> for the given <var>key</var>. Depending on whether
+     * this store is persistent or not, the new values will not or will be forgotten when the JVM exits.
+     */
+    void
+    put(String key, String userName, CharSequence password) throws IOException;
+
+    /**
+     * Removes both the user name and the password for the given <var>key</var>. Depending on whether this store is
+     * persistent or not, the removal will not or will be forgotten when the JVM exits.
+     */
+    void
+    remove(String key) throws IOException;
 }
