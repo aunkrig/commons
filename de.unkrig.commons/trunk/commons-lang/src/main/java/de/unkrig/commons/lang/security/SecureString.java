@@ -26,21 +26,29 @@
 
 package de.unkrig.commons.lang.security;
 
+import java.io.Closeable;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CoderResult;
+import java.nio.charset.CodingErrorAction;
 import java.util.Arrays;
 
 import de.unkrig.commons.lang.CharSequences;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
- * A {@link CharSequence} that can be {@link #erase()}d, which reliably removes its characters from the heap.
- * After a {@link SecureString} has been {@link #erase()}d, all {@link CharSequence} methods throw an {@link
+ * A {@link CharSequence} that can be {@link #close()}d, which reliably removes its characters from the heap.
+ * After a {@link SecureString} has been {@link #close()}d, all {@link CharSequence} methods throw an {@link
  * IllegalStateException}.
  * <p>
  *   Notice that the {@link #toString()} method returns either {@code "****"} or {@code "ERASED"}.
  * </p>
  */
 public
-class SecureString implements CharSequence {
+class SecureString implements CharSequence, Closeable {
 
     @Nullable private char[] contents;
 
@@ -53,6 +61,9 @@ class SecureString implements CharSequence {
         for (int i = 0; i < len; i++) ca[i] = that.charAt(i);
     }
 
+    /**
+     * A new secure string which is a copy of <var>that</var>
+     */
     public
     SecureString(CharSequence that) {
 
@@ -62,8 +73,96 @@ class SecureString implements CharSequence {
         for (int i = 0; i < len; i++) ca[i] = that.charAt(i);
     }
 
+    /**
+     * A new secure string which takes ownership over the character array
+     */
     public
     SecureString(char[] ca) { this.contents = ca; }
+
+    /**
+     * Decodes the <var>ba</var> and fills it with zeros.
+     */
+    public
+    SecureString(byte[] ba, String charsetName) {
+        this.contents = SecureString.secureDecode(ba, Charset.forName(charsetName));
+   }
+
+    /**
+     * Decodes the <var>ba</var> and fills it with zeros.
+     */
+    public
+    SecureString(byte[] ba, Charset cs) { this.contents = SecureString.secureDecode(ba, cs); }
+
+    /**
+     * Decodes the <var>ba</var> and fills it with zeros. Leaves no traces of the data in the heap, except for the
+     * returned char array.
+     */
+    private static char[]
+    secureDecode(byte[] ba, Charset cs) {
+
+        if (ba.length == 0) return new char[0];
+
+        try {
+
+            // Set up the charset encoder.
+            CharsetDecoder cd = (
+                cs
+                .newDecoder()
+                .onMalformedInput(CodingErrorAction.REPLACE)
+                .onUnmappableCharacter(CodingErrorAction.REPLACE)
+            );
+
+            // Allocate a char array for the decoded output.
+            char[] ca = new char[ba.length * (int) Math.ceil(cd.maxCharsPerByte())];
+
+            // Wrap input and output arrays in ByteBuffers resp. CharBuffers.
+            ByteBuffer bb = ByteBuffer.wrap(ba);
+            CharBuffer cb = CharBuffer.wrap(ca);
+
+            // Now go for it!
+            try {
+                cd.reset();
+
+                CoderResult cr = cd.decode(bb, cb, true);
+                if (!cr.isUnderflow()) cr.throwException();
+
+                cr = cd.flush(cb);
+                if (!cr.isUnderflow()) cr.throwException();
+            } catch (CharacterCodingException cce) {
+                throw new AssertionError(cce);
+            }
+
+            if (cb.position() != ca.length) {
+                char[] tmp = ca;
+                ca = Arrays.copyOf(ca, cb.position());
+                Arrays.fill(tmp, '\0');
+            }
+
+            return ca;
+        } finally {
+            Arrays.fill(ba, (byte) 0);
+        }
+    }
+
+    /**
+     * @return A new secure string which is a copy of {@code this}
+     */
+    @Nullable public SecureString
+    copy() { return new SecureString(this); }
+
+    /**
+     * @return A new secure string which is a copy of <var>that</var>, or {@code null} iff <var>that</var> {@code ==
+     *         null}
+     */
+    @Nullable public static SecureString
+    from(@Nullable CharSequence that) { return that == null ? null : new SecureString(that); }
+
+    /**
+     * @return A new secure string which takes ownership of <var>that</var>, or {@code null} iff <var>that</var> {@code
+     *         == null}
+     */
+    @Nullable public static SecureString
+    from(@Nullable char[] that) { return that == null ? null : new SecureString(that); }
 
     @Override public int
     length() {
@@ -81,25 +180,25 @@ class SecureString implements CharSequence {
         return ca[index];
     }
 
-    public void
-    erase() {
+
+    @Override public void
+    close() {
 
         char[] ca = this.contents;
         if (ca == null) return;
 
-        Arrays.fill(ca, '\0');
         this.contents = null;
+
+        Arrays.fill(ca, '\0');
     }
 
     public char[]
-    extract() {
+    toCharArray() {
 
         char[] ca = this.contents;
         if (ca == null) throw new IllegalStateException();
 
-        this.contents = null;
-
-        return ca;
+        return Arrays.copyOf(ca, ca.length);
     }
 
     @Override public CharSequence
@@ -142,7 +241,7 @@ class SecureString implements CharSequence {
     }
 
     @Override
-    protected void finalize() { this.erase(); }
+    protected void finalize() { this.close(); }
 
     /**
      * @return Either {@code "****"} or {@code "ERASED"}.
