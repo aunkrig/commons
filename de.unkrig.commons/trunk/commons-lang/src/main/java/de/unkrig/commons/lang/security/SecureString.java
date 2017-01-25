@@ -32,6 +32,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 import java.nio.charset.CodingErrorAction;
 import java.util.Arrays;
@@ -248,4 +249,49 @@ class SecureString implements CharSequence, Closeable {
      */
     @Override public String
     toString() { return this.contents == null ? "ERASED" : "****"; }
+
+    public byte[]
+    getBytes(String charsetName) { return this.getBytes(Charset.forName(charsetName)); }
+
+    public byte[]
+    getBytes(Charset charset) {
+
+        char[] ca = this.contents;
+        if (ca == null) throw new IllegalStateException();
+
+        if (ca.length == 0) return new byte[0];
+
+        CharsetEncoder ce = (
+            charset
+            .newEncoder()
+            .onMalformedInput(CodingErrorAction.REPLACE)
+            .onUnmappableCharacter(CodingErrorAction.REPLACE)
+        );
+
+        byte[] ba = new byte[ca.length * (int) Math.ceil(ce.maxBytesPerChar())];
+
+        ByteBuffer bb = ByteBuffer.wrap(ba);
+        CharBuffer cb = CharBuffer.wrap(ca);
+
+        ce.reset();
+
+        try {
+
+            CoderResult cr = ce.encode(cb, bb, true);
+            if (!cr.isUnderflow()) cr.throwException();
+
+            cr = ce.flush(bb);
+            if (!cr.isUnderflow()) cr.throwException();
+        } catch (CharacterCodingException cce) {
+            throw new AssertionError(cce);
+        }
+
+        if (bb.position() != ba.length) {
+            byte[] tmp = ba;
+            ba = Arrays.copyOf(ba, bb.position());
+            Arrays.fill(tmp, (byte) 0);
+        }
+
+        return ba;
+    }
 }

@@ -33,36 +33,24 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
-import java.security.KeyStore;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-
 import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.ObjectUtil;
 import de.unkrig.commons.nullanalysis.Nullable;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 /**
  * Utility methods related to {@link UserNamePasswordStore}s.
  */
 public final
 class UserNamePasswordStores {
-
-    private static final File KEYSTORE_FILE = new File(System.getProperty("user.home"), ".antology_setAuthenticator_keystore");
-
-    // "If you use a block-chaining mode like CBC, you need to provide an IvParameterSpec to the Cipher as well."
-    // http://stackoverflow.com/questions/6669181/why-does-my-aes-encryption-throws-an-invalidkeyexception
-    private static final byte[] IV = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     private UserNamePasswordStores() {}
 
@@ -79,7 +67,7 @@ class UserNamePasswordStores {
             getUserName(String key) { return UserNamePasswordStores.toString(delegate.getProperty(key + ".userName")); }
 
             @Override @Nullable public SecureString
-            getPassword(String key) {  return delegate.getProperty(key + ".password"); }
+            getPassword(String key, String userName) {  return delegate.getProperty(key + ".password"); }
 
 
             @Override public void
@@ -131,65 +119,21 @@ class UserNamePasswordStores {
      * except that it encrypts and decrypts passwords on-the-fly.
      */
     public static UserNamePasswordStore
-    encryptPasswords(final UserNamePasswordStore delegate) throws GeneralSecurityException, IOException {
+    encryptPasswords(
+        File                        keyStoreFile,
+        char[]                      keyStorePassword,
+        String                      keyAlias,
+        char[]                      keyProtectionPassword,
+        final UserNamePasswordStore delegate
+    ) throws GeneralSecurityException, IOException {
 
-        char[] keystorePassword   = new char[0];
-        String alias              = "setAuthenticatorKey";
-
-        KeyStore ks = KeyStore.getInstance("JCEKS");
-
-        boolean keystoreDirty = false;
-        if (UserNamePasswordStores.KEYSTORE_FILE.exists()) {
-
-            // Load existing keystore file.
-            InputStream is = new FileInputStream(UserNamePasswordStores.KEYSTORE_FILE);
-            try {
-
-                ks.load(is, keystorePassword);
-                is.close();
-            } finally {
-                try { is.close(); } catch (Exception e) {}
-            }
-        } else {
-
-            // Keystore file does not yet exist; create an empty keystore.
-            ks.load(null, keystorePassword);
-            keystoreDirty = true;
-        }
-
-        SecretKey secretKey = (SecretKey) ks.getKey(alias, keystorePassword);
-        if (secretKey == null) {
-
-            // Key does not exist in keystore; generate a new one and put it into the keystore.
-            secretKey = KeyGenerator.getInstance("AES").generateKey();
-//            ks.setEntry(alias, new KeyStore.SecretKeyEntry(secretKey), keyStoreProtection);
-            ks.setKeyEntry(alias, secretKey, keystorePassword, null);
-            keystoreDirty = true;
-        }
-
-        // Store the keystore in the file, if necessary.
-        if (keystoreDirty) {
-
-            OutputStream os = new FileOutputStream(UserNamePasswordStores.KEYSTORE_FILE);
-            try {
-
-                ks.store(os, keystorePassword);
-                os.close();
-            } finally {
-                try { os.close(); } catch (Exception e) {}
-            }
-        }
-
-        final Cipher cipher;
-        {
-            try {
-                cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            } catch (GeneralSecurityException gse) {
-                throw new ExceptionInInitializerError(gse);
-            }
-        }
-
-        final SecretKey finalSecretKey = secretKey;
+        final EncryptorDecryptor
+        ed = EncryptorDecryptors.keyStoreBased(
+            keyStoreFile,
+            keyStorePassword,
+            keyAlias,
+            keyProtectionPassword
+        );
 
         return new UserNamePasswordStore() {
 
@@ -197,69 +141,25 @@ class UserNamePasswordStores {
             getUserName(String key) { return delegate.getUserName(key); }
 
             @Override @Nullable public SecureString
-            getPassword(String key) { return this.decrypt(delegate.getPassword(key)); }
+            getPassword(String key, String userName) {
+                SecureString password = delegate.getPassword(key, userName);
+                return password == null ? null : EncryptorDecryptors.decrypt(
+                    ed,                                     // ed
+                    UserNamePasswordStores.md5Of(userName), // salt
+                    password                                // subject
+                );
+            }
 
             @Override public void
             put(String key, String userName) throws IOException { delegate.put(key, userName); }
 
             @Override public void
             put(String key, String userName, CharSequence password) throws IOException {
-                delegate.put(key, userName, this.encrypt(password));
+                delegate.put(key, userName, EncryptorDecryptors.encrypt(ed, UserNamePasswordStores.md5Of(userName), password));
             }
 
             @Override public void
             remove(String key) throws IOException { delegate.remove(key);}
-
-            // =========================
-
-            private CharSequence
-            encrypt(CharSequence subject) {
-                try {
-                    byte[] utf8Bytes = new String(new SecureString(subject).toCharArray()).getBytes("UTF-8");
-
-                    byte[] encryptedBytes;
-                    synchronized (cipher) {
-                        cipher.init(Cipher.ENCRYPT_MODE, finalSecretKey, new IvParameterSpec(UserNamePasswordStores.IV));
-                        encryptedBytes = cipher.doFinal(utf8Bytes);
-                    }
-
-                    @SuppressWarnings("restriction") String encryptedString = new BASE64Encoder().encode(encryptedBytes);
-                    return encryptedString;
-                } catch (UnsupportedEncodingException uee) {
-                    throw new AssertionError(uee);
-                } catch (GeneralSecurityException gse) {
-                    throw new AssertionError(gse);
-                }
-            }
-
-            /**
-             * Closes the <var>password</var>; the caller is responsible for closing the returned secure string.
-             */
-            @Nullable private SecureString
-            decrypt(@Nullable SecureString encryptedPassword) {
-
-                if (encryptedPassword == null) return null;
-
-                String encryptedString = new String(encryptedPassword.toCharArray());
-
-                try {
-
-                    @SuppressWarnings("restriction") byte[]
-                    encryptedBytes = new BASE64Decoder().decodeBuffer(encryptedString);
-
-                    byte[] utf8Bytes;
-                    synchronized (cipher) {
-                        cipher.init(Cipher.ENCRYPT_MODE, finalSecretKey, new IvParameterSpec(UserNamePasswordStores.IV));
-                        utf8Bytes = cipher.doFinal(encryptedBytes);
-                    }
-
-                    return new SecureString(utf8Bytes, "UTF8");
-                } catch (GeneralSecurityException gse) {
-                    throw new AssertionError(gse);
-                } catch (IOException ioe) {
-                    throw new AssertionError(ioe);
-                }
-            }
         };
     }
 
@@ -389,5 +289,18 @@ class UserNamePasswordStores {
             subject instanceof SecureString ? new String(((SecureString) subject).toCharArray()) :
             subject.toString()
         );
+    }
+
+    private static byte[]
+    md5Of(String subject) {
+
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException nsae) {
+            throw new AssertionError(nsae);
+        }
+
+        return md.digest(subject.getBytes(Charset.forName("UTF-8")));
     }
 }
