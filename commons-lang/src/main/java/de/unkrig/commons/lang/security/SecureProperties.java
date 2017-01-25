@@ -41,7 +41,7 @@ interface SecureProperties {
 
     void setProperty(String key, CharSequence value);
 
-    @Nullable SecureString getProperty(String key);
+    @Nullable DestroyableString getProperty(String key);
 
     Set<String> propertyNames();
 

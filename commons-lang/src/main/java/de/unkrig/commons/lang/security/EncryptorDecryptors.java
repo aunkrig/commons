@@ -168,7 +168,7 @@ class EncryptorDecryptors {
     public static String
     encrypt(EncryptorDecryptor ed, @Nullable byte[] salt, CharSequence subject) {
 
-        SecureString ss = new SecureString(subject);
+        DestroyableString ss = new DestroyableString(subject);
         try {
 
             byte[] unencryptedBytes = ss.getBytes("UTF-8");
@@ -184,7 +184,7 @@ class EncryptorDecryptors {
 
             return EncryptorDecryptors.base64Encode(encryptedBytes);
         } finally {
-            ss.close();
+            ss.destroy();
         }
     }
 
@@ -194,11 +194,11 @@ class EncryptorDecryptors {
      *   Closes the <var>subject</var>; the caller is responsible for closing the returned secure string.
      * </p>
      */
-    public static SecureString
-    decrypt(EncryptorDecryptor ed, SecureString subject) { return EncryptorDecryptors.decrypt(ed, null, subject); }
+    public static DestroyableString
+    decrypt(EncryptorDecryptor ed, DestroyableString subject) { return EncryptorDecryptors.decrypt(ed, null, subject); }
 
-    public static SecureString
-    decrypt(EncryptorDecryptor ed, @Nullable byte[] salt, SecureString subject) {
+    public static DestroyableString
+    decrypt(EncryptorDecryptor ed, @Nullable byte[] salt, DestroyableString subject) {
 
         try {
             String encryptedString = new String(subject.toCharArray());
@@ -219,9 +219,9 @@ class EncryptorDecryptors {
                 Arrays.fill(tmp, (byte) 0);
             }
 
-            return new SecureString(decryptedBytes, "UTF8");
+            return new DestroyableString(decryptedBytes, "UTF8");
         } finally {
-            subject.close();
+            subject.destroy();
         }
     }
 

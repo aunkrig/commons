@@ -26,7 +26,6 @@
 
 package de.unkrig.commons.lang.security;
 
-import java.io.Closeable;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -37,24 +36,28 @@ import java.nio.charset.CoderResult;
 import java.nio.charset.CodingErrorAction;
 import java.util.Arrays;
 
+import javax.security.auth.Destroyable;
+
 import de.unkrig.commons.lang.CharSequences;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
- * A {@link CharSequence} that can be {@link #close()}d, which reliably removes its characters from the heap.
- * After a {@link SecureString} has been {@link #close()}d, all {@link CharSequence} methods throw an {@link
+ * A {@link CharSequence} that can be {@link #destroy()}ed, which reliably removes its characters from the heap.
+ * After a {@link DestroyableString} has been {@link #destroy()}ed, all {@link CharSequence} methods throw an {@link
  * IllegalStateException}.
  * <p>
  *   Notice that the {@link #toString()} method returns either {@code "****"} or {@code "ERASED"}.
  * </p>
+ *
+ * @see Destroyable
  */
 public
-class SecureString implements CharSequence, Closeable {
+class DestroyableString implements CharSequence, Destroyable {
 
     @Nullable private char[] contents;
 
     public
-    SecureString(String that) {
+    DestroyableString(String that) {
 
         int    len = that.length();
         char[] ca  = (this.contents = new char[len]);
@@ -66,7 +69,7 @@ class SecureString implements CharSequence, Closeable {
      * A new secure string which is a copy of <var>that</var>
      */
     public
-    SecureString(CharSequence that) {
+    DestroyableString(CharSequence that) {
 
         int    len = that.length();
         char[] ca  = (this.contents = new char[len]);
@@ -78,21 +81,21 @@ class SecureString implements CharSequence, Closeable {
      * A new secure string which takes ownership over the character array
      */
     public
-    SecureString(char[] ca) { this.contents = ca; }
+    DestroyableString(char[] ca) { this.contents = ca; }
 
     /**
      * Decodes the <var>ba</var> and fills it with zeros.
      */
     public
-    SecureString(byte[] ba, String charsetName) {
-        this.contents = SecureString.secureDecode(ba, Charset.forName(charsetName));
+    DestroyableString(byte[] ba, String charsetName) {
+        this.contents = DestroyableString.secureDecode(ba, Charset.forName(charsetName));
    }
 
     /**
      * Decodes the <var>ba</var> and fills it with zeros.
      */
     public
-    SecureString(byte[] ba, Charset cs) { this.contents = SecureString.secureDecode(ba, cs); }
+    DestroyableString(byte[] ba, Charset cs) { this.contents = DestroyableString.secureDecode(ba, cs); }
 
     /**
      * Decodes the <var>ba</var> and fills it with zeros. Leaves no traces of the data in the heap, except for the
@@ -148,22 +151,22 @@ class SecureString implements CharSequence, Closeable {
     /**
      * @return A new secure string which is a copy of {@code this}
      */
-    @Nullable public SecureString
-    copy() { return new SecureString(this); }
+    @Nullable public DestroyableString
+    copy() { return new DestroyableString(this); }
 
     /**
      * @return A new secure string which is a copy of <var>that</var>, or {@code null} iff <var>that</var> {@code ==
      *         null}
      */
-    @Nullable public static SecureString
-    from(@Nullable CharSequence that) { return that == null ? null : new SecureString(that); }
+    @Nullable public static DestroyableString
+    from(@Nullable CharSequence that) { return that == null ? null : new DestroyableString(that); }
 
     /**
      * @return A new secure string which takes ownership of <var>that</var>, or {@code null} iff <var>that</var> {@code
      *         == null}
      */
-    @Nullable public static SecureString
-    from(@Nullable char[] that) { return that == null ? null : new SecureString(that); }
+    @Nullable public static DestroyableString
+    from(@Nullable char[] that) { return that == null ? null : new DestroyableString(that); }
 
     @Override public int
     length() {
@@ -183,7 +186,7 @@ class SecureString implements CharSequence, Closeable {
 
 
     @Override public void
-    close() {
+    destroy() {
 
         char[] ca = this.contents;
         if (ca == null) return;
@@ -192,6 +195,9 @@ class SecureString implements CharSequence, Closeable {
 
         Arrays.fill(ca, '\0');
     }
+
+    @Override
+    public boolean isDestroyed() { return this.contents == null; }
 
     public char[]
     toCharArray() {
@@ -226,8 +232,8 @@ class SecureString implements CharSequence, Closeable {
     equals(@Nullable Object obj) {
 
         if (this == obj) return true;
-        if (!(obj instanceof SecureString)) return false;
-        SecureString that = (SecureString) obj;
+        if (!(obj instanceof DestroyableString)) return false;
+        DestroyableString that = (DestroyableString) obj;
 
         char[] ca1 = this.contents;
         if (ca1 == null) throw new IllegalStateException();
@@ -242,7 +248,7 @@ class SecureString implements CharSequence, Closeable {
     }
 
     @Override
-    protected void finalize() { this.close(); }
+    protected void finalize() { this.destroy(); }
 
     /**
      * @return Either {@code "****"} or {@code "ERASED"}.

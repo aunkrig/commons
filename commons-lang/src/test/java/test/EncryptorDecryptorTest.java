@@ -37,7 +37,7 @@ import org.junit.Test;
 
 import de.unkrig.commons.lang.security.EncryptorDecryptor;
 import de.unkrig.commons.lang.security.EncryptorDecryptors;
-import de.unkrig.commons.lang.security.SecureString;
+import de.unkrig.commons.lang.security.DestroyableString;
 
 public class EncryptorDecryptorTest {
 
@@ -112,7 +112,7 @@ public class EncryptorDecryptorTest {
 
         String encrypted = EncryptorDecryptors.encrypt(ed, original);
         Assert.assertNotEquals(original, encrypted);
-        SecureString decrypted = EncryptorDecryptors.decrypt(ed, new SecureString(encrypted));
+        DestroyableString decrypted = EncryptorDecryptors.decrypt(ed, new DestroyableString(encrypted));
         Assert.assertEquals(original, new String(decrypted.toCharArray()));
     }
 
@@ -131,7 +131,7 @@ public class EncryptorDecryptorTest {
 
         String encrypted = EncryptorDecryptors.encrypt(ed, salt, original);
         Assert.assertNotEquals(original, encrypted);
-        SecureString decrypted = EncryptorDecryptors.decrypt(ed, salt, new SecureString(encrypted));
+        DestroyableString decrypted = EncryptorDecryptors.decrypt(ed, salt, new DestroyableString(encrypted));
         Assert.assertEquals(original, new String(decrypted.toCharArray()));
     }
 }

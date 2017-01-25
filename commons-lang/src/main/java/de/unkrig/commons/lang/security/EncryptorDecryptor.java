@@ -32,7 +32,7 @@ package de.unkrig.commons.lang.security;
  * <p>
  *   If you like to encrypt and decrypt <em>strings/em>, rather than byte arrays, then {@link
  *   EncryptorDecryptors#encrypt(EncryptorDecryptor, CharSequence)} and {@link
- *   EncryptorDecryptors#decrypt(EncryptorDecryptor, SecureString)} may come in handy.
+ *   EncryptorDecryptors#decrypt(EncryptorDecryptor, DestroyableString)} may come in handy.
  * </p>
  */
 public
