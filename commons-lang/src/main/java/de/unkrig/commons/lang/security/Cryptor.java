@@ -26,40 +26,26 @@
 
 package de.unkrig.commons.lang.security;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 import javax.security.auth.Destroyable;
 
-import de.unkrig.commons.nullanalysis.Nullable;
-
 /**
- * A subset of {@link Properties}, but with the values being {@link CharSequence}s instead of {@link String}s.
+ * An interface that implements both {@link Encryptor} and {@link Decryptor}. ("{@code EncryptorAndDecryptor}" was
+ * considered a too long name for this interface.)
+ * <p>
+ *   Additionally, this interface promises that the ancryptor and decryptor are "right" for each other, i.e.
+ * </p>
+ * <blockquote>
+ *   {@code Arrays.equals(}<var>ba</var>{@code ,} <var>cryptor</var>{@code .decrypt(}<var>cryptor</var>{@code
+ *   .encrypt(}<var>ba</var>{@code )))}
+ * </blockquote>
+ * <p>
+ *   is {@code true} for any byte array <var>ba</var> and {@link Cryptor} <var>cryptor</var>.
+ *   Also, it is (more or less) difficult for an attacker to decrypt any encrypted data without the <var>ed</var>.
+ * </p>
+ *
+ * @see Encryptors#encrypt(Cryptor, CharSequence)      For encrypting <em>strings</em> rather than byte arrays
+ * @see Decryptors#decrypt(Cryptor, DestroyableString) For decrypting <em>strings</em> rather than byte arrays
  */
 public
-interface SecureProperties extends Destroyable {
-
-    void setProperty(String key, CharSequence value);
-
-    @Nullable DestroyableString getProperty(String key);
-
-    Set<String> propertyNames();
-
-    int size();
-
-    boolean isEmpty();
-
-    boolean containsName(String name);
-
-    void put(String name, CharSequence value);
-
-    void removeProperty(String name);
-
-    void putAll(Map<? extends String, ? extends CharSequence> t);
-
-    void clear();
-
-    void store() throws IOException;
+interface Cryptor extends Encryptor, Decryptor, Destroyable {
 }

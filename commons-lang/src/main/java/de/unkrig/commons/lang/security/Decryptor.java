@@ -29,39 +29,24 @@ package de.unkrig.commons.lang.security;
 import javax.security.auth.Destroyable;
 
 /**
- * An API that encrypts and decrypts byte arrays.
- * <p>
- *   The promise is that
- * </p>
- * <blockquote>
- *   {@code Arrays.equals(}<var>ba</var>{@code ,} <var>ed</var>{@code .decrypt(}<var>ed</var>{@code
- *   .encrypt(}<var>ba</var>{@code )))}
- * </blockquote>
- * <p>
- *   is {@code true} for any byte array <var>ba</var> and {@link EncryptorDecryptor} <var>ed</var>.
- *   Also, it is (more or less) difficult for an attacker to decrypt any encrypted data without the <var>ed</var>.
- * </p>
+ * This interface transforms a byte array such that it equals the original data which was previously encrypted
+ * with the "right" {@link Encryptor}.
  *
- * @see EncryptorDecryptors#encrypt(EncryptorDecryptor, CharSequence)      For encrypting <em>strings</em> rather than
- *                                                                         byte arrays
- * @see EncryptorDecryptors#decrypt(EncryptorDecryptor, DestroyableString) For decrypting <em>strings</em> rather than
- *                                                                         byte arrays
+ * @see Decryptors#decrypt(Decryptor, DestroyableString) For decrypting <em>strings</em> rather than byte
+ *                                                                arrays
  */
 public
-interface EncryptorDecryptor extends Destroyable {
-
-    /**
-     * Encrypts the <var>unencrypted</var> byte array and fills it with zeros.
-     *
-     * @return The encrypted data
-     */
-    byte[] encrypt(byte[] unencrypted);
+interface Decryptor extends Destroyable {
 
     /**
      * Decrypts the <var>encrypted</var> byte array and fills it with zeros.
+     * <p>
+     *   If the <var>encrypted</var> data was not generated with the "right" {@link Encryptor}, then this method either
+     *   returns garbled data, or throws a {@link WrongKeyException}.
+     * </p>
      *
-     * @return The decrypted data
-     * @throws WrongKeyException  The decryption key is wrong
+     * @return                   The decrypted data
+     * @throws WrongKeyException The decryption key is wrong
      */
     byte[] decrypt(byte[] encrypted) throws WrongKeyException;
 }
