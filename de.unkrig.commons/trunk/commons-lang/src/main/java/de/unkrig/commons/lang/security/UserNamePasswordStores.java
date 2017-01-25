@@ -66,7 +66,7 @@ class UserNamePasswordStores {
             @Override @Nullable public String
             getUserName(String key) { return UserNamePasswordStores.toString(delegate.getProperty(key + ".userName")); }
 
-            @Override @Nullable public SecureString
+            @Override @Nullable public DestroyableString
             getPassword(String key, String userName) {  return delegate.getProperty(key + ".password"); }
 
 
@@ -140,9 +140,9 @@ class UserNamePasswordStores {
             @Override @Nullable public String
             getUserName(String key) { return delegate.getUserName(key); }
 
-            @Override @Nullable public SecureString
+            @Override @Nullable public DestroyableString
             getPassword(String key, String userName) {
-                SecureString password = delegate.getPassword(key, userName);
+                DestroyableString password = delegate.getPassword(key, userName);
                 return password == null ? null : EncryptorDecryptors.decrypt(
                     ed,                                     // ed
                     UserNamePasswordStores.md5Of(userName), // salt
@@ -252,10 +252,10 @@ class UserNamePasswordStores {
             @Override public boolean
             isEmpty() { return properties.isEmpty(); }
 
-            @Override @Nullable public SecureString
+            @Override @Nullable public DestroyableString
             getProperty(String key) {
                 String result = properties.getProperty(key);
-                return result == null ? null : new SecureString(result);
+                return result == null ? null : new DestroyableString(result);
             }
 
             @Override public boolean
@@ -280,13 +280,13 @@ class UserNamePasswordStores {
     }
 
     @Nullable private static String
-    toString(@Nullable SecureString subject) { return subject == null ? null : new String(subject.toCharArray()); }
+    toString(@Nullable DestroyableString subject) { return subject == null ? null : new String(subject.toCharArray()); }
 
     @Nullable private static String
     toString(@Nullable CharSequence subject) {
         return (
             subject == null                 ? null                                               :
-            subject instanceof SecureString ? new String(((SecureString) subject).toCharArray()) :
+            subject instanceof DestroyableString ? new String(((DestroyableString) subject).toCharArray()) :
             subject.toString()
         );
     }

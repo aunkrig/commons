@@ -50,7 +50,7 @@ interface UserNamePasswordStore {
      *                 <var>key</var>, or {@code null} if a password for the given <var>key</var> is not in this store;
      *                 the caller is responsible for {@link Closeable#close() closing} the returned secure string
      */
-    @Nullable SecureString
+    @Nullable DestroyableString
     getPassword(String key, String userName);
 
     /**
