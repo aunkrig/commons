@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package de.unkrig.commons.lang.security;
+package de.unkrig.commons.lang.crypto;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -33,6 +33,7 @@ import java.net.PasswordAuthentication;
 
 import javax.security.auth.Destroyable;
 
+import de.unkrig.commons.lang.security.DestroyableString;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**

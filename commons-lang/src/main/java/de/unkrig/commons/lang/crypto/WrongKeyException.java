@@ -24,29 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package de.unkrig.commons.lang.security;
-
-import javax.security.auth.Destroyable;
+package de.unkrig.commons.lang.crypto;
 
 /**
- * This interface transforms a byte array such that it equals the original data which was previously encrypted
- * with the "right" {@link Encryptor}.
- *
- * @see Decryptors#decrypt(Decryptor, DestroyableString) For decrypting <em>strings</em> rather than byte
- *                                                                arrays
+ * Indicates that decryption failed because the key that was used is wrong.
  */
 public
-interface Decryptor extends Destroyable {
-
-    /**
-     * Decrypts the <var>encrypted</var> byte array and fills it with zeros.
-     * <p>
-     *   If the <var>encrypted</var> data was not generated with the "right" {@link Encryptor}, then this method either
-     *   returns garbled data, or throws a {@link WrongKeyException}.
-     * </p>
-     *
-     * @return                   The decrypted data
-     * @throws WrongKeyException The decryption key is wrong
-     */
-    byte[] decrypt(byte[] encrypted) throws WrongKeyException;
+class WrongKeyException extends Exception {
+    private static final long serialVersionUID = 1L;
 }

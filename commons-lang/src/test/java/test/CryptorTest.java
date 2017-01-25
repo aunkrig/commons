@@ -38,15 +38,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.unkrig.commons.lang.security.Cryptor;
-import de.unkrig.commons.lang.security.Cryptors;
-import de.unkrig.commons.lang.security.Decryptor;
-import de.unkrig.commons.lang.security.Decryptors;
+import de.unkrig.commons.lang.crypto.Cryptor;
+import de.unkrig.commons.lang.crypto.Cryptors;
+import de.unkrig.commons.lang.crypto.Decryptor;
+import de.unkrig.commons.lang.crypto.Decryptors;
+import de.unkrig.commons.lang.crypto.Encryptor;
+import de.unkrig.commons.lang.crypto.Encryptors;
+import de.unkrig.commons.lang.crypto.SaltException;
+import de.unkrig.commons.lang.crypto.WrongKeyException;
 import de.unkrig.commons.lang.security.DestroyableString;
-import de.unkrig.commons.lang.security.Encryptor;
-import de.unkrig.commons.lang.security.Encryptors;
-import de.unkrig.commons.lang.security.SaltException;
-import de.unkrig.commons.lang.security.WrongKeyException;
 
 public class CryptorTest {
 

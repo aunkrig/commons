@@ -24,12 +24,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package de.unkrig.commons.lang.security;
+package de.unkrig.commons.lang.crypto;
+
+import javax.security.auth.Destroyable;
+
+import de.unkrig.commons.lang.security.DestroyableString;
 
 /**
- * Indicates that decryption failed because the key that was used is wrong.
+ * An interface that implements both {@link Encryptor} and {@link Decryptor}. ("{@code EncryptorAndDecryptor}" was
+ * considered a too long name for this interface.)
+ * <p>
+ *   Additionally, this interface promises that the encryptor and decryptor are "right" for each other, i.e.
+ * </p>
+ * <blockquote>
+ *   {@code Arrays.equals(}<var>ba</var>{@code ,} <var>cryptor</var>{@code .decrypt(}<var>cryptor</var>{@code
+ *   .encrypt(}<var>ba</var>{@code )))}
+ * </blockquote>
+ * <p>
+ *   is {@code true} for any byte array <var>ba</var> and any <var>cryptor</var> instance.
+ * </p>
+ *
+ * @see Encryptors#encrypt(Cryptor, CharSequence)      For encrypting <em>strings</em> rather than byte arrays
+ * @see Decryptors#decrypt(Cryptor, DestroyableString) For decrypting <em>strings</em> rather than byte arrays
  */
 public
-class WrongKeyException extends Exception {
-    private static final long serialVersionUID = 1L;
+interface Cryptor extends Encryptor, Decryptor, Destroyable {
 }

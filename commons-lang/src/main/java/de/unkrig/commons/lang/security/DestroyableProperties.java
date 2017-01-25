@@ -28,7 +28,6 @@ package de.unkrig.commons.lang.security;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import javax.security.auth.Destroyable;
@@ -36,10 +35,10 @@ import javax.security.auth.Destroyable;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
- * A partial reimplementation of {@link Properties}, but with the values being {@link CharSequence}s instead of {@link
- * String}s.
+ * A (partial) reimplementation of {@link java.util.Properties java.util.Properties}, but with the property values
+ * being {@link CharSequence}s instead of {@link String}s.
  * <p>
- *   {@link #destroy()} makes a best-effort attempt to destroy any sensitive data, in particular property values.
+ *   {@link #destroy()} makes a best-effort attempt to destroy any sensitive data stored in property values.
  * </p>
  */
 public
