@@ -31,13 +31,16 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import de.unkrig.commons.lang.security.DestroyableString;
 import de.unkrig.commons.lang.security.EncryptorDecryptor;
 import de.unkrig.commons.lang.security.EncryptorDecryptors;
-import de.unkrig.commons.lang.security.DestroyableString;
 
 public class EncryptorDecryptorTest {
 
@@ -56,12 +59,13 @@ public class EncryptorDecryptorTest {
     @Test public void
     testByteArrays() throws GeneralSecurityException, IOException {
 
-        EncryptorDecryptor ed = EncryptorDecryptors.keyStoreBased(
+        SecretKey secretKey = EncryptorDecryptors.adHocSecretKey(
             EncryptorDecryptorTest.KEY_STORE_FILE,
             EncryptorDecryptorTest.KEY_STORE_PASSWORD,
             EncryptorDecryptorTest.KEY_ALIAS,
             EncryptorDecryptorTest.KEY_PROTECTION_PASSWORD
         );
+        EncryptorDecryptor ed = EncryptorDecryptors.fromKeys(secretKey, secretKey);
 
         byte[] original = { 3, 99, 3, -23, 5, 99, 99 };
 
@@ -72,26 +76,39 @@ public class EncryptorDecryptorTest {
         Assert.assertArrayEquals(original, decrypted);
     }
 
+    @Test(expected = GeneralSecurityException.class) public void
+    testWrongSecretKey() throws GeneralSecurityException {
+
+        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+
+        SecretKey secretKey1 = keyGenerator.generateKey();
+        SecretKey secretKey2 = keyGenerator.generateKey();
+
+        EncryptorDecryptor ed = EncryptorDecryptors.fromKeys(secretKey1, secretKey2);
+
+        byte[] original = { 3, 99, 3, -23, 5, 99, 99 };
+
+        byte[] encrypted = ed.encrypt(Arrays.copyOf(original, original.length));
+
+        ed.decrypt(encrypted);
+    }
+
     @Test public void
     testTwoEncodesDecoders() throws GeneralSecurityException, IOException {
 
-        EncryptorDecryptor ed1 = EncryptorDecryptors.keyStoreBased(
+        SecretKey secretKey = EncryptorDecryptors.adHocSecretKey(
             EncryptorDecryptorTest.KEY_STORE_FILE,
             EncryptorDecryptorTest.KEY_STORE_PASSWORD,
             EncryptorDecryptorTest.KEY_ALIAS,
             EncryptorDecryptorTest.KEY_PROTECTION_PASSWORD
         );
+        EncryptorDecryptor ed1 = EncryptorDecryptors.fromKeys(secretKey, secretKey);
 
         byte[] original = { 3, 99, 3, -23, 5, 99, 99 };
 
         byte[] encrypted = ed1.encrypt(Arrays.copyOf(original, original.length));
 
-        EncryptorDecryptor ed2 = EncryptorDecryptors.keyStoreBased(
-            EncryptorDecryptorTest.KEY_STORE_FILE,
-            EncryptorDecryptorTest.KEY_STORE_PASSWORD,
-            EncryptorDecryptorTest.KEY_ALIAS,
-            EncryptorDecryptorTest.KEY_PROTECTION_PASSWORD
-        );
+        EncryptorDecryptor ed2 = EncryptorDecryptors.fromKeys(secretKey, secretKey);
 
         byte[] decrypted = ed2.decrypt(encrypted);
 
@@ -101,12 +118,13 @@ public class EncryptorDecryptorTest {
     @Test public void
     testStrings() throws GeneralSecurityException, IOException {
 
-        EncryptorDecryptor ed = EncryptorDecryptors.keyStoreBased(
+        SecretKey secretKey = EncryptorDecryptors.adHocSecretKey(
             EncryptorDecryptorTest.KEY_STORE_FILE,
             EncryptorDecryptorTest.KEY_STORE_PASSWORD,
             EncryptorDecryptorTest.KEY_ALIAS,
             EncryptorDecryptorTest.KEY_PROTECTION_PASSWORD
         );
+        EncryptorDecryptor ed = EncryptorDecryptors.fromKeys(secretKey, secretKey);
 
         String original = "The quick brown fox jumps over the lazy dog";
 
@@ -119,12 +137,13 @@ public class EncryptorDecryptorTest {
     @Test public void
     testStringsWithSalt() throws GeneralSecurityException, IOException {
 
-        EncryptorDecryptor ed = EncryptorDecryptors.keyStoreBased(
+        SecretKey secretKey = EncryptorDecryptors.adHocSecretKey(
             EncryptorDecryptorTest.KEY_STORE_FILE,
             EncryptorDecryptorTest.KEY_STORE_PASSWORD,
             EncryptorDecryptorTest.KEY_ALIAS,
             EncryptorDecryptorTest.KEY_PROTECTION_PASSWORD
         );
+        EncryptorDecryptor ed = EncryptorDecryptors.fromKeys(secretKey, secretKey);
 
         String original = "The quick brown fox jumps over the lazy dog";
         byte[] salt = { 1, 2, 3, 4 };

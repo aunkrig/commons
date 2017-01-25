@@ -42,6 +42,8 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.crypto.SecretKey;
+
 import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.ObjectUtil;
 import de.unkrig.commons.nullanalysis.Nullable;
@@ -119,21 +121,9 @@ class UserNamePasswordStores {
      * except that it encrypts and decrypts passwords on-the-fly.
      */
     public static UserNamePasswordStore
-    encryptPasswords(
-        File                        keyStoreFile,
-        char[]                      keyStorePassword,
-        String                      keyAlias,
-        char[]                      keyProtectionPassword,
-        final UserNamePasswordStore delegate
-    ) throws GeneralSecurityException, IOException {
+    encryptPasswords(SecretKey secretKey, final UserNamePasswordStore delegate) throws GeneralSecurityException {
 
-        final EncryptorDecryptor
-        ed = EncryptorDecryptors.keyStoreBased(
-            keyStoreFile,
-            keyStorePassword,
-            keyAlias,
-            keyProtectionPassword
-        );
+        final EncryptorDecryptor ed = EncryptorDecryptors.fromKeys(secretKey, secretKey);
 
         return new UserNamePasswordStore() {
 

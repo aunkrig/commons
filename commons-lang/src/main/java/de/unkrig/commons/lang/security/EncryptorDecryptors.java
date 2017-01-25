@@ -33,14 +33,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.Arrays;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
 
 import de.unkrig.commons.nullanalysis.Nullable;
 import sun.misc.BASE64Decoder;
@@ -60,14 +62,14 @@ class EncryptorDecryptors {
     private EncryptorDecryptors() {}
 
     /**
-     * Creates and returns an {@link EncryptorDecryptor} which loads a {@link SecretKey} from the
-     * <var>keyStoreFile</var> (or, if that file does not exist, generates a new {@link SecretKey} and stores it in
-     * the <var>keyStoreFile</var>). That {@link SecretKey} is then used to encrypt and decrypt data at libitum.
+     * Loads a {@link SecretKey} from the <var>keyStoreFile</var>, or, if that file does not exist, generates a new
+     * {@link SecretKey} and stores it in the <var>keyStoreFile</var>).
      *
-     * @param keyStorePassword See {@link KeyStore#load(InputStream, char[])}
+     * @param keyStorePassword      See {@link KeyStore#load(InputStream, char[])}
+     * @param keyProtectionPassword See {@link KeyStore#getKey(String, char[])
      */
-    public static EncryptorDecryptor
-    keyStoreBased(
+    public static SecretKey
+    adHocSecretKey(
         File             keyStoreFile,
         @Nullable char[] keyStorePassword,
         String           keyAlias,
@@ -124,17 +126,26 @@ class EncryptorDecryptors {
             }
         }
 
-        final SecretKey finalSecretKey = secretKey;
-        final Cipher    cipher         = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        return secretKey;
+    }
+
+    /**
+     * Creates and returns aen {@link EncryptorDecryptor} which uses the given keys for encryption resp. decryption.
+     */
+    public static EncryptorDecryptor
+    fromKeys(final Key encryptionKey, final Key decryptionKey) throws NoSuchAlgorithmException, NoSuchPaddingException {
 
         return new EncryptorDecryptor() {
+
+            final Cipher encryptionCipher = Cipher.getInstance(encryptionKey.getAlgorithm());
+            final Cipher decryptionCipher = Cipher.getInstance(decryptionKey.getAlgorithm());
 
             @Override public byte[]
             encrypt(byte[] unencrypted) {
                 try {
-                    synchronized (cipher) {
-                        cipher.init(Cipher.ENCRYPT_MODE, finalSecretKey, new IvParameterSpec(EncryptorDecryptors.IV));
-                        return cipher.doFinal(unencrypted);
+                    synchronized (this.encryptionCipher) {
+                        this.encryptionCipher.init(Cipher.ENCRYPT_MODE, encryptionKey);
+                        return this.encryptionCipher.doFinal(unencrypted);
                     }
                 } catch (GeneralSecurityException gse) {
                     throw new AssertionError(gse);
@@ -146,9 +157,9 @@ class EncryptorDecryptors {
             @Override public byte[]
             decrypt(byte[] encrypted) {
                 try {
-                    synchronized (cipher) {
-                        cipher.init(Cipher.DECRYPT_MODE, finalSecretKey, new IvParameterSpec(EncryptorDecryptors.IV));
-                        return cipher.doFinal(encrypted);
+                    synchronized (this.decryptionCipher) {
+                        this.decryptionCipher.init(Cipher.DECRYPT_MODE, decryptionKey);
+                        return this.decryptionCipher.doFinal(encrypted);
                     }
                 } catch (GeneralSecurityException gse) {
                     throw new AssertionError(gse);
