@@ -45,12 +45,13 @@ interface UserNamePasswordStore {
     getUserName(String key);
 
     /**
-     * @return The least recently {@link #put(String, String, CharSequence) put} <var>password</var> for the
-     *         <var>key</var>, or {@code null} if a password for the given <var>key</var> is not in this store;
-     *         the caller is responsible for {@link Closeable#close() closing} the returned secure string
+     * @param userName Must equal the <var>userName</var> provided with {@link #put(String, String, CharSequence)}
+     * @return         The least recently {@link #put(String, String, CharSequence) put} <var>password</var> for the
+     *                 <var>key</var>, or {@code null} if a password for the given <var>key</var> is not in this store;
+     *                 the caller is responsible for {@link Closeable#close() closing} the returned secure string
      */
     @Nullable SecureString
-    getPassword(String key);
+    getPassword(String key, String userName);
 
     /**
      * Updates the <var>userName</var> and removes the password for the given <var>key</var>. Depending on whether this
