@@ -45,6 +45,7 @@ import de.unkrig.commons.lang.security.Decryptors;
 import de.unkrig.commons.lang.security.DestroyableString;
 import de.unkrig.commons.lang.security.Encryptor;
 import de.unkrig.commons.lang.security.Encryptors;
+import de.unkrig.commons.lang.security.SaltException;
 import de.unkrig.commons.lang.security.WrongKeyException;
 
 public class CryptorTest {
@@ -167,7 +168,7 @@ public class CryptorTest {
     }
 
     @Test public void
-    testStringsWithSalt() throws GeneralSecurityException, IOException, WrongKeyException {
+    testStringsWithSalt() throws GeneralSecurityException, IOException, WrongKeyException, SaltException {
 
         SecretKey secretKey = Cryptors.adHocSecretKey(
             CryptorTest.KEY_STORE_FILE,
@@ -188,6 +189,5 @@ public class CryptorTest {
         DestroyableString decrypted = Decryptors.decrypt(c, salt, new DestroyableString(encrypted));
 
         Assert.assertEquals(original, new String(decrypted.toCharArray()));
-
     }
 }

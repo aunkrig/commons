@@ -24,53 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package de.unkrig.commons.lang.java6;
-
-import java.io.IOException;
-import java.util.Arrays;
-
-import de.unkrig.commons.lang.AssertionUtil;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
+package de.unkrig.commons.lang.security;
 
 /**
- * Utility methods related to BASE64 encoding.
+ * Indicates that after decryption, the salt data does not match.
  */
-public final
-class Base64 {
-
-    static { AssertionUtil.enableAssertionsForThisClass(); }
-
-    private Base64() {}
-
-    /**
-     * BASE64-encodes the <var>subject</var> byte array and fills it with zeros.
-     */
-    public static String
-    encode(byte[] subject) {
-
-        try {
-
-            @SuppressWarnings("restriction") String tmp = new BASE64Encoder().encode(subject);
-
-            return tmp;
-        } finally {
-            Arrays.fill(subject, (byte) 0);
-        }
-    }
-
-    /**
-     * BASE64-decodes the <var>subject</var>.
-     */
-    public static byte[]
-    decode(String subject) throws AssertionError {
-
-        try {
-
-            @SuppressWarnings("restriction") byte[] tmp = new BASE64Decoder().decodeBuffer(subject);
-            return tmp;
-        } catch (IOException ioe) {
-            throw new AssertionError(ioe);
-        }
-    }
+public
+class SaltException extends Exception {
+    private static final long serialVersionUID = 1L;
 }
