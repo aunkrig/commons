@@ -33,7 +33,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.GeneralSecurityException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -121,13 +120,13 @@ class PasswordAuthenticationStores {
 
     /**
      * Creates and returns a {@link PasswordAuthenticationStore} that forwards all operations to the <var>delegate</var>,
-     * except that it encrypts and decrypts passwords on-the-fly.
+     * except that it encrypts and decrypts passwords on-the-fly. Uses the user name as the "salt" for encryption/
+     * decryption.
      */
     public static PasswordAuthenticationStore
-    encryptPasswords(SecretKey secretKey, final PasswordAuthenticationStore delegate) throws GeneralSecurityException {
+    encryptPasswords(SecretKey secretKey, final PasswordAuthenticationStore delegate) {
 
-        final Cryptor
-        ed = Cryptors.addChecksum(Cryptors.fromSecretKey(secretKey));
+        final Cryptor c = Cryptors.addChecksum(Cryptors.fromSecretKey(secretKey));
 
         return new PasswordAuthenticationStore() {
 
@@ -139,11 +138,13 @@ class PasswordAuthenticationStores {
                 DestroyableString password = delegate.getPassword(key, userName);
                 try {
                     return password == null ? null : Decryptors.decrypt(
-                        ed,               // ed
+                        c,                // c
                         MD5.of(userName), // salt
                         password          // subject
                     );
                 } catch (WrongKeyException wke) {
+                    return null;
+                } catch (SaltException e) {
                     return null;
                 }
             }
@@ -153,7 +154,7 @@ class PasswordAuthenticationStores {
 
             @Override public void
             put(String key, String userName, CharSequence password) throws IOException {
-                delegate.put(key, userName, Encryptors.encrypt(ed, MD5.of(userName), password));
+                delegate.put(key, userName, Encryptors.encrypt(c, MD5.of(userName), password));
             }
 
             @Override public void
@@ -161,12 +162,12 @@ class PasswordAuthenticationStores {
 
             @Override public void
             destroy() throws DestroyFailedException {
-                ed.destroy();
+                c.destroy();
                 delegate.isDestroyed();
             }
 
             @Override public boolean
-            isDestroyed() { return ed.isDestroyed() && delegate.isDestroyed(); }
+            isDestroyed() { return c.isDestroyed() && delegate.isDestroyed(); }
         };
     }
 
@@ -306,7 +307,7 @@ class PasswordAuthenticationStores {
             }
 
             @Override public void
-            destroy() throws DestroyFailedException { this.destroyed = true; }
+            destroy() { this.destroyed = true; }
 
             @Override public boolean
             isDestroyed() { return this.destroyed; }

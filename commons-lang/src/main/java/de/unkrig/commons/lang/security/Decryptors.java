@@ -47,7 +47,7 @@ class Decryptors {
     private Decryptors() {}
 
     /**
-     * Creates and returns an {@link Cryptor} which uses the given keys for encryption and decryption. When
+     * Creates and returns an {@link Decryptor} which uses the given keys for encryption and decryption. When
      * this method returns, the two keys may safely be destroyed.
      */
     public static Decryptor
@@ -152,8 +152,14 @@ class Decryptors {
      * @throws WrongKeyException The key is wrong
      */
     public static DestroyableString
-    decrypt(Cryptor ed, DestroyableString subject) throws WrongKeyException {
-        return Decryptors.decrypt(ed, null, subject);
+    decrypt(Decryptor decryptor, DestroyableString subject) throws WrongKeyException {
+        try {
+            return Decryptors.decrypt(decryptor, null, subject);
+        } catch (SaltException se) {
+
+            // Should not occur due to the missing salt.
+            throw new AssertionError(se);
+        }
     }
 
     /**
@@ -164,23 +170,24 @@ class Decryptors {
      * </p>
      *
      * @throws WrongKeyException The key is wrong
+     * @throws SaltException     After decryption, the salt verification failed
      */
     public static DestroyableString
-    decrypt(Cryptor ed, @Nullable byte[] salt, DestroyableString subject) throws WrongKeyException {
+    decrypt(Decryptor decryptor, @Nullable byte[] salt, DestroyableString subject) throws WrongKeyException, SaltException {
 
         try {
             String encryptedString = new String(subject.toCharArray());
 
             byte[] encryptedBytes = Base64.decode(encryptedString);
 
-            byte[] decryptedBytes = ed.decrypt(encryptedBytes);
+            byte[] decryptedBytes = decryptor.decrypt(encryptedBytes);
 
             if (salt != null && salt.length > 0) {
 
                 if (
                     decryptedBytes.length < salt.length
                     || !Decryptors.arrayEquals(decryptedBytes, 0, salt, 0, salt.length)
-                ) throw new AssertionError("Salt mismatch");
+                ) throw new SaltException();
 
                 byte[] tmp = decryptedBytes;
                 decryptedBytes = Arrays.copyOfRange(decryptedBytes, salt.length, decryptedBytes.length);

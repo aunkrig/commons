@@ -32,15 +32,14 @@ import javax.security.auth.Destroyable;
  * An interface that implements both {@link Encryptor} and {@link Decryptor}. ("{@code EncryptorAndDecryptor}" was
  * considered a too long name for this interface.)
  * <p>
- *   Additionally, this interface promises that the ancryptor and decryptor are "right" for each other, i.e.
+ *   Additionally, this interface promises that the encryptor and decryptor are "right" for each other, i.e.
  * </p>
  * <blockquote>
  *   {@code Arrays.equals(}<var>ba</var>{@code ,} <var>cryptor</var>{@code .decrypt(}<var>cryptor</var>{@code
  *   .encrypt(}<var>ba</var>{@code )))}
  * </blockquote>
  * <p>
- *   is {@code true} for any byte array <var>ba</var> and {@link Cryptor} <var>cryptor</var>.
- *   Also, it is (more or less) difficult for an attacker to decrypt any encrypted data without the <var>ed</var>.
+ *   is {@code true} for any byte array <var>ba</var> and any <var>cryptor</var> instance.
  * </p>
  *
  * @see Encryptors#encrypt(Cryptor, CharSequence)      For encrypting <em>strings</em> rather than byte arrays

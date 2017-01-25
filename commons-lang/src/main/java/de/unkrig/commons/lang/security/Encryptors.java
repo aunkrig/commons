@@ -131,14 +131,14 @@ class Encryptors {
      * Encodes the <var>subject</var> as UTF-8, encrypts the resulting bytes, and BASE64-encodes them.
      */
     public static String
-    encrypt(Cryptor ed, CharSequence subject) { return Encryptors.encrypt(ed, null, subject); }
+    encrypt(Encryptor encryptor, CharSequence subject) { return Encryptors.encrypt(encryptor, null, subject); }
 
     /**
      * Encodes the <var>subject</var> as UTF-8, (optionally) prepends it with the salt, encrypts the resulting bytes,
      * and BASE64-encodes them.
      */
     public static String
-    encrypt(Cryptor ed, @Nullable byte[] salt, CharSequence subject) {
+    encrypt(Encryptor encryptor, @Nullable byte[] salt, CharSequence subject) {
 
         DestroyableString ss = new DestroyableString(subject);
         try {
@@ -152,7 +152,7 @@ class Encryptors {
                 Arrays.fill(tmp, (byte) 0);
             }
 
-            byte[] encryptedBytes = ed.encrypt(unencryptedBytes);
+            byte[] encryptedBytes = encryptor.encrypt(unencryptedBytes);
 
             return Base64.encode(encryptedBytes);
         } finally {
