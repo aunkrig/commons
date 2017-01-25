@@ -24,27 +24,51 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package de.unkrig.commons.lang.security;
+package de.unkrig.commons.lang.crypto;
 
-import javax.security.auth.Destroyable;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
-/**
- * This interface transforms a byte array such that later the original data can be restored with the "right" {@link
- * Decryptor}.
- * <p>
- *   Also, it is (more or less) difficult for an attacker to decrypt any encrypted data without the "right" {@link
- *   Decryptor}.
- * </p>
- *
- * @see Encryptors#encrypt(Encryptor, CharSequence) For encrypting <em>strings</em> rather than byte arrays
- */
-public
-interface Encryptor extends Destroyable {
+import de.unkrig.commons.lang.AssertionUtil;
+
+public final
+class MD5 {
+
+    static { AssertionUtil.enableAssertionsForThisClass(); }
+
+    private MD5() {}
 
     /**
-     * Encrypts the <var>unencrypted</var> byte array and afterwards fills it with zeros.
-     *
-     * @return The encrypted data
+     * @return Exactly 16 bytes
      */
-    byte[] encrypt(byte[] unencrypted);
+    public static byte[]
+    of(String subject) { return MD5.of(subject.getBytes(Charset.forName("UTF-8"))); }
+
+    /**
+     * @return Exactly 16 bytes
+     */
+    public static byte[]
+    of(byte[] subject) { return MD5.of(subject, 0, subject.length); }
+
+    /**
+     * @return Exactly 16 bytes
+     */
+    public static byte[]
+    of(byte[] subject, int offset, int length) {
+
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException nsae) {
+            throw new AssertionError(nsae);
+        }
+
+        md.update(subject, offset, length);
+
+        byte[] result = md.digest();
+        assert result.length == 16;
+
+        return result;
+    }
 }

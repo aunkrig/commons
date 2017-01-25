@@ -24,27 +24,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package de.unkrig.commons.lang.security;
+package de.unkrig.commons.lang.crypto;
 
 import javax.security.auth.Destroyable;
 
+import de.unkrig.commons.lang.security.DestroyableString;
+
 /**
- * An interface that implements both {@link Encryptor} and {@link Decryptor}. ("{@code EncryptorAndDecryptor}" was
- * considered a too long name for this interface.)
- * <p>
- *   Additionally, this interface promises that the encryptor and decryptor are "right" for each other, i.e.
- * </p>
- * <blockquote>
- *   {@code Arrays.equals(}<var>ba</var>{@code ,} <var>cryptor</var>{@code .decrypt(}<var>cryptor</var>{@code
- *   .encrypt(}<var>ba</var>{@code )))}
- * </blockquote>
- * <p>
- *   is {@code true} for any byte array <var>ba</var> and any <var>cryptor</var> instance.
- * </p>
+ * This interface transforms a byte array such that it equals the original data which was previously encrypted
+ * with the "right" {@link Encryptor}.
  *
- * @see Encryptors#encrypt(Cryptor, CharSequence)      For encrypting <em>strings</em> rather than byte arrays
- * @see Decryptors#decrypt(Cryptor, DestroyableString) For decrypting <em>strings</em> rather than byte arrays
+ * @see Decryptors#decrypt(Decryptor, DestroyableString) For decrypting <em>strings</em> rather than byte
+ *                                                                arrays
  */
 public
-interface Cryptor extends Encryptor, Decryptor, Destroyable {
+interface Decryptor extends Destroyable {
+
+    /**
+     * Decrypts the <var>encrypted</var> byte array and fills it with zeros.
+     * <p>
+     *   If the <var>encrypted</var> data was not generated with the "right" {@link Encryptor}, then this method either
+     *   returns garbled data, or throws a {@link WrongKeyException}.
+     * </p>
+     *
+     * @return                   The decrypted data
+     * @throws WrongKeyException The decryption key is wrong
+     */
+    byte[] decrypt(byte[] encrypted) throws WrongKeyException;
 }
