@@ -27,13 +27,23 @@
 package de.unkrig.commons.lang.security;
 
 /**
- * An API that promises that {@code Arrays.equals(ba, encryptorDecryptor.decrypt(encryptorDecryptor.encrypt(ba)))}
- * is always {@code true}.
+ * An API that encrypts and decrypts byte arrays.
  * <p>
- *   If you like to encrypt and decrypt <em>strings/em>, rather than byte arrays, then {@link
- *   EncryptorDecryptors#encrypt(EncryptorDecryptor, CharSequence)} and {@link
- *   EncryptorDecryptors#decrypt(EncryptorDecryptor, DestroyableString)} may come in handy.
+ *   The promise is that
  * </p>
+ * <blockquote>
+ *   {@code Arrays.equals(}<var>ba</var>{@code ,} <var>ed</var>{@code .decrypt(}<var>ed</var>{@code
+ *   .encrypt(}<var>ba</var>{@code )))}
+ * </blockquote>
+ * <p>
+ *   is {@code true} for any byte array <var>ba</var> and {@link EncryptorDecryptor} <var>ed</var>.
+ *   Also, it is (more or less) difficult for an attacker to decrypt any encrypted data without the <var>ed</var>.
+ * </p>
+ *
+ * @see EncryptorDecryptors#encrypt(EncryptorDecryptor, CharSequence)      For encrypting <em>strings</em> rather than
+ *                                                                         byte arrays
+ * @see EncryptorDecryptors#decrypt(EncryptorDecryptor, DestroyableString) For decrypting <em>strings</em> rather than
+ *                                                                         byte arrays
  */
 public
 interface EncryptorDecryptor {
