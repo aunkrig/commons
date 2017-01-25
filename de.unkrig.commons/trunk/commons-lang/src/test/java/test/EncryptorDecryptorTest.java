@@ -41,6 +41,7 @@ import org.junit.Test;
 import de.unkrig.commons.lang.security.DestroyableString;
 import de.unkrig.commons.lang.security.EncryptorDecryptor;
 import de.unkrig.commons.lang.security.EncryptorDecryptors;
+import de.unkrig.commons.lang.security.WrongKeyException;
 
 public class EncryptorDecryptorTest {
 
@@ -57,7 +58,7 @@ public class EncryptorDecryptorTest {
     }
 
     @Test public void
-    testByteArrays() throws GeneralSecurityException, IOException {
+    testByteArrays() throws WrongKeyException, GeneralSecurityException, IOException {
 
         SecretKey secretKey = EncryptorDecryptors.adHocSecretKey(
             EncryptorDecryptorTest.KEY_STORE_FILE,
@@ -76,8 +77,29 @@ public class EncryptorDecryptorTest {
         Assert.assertArrayEquals(original, decrypted);
     }
 
-    @Test(expected = GeneralSecurityException.class) public void
-    testWrongSecretKey() throws GeneralSecurityException {
+    @Test public void
+    testAddChecksum() throws WrongKeyException, GeneralSecurityException, IOException {
+
+        SecretKey secretKey = EncryptorDecryptors.adHocSecretKey(
+            EncryptorDecryptorTest.KEY_STORE_FILE,
+            EncryptorDecryptorTest.KEY_STORE_PASSWORD,
+            EncryptorDecryptorTest.KEY_ALIAS,
+            EncryptorDecryptorTest.KEY_PROTECTION_PASSWORD
+            );
+        EncryptorDecryptor ed = EncryptorDecryptors.fromKeys(secretKey, secretKey);
+        ed = EncryptorDecryptors.addChecksum(ed);
+
+        byte[] original = { 3, 99, 3, -23, 5, 99, 99 };
+
+        byte[] encrypted = ed.encrypt(Arrays.copyOf(original, original.length));
+
+        byte[] decrypted = ed.decrypt(encrypted);
+
+        Assert.assertArrayEquals(original, decrypted);
+    }
+
+    @Test(expected = WrongKeyException.class) public void
+    testWrongSecretKey() throws GeneralSecurityException, WrongKeyException {
 
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
 
@@ -94,7 +116,7 @@ public class EncryptorDecryptorTest {
     }
 
     @Test public void
-    testTwoEncodesDecoders() throws GeneralSecurityException, IOException {
+    testTwoEncodesDecoders() throws GeneralSecurityException, IOException, WrongKeyException {
 
         SecretKey secretKey = EncryptorDecryptors.adHocSecretKey(
             EncryptorDecryptorTest.KEY_STORE_FILE,
@@ -116,7 +138,7 @@ public class EncryptorDecryptorTest {
     }
 
     @Test public void
-    testStrings() throws GeneralSecurityException, IOException {
+    testStrings() throws GeneralSecurityException, IOException, WrongKeyException {
 
         SecretKey secretKey = EncryptorDecryptors.adHocSecretKey(
             EncryptorDecryptorTest.KEY_STORE_FILE,
@@ -135,7 +157,7 @@ public class EncryptorDecryptorTest {
     }
 
     @Test public void
-    testStringsWithSalt() throws GeneralSecurityException, IOException {
+    testStringsWithSalt() throws GeneralSecurityException, IOException, WrongKeyException {
 
         SecretKey secretKey = EncryptorDecryptors.adHocSecretKey(
             EncryptorDecryptorTest.KEY_STORE_FILE,

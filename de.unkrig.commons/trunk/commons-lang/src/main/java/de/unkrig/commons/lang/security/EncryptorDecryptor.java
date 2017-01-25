@@ -26,6 +26,8 @@
 
 package de.unkrig.commons.lang.security;
 
+import javax.security.auth.Destroyable;
+
 /**
  * An API that encrypts and decrypts byte arrays.
  * <p>
@@ -46,7 +48,7 @@ package de.unkrig.commons.lang.security;
  *                                                                         byte arrays
  */
 public
-interface EncryptorDecryptor {
+interface EncryptorDecryptor extends Destroyable {
 
     /**
      * Encrypts the <var>unencrypted</var> byte array and fills it with zeros.
@@ -59,6 +61,7 @@ interface EncryptorDecryptor {
      * Decrypts the <var>encrypted</var> byte array and fills it with zeros.
      *
      * @return The decrypted data
+     * @throws WrongKeyException  The decryption key is wrong
      */
-    byte[] decrypt(byte[] encrypted);
+    byte[] decrypt(byte[] encrypted) throws WrongKeyException;
 }

@@ -33,16 +33,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
 import javax.crypto.SecretKey;
+import javax.security.auth.DestroyFailedException;
 
 import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.ObjectUtil;
@@ -113,6 +111,11 @@ class UserNamePasswordStores {
 
                 sps.store();
             }
+
+            @Override public void
+            destroy() throws DestroyFailedException { delegate.destroy(); }
+
+            @Override public boolean isDestroyed() { return delegate.isDestroyed(); }
         };
     }
 
@@ -123,7 +126,8 @@ class UserNamePasswordStores {
     public static UserNamePasswordStore
     encryptPasswords(SecretKey secretKey, final UserNamePasswordStore delegate) throws GeneralSecurityException {
 
-        final EncryptorDecryptor ed = EncryptorDecryptors.fromKeys(secretKey, secretKey);
+        final EncryptorDecryptor
+        ed = EncryptorDecryptors.addChecksum(EncryptorDecryptors.fromKeys(secretKey, secretKey));
 
         return new UserNamePasswordStore() {
 
@@ -133,11 +137,15 @@ class UserNamePasswordStores {
             @Override @Nullable public DestroyableString
             getPassword(String key, String userName) {
                 DestroyableString password = delegate.getPassword(key, userName);
-                return password == null ? null : EncryptorDecryptors.decrypt(
-                    ed,                                     // ed
-                    UserNamePasswordStores.md5Of(userName), // salt
-                    password                                // subject
-                );
+                try {
+                    return password == null ? null : EncryptorDecryptors.decrypt(
+                        ed,               // ed
+                        MD5.of(userName), // salt
+                        password          // subject
+                    );
+                } catch (WrongKeyException wke) {
+                    return null;
+                }
             }
 
             @Override public void
@@ -145,11 +153,20 @@ class UserNamePasswordStores {
 
             @Override public void
             put(String key, String userName, CharSequence password) throws IOException {
-                delegate.put(key, userName, EncryptorDecryptors.encrypt(ed, UserNamePasswordStores.md5Of(userName), password));
+                delegate.put(key, userName, EncryptorDecryptors.encrypt(ed, MD5.of(userName), password));
             }
 
             @Override public void
-            remove(String key) throws IOException { delegate.remove(key);}
+            remove(String key) throws IOException { delegate.remove(key); }
+
+            @Override public void
+            destroy() throws DestroyFailedException {
+                ed.destroy();
+                delegate.isDestroyed();
+            }
+
+            @Override public boolean
+            isDestroyed() { return ed.isDestroyed() && delegate.isDestroyed(); }
         };
     }
 
@@ -176,9 +193,11 @@ class UserNamePasswordStores {
         return new SecureProperties() {
 
             private boolean dirty;
+            private boolean destroyed;
 
             @Override public synchronized void
             store() throws IOException {
+                if (this.destroyed) throw new IllegalStateException();
 
                 if (!this.dirty) return;
 
@@ -209,22 +228,32 @@ class UserNamePasswordStores {
             }
 
             @Override public int
-            size() { return properties.size(); }
+            size() {
+                if (this.destroyed) throw new IllegalStateException();
+
+                return properties.size();
+            }
 
             @Override public synchronized void
             setProperty(String key, CharSequence value) {
+                if (this.destroyed) throw new IllegalStateException();
+
                 Object previous = properties.setProperty(key, UserNamePasswordStores.toString(value));
                 this.dirty |= !ObjectUtil.equals(value, previous);
             }
 
             @Override public void
             removeProperty(String name) {
+                if (this.destroyed) throw new IllegalStateException();
+
                 Object previous = properties.remove(name);
                 this.dirty |= previous != null;
             }
 
             @Override public void
             putAll(Map<? extends String, ? extends CharSequence> t) {
+                if (this.destroyed) throw new IllegalStateException();
+
                 for (Entry<? extends String, ? extends CharSequence> e : t.entrySet()) {
                     String       key   = e.getKey();
                     CharSequence value = e.getValue();
@@ -234,25 +263,53 @@ class UserNamePasswordStores {
             }
 
             @Override public void
-            put(String name, CharSequence value) { properties.put(name, value.toString()); }
+            put(String name, CharSequence value) {
+                if (this.destroyed) throw new IllegalStateException();
+
+                properties.put(name, value.toString());
+            }
 
             @Override public Set<String>
-            propertyNames() { return properties.stringPropertyNames(); }
+            propertyNames() {
+                if (this.destroyed) throw new IllegalStateException();
+
+                return properties.stringPropertyNames();
+            }
 
             @Override public boolean
-            isEmpty() { return properties.isEmpty(); }
+            isEmpty() {
+                if (this.destroyed) throw new IllegalStateException();
+
+                return properties.isEmpty();
+            }
 
             @Override @Nullable public DestroyableString
             getProperty(String key) {
+                if (this.destroyed) throw new IllegalStateException();
+
                 String result = properties.getProperty(key);
                 return result == null ? null : new DestroyableString(result);
             }
 
             @Override public boolean
-            containsName(String name) { return properties.containsKey(name); }
+            containsName(String name) {
+                if (this.destroyed) throw new IllegalStateException();
+
+                return properties.containsKey(name);
+            }
 
             @Override public void
-            clear() { properties.clear(); }
+            clear() {
+                if (this.destroyed) throw new IllegalStateException();
+
+                properties.clear();
+            }
+
+            @Override public void
+            destroy() throws DestroyFailedException { this.destroyed = true; }
+
+            @Override public boolean
+            isDestroyed() { return this.destroyed; }
         };
     }
 
@@ -279,18 +336,5 @@ class UserNamePasswordStores {
             subject instanceof DestroyableString ? new String(((DestroyableString) subject).toCharArray()) :
             subject.toString()
         );
-    }
-
-    private static byte[]
-    md5Of(String subject) {
-
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException nsae) {
-            throw new AssertionError(nsae);
-        }
-
-        return md.digest(subject.getBytes(Charset.forName("UTF-8")));
     }
 }
