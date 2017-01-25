@@ -47,24 +47,24 @@ import de.unkrig.commons.lang.ObjectUtil;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
- * Utility methods related to {@link UserNamePasswordStore}s.
+ * Utility methods related to {@link PasswordAuthenticationStore}s.
  */
 public final
-class UserNamePasswordStores {
+class PasswordAuthenticationStores {
 
-    private UserNamePasswordStores() {}
+    private PasswordAuthenticationStores() {}
 
     /**
-     * Creates and returns a {@link UserNamePasswordStore} which uses a given {@link SecureProperties} object for
+     * Creates and returns a {@link PasswordAuthenticationStore} which uses a given {@link DestroyableProperties} object for
      * persistent storage.
      */
-    public static UserNamePasswordStore
-    propertiesUserNamePasswordStore(final SecureProperties delegate) {
+    public static PasswordAuthenticationStore
+    propertiesPasswordAuthenticationStore(final DestroyableProperties delegate) {
 
-        return new UserNamePasswordStore() {
+        return new PasswordAuthenticationStore() {
 
             @Override @Nullable public String
-            getUserName(String key) { return UserNamePasswordStores.toString(delegate.getProperty(key + ".userName")); }
+            getUserName(String key) { return PasswordAuthenticationStores.toString(delegate.getProperty(key + ".userName")); }
 
             @Override @Nullable public DestroyableString
             getPassword(String key, String userName) {  return delegate.getProperty(key + ".password"); }
@@ -76,7 +76,7 @@ class UserNamePasswordStores {
                 String userNamePropertyName = key + ".userName";
                 String passwordPropertyName = key + ".password";
 
-                SecureProperties sps = delegate;
+                DestroyableProperties sps = delegate;
 
                 sps.setProperty(userNamePropertyName, userName);
                 sps.removeProperty(passwordPropertyName);
@@ -90,7 +90,7 @@ class UserNamePasswordStores {
                 String userNamePropertyName = key + ".userName";
                 String passwordPropertyName = key + ".password";
 
-                SecureProperties sps = delegate;
+                DestroyableProperties sps = delegate;
 
                 sps.setProperty(userNamePropertyName, userName);
                 sps.setProperty(passwordPropertyName, password);
@@ -104,7 +104,7 @@ class UserNamePasswordStores {
                 String userNamePropertyName = key + ".userName";
                 String passwordPropertyName = key + ".password";
 
-                SecureProperties sps = delegate;
+                DestroyableProperties sps = delegate;
 
                 sps.removeProperty(userNamePropertyName);
                 sps.removeProperty(passwordPropertyName);
@@ -120,16 +120,16 @@ class UserNamePasswordStores {
     }
 
     /**
-     * Creates and returns a {@link UserNamePasswordStore} that forwards all operations to the <var>delegate</var>,
+     * Creates and returns a {@link PasswordAuthenticationStore} that forwards all operations to the <var>delegate</var>,
      * except that it encrypts and decrypts passwords on-the-fly.
      */
-    public static UserNamePasswordStore
-    encryptPasswords(SecretKey secretKey, final UserNamePasswordStore delegate) throws GeneralSecurityException {
+    public static PasswordAuthenticationStore
+    encryptPasswords(SecretKey secretKey, final PasswordAuthenticationStore delegate) throws GeneralSecurityException {
 
-        final EncryptorDecryptor
-        ed = EncryptorDecryptors.addChecksum(EncryptorDecryptors.fromKeys(secretKey, secretKey));
+        final Cryptor
+        ed = Cryptors.addChecksum(Cryptors.fromSecretKey(secretKey));
 
-        return new UserNamePasswordStore() {
+        return new PasswordAuthenticationStore() {
 
             @Override @Nullable public String
             getUserName(String key) { return delegate.getUserName(key); }
@@ -138,7 +138,7 @@ class UserNamePasswordStores {
             getPassword(String key, String userName) {
                 DestroyableString password = delegate.getPassword(key, userName);
                 try {
-                    return password == null ? null : EncryptorDecryptors.decrypt(
+                    return password == null ? null : Decryptors.decrypt(
                         ed,               // ed
                         MD5.of(userName), // salt
                         password          // subject
@@ -153,7 +153,7 @@ class UserNamePasswordStores {
 
             @Override public void
             put(String key, String userName, CharSequence password) throws IOException {
-                delegate.put(key, userName, EncryptorDecryptors.encrypt(ed, MD5.of(userName), password));
+                delegate.put(key, userName, Encryptors.encrypt(ed, MD5.of(userName), password));
             }
 
             @Override public void
@@ -171,9 +171,9 @@ class UserNamePasswordStores {
     }
 
     /**
-     * Creates and returns a {@link SecureProperties} object which uses a properties file as its persistent store.
+     * Creates and returns a {@link DestroyableProperties} object which uses a properties file as its persistent store.
      */
-    public static SecureProperties
+    public static DestroyableProperties
     propertiesFileSecureProperties(final File propertiesFile, final String comments) throws IOException {
 
         final Properties properties = new Properties();
@@ -190,7 +190,7 @@ class UserNamePasswordStores {
             try { is.close(); } catch (Exception e) {}
         }
 
-        return new SecureProperties() {
+        return new DestroyableProperties() {
 
             private boolean dirty;
             private boolean destroyed;
@@ -218,11 +218,11 @@ class UserNamePasswordStores {
 
                 File origFile = new File(propertiesFile.getParentFile(), "." + propertiesFile.getName() + ",orig");
 
-                if (origFile.exists()) UserNamePasswordStores.delete(origFile);
+                if (origFile.exists()) PasswordAuthenticationStores.delete(origFile);
 
-                if (propertiesFile.exists()) UserNamePasswordStores.rename(propertiesFile, origFile);
+                if (propertiesFile.exists()) PasswordAuthenticationStores.rename(propertiesFile, origFile);
 
-                UserNamePasswordStores.rename(newFile, propertiesFile);
+                PasswordAuthenticationStores.rename(newFile, propertiesFile);
 
                 this.dirty = false;
             }
@@ -238,7 +238,7 @@ class UserNamePasswordStores {
             setProperty(String key, CharSequence value) {
                 if (this.destroyed) throw new IllegalStateException();
 
-                Object previous = properties.setProperty(key, UserNamePasswordStores.toString(value));
+                Object previous = properties.setProperty(key, PasswordAuthenticationStores.toString(value));
                 this.dirty |= !ObjectUtil.equals(value, previous);
             }
 

@@ -2,7 +2,7 @@
 /*
  * de.unkrig.commons - A general-purpose Java class library
  *
- * Copyright (c) 2017, Arno Unkrig
+ * Copyright (c) 2014, Arno Unkrig
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -24,12 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package de.unkrig.commons.lang.security;
+/**
+ * This package provides Java 7-plus functionality that is missing in Java 6.
+ */
+@NotNullByDefault
+package de.unkrig.commons.lang.java6;
 
-import java.security.GeneralSecurityException;
+import de.unkrig.commons.nullanalysis.NotNullByDefault;
 
-public
-class SaltException extends GeneralSecurityException {
-
-    private static final long serialVersionUID = 1L;
-}
