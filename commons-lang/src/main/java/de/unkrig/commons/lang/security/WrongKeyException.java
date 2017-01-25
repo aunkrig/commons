@@ -26,40 +26,10 @@
 
 package de.unkrig.commons.lang.security;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import javax.security.auth.Destroyable;
-
-import de.unkrig.commons.nullanalysis.Nullable;
-
 /**
- * A subset of {@link Properties}, but with the values being {@link CharSequence}s instead of {@link String}s.
+ * Indicates that decryption failed because the key that was used is wrong.
  */
 public
-interface SecureProperties extends Destroyable {
-
-    void setProperty(String key, CharSequence value);
-
-    @Nullable DestroyableString getProperty(String key);
-
-    Set<String> propertyNames();
-
-    int size();
-
-    boolean isEmpty();
-
-    boolean containsName(String name);
-
-    void put(String name, CharSequence value);
-
-    void removeProperty(String name);
-
-    void putAll(Map<? extends String, ? extends CharSequence> t);
-
-    void clear();
-
-    void store() throws IOException;
+class WrongKeyException extends Exception {
+    private static final long serialVersionUID = 1L;
 }

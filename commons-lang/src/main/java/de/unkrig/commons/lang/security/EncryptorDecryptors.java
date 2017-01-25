@@ -39,11 +39,15 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.Arrays;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.security.auth.DestroyFailedException;
+import javax.security.auth.Destroyable;
 
+import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.nullanalysis.Nullable;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
@@ -54,10 +58,7 @@ import sun.misc.BASE64Encoder;
 public final
 class EncryptorDecryptors {
 
-    // "If you use a block-chaining mode like CBC, you need to provide an IvParameterSpec to the Cipher as well."
-    // Aha.
-    // See : http://stackoverflow.com/questions/6669181/why-does-my-aes-encryption-throws-an-invalidkeyexception
-    private static final byte[] IV = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    static { AssertionUtil.enableAssertionsForThisClass(); }
 
     private EncryptorDecryptors() {}
 
@@ -130,22 +131,33 @@ class EncryptorDecryptors {
     }
 
     /**
-     * Creates and returns aen {@link EncryptorDecryptor} which uses the given keys for encryption resp. decryption.
+     * Creates and returns an {@link EncryptorDecryptor} which uses the given keys for encryption and decryption. When
+     * this method returns, the two keys may safely be destroyed.
      */
     public static EncryptorDecryptor
-    fromKeys(final Key encryptionKey, final Key decryptionKey) throws NoSuchAlgorithmException, NoSuchPaddingException {
+    fromKeys(final Key encryptionKey, final Key decryptionKey) throws NoSuchPaddingException {
+
+        final Cipher encryptionCipher, decryptionCipher;
+        try {
+            encryptionCipher = Cipher.getInstance(encryptionKey.getAlgorithm());
+            decryptionCipher = Cipher.getInstance(decryptionKey.getAlgorithm());
+        } catch (NoSuchAlgorithmException nsae) {
+            throw new AssertionError(nsae);
+        }
 
         return new EncryptorDecryptor() {
 
-            final Cipher encryptionCipher = Cipher.getInstance(encryptionKey.getAlgorithm());
-            final Cipher decryptionCipher = Cipher.getInstance(decryptionKey.getAlgorithm());
+            private boolean destroyed;
 
             @Override public byte[]
             encrypt(byte[] unencrypted) {
+                if (this.destroyed) throw new IllegalStateException();
+
                 try {
-                    synchronized (this.encryptionCipher) {
-                        this.encryptionCipher.init(Cipher.ENCRYPT_MODE, encryptionKey);
-                        return this.encryptionCipher.doFinal(unencrypted);
+
+                    synchronized (encryptionCipher) {
+                        encryptionCipher.init(Cipher.ENCRYPT_MODE, encryptionKey);
+                        return encryptionCipher.doFinal(unencrypted);
                     }
                 } catch (GeneralSecurityException gse) {
                     throw new AssertionError(gse);
@@ -155,11 +167,20 @@ class EncryptorDecryptors {
             }
 
             @Override public byte[]
-            decrypt(byte[] encrypted) {
+            decrypt(byte[] encrypted) throws WrongKeyException {
+                if (this.destroyed) throw new IllegalStateException();
+
                 try {
-                    synchronized (this.decryptionCipher) {
-                        this.decryptionCipher.init(Cipher.DECRYPT_MODE, decryptionKey);
-                        return this.decryptionCipher.doFinal(encrypted);
+                    synchronized (decryptionCipher) {
+                        decryptionCipher.init(Cipher.DECRYPT_MODE, decryptionKey);
+
+                        try {
+                            return decryptionCipher.doFinal(encrypted);
+                        } catch (BadPaddingException bpe) {
+
+                            // A wrong key often causes a BadPaddingException.
+                            throw new WrongKeyException();
+                        }
                     }
                 } catch (GeneralSecurityException gse) {
                     throw new AssertionError(gse);
@@ -167,6 +188,73 @@ class EncryptorDecryptors {
                     Arrays.fill(encrypted, (byte) 0);
                 }
             }
+
+            @Override public void
+            destroy() throws DestroyFailedException {
+                if (encryptionCipher instanceof Destroyable) ((Destroyable) encryptionCipher).destroy();
+                if (decryptionCipher instanceof Destroyable) ((Destroyable) decryptionCipher).destroy();
+                this.destroyed = true;
+            }
+
+            @Override public boolean
+            isDestroyed() { return this.destroyed; }
+        };
+    }
+
+    /**
+     * Wraps the <var>delegate</var> such that any change in the encrypted data is guaranteed to be detected and raised
+     * as a {@link WrongKeyException}.
+     */
+    public static EncryptorDecryptor
+    addChecksum(final EncryptorDecryptor delegate) {
+
+        return new EncryptorDecryptor() {
+
+            @Override public byte[]
+            encrypt(byte[] unencrypted) {
+
+                byte[] md5 = MD5.of(unencrypted);
+                assert md5.length == 16;
+
+                byte[] tmp = unencrypted;
+                unencrypted = Arrays.copyOf(unencrypted, unencrypted.length + 16);
+                System.arraycopy(md5, 0, unencrypted, unencrypted.length - 16, 16);
+                Arrays.fill(tmp, (byte) 0);
+
+                return delegate.encrypt(unencrypted);
+            }
+
+            @Override public byte[]
+            decrypt(byte[] encrypted) throws WrongKeyException {
+
+                byte[] decrypted = delegate.decrypt(encrypted);
+
+                // Verify the checksum at the end of the decrypted data.
+                if (decrypted.length < 16) {
+                    Arrays.fill(decrypted, (byte) 0);
+                    throw new WrongKeyException();
+                }
+
+                byte[] md5 = MD5.of(decrypted, 0, decrypted.length - 16);
+                assert md5.length == 16;
+
+                if (!EncryptorDecryptors.arrayEquals(decrypted, decrypted.length - 16, md5, 0, 16)) {
+                    Arrays.fill(decrypted, (byte) 0);
+                    throw new WrongKeyException();
+                }
+
+                byte[] tmp = decrypted;
+                decrypted = Arrays.copyOf(decrypted, decrypted.length - 16);
+                Arrays.fill(tmp, (byte) 0);
+
+                return decrypted;
+            }
+
+            @Override public void
+            destroy() throws DestroyFailedException { delegate.destroy(); }
+
+            @Override public boolean
+            isDestroyed() { return delegate.isDestroyed(); }
         };
     }
 
@@ -204,12 +292,19 @@ class EncryptorDecryptors {
      * <p>
      *   Closes the <var>subject</var>; the caller is responsible for closing the returned secure string.
      * </p>
+     *
+     * @throws WrongKeyException The key is wrong
      */
     public static DestroyableString
-    decrypt(EncryptorDecryptor ed, DestroyableString subject) { return EncryptorDecryptors.decrypt(ed, null, subject); }
+    decrypt(EncryptorDecryptor ed, DestroyableString subject) throws WrongKeyException {
+        return EncryptorDecryptors.decrypt(ed, null, subject);
+    }
 
+    /**
+     * @throws WrongKeyException The key is wrong
+     */
     public static DestroyableString
-    decrypt(EncryptorDecryptor ed, @Nullable byte[] salt, DestroyableString subject) {
+    decrypt(EncryptorDecryptor ed, @Nullable byte[] salt, DestroyableString subject) throws WrongKeyException {
 
         try {
             String encryptedString = new String(subject.toCharArray());

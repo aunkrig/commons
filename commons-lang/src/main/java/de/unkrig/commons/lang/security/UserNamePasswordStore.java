@@ -29,13 +29,15 @@ package de.unkrig.commons.lang.security;
 import java.io.Closeable;
 import java.io.IOException;
 
+import javax.security.auth.Destroyable;
+
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * Stores username/password pairs, persistently or not.
  */
 public
-interface UserNamePasswordStore {
+interface UserNamePasswordStore extends Destroyable {
 
     /**
      * @return The least recently {@link #put(String, String, CharSequence) put} <var>userName</var> for the

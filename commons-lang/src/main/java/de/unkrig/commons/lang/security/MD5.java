@@ -26,40 +26,49 @@
 
 package de.unkrig.commons.lang.security;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
-import javax.security.auth.Destroyable;
+import de.unkrig.commons.lang.AssertionUtil;
 
-import de.unkrig.commons.nullanalysis.Nullable;
+public final
+class MD5 {
 
-/**
- * A subset of {@link Properties}, but with the values being {@link CharSequence}s instead of {@link String}s.
- */
-public
-interface SecureProperties extends Destroyable {
+    static { AssertionUtil.enableAssertionsForThisClass(); }
 
-    void setProperty(String key, CharSequence value);
+    private MD5() {}
 
-    @Nullable DestroyableString getProperty(String key);
+    /**
+     * @return Exactly 16 bytes
+     */
+    public static byte[]
+    of(String subject) { return MD5.of(subject.getBytes(Charset.forName("UTF-8"))); }
 
-    Set<String> propertyNames();
+    /**
+     * @return Exactly 16 bytes
+     */
+    public static byte[]
+    of(byte[] subject) { return MD5.of(subject, 0, subject.length); }
 
-    int size();
+    /**
+     * @return Exactly 16 bytes
+     */
+    public static byte[]
+    of(byte[] subject, int offset, int length) {
 
-    boolean isEmpty();
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException nsae) {
+            throw new AssertionError(nsae);
+        }
 
-    boolean containsName(String name);
+        md.update(subject, offset, length);
 
-    void put(String name, CharSequence value);
+        byte[] result = md.digest();
+        assert result.length == 16;
 
-    void removeProperty(String name);
-
-    void putAll(Map<? extends String, ? extends CharSequence> t);
-
-    void clear();
-
-    void store() throws IOException;
+        return result;
+    }
 }
