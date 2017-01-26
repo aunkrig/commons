@@ -71,6 +71,7 @@ public class CryptorTest {
             CryptorTest.KEY_ALIAS,
             CryptorTest.KEY_PROTECTION_PASSWORD
         );
+        Assert.assertNotNull(secretKey);
 
         Cryptor c = Cryptors.fromSecretKey(secretKey);
 
@@ -92,6 +93,7 @@ public class CryptorTest {
             CryptorTest.KEY_ALIAS,
             CryptorTest.KEY_PROTECTION_PASSWORD
         );
+        Assert.assertNotNull(secretKey);
 
         Cryptor c = Cryptors.fromSecretKey(secretKey);
 
@@ -133,6 +135,7 @@ public class CryptorTest {
             CryptorTest.KEY_ALIAS,
             CryptorTest.KEY_PROTECTION_PASSWORD
         );
+        Assert.assertNotNull(secretKey);
 
         Encryptor e = Encryptors.fromKey(secretKey);
 
@@ -154,6 +157,7 @@ public class CryptorTest {
             CryptorTest.KEY_ALIAS,
             CryptorTest.KEY_PROTECTION_PASSWORD
         );
+        Assert.assertNotNull(secretKey);
 
         String original = "The quick brown fox jumps over the lazy dog";
 
@@ -176,6 +180,7 @@ public class CryptorTest {
             CryptorTest.KEY_ALIAS,
             CryptorTest.KEY_PROTECTION_PASSWORD
         );
+        Assert.assertNotNull(secretKey);
 
         Cryptor c = Cryptors.fromSecretKey(secretKey);
 

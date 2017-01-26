@@ -79,4 +79,20 @@ interface PasswordAuthenticationStore extends Destroyable {
      */
     void
     remove(String key) throws IOException;
+
+    /**
+     * A password store that discards all data stored in it.
+     */
+    PasswordAuthenticationStore
+    NOP = new PasswordAuthenticationStore() {
+        @Override @Nullable public String            getUserName(String key)                                 { return null; }
+        @Override @Nullable public DestroyableString getPassword(String key, String userName)                { return null; }
+        @Override public void                        put(String key, String userName)                        {}
+        @Override public void                        put(String key, String userName, CharSequence password) {}
+        @Override public void                        remove(String key)                                      {}
+
+        @Override public void                        destroy()                                               {}
+        @Override public boolean                     isDestroyed()                                           { return false; }
+    };
+
 }
