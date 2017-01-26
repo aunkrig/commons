@@ -26,16 +26,14 @@
 
 package test;
 
-import java.io.File;
-import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import de.unkrig.commons.lang.crypto.Cryptor;
@@ -50,30 +48,19 @@ import de.unkrig.commons.lang.security.DestroyableString;
 
 public class CryptorTest {
 
-    private static final File   KEY_STORE_FILE          = new File(CryptorTest.class.getName() + "-keyStore");
-    private static final char[] KEY_STORE_PASSWORD      = new char[] { 'x', 'y', 'z' };
-    private static final String KEY_ALIAS               = "alias";
-    private static final char[] KEY_PROTECTION_PASSWORD = new char[] { 'A', 'B', 'C' };
-
-    @Before public void
-    setUp() {
-        if (CryptorTest.KEY_STORE_FILE.exists()) {
-            Assert.assertTrue(CryptorTest.KEY_STORE_FILE.delete());
+    private static final SecretKey SECRET_KEY;
+    static {
+        try {
+            SECRET_KEY = KeyGenerator.getInstance("AES").generateKey();
+        } catch (NoSuchAlgorithmException nsae) {
+            throw new ExceptionInInitializerError(nsae);
         }
     }
 
     @Test public void
-    testByteArrays() throws WrongKeyException, GeneralSecurityException, IOException {
+    testByteArrays() throws WrongKeyException {
 
-        SecretKey secretKey = Cryptors.adHocSecretKey(
-            CryptorTest.KEY_STORE_FILE,
-            CryptorTest.KEY_STORE_PASSWORD,
-            CryptorTest.KEY_ALIAS,
-            CryptorTest.KEY_PROTECTION_PASSWORD
-        );
-        Assert.assertNotNull(secretKey);
-
-        Cryptor c = Cryptors.fromSecretKey(secretKey);
+        Cryptor c = Cryptors.fromSecretKey(CryptorTest.SECRET_KEY);
 
         byte[] original = { 3, 99, 3, -23, 5, 99, 99 };
 
@@ -85,17 +72,9 @@ public class CryptorTest {
     }
 
     @Test public void
-    testAddChecksum() throws WrongKeyException, GeneralSecurityException, IOException {
+    testAddChecksum() throws WrongKeyException {
 
-        SecretKey secretKey = Cryptors.adHocSecretKey(
-            CryptorTest.KEY_STORE_FILE,
-            CryptorTest.KEY_STORE_PASSWORD,
-            CryptorTest.KEY_ALIAS,
-            CryptorTest.KEY_PROTECTION_PASSWORD
-        );
-        Assert.assertNotNull(secretKey);
-
-        Cryptor c = Cryptors.fromSecretKey(secretKey);
+        Cryptor c = Cryptors.fromSecretKey(CryptorTest.SECRET_KEY);
 
         c = Cryptors.addChecksum(c);
 
@@ -127,41 +106,25 @@ public class CryptorTest {
     }
 
     @Test public void
-    testTwoEncodesDecoders() throws GeneralSecurityException, IOException, WrongKeyException {
+    testTwoEncodesDecoders() throws WrongKeyException {
 
-        SecretKey secretKey = Cryptors.adHocSecretKey(
-            CryptorTest.KEY_STORE_FILE,
-            CryptorTest.KEY_STORE_PASSWORD,
-            CryptorTest.KEY_ALIAS,
-            CryptorTest.KEY_PROTECTION_PASSWORD
-        );
-        Assert.assertNotNull(secretKey);
-
-        Encryptor e = Encryptors.fromKey(secretKey);
+        Encryptor e = Encryptors.fromKey(CryptorTest.SECRET_KEY);
 
         byte[] original = { 3, 99, 3, -23, 5, 99, 99 };
         byte[] encrypted = e.encrypt(Arrays.copyOf(original, original.length));
 
-        Decryptor d = Decryptors.fromKey(secretKey);
+        Decryptor d = Decryptors.fromKey(CryptorTest.SECRET_KEY);
 
         byte[] decrypted = d.decrypt(encrypted);
         Assert.assertArrayEquals(original, decrypted);
     }
 
     @Test public void
-    testStrings() throws GeneralSecurityException, IOException, WrongKeyException {
-
-        SecretKey secretKey = Cryptors.adHocSecretKey(
-            CryptorTest.KEY_STORE_FILE,
-            CryptorTest.KEY_STORE_PASSWORD,
-            CryptorTest.KEY_ALIAS,
-            CryptorTest.KEY_PROTECTION_PASSWORD
-        );
-        Assert.assertNotNull(secretKey);
+    testStrings() throws WrongKeyException {
 
         String original = "The quick brown fox jumps over the lazy dog";
 
-        Cryptor c = Cryptors.fromSecretKey(secretKey);
+        Cryptor c = Cryptors.fromSecretKey(CryptorTest.SECRET_KEY);
 
         String encrypted = Encryptors.encrypt(c, original);
 
@@ -172,27 +135,32 @@ public class CryptorTest {
     }
 
     @Test public void
-    testStringsWithSalt() throws GeneralSecurityException, IOException, WrongKeyException, SaltException {
+    testStringsWithSalt() throws WrongKeyException, SaltException {
 
-        SecretKey secretKey = Cryptors.adHocSecretKey(
-            CryptorTest.KEY_STORE_FILE,
-            CryptorTest.KEY_STORE_PASSWORD,
-            CryptorTest.KEY_ALIAS,
-            CryptorTest.KEY_PROTECTION_PASSWORD
-        );
-        Assert.assertNotNull(secretKey);
-
-        Cryptor c = Cryptors.fromSecretKey(secretKey);
+        Cryptor c = Cryptors.fromSecretKey(CryptorTest.SECRET_KEY);
 
         String original = "The quick brown fox jumps over the lazy dog";
         byte[] salt = { 1, 2, 3, 4 };
 
         String encrypted = Encryptors.encrypt(c, salt, original);
-
         Assert.assertNotEquals(original, encrypted);
 
         DestroyableString decrypted = Decryptors.decrypt(c, salt, new DestroyableString(encrypted));
-
         Assert.assertEquals(original, new String(decrypted.toCharArray()));
+    }
+
+    @Test(expected = SaltException.class) public void
+    testStringsWithWrongSalt() throws WrongKeyException, SaltException {
+
+        Cryptor c = Cryptors.fromSecretKey(CryptorTest.SECRET_KEY);
+
+        String original = "The quick brown fox jumps over the lazy dog";
+        byte[] salt = { 1, 2, 3, 4 };
+
+        String encrypted = Encryptors.encrypt(c, salt, original);
+        Assert.assertNotEquals(original, encrypted);
+
+        salt[0]++;
+        DestroyableString decrypted = Decryptors.decrypt(c, salt, new DestroyableString(encrypted));
     }
 }
