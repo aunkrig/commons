@@ -177,7 +177,7 @@ class PasswordAuthenticationStores {
      * Creates and returns a {@link DestroyableProperties} object which uses a properties file as its persistent store.
      */
     public static DestroyableProperties
-    propertiesFileSecureProperties(final File propertiesFile, final String comments) throws IOException {
+    propertiesFileDestroyableProperties(final File propertiesFile, final String comments) throws IOException {
 
         final Properties properties = new Properties();
 
