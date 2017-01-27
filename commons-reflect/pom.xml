@@ -24,14 +24,14 @@
 		<dependency>
 			<groupId>de.unkrig.commons</groupId>
 			<artifactId>commons-nullanalysis</artifactId>
-			<version>1.2.8-SNAPSHOT</version>
+			<version>1.2.8</version>
 		</dependency>
 	</dependencies>
 
 	<parent>
 		<groupId>de.unkrig.commons</groupId>
 		<artifactId>commons-parent</artifactId>
-		<version>1.2.8-SNAPSHOT</version>
+		<version>1.2.8</version>
 		<relativePath>../commons-parent</relativePath>
 	</parent>
 </project>
