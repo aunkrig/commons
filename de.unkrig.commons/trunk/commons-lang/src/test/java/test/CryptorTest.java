@@ -161,6 +161,6 @@ public class CryptorTest {
         Assert.assertNotEquals(original, encrypted);
 
         salt[0]++;
-        DestroyableString decrypted = Decryptors.decrypt(c, salt, new DestroyableString(encrypted));
+        Decryptors.decrypt(c, salt, new DestroyableString(encrypted));
     }
 }
