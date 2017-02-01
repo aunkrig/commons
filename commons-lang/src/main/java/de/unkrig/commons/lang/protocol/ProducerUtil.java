@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Random;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -504,11 +505,22 @@ class ProducerUtil {
      * </p>
      */
     public static Producer<Integer>
-    increasing() {
+    increasing() { return ProducerUtil.increasing(0); }
+
+    /**
+     * Creates and returns a {@link Producer} that produces <var>initialValue</var>, <var>initialValue</var>{@code +1},
+     * <var>initialValue</var>{@code + 2}, etc.
+     * <p>
+     *   The returned producer is not synchronized and therefore not thread-safe; to get a thread-safe producer, use
+     *   {@link ProducerUtil#synchronizedProducer(ProducerWhichThrows)}.
+     * </p>
+     */
+    public static Producer<Integer>
+    increasing(final int initialValue) {
 
         return new Producer<Integer>() {
 
-            int value;
+            int value = initialValue;
 
             @Override @Nullable public Integer
             produce() { return this.value++; }
@@ -682,6 +694,9 @@ class ProducerUtil {
      *   ProducerUtil#synchronizedProducer(ProducerWhichThrows)}.
      * </p>
      * <p>
+     *   The returned producer produces {@code null} if the current thread was interrupted while prefetching.
+     * </p>
+     * <p>
      *   {@link #atMostEvery(long, boolean, boolean) atMostEvery(milliseconds, false, false} may be a good choice for
      *   the <var>invalidationCondition</var> to set up an expiration-time-based cache.
      * </p>
@@ -693,70 +708,64 @@ class ProducerUtil {
         final boolean                                      prefetch
     ) throws EX {
 
-        final Future<T> f = prefetch ? delegate.produce() : null;
-
         return new ProducerWhichThrows<T, EX>() {
 
-            @Nullable T         cache;
-            boolean             isCached; // FALSE before the first call, TRUE afterwards.
-            @Nullable Future<T> future = f;
+            @Nullable Future<T> previous;
+            @Nullable Future<T> next = prefetch ? delegate.produce() : null;
 
-            @Override @Nullable public T
+            @Override @Nullable public synchronized T
             produce() throws EX {
 
                 try {
-                    Future<T> f = this.future;
 
-                    if (!this.isCached) {
-                        // This is the first invocation.
+                    Future<T> p = this.previous;
+                    Future<T> n = this.next;
 
-                        if (f == null) {
+                    if (p == null) {
+                        if (n == null) {
 
-                            // Prefetching was not configured, so create the FUTURE for the first product NOW.
-                            f = delegate.produce();
-                            assert f != null;
-                            this.future = f;
+                            // !prefetch => Wait synchronously for the first value;
+                            return (this.previous = delegate.produce()).get();
                         }
-
-                        // Wait synchronously until the FUTURE has computed its result.
-                        T result = f.get();
-
-                        // Cache and return the result;
-                        this.cache    = result;
-                        this.isCached = true;
-                        this.future   = null;
-                        return result;
+                        this.previous = n;
+                        this.next     = null;
+                        return n.get();
                     }
 
-                    // This is NOT the first invocation.
-
-                    if (f != null) {
-                        // A background refetch is currently pending.
-
-                        if (f.isDone()) {
-
-                            // The background refetch has just completed! Fetch, cache and return its result.
-                            this.future = null;
-                            this.cache  = f.get();
+                    if (n == null) {
+                        if (Boolean.TRUE.equals(invalidationCondition.produce())) {
+                            n = delegate.produce();
+                            assert n != null;
+                            if (n.isDone()) {
+                                this.previous = n;
+                                return n.get();
+                            }
+                            this.next = n;
                         }
-
-                        return this.cache;
+                    } else {
+                        if (n.isDone()) {
+                            this.previous = n;
+                            this.next     = null;
+                            return n.get();
+                        }
                     }
 
-                    // Check the "invalidation condition".
-                    if (Boolean.TRUE.equals(invalidationCondition.produce())) {
-
-                        // Start the "background refresh".
-                        f = delegate.produce();
-                        assert f != null;
-                        this.future = f;
-                    }
-
-                    return this.cache;
-                } catch (InterruptedException ie) {
-                    throw new IllegalStateException(ie);
+                    return p.get();
                 } catch (ExecutionException ee) {
-                    throw new IllegalStateException(ee);
+
+                    Throwable cause = ee.getCause();
+                    if (cause instanceof RuntimeException) throw (RuntimeException) cause;
+                    if (cause instanceof Error)            throw (Error)            cause;
+
+                    @SuppressWarnings("unchecked") EX ex = (EX) cause;
+                    throw ex;
+                } catch (CancellationException ce) {
+
+                    // Should never get here, because we never cancel our Futures.
+                    throw new AssertionError(ce);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return null;
                 }
             }
         };
@@ -930,6 +939,29 @@ class ProducerUtil {
 
                     if (atomicInteger.compareAndSet(current, next)) return current;
                 }
+            }
+        };
+    }
+
+    /**
+     * The <var>i</var>th product is produced by <var>delegates</var>{@code [}<var>i</var> {@code
+     * %} <var>delegates</var>{@code .length].produce()}.
+     */
+    public static <T, EX extends Exception> ProducerWhichThrows<T, EX>
+    roundRobin(final ProducerWhichThrows<? extends T, ? extends EX>... delegates) {
+
+        return new ProducerWhichThrows<T, EX>() {
+
+            int nextIndex = 0;
+
+            @Override @Nullable public T
+            produce() throws EX {
+
+                ProducerWhichThrows<? extends T, ? extends EX> p = delegates[this.nextIndex];
+
+                this.nextIndex = (this.nextIndex + 1) % delegates.length;
+
+                return p.produce();
             }
         };
     }
