@@ -158,7 +158,7 @@ class IoUtilTest {
         );
 
         URL loc = IoUtil.findOnPath(
-            new File[] { new File("../commons-lang/target/commons-lang-1.2.8-SNAPSHOT.jar") },
+            new File[] { new File("../commons-lang/target/commons-lang-1.2.9-SNAPSHOT.jar") },
             "de/unkrig/commons/lang/AssertionUtil.class"
         );
         Assert.assertEquals(
