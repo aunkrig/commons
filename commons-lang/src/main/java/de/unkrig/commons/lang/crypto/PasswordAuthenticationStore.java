@@ -26,14 +26,12 @@
 
 package de.unkrig.commons.lang.crypto;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 
 import javax.security.auth.Destroyable;
 
-import de.unkrig.commons.lang.security.DestroyableString;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -44,19 +42,19 @@ public
 interface PasswordAuthenticationStore extends Destroyable {
 
     /**
-     * @return The least recently {@link #put(String, String, CharSequence) put} <var>userName</var> for the
+     * @return The least recently {@link #put(String, String) put} <var>userName</var> for the
      *         <var>key</var>, or {@code null} if a user name for the given <var>key</var> is not in this store
      */
     @Nullable String
     getUserName(String key);
 
     /**
-     * @param userName Must equal the <var>userName</var> provided with {@link #put(String, String, CharSequence)}
-     * @return         The least recently {@link #put(String, String, CharSequence) put} <var>password</var> for the
+     * @param userName Must equal the <var>userName</var> provided with {@link #put(String, String, char[])}
+     * @return         The least recently {@link #put(String, String, char[]) put} <var>password</var> for the
      *                 <var>key</var>, or {@code null} if a password for the given <var>key</var> is not in this store;
-     *                 the caller is responsible for {@link Closeable#close() closing} the returned secure string
+     *                 the caller is responsible for clearing the returned {@code char[]}
      */
-    @Nullable DestroyableString
+    @Nullable char[]
     getPassword(String key, String userName);
 
     /**
@@ -69,9 +67,12 @@ interface PasswordAuthenticationStore extends Destroyable {
     /**
      * Updates the <var>userName</var> and the <var>password</var> for the given <var>key</var>. Depending on whether
      * this store is persistent or not, the new values will not or will be forgotten when the JVM exits.
+     * <p>
+     *   This method clears the <var>password</var> character array before it returns.
+     * </p>
      */
     void
-    put(String key, String userName, CharSequence password) throws IOException;
+    put(String key, String userName, char[] password) throws IOException;
 
     /**
      * Removes both the user name and the password for the given <var>key</var>. Depending on whether this store is
@@ -85,14 +86,14 @@ interface PasswordAuthenticationStore extends Destroyable {
      */
     PasswordAuthenticationStore
     NOP = new PasswordAuthenticationStore() {
-        @Override @Nullable public String            getUserName(String key)                                 { return null; }
-        @Override @Nullable public DestroyableString getPassword(String key, String userName)                { return null; }
-        @Override public void                        put(String key, String userName)                        {}
-        @Override public void                        put(String key, String userName, CharSequence password) {}
-        @Override public void                        remove(String key)                                      {}
+        @Override @Nullable public String getUserName(String key)                           { return null; }
+        @Override @Nullable public char[] getPassword(String key, String userName)          { return null; }
+        @Override public void             put(String key, String userName)                  {}
+        @Override public void             put(String key, String userName, char[] password) {}
+        @Override public void             remove(String key)                                {}
 
-        @Override public void                        destroy()                                               {}
-        @Override public boolean                     isDestroyed()                                           { return false; }
+        @Override public void             destroy()                                         {}
+        @Override public boolean          isDestroyed()                                     { return false; }
     };
 
 }

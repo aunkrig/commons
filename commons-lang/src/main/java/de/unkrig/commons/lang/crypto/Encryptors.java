@@ -26,6 +26,7 @@
 
 package de.unkrig.commons.lang.crypto;
 
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.Arrays;
@@ -36,7 +37,7 @@ import javax.security.auth.Destroyable;
 
 import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.java6.Base64;
-import de.unkrig.commons.lang.security.DestroyableString;
+import de.unkrig.commons.lang.security.SecureCharsets;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -132,32 +133,26 @@ class Encryptors {
      * Encodes the <var>subject</var> as UTF-8, encrypts the resulting bytes, and BASE64-encodes them.
      */
     public static String
-    encrypt(Encryptor encryptor, CharSequence subject) { return Encryptors.encrypt(encryptor, null, subject); }
+    encrypt(Encryptor encryptor, char[] subject) { return Encryptors.encrypt(encryptor, null, subject); }
 
     /**
      * Encodes the <var>subject</var> as UTF-8, (optionally) prepends it with the salt, encrypts the resulting bytes,
-     * and BASE64-encodes them.
+     * and BASE64-encodes them. The <var>subject</var> is left untouched.
      */
     public static String
-    encrypt(Encryptor encryptor, @Nullable byte[] salt, CharSequence subject) {
+    encrypt(Encryptor encryptor, @Nullable byte[] salt, char[] subject) {
 
-        DestroyableString ss = new DestroyableString(subject);
-        try {
+        byte[] unencryptedBytes = SecureCharsets.secureEncode(subject, Charset.forName("UTF-8"));
 
-            byte[] unencryptedBytes = ss.getBytes("UTF-8");
-
-            if (salt != null && salt.length > 0) {
-                byte[] tmp = unencryptedBytes;
-                unencryptedBytes = Arrays.copyOf(salt, salt.length + tmp.length);
-                System.arraycopy(tmp, 0, unencryptedBytes, salt.length, tmp.length);
-                Arrays.fill(tmp, (byte) 0);
-            }
-
-            byte[] encryptedBytes = encryptor.encrypt(unencryptedBytes);
-
-            return Base64.encode(encryptedBytes);
-        } finally {
-            ss.destroy();
+        if (salt != null && salt.length > 0) {
+            byte[] tmp = unencryptedBytes;
+            unencryptedBytes = Arrays.copyOf(salt, salt.length + tmp.length);
+            System.arraycopy(tmp, 0, unencryptedBytes, salt.length, tmp.length);
+            Arrays.fill(tmp, (byte) 0);
         }
+
+        byte[] encryptedBytes = encryptor.encrypt(unencryptedBytes);
+
+        return Base64.encode(encryptedBytes);
     }
 }
