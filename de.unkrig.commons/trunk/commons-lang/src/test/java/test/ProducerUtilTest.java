@@ -37,6 +37,8 @@ import de.unkrig.commons.lang.protocol.Predicate;
 import de.unkrig.commons.lang.protocol.Producer;
 import de.unkrig.commons.lang.protocol.ProducerUtil;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
+import de.unkrig.commons.lang.protocol.RunnableWhichThrows;
+import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 //CHECKSTYLE JavadocMethod:OFF
@@ -48,6 +50,14 @@ class ProducerUtilTest {
     class Naturals implements Producer<Integer> {
         private final AtomicInteger ai = new AtomicInteger();
         @Override public Integer produce() { return this.ai.incrementAndGet(); }
+    }
+
+    class FooException extends Exception {
+        private static final long serialVersionUID = 1L;
+    }
+
+    class ThrowFooException<T> implements ProducerWhichThrows<T, FooException> {
+        @Override public T produce() throws FooException { throw new FooException(); }
     }
 
     class Bistable implements Predicate<Object> {
@@ -64,7 +74,7 @@ class ProducerUtilTest {
     testSparingProducer() {
 
         @SuppressWarnings("deprecation") Producer<? extends Integer>
-        p = ProducerUtil.sparingProducer(new Naturals(), new Bistable(), "");
+        p = ProducerUtil.sparingProducer(ProducerUtil.increasing(1), new Bistable(), "");
 
         Integer[] ia = new Integer[5];
         for (int i = 0; i < ia.length; i++) {
@@ -75,7 +85,7 @@ class ProducerUtilTest {
 
     @Test public void
     testProducerUtilCache1() {
-        ProducerWhichThrows<Integer, RuntimeException> p = ProducerUtil.cache(new Naturals(), new Toggle());
+        ProducerWhichThrows<Integer, RuntimeException> p = ProducerUtil.cache(ProducerUtil.increasing(1), new Toggle());
         for (int expected : new int[] { 1, 2, 2, 3, 3, 4, 4, 5, 5, }) {
             Assert.assertEquals((Integer) expected, p.produce());
         }
@@ -83,7 +93,10 @@ class ProducerUtilTest {
 
     @Test public void
     testProducerUtilCache2() {
-        ProducerWhichThrows<Integer, RuntimeException> p = ProducerUtil.cache(99, new Naturals(), new Toggle());
+
+    	ProducerWhichThrows<Integer, RuntimeException>
+        p = ProducerUtil.cache(99, ProducerUtil.increasing(1), new Toggle());
+
         for (int expected : new int[] { 99, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, }) {
             Assert.assertEquals((Integer) expected, p.produce());
         }
@@ -93,111 +106,118 @@ class ProducerUtilTest {
     testProducerUtilCache3() throws Exception {
 
         ProducerWhichThrows<Integer, RuntimeException>
-        p = ProducerUtil.cache(new Naturals(), ProducerUtil.atMostEvery(200, false, true));
+        p = ProducerUtil.cache(ProducerUtil.increasing(1), ProducerUtil.atMostEvery(200, false, true));
 
         Thread.sleep(100);
 
-        assertProductEqualsFor(1, p, 200);
+        ProducerUtilTest.assertProductEqualsFor(1, p, 200);
 
         Thread.sleep(100);
         Assert.assertEquals((Integer) 2, p.produce());
         Thread.sleep(100);
-        assertProductEqualsFor(2, p, 100);
+        ProducerUtilTest.assertProductEqualsFor(2, p, 100);
         Assert.assertEquals((Integer) 3, p.produce());
     }
 
-    @SuppressWarnings("null")
     @Test public void
-    testCacheAsynchronously() {
-        
-        ProducerWhichThrows<Future<Integer>, RuntimeException> fp = new ProducerWhichThrows<Future<Integer>, RuntimeException>() {
-            
-            @Override @Nullable public Future<Integer> produce() {
+    testProducerUtilCacheAsynchronously() throws Exception {
 
-                ProducerUtilTest.this.nextValue++;
-                
-                return new Future<Integer>() {
+        final Producer<Integer> inc = ProducerUtil.increasing(1);
 
-                    @Override public boolean cancel(boolean mayInterruptIfRunning) { return false; } 
-                    @Override public boolean isCancelled()                         { return false; }
-                    @Override public boolean isDone()                              { return true; }
-                    @Override public Integer get(long timeout, TimeUnit unit)      { return this.get(); }
+        ProducerWhichThrows<Integer, RuntimeException>
+        p = ProducerUtil.cacheAsynchronously(
+            new Producer<Future<Integer>>() { // delegate
 
-                    @Override public Integer get() { return (ProducerUtilTest.this.nextValue += 2) - 2; }
-                };
-            }
+                @Override @Nullable public Future<Integer>
+                produce() throws RuntimeException {  return ProducerUtilTest.completedFuture(inc.produce()); }
+            },
+            ProducerUtil.oneOutOf(3, 3),      // invalidationCondition
+            true                              // prefetch
+        );
+
+        Assert.assertEquals((Integer) 1, p.produce());
+        Assert.assertEquals((Integer) 1, p.produce());
+        Assert.assertEquals((Integer) 1, p.produce());
+        Assert.assertEquals((Integer) 1, p.produce());
+        Assert.assertEquals((Integer) 2, p.produce());
+        Assert.assertEquals((Integer) 2, p.produce());
+        Assert.assertEquals((Integer) 2, p.produce());
+        Assert.assertEquals((Integer) 3, p.produce());
+    }
+
+    @Test public void
+    testProducerUtilCacheAsynchronouslyWithException() throws Exception {
+
+        // Produce an increasing sequence of integers.
+        ProducerWhichThrows<Integer, FooException>
+        inc = ProducerUtil.asProducerWhichThrows(ProducerUtil.increasing(1));
+
+        // Every one out of three invocations throws a "FooException".
+        ProducerWhichThrows<Integer, FooException>
+        throwsFooException = new ProducerWhichThrows<Integer, FooException>() {
+            @Override @Nullable public Integer produce() throws FooException { throw new FooException(); }
+        };
+        @SuppressWarnings("unchecked") final ProducerWhichThrows<Integer, FooException>
+        inc2 = ProducerUtil.<Integer, FooException>roundRobin(
+            inc,
+            inc,
+            throwsFooException
+        );
+
+        // Invalidate the cache every three invocations.
+        ProducerWhichThrows<Boolean, FooException>
+        invalidationCondition = ProducerUtil.<Boolean, FooException>asProducerWhichThrows(ProducerUtil.oneOutOf(3, 3));
+
+        // Create a "Future" that completes immediately.
+        ProducerWhichThrows<Future<Integer>, FooException>
+        delegate = new ProducerWhichThrows<Future<Integer>, FooException>() {
+
+            @Override @Nullable public Future<Integer>
+            produce() throws FooException {  return ProducerUtilTest.completedFuture(inc2.produce()); }
         };
 
-        this.nextValue = 1;
-        ProducerWhichThrows<Integer, RuntimeException> p = ProducerUtil.cacheAsynchronously(
-            fp,
-            ProducerUtil.alternate(true, false), // invalidationCondition
-            false // prefetch
-        );
-        Assert.assertEquals(1, this.nextValue);
-        Assert.assertEquals(2, (int) p.produce());
-        Assert.assertEquals(4, this.nextValue);
-        Assert.assertEquals(2, (int) p.produce());
-        Assert.assertEquals(5, this.nextValue);
-        Assert.assertEquals(5, (int) p.produce());
-        Assert.assertEquals(7, this.nextValue);
-        Assert.assertEquals(5, (int) p.produce());
-        Assert.assertEquals(7, this.nextValue);
-        Assert.assertEquals(5, (int) p.produce());
-        Assert.assertEquals(8, this.nextValue);
-        Assert.assertEquals(8, (int) p.produce());
-        Assert.assertEquals(10, this.nextValue);
-        Assert.assertEquals(8, (int) p.produce());
-        Assert.assertEquals(10, this.nextValue);
-        Assert.assertEquals(8, (int) p.produce());
-        Assert.assertEquals(11, this.nextValue);
-        Assert.assertEquals(11, (int) p.produce());
-        Assert.assertEquals(13, this.nextValue);
-        Assert.assertEquals(11, (int) p.produce());
-        Assert.assertEquals(13, this.nextValue);
-        Assert.assertEquals(11, (int) p.produce());
-        Assert.assertEquals(14, this.nextValue);
-        
-        this.nextValue = 1;
-        p = ProducerUtil.cacheAsynchronously(
-            fp,
-            ProducerUtil.alternate(true, false), // invalidationCondition
-            true // prefetch
-        );
-        Assert.assertEquals(2, this.nextValue); // <= Only THIS value is different!
-        Assert.assertEquals(2, (int) p.produce());
-        Assert.assertEquals(4, this.nextValue);
-        Assert.assertEquals(2, (int) p.produce());
-        Assert.assertEquals(5, this.nextValue);
-        Assert.assertEquals(5, (int) p.produce());
-        Assert.assertEquals(7, this.nextValue);
-        Assert.assertEquals(5, (int) p.produce());
-        Assert.assertEquals(7, this.nextValue);
-        Assert.assertEquals(5, (int) p.produce());
-        Assert.assertEquals(8, this.nextValue);
-        Assert.assertEquals(8, (int) p.produce());
-        Assert.assertEquals(10, this.nextValue);
-        Assert.assertEquals(8, (int) p.produce());
-        Assert.assertEquals(10, this.nextValue);
-        Assert.assertEquals(8, (int) p.produce());
-        Assert.assertEquals(11, this.nextValue);
-        Assert.assertEquals(11, (int) p.produce());
-        Assert.assertEquals(13, this.nextValue);
-        Assert.assertEquals(11, (int) p.produce());
-        Assert.assertEquals(13, this.nextValue);
+        // Finally, invoke "cacheAsynchronously()"!
+        final ProducerWhichThrows<Integer, FooException>
+        p = ProducerUtil.cacheAsynchronously(delegate, invalidationCondition, true);
+
+        // Now verify the results.
+        final RunnableWhichThrows<FooException>
+        callProduce = new RunnableWhichThrows<FooException>() {
+            @Override public void run() throws FooException { p.produce(); }
+        };
+        Assert.assertEquals((Integer) 1, p.produce());
+        Assert.assertEquals((Integer) 1, p.produce());
+        Assert.assertEquals((Integer) 1, p.produce());
+        Assert.assertEquals((Integer) 1, p.produce());
+        Assert.assertEquals((Integer) 2, p.produce());
+        Assert.assertEquals((Integer) 2, p.produce());
+        Assert.assertEquals((Integer) 2, p.produce());
+        ProducerUtilTest.assertThrows(FooException.class, callProduce);
+        Assert.assertEquals((Integer) 2, p.produce());
+        Assert.assertEquals((Integer) 2, p.produce());
+        Assert.assertEquals((Integer) 3, p.produce());
+        Assert.assertEquals((Integer) 3, p.produce());
+        Assert.assertEquals((Integer) 3, p.produce());
+        Assert.assertEquals((Integer) 4, p.produce());
+        Assert.assertEquals((Integer) 4, p.produce());
+        Assert.assertEquals((Integer) 4, p.produce());
+        ProducerUtilTest.assertThrows(FooException.class, callProduce);
+        Assert.assertEquals((Integer) 4, p.produce());
+        Assert.assertEquals((Integer) 4, p.produce());
+        Assert.assertEquals((Integer) 5, p.produce());
+        Assert.assertEquals((Integer) 5, p.produce());
     }
-    private int nextValue;
-    
+
     @SuppressWarnings("null") @Test public void
     testProducerUtilAtMostEvery1() throws Exception {
         Producer<Boolean> p = ProducerUtil.atMostEvery(200, false, false);
 
         Thread.sleep(100);
-        assertProductEqualsFor(false, p, 200);
+        ProducerUtilTest.assertProductEqualsFor(false, p, 200);
         Assert.assertTrue(p.produce());
 
         Thread.sleep(100);
-        assertProductEqualsFor(false, p, 200);
+        ProducerUtilTest.assertProductEqualsFor(false, p, 200);
         Assert.assertTrue(p.produce());
     }
 
@@ -206,10 +226,10 @@ class ProducerUtilTest {
         Producer<Boolean> p = ProducerUtil.atMostEvery(200, false, true);
 
         Thread.sleep(100);
-        assertProductEqualsFor(false, p, 200);
+        ProducerUtilTest.assertProductEqualsFor(false, p, 200);
         Assert.assertTrue(p.produce());
         Thread.sleep(100);
-        assertProductEqualsFor(false, p, 100);
+        ProducerUtilTest.assertProductEqualsFor(false, p, 100);
         Assert.assertTrue(p.produce());
     }
 
@@ -220,11 +240,11 @@ class ProducerUtilTest {
         Assert.assertTrue(p.produce());
 
         Thread.sleep(100);
-        assertProductEqualsFor(false, p, 200);
+        ProducerUtilTest.assertProductEqualsFor(false, p, 200);
         Assert.assertTrue(p.produce());
 
         Thread.sleep(100);
-        assertProductEqualsFor(false, p, 200);
+        ProducerUtilTest.assertProductEqualsFor(false, p, 200);
         Assert.assertTrue(p.produce());
     }
 
@@ -234,11 +254,11 @@ class ProducerUtilTest {
 
         Assert.assertTrue(p.produce());
         Thread.sleep(100);
-        assertProductEqualsFor(false, p, 100);
+        ProducerUtilTest.assertProductEqualsFor(false, p, 100);
 
         Assert.assertTrue(p.produce());
         Thread.sleep(100);
-        assertProductEqualsFor(false, p, 100);
+        ProducerUtilTest.assertProductEqualsFor(false, p, 100);
         Assert.assertTrue(p.produce());
     }
 
@@ -261,5 +281,37 @@ class ProducerUtilTest {
                 Assert.assertEquals("After " + elapsed + "ms", expected, p.produce());
             }
         }
+    }
+
+    private static <T> Future<T>
+    completedFuture(@Nullable final T value) {
+
+        Future<T> result =  new Future<T>() {
+
+            // SUPPRESS CHECKSTYLE LineLength:3
+            @Override public boolean isDone()                              { return true;                               }
+            @Override public boolean isCancelled()                         { return false;                              }
+            @Override public boolean cancel(boolean mayInterruptIfRunning) { throw new UnsupportedOperationException(); }
+
+            @NotNullByDefault(false) @Override public T
+            get(long timeout, TimeUnit unit) { return this.get(); }
+
+            @NotNullByDefault(false) @Override public T
+            get() { return value; }
+        };
+        return result;
+    }
+
+    private static <EX extends Throwable> void
+    assertThrows(Class<EX> expected, RunnableWhichThrows<EX> runnableWhichThrows) {
+
+        try {
+            runnableWhichThrows.run();
+        } catch (Throwable t) {
+            if (expected.isAssignableFrom(t.getClass())) return;
+
+            throw new AssertionError(t);
+        }
+        throw new AssertionError("Missing exception");
     }
 }
