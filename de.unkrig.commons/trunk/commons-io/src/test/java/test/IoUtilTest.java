@@ -162,7 +162,7 @@ class IoUtilTest {
             "de/unkrig/commons/lang/AssertionUtil.class"
         );
         Assert.assertEquals(
-            "jar:" + new File(System.getProperty("user.dir")).toURI() + "../commons-lang/target/commons-lang-1.2.8-SNAPSHOT.jar!/de/unkrig/commons/lang/AssertionUtil.class",
+            "jar:" + new File(System.getProperty("user.dir")).toURI() + "../commons-lang/target/commons-lang-1.2.9-SNAPSHOT.jar!/de/unkrig/commons/lang/AssertionUtil.class",
             String.valueOf(loc)
         );
         if (loc != null) loc.openStream().close();
