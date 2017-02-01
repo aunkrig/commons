@@ -28,14 +28,11 @@ package de.unkrig.commons.lang.crypto;
 
 import javax.security.auth.Destroyable;
 
-import de.unkrig.commons.lang.security.DestroyableString;
-
 /**
  * This interface transforms a byte array such that it equals the original data which was previously encrypted
  * with the "right" {@link Encryptor}.
  *
- * @see Decryptors#decrypt(Decryptor, DestroyableString) For decrypting <em>strings</em> rather than byte
- *                                                                arrays
+ * @see Decryptors#decrypt(Decryptor, String) For decrypting <em>strings</em> rather than byte arrays
  */
 public
 interface Decryptor extends Destroyable {

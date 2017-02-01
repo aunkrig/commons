@@ -26,6 +26,7 @@
 
 package de.unkrig.commons.lang.crypto;
 
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.Arrays;
@@ -37,7 +38,7 @@ import javax.security.auth.Destroyable;
 
 import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.java6.Base64;
-import de.unkrig.commons.lang.security.DestroyableString;
+import de.unkrig.commons.lang.security.SecureCharsets;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 public final
@@ -147,18 +148,19 @@ class Decryptors {
     /**
      * BASE64-decodes the <var>subject</var>, decrypts the resulting bytes, and decodes them as UTF-8.
      * <p>
-     *   Closes the <var>subject</var>; the caller is responsible for closing the returned secure string.
+     *   Fills the <var>subject</var> with zeros.
      * </p>
      *
      * @throws WrongKeyException The key is wrong
      */
-    public static DestroyableString
-    decrypt(Decryptor decryptor, DestroyableString subject) throws WrongKeyException {
+    public static char[]
+    decrypt(Decryptor decryptor, String subject) throws WrongKeyException {
+
         try {
             return Decryptors.decrypt(decryptor, null, subject);
         } catch (SaltException se) {
 
-            // Should not occur due to the missing salt.
+            // Should not occur because there is no salt.
             throw new AssertionError(se);
         }
     }
@@ -166,39 +168,30 @@ class Decryptors {
     /**
      * BASE64-decodes the <var>subject</var>, decrypts the resulting bytes, (optionally) verifies and then strips the
      * <var>salt</var> prefix, and decodes the bytes as UTF-8.
-     * <p>
-     *   Closes the <var>subject</var>; the caller is responsible for closing the returned secure string.
-     * </p>
      *
      * @throws WrongKeyException The key is wrong
      * @throws SaltException     After decryption, the salt verification failed
      */
-    public static DestroyableString
-    decrypt(Decryptor decryptor, @Nullable byte[] salt, DestroyableString subject) throws WrongKeyException, SaltException {
+    public static char[]
+    decrypt(Decryptor decryptor, @Nullable byte[] salt, String subject) throws WrongKeyException, SaltException {
 
-        try {
-            String encryptedString = new String(subject.toCharArray());
+        byte[] encryptedBytes = Base64.decode(subject);
 
-            byte[] encryptedBytes = Base64.decode(encryptedString);
+        byte[] decryptedBytes = decryptor.decrypt(encryptedBytes);
 
-            byte[] decryptedBytes = decryptor.decrypt(encryptedBytes);
+        if (salt != null && salt.length > 0) {
 
-            if (salt != null && salt.length > 0) {
+            if (
+                decryptedBytes.length < salt.length
+                || !Decryptors.arrayEquals(decryptedBytes, 0, salt, 0, salt.length)
+            ) throw new SaltException();
 
-                if (
-                    decryptedBytes.length < salt.length
-                    || !Decryptors.arrayEquals(decryptedBytes, 0, salt, 0, salt.length)
-                ) throw new SaltException();
-
-                byte[] tmp = decryptedBytes;
-                decryptedBytes = Arrays.copyOfRange(decryptedBytes, salt.length, decryptedBytes.length);
-                Arrays.fill(tmp, (byte) 0);
-            }
-
-            return new DestroyableString(decryptedBytes, "UTF8");
-        } finally {
-            subject.destroy();
+            byte[] tmp = decryptedBytes;
+            decryptedBytes = Arrays.copyOfRange(decryptedBytes, salt.length, decryptedBytes.length);
+            Arrays.fill(tmp, (byte) 0);
         }
+
+        return SecureCharsets.secureDecode(decryptedBytes, Charset.forName("UTF8"));
     }
 
     private static boolean

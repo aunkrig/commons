@@ -44,9 +44,9 @@ import de.unkrig.commons.nullanalysis.Nullable;
 public
 interface DestroyableProperties extends Destroyable {
 
-    void setProperty(String key, CharSequence value);
+    void setProperty(String key, char[] value);
 
-    @Nullable DestroyableString getProperty(String key);
+    @Nullable char[] getProperty(String key);
 
     Set<String> propertyNames();
 

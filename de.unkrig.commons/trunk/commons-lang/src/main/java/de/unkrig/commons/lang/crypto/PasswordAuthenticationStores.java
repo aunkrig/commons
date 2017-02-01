@@ -44,7 +44,6 @@ import javax.security.auth.DestroyFailedException;
 import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.ObjectUtil;
 import de.unkrig.commons.lang.security.DestroyableProperties;
-import de.unkrig.commons.lang.security.DestroyableString;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -65,10 +64,13 @@ class PasswordAuthenticationStores {
         return new PasswordAuthenticationStore() {
 
             @Override @Nullable public String
-            getUserName(String key) { return PasswordAuthenticationStores.toString(delegate.getProperty(key + ".userName")); }
+            getUserName(String key) {
+                char[] ca = delegate.getProperty(key + ".userName");
+                return ca == null ? null : new String(ca);
+            }
 
-            @Override @Nullable public DestroyableString
-            getPassword(String key, String userName) {  return delegate.getProperty(key + ".password"); }
+            @Override @Nullable public char[]
+            getPassword(String key, String userName) { return delegate.getProperty(key + ".password"); }
 
 
             @Override public void
@@ -79,22 +81,22 @@ class PasswordAuthenticationStores {
 
                 DestroyableProperties sps = delegate;
 
-                sps.setProperty(userNamePropertyName, userName);
+                sps.setProperty(userNamePropertyName, userName.toCharArray());
                 sps.removeProperty(passwordPropertyName);
 
                 sps.store();
             }
 
             @Override public void
-            put(String key, String userName, CharSequence password) throws IOException {
+            put(String key, String userName, char[] password) throws IOException {
 
                 String userNamePropertyName = key + ".userName";
                 String passwordPropertyName = key + ".password";
 
                 DestroyableProperties sps = delegate;
 
-                sps.setProperty(userNamePropertyName, userName);
-                sps.setProperty(passwordPropertyName, password);
+                sps.setProperty(userNamePropertyName, userName.toCharArray());
+                sps.setProperty(passwordPropertyName, password); // <= Clears "password" array.
 
                 sps.store();
             }
@@ -135,14 +137,14 @@ class PasswordAuthenticationStores {
             @Override @Nullable public String
             getUserName(String key) { return delegate.getUserName(key); }
 
-            @Override @Nullable public DestroyableString
+            @Override @Nullable public char[]
             getPassword(String key, String userName) {
-                DestroyableString password = delegate.getPassword(key, userName);
+                char[] password = delegate.getPassword(key, userName);
                 try {
                     return password == null ? null : Decryptors.decrypt(
-                        c,                // c
-                        MD5.of(userName), // salt
-                        password          // subject
+                        c,                   // decryptor
+                        MD5.of(userName),    // salt
+                        new String(password) // subject
                     );
                 } catch (WrongKeyException wke) {
                     return null;
@@ -155,8 +157,8 @@ class PasswordAuthenticationStores {
             put(String key, String userName) throws IOException { delegate.put(key, userName); }
 
             @Override public void
-            put(String key, String userName, CharSequence password) throws IOException {
-                delegate.put(key, userName, Encryptors.encrypt(c, MD5.of(userName), password));
+            put(String key, String userName, char[] password) throws IOException {
+                delegate.put(key, userName, Encryptors.encrypt(c, MD5.of(userName), password).toCharArray());
             }
 
             @Override public void
@@ -238,10 +240,10 @@ class PasswordAuthenticationStores {
             }
 
             @Override public synchronized void
-            setProperty(String key, CharSequence value) {
+            setProperty(String key, char[] value) {
                 if (this.destroyed) throw new IllegalStateException();
 
-                Object previous = properties.setProperty(key, PasswordAuthenticationStores.toString(value));
+                Object previous = properties.setProperty(key, new String(value));
                 this.dirty |= !ObjectUtil.equals(value, previous);
             }
 
@@ -286,12 +288,12 @@ class PasswordAuthenticationStores {
                 return properties.isEmpty();
             }
 
-            @Override @Nullable public DestroyableString
+            @Override @Nullable public char[]
             getProperty(String key) {
                 if (this.destroyed) throw new IllegalStateException();
 
                 String result = properties.getProperty(key);
-                return result == null ? null : new DestroyableString(result);
+                return result == null ? null : result.toCharArray();
             }
 
             @Override public boolean
@@ -327,17 +329,5 @@ class PasswordAuthenticationStores {
     private static void
     delete(File file) throws IOException {
         if (!file.delete()) throw new IOException("Unable to delete \"" + file + "\"");
-    }
-
-    @Nullable private static String
-    toString(@Nullable DestroyableString subject) { return subject == null ? null : new String(subject.toCharArray()); }
-
-    @Nullable private static String
-    toString(@Nullable CharSequence subject) {
-        return (
-            subject == null                 ? null                                               :
-            subject instanceof DestroyableString ? new String(((DestroyableString) subject).toCharArray()) :
-            subject.toString()
-        );
     }
 }

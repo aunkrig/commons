@@ -44,7 +44,6 @@ import de.unkrig.commons.lang.crypto.Encryptor;
 import de.unkrig.commons.lang.crypto.Encryptors;
 import de.unkrig.commons.lang.crypto.SaltException;
 import de.unkrig.commons.lang.crypto.WrongKeyException;
-import de.unkrig.commons.lang.security.DestroyableString;
 
 public class CryptorTest {
 
@@ -126,12 +125,12 @@ public class CryptorTest {
 
         Cryptor c = Cryptors.fromSecretKey(CryptorTest.SECRET_KEY);
 
-        String encrypted = Encryptors.encrypt(c, original);
+        String encrypted = Encryptors.encrypt(c, original.toCharArray());
 
         Assert.assertNotEquals(original, encrypted);
 
-        DestroyableString decrypted = Decryptors.decrypt(c, new DestroyableString(encrypted));
-        Assert.assertEquals(original, new String(decrypted.toCharArray()));
+        char[] decrypted = Decryptors.decrypt(c, encrypted);
+        Assert.assertEquals(original, new String(decrypted));
     }
 
     @Test public void
@@ -142,11 +141,11 @@ public class CryptorTest {
         String original = "The quick brown fox jumps over the lazy dog";
         byte[] salt = { 1, 2, 3, 4 };
 
-        String encrypted = Encryptors.encrypt(c, salt, original);
+        String encrypted = Encryptors.encrypt(c, salt, original.toCharArray());
         Assert.assertNotEquals(original, encrypted);
 
-        DestroyableString decrypted = Decryptors.decrypt(c, salt, new DestroyableString(encrypted));
-        Assert.assertEquals(original, new String(decrypted.toCharArray()));
+        char[] decrypted = Decryptors.decrypt(c, salt, encrypted);
+        Assert.assertEquals(original, new String(decrypted));
     }
 
     @Test(expected = SaltException.class) public void
@@ -157,10 +156,10 @@ public class CryptorTest {
         String original = "The quick brown fox jumps over the lazy dog";
         byte[] salt = { 1, 2, 3, 4 };
 
-        String encrypted = Encryptors.encrypt(c, salt, original);
+        String encrypted = Encryptors.encrypt(c, salt, original.toCharArray());
         Assert.assertNotEquals(original, encrypted);
 
         salt[0]++;
-        Decryptors.decrypt(c, salt, new DestroyableString(encrypted));
+        Decryptors.decrypt(c, salt, encrypted);
     }
 }

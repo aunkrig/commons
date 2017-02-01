@@ -28,8 +28,6 @@ package de.unkrig.commons.lang.crypto;
 
 import javax.security.auth.Destroyable;
 
-import de.unkrig.commons.lang.security.DestroyableString;
-
 /**
  * An interface that implements both {@link Encryptor} and {@link Decryptor}. ("{@code EncryptorAndDecryptor}" was
  * considered a too long name for this interface.)
@@ -44,8 +42,8 @@ import de.unkrig.commons.lang.security.DestroyableString;
  *   is {@code true} for any byte array <var>ba</var> and any <var>cryptor</var> instance.
  * </p>
  *
- * @see Encryptors#encrypt(Cryptor, CharSequence)      For encrypting <em>strings</em> rather than byte arrays
- * @see Decryptors#decrypt(Cryptor, DestroyableString) For decrypting <em>strings</em> rather than byte arrays
+ * @see Encryptors#encrypt(Encryptor, char[])      For encrypting characters rather than byte arrays
+ * @see Decryptors#decrypt(Decryptor, String)      For decrypting <em>strings</em> rather than byte arrays
  */
 public
 interface Cryptor extends Encryptor, Decryptor, Destroyable {
