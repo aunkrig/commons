@@ -225,9 +225,13 @@ class PasswordAuthenticationStores {
 
                 if (origFile.exists()) PasswordAuthenticationStores.delete(origFile);
 
-                if (propertiesFile.exists()) PasswordAuthenticationStores.rename(propertiesFile, origFile);
-
-                PasswordAuthenticationStores.rename(newFile, propertiesFile);
+                if (propertiesFile.exists()) {
+                    PasswordAuthenticationStores.rename(propertiesFile, origFile);
+                    PasswordAuthenticationStores.rename(newFile, propertiesFile);
+                    PasswordAuthenticationStores.delete(origFile);
+                } else {
+                    PasswordAuthenticationStores.rename(newFile, propertiesFile);
+                }
 
                 this.dirty = false;
             }
