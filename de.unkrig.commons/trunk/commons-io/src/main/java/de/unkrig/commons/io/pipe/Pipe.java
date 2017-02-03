@@ -47,9 +47,9 @@ interface Pipe extends Closeable {
      * Reads at most <var>len</var> bytes from this pipe into the <var>buf</var> at offset <var>off</var>.
      *
      * @return                  The number of bytes read ({@code 1 ... len}); 0 iff this pipe is empty
-     * @throws RuntimeException {@code off} is negative
-     * @throws RuntimeException {@code len} is negative
-     * @throws RuntimeException {@code off+len} is greater than <var>buf</var>{@code .length}
+     * @throws RuntimeException <var>off</var> is negative
+     * @throws RuntimeException <var>len</var> is negative
+     * @throws RuntimeException <var>off</var>+<var>len</var> is greater than <var>buf</var>{@code .length}
      */
     int read(byte[] buf, int off, int len) throws IOException;
 
@@ -64,9 +64,9 @@ interface Pipe extends Closeable {
      * Writes at most <var>len</var> bytes from <var>buf</var> at offset <var>off</var> to this pipe.
      *
      * @return                  The number of bytes written ({@code 1 ... len}); 0 iff this pipe is full
-     * @throws RuntimeException {@code off} is negative
-     * @throws RuntimeException {@code len} is negative
-     * @throws RuntimeException {@code off+len} is greater than {@code buf.length}
+     * @throws RuntimeException <var>off</var> is negative
+     * @throws RuntimeException <var>len</var> is negative
+     * @throws RuntimeException <var>off</var>+<var>len</var> is greater than <var>buf</var>{@code .length}
      */
     int write(byte[] buf, int off, int len) throws IOException;
 

@@ -58,8 +58,8 @@ class FileContentsProcessor<T> implements FileProcessor<T> {
     }
 
     /**
-     * Opens the {@code file}, passes the input stream to {@link ContentsProcessor#process(String, InputStream, long,
-     * long, ProducerWhichThrows)}, then closes the file.
+     * Opens the <var>file</var>, passes the input stream to {@link ContentsProcessor#process(String, InputStream,
+     * long, long, ProducerWhichThrows)}, then closes the file.
      * <p>
      *   Subclasses may override this behavior, e.g. by recursing into directories or archives.
      * </p>

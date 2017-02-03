@@ -404,7 +404,7 @@ class FtpSession implements RunnableWhichThrows<IOException> {
     // IMPLEMENTATION
 
     /**
-     * Establishes the data connection, calls the {@code action}, then closes the data connection.
+     * Establishes the data connection, calls the <var>action</var>, then closes the data connection.
      */
     private void
     dataConnection(ConsumerWhichThrows<Socket, IOException> action) throws IOException {

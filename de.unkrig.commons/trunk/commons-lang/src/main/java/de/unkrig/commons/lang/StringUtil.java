@@ -44,7 +44,7 @@ class StringUtil {
     StringUtil() {}
 
     /**
-     * Converts all {@code elements} to string and concatenates these, separated by the {@code glue}.
+     * Converts all <var>elements</var> to string and concatenates these, separated by the <var>glue</var>.
      */
     public static String
     join(Collection<? extends Object> elements, String glue) {
@@ -94,7 +94,7 @@ class StringUtil {
     }
 
     /**
-     * @return A string consisting of {@code n} times the character "{@code c}"
+     * @return A string consisting of <var>n</var> times the character <var>c</var>
      */
     public static String
     repeat(int n, char c) {
@@ -107,7 +107,7 @@ class StringUtil {
     }
 
     /**
-     * @return A string consisting of {@code n} times the string "{@code s}"
+     * @return A string consisting of <var>n</var> times the string <var>s</var>
      */
     public static String
     repeat(int n, String s) {

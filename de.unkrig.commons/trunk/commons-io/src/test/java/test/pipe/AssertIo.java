@@ -26,9 +26,9 @@
 
 package test.pipe;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.OutputStream;
+
+import org.junit.Assert;
 
 import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.protocol.Producer;
@@ -44,7 +44,7 @@ class AssertIo {
     private AssertIo() {}
 
     /**
-     * @return An output stream which asserts that the data written to it equals the {@code expected} byte sequence
+     * @return An output stream which asserts that the data written to it equals the <var>expected</var> byte sequence
      */
     public static OutputStream
     assertEqualData(final Producer<? extends Byte> expected) {
@@ -58,7 +58,7 @@ class AssertIo {
                 Byte product = expected.produce();
                 assert product != null;
                 if ((0xff & product) != (0xff & b)) {
-                    assertEquals(this.count + " bytes matched so far", 0xff & product, 0xff & b);
+                    Assert.assertEquals(this.count + " bytes matched so far", 0xff & product, 0xff & b);
                 }
                 this.count++;
             }

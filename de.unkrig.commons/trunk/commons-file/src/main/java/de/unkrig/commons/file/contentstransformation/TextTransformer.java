@@ -40,8 +40,8 @@ public
 interface TextTransformer {
 
     /**
-     * Reads characters from {@code reader} (typically until end-of-input) and writes characters to {@code writer}.
-     * Closes neither the {@code reader} nor the {@code writer}.
+     * Reads characters from <var>reader</var> (typically until end-of-input) and writes characters to
+     * <var>writer</var>. Closes neither the <var>reader</var> nor the <var>writer</var>.
      *
      * @param path Designates the contents that is transformed
      */

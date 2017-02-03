@@ -158,7 +158,7 @@ class CompressionFormatFactory {
 
     /**
      * @return The {@link CompressionFormat} for the given file name, or {@code null} iff a compression format cannot
-     *         be deduced from the {@code fileName}
+     *         be deduced from the <var>fileName</var>
      * @see    FileNameUtil#isCompressedFilename(String)
      */
     @Nullable public static CompressionFormat
@@ -170,8 +170,8 @@ class CompressionFormatFactory {
     }
 
     /**
-     * @return The {@link CompressionFormat} for the given {@code compressionFormatName}
-     * @throws CompressorException The {@code compressionFormatName} is unknown
+     * @return The {@link CompressionFormat} for the given <var>compressionFormatName</var>
+     * @throws CompressorException The <var>compressionFormatName</var> is unknown
      */
     public static CompressionFormat
     forFormatName(String compressionFormatName) throws CompressorException {
@@ -222,7 +222,7 @@ class CompressionFormatFactory {
     }
 
     /**
-     * @return     The compression format produced by the {@code compressorOutputStream}
+     * @return     The compression format produced by the <var>compressorOutputStream</var>
      * @deprecated Should be replaced by a new method {@code CompressorOutputStream.getFormat()}
      */
     @Deprecated public static CompressionFormat
@@ -259,8 +259,8 @@ class CompressionFormatFactory {
     }
 
     /**
-     * Determines the compression format from the first few bytes of the {@code inputStream} and then wraps it in the
-     * appropriate {@link CompressorInputStream}.
+     * Determines the compression format from the first few bytes of the <var>inputStream</var> and then wraps it in
+     * the appropriate {@link CompressorInputStream}.
      */
     public static CompressorInputStream
     compressorInputStream(InputStream inputStream) throws IOException, CompressorException {
@@ -274,8 +274,8 @@ class CompressionFormatFactory {
     }
 
     /**
-     * Determines the compression format from the first few bytes of the {@code compressedFile} and then returns a
-     * {@link CompressorInputStream} reading from the {@code compressedFile}.
+     * Determines the compression format from the first few bytes of the <var>compressedFile</var> and then returns a
+     * {@link CompressorInputStream} reading from the <var>compressedFile</var>.
      * <p>
      *   Is typically faster than {@code
      *   CompressionFormatFactory.forContents(compressedFile).compressorInputStream(compressedFile)}.

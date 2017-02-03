@@ -46,7 +46,7 @@ class X509Util {
 
     /**
      * @return An {@link X509KeyManager} that forwards all method calls to a delegate, except that {@link
-     * X509KeyManager#chooseServerAlias(String, Principal[], Socket)} returns {@code serverAlias}.
+     * X509KeyManager#chooseServerAlias(String, Principal[], Socket)} returns <var>serverAlias</var>.
      */
     @NotNullByDefault(false) public static X509KeyManager
     selectServerAlias(final X509KeyManager delegate, final String serverAlias) {

@@ -46,7 +46,7 @@ public
 interface ConsumerWhichThrows<T, EX extends Throwable> {
 
     /**
-     * Consumes one {@code subject} of type {@code T}.
+     * Consumes one <var>subject</var> of type {@code T}.
      * <p>
      *   Generally subjects should either be immutable, or the 'ownership' of the product should pass from the caller
      *   to the consumer. Particularly, the consumer should not be called with one (mutable) instance more than once.

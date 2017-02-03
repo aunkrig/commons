@@ -82,7 +82,7 @@ class FileUtil {
     /**
      * Deletes the given regular file, or clears and deletes the given directory recursively.
      *
-     * @throws IOException The {@code file} could not be deleted
+     * @throws IOException The <var>file</var> could not be deleted
      */
     public static void
     deleteRecursively(File file) throws IOException {
@@ -121,10 +121,10 @@ class FileUtil {
     }
 
     /**
-     * Opens the named {@code file}, lets the {@code processor} read text from it, and closes the file.
+     * Opens the named <var>file</var>, lets the <var>processor</var> read text from it, and closes the file.
      *
      * @param charset The charset to be used for reading
-     * @throws EX     The throwable that the {@code processor} may throw
+     * @throws EX     The throwable that the <var>processor</var> may throw
      */
     public static <EX extends Throwable> void
     processContent(
@@ -137,9 +137,9 @@ class FileUtil {
     }
 
     /**
-     * Passes the given {@code reader} to the {@code processor}, and then closes the file.
+     * Passes the given <var>reader</var> to the <var>processor</var>, and then closes the file.
      *
-     * @throws EX The throwable that the {@code processor} may throw
+     * @throws EX The throwable that the <var>processor</var> may throw
      */
     public static <EX extends Throwable> void
     processContent(

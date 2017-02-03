@@ -72,7 +72,7 @@ class ObjectUtil {
     hashCode(@Nullable Object o) { return o == null ? 0 : o.hashCode(); }
 
     /**
-     * @return Returns {@code value.toString()} or the {@code defaultValue} iff {@code value == null}
+     * @return Returns {@code value.toString()} or the <var>defaultValue</var> iff {@code value == null}
      */
     public static <T> String
     toString(@Nullable T value, String defaultValue) { return value != null ? value.toString() : defaultValue; }

@@ -202,7 +202,7 @@ class PrettyPrinter {
     }
 
     /**
-     * @return The fully qualified canonical name of the class of {@code o}, or, if that class is in a subpackage of
+     * @return The fully qualified canonical name of the class of <var>o</var>, or, if that class is in a subpackage of
      * 'java', its simple class name.
      */
     private static String

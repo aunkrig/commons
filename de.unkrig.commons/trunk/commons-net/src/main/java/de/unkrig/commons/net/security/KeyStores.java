@@ -57,7 +57,7 @@ class KeyStores {
     private KeyStores() {}
 
     /**
-     * Loads and returns the given {@code keyStoreFile} (or the JVM's default keystore file).
+     * Loads and returns the given <var>keyStoreFile</var> (or the JVM's default keystore file).
      */
     public static KeyStore
     loadKeyStore(@Nullable File keyStoreFile, @Nullable char[] keyStorePassword)

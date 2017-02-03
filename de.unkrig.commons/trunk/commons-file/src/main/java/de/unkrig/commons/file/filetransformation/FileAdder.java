@@ -36,9 +36,9 @@ public
 interface FileAdder {
 
     /**
-     * Adds files in the given {@code directory}.
+     * Adds files in the given <var>directory</var>.
      *
-     * @param path The path designating the {@code directory}
+     * @param path The path designating the <var>directory</var>
      */
     void
     addFiles(String path, File directory, FileTransformer.Mode mode) throws IOException;

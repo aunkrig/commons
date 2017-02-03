@@ -45,10 +45,10 @@ class AbstractRingBuffer extends AbstractPipe {
     AbstractRingBuffer(long capacity) { this.capacity = capacity; }
 
     /**
-     * Transfers {@code len} bytes from the backing store to {@code buf[off]...}.
+     * Transfers <var>len</var> bytes from the backing store to <var>buf</var>{@code [off]...}.
      *
-     * @param pos 0...{@code capacity}
-     * @param off 0...{@code buf.length}
+     * @param pos 0...<var>capacity</var>
+     * @param off 0...<var>buf</var>{@code .length}
      * @param len 0...{@code min(capacity - pos, buf.length - off}
      * @see #AbstractRingBuffer(long)
      */
@@ -56,11 +56,11 @@ class AbstractRingBuffer extends AbstractPipe {
     get(long pos, byte[] buf, int off, int len) throws IOException;
 
     /**
-     * Transfers {@code len} bytes from {@code buf[off]...} to the backing store.
+     * Transfers <var>len</var> bytes from {@code buf[off]...} to the backing store.
      *
      * @param off 0...{@code buf.length}
      * @param len 0...{@code min(capacity - pos, buf.length - off}
-     * @param pos 0...{@code capacity}
+     * @param pos 0...<var>capacity</var>
      * @see #AbstractRingBuffer(long)
      */
     protected abstract void

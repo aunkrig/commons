@@ -310,7 +310,7 @@ class IoUtil {
     }
 
     /**
-     * Copies the contents of the <var>reader</var> to the {@code outputFile}, encoded with the given
+     * Copies the contents of the <var>reader</var> to the <var>outputFile</var>, encoded with the given
      * <var>outputCharset</var>. Attempts to delete a partially written output file if the operation fails.
      *
      * @return The number of characters copied
@@ -773,7 +773,7 @@ class IoUtil {
 
     /**
      * Executes the <var>writingRunnables</var> in parallel, <i>concatenates</i> their output, and writes it to the
-     * {@code writer}, i.e. the output of the runnables does not mix, but the <i>complete</i> output of the first
+     * <var>writer</var>, i.e. the output of the runnables does not mix, but the <i>complete</i> output of the first
      * runnable appears before that of the second runnable, and so on.
      * <p>
      *   Since the character buffer for each {@link WritingRunnable} has a limited size, the runnables with higher

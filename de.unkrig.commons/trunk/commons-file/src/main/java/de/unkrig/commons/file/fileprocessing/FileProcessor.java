@@ -43,7 +43,7 @@ interface FileProcessor<T> {
     /**
      * Do 'something' with the given file.
      *
-     * @param path                  The string that characterizes the {@code file}
+     * @param path                  The string that characterizes the <var>file</var>
      * @throws InterruptedException The processing was parallelized in multiple threads, and at least one of the
      *                              threads was interrupted
      */

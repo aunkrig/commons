@@ -126,8 +126,8 @@ class TransformerUtil {
     }
 
     /**
-     * @return A {@link Transformer} which calls the {@code delegate}, except when the {@code subject} equals the
-     *         {@code extraInput}, when it returns {@code extraOutput}
+     * @return A {@link Transformer} which calls the <var>delegate</var>, except when the <var>subject</var> equals the
+     *         <var>extraInput</var>, when it returns <var>extraOutput</var>
      */
     public static <I, O> Transformer<I, O>
     combine(final I extraInput, final O extraOutput, final Transformer<? super I, O> delegate) {
@@ -142,8 +142,8 @@ class TransformerUtil {
     }
 
     /**
-     * @return A {@link TransformerWhichThrows} which calls the {@code delegate}, except when the {@code subject}
-     *         equals the {@code extraInput}, when it returns {@code extraOutput}
+     * @return A {@link TransformerWhichThrows} which calls the <var>delegate</var>, except when the <var>subject</var>
+     *         equals the <var>extraInput</var>, when it returns <var>extraOutput</var>
      */
     public static <I, O, EX extends Throwable> TransformerWhichThrows<I, O, EX>
     combine(final I extraInput, final O extraOutput, final TransformerWhichThrows<? super I, O, EX> delegate) {

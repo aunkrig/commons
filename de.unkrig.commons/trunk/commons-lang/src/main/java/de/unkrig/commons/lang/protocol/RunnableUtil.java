@@ -41,9 +41,9 @@ class RunnableUtil {
     public static final Runnable NOP = new Runnable() { @Override public void run() {} };
 
     /**
-     * Runs {@code delegate1}, then {@code delegate2} in the current thread.
+     * Runs <var>delegate1</var>, then <var>delegate2</var> in the current thread.
      *
-     * @return A runnable that runs {@code delegate1} and then {@code delegate2}
+     * @return A runnable that runs <var>delegate1</var> and then <var>delegate2</var>
      *
      * @see RunnableWhichThrows#run()
      */
@@ -52,8 +52,8 @@ class RunnableUtil {
         return new RunnableWhichThrows<EX>() {
 
             /**
-             * @throws EX The exception thrown by {@code delegate1} or {@code delegate2}; if thrown by {@code
-             *            delegate1}, then {@code delegate2} is not run
+             * @throws EX The exception thrown by <var>delegate1</var> or <var>delegate2</var>; if thrown by
+             *            <var>delegate1</var>, then <var>delegate2</var> is not run
              */
             @Override public void
             run() throws EX {
@@ -64,9 +64,9 @@ class RunnableUtil {
     }
 
     /**
-     * Runs the given {@code delegates} in the current thread, in the order of the collection's iterator.
+     * Runs the given <var>delegates</var> in the current thread, in the order of the collection's iterator.
      *
-     * @return    A runnable that runs all the {@code delegates} in strict sequence
+     * @return    A runnable that runs all the <var>delegates</var> in strict sequence
      *
      * @see RunnableWhichThrows#run()
      */
@@ -75,7 +75,7 @@ class RunnableUtil {
         return new RunnableWhichThrows<EX>() {
 
             /**
-             * @throws EX The exception thrown by one of the {@code delegates}; the following runnables are not run
+             * @throws EX The exception thrown by one of the <var>delegates</var>; the following runnables are not run
              */
             @Override public void
             run() throws EX {
@@ -108,12 +108,12 @@ class RunnableUtil {
     }
 
     /**
-     * The returned {@link Runnable} runs the delegate iff the {@code condition} evaluates to {@code true}.
+     * The returned {@link Runnable} runs the delegate iff the <var>condition</var> evaluates to {@code true}.
      * <p>
-     *   (The {@code condition} is evaluated with {@code null} as the {@code subject} argument.)
+     *   (The <var>condition</var> is evaluated with {@code null} as the <var>subject</var> argument.)
      * </p>
      *
-     * @param subject The {@code subject} for the {@code condition}
+     * @param subject The <var>subject</var> for the <var>condition</var>
      */
     public static <ST> Runnable
     sparingRunnable(final Runnable delegate, final Predicate<? super ST> condition, final ST subject) {
@@ -125,7 +125,7 @@ class RunnableUtil {
     }
 
     /**
-     * The returned {@link Runnable} runs the delegate iff the {@code condition} produces {@link Boolean#TRUE}.
+     * The returned {@link Runnable} runs the delegate iff the <var>condition</var> produces {@link Boolean#TRUE}.
      *
      * @see PredicateUtil#after(long)
      * @see ProducerUtil#every(long)

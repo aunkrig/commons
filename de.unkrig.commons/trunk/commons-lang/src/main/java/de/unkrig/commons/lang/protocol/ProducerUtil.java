@@ -48,11 +48,11 @@ class ProducerUtil {
     ProducerUtil() {}
 
     /**
-     * The returned {@link Producer} calls the {@code delegate} iff the {@code condition} returns {@code true},
-     * otherwise it returns the previous product of the {@code delegate}, or {@code null} iff the delegate has
+     * The returned {@link Producer} calls the <var>delegate</var> iff the <var>condition</var> returns {@code true},
+     * otherwise it returns the previous product of the <var>delegate</var>, or {@code null} iff the delegate has
      * not yet been called.
      *
-     * @param subject The {@code subject} argument for the {@code condition}
+     * @param subject The <var>subject</var> argument for the <var>condition</var>
      * @deprecated    Use {@link #cache(ProducerWhichThrows, ProducerWhichThrows)} instead, which has very similar (but
      *                not identical) semantics.
      */
@@ -73,9 +73,9 @@ class ProducerUtil {
 
     /**
      * Returns a {@code Producer<Boolean>} who's first evaluation result is {@code true}, and each following result is
-     * {@code true} iff the last {@code true} result was returned at least the given {@code interval} milliseconds ago.
-     * In other words, the interval between two returned {@code true} values is never shorter than {@code interval}
-     * milliseconds.
+     * {@code true} iff the last {@code true} result was returned at least the given <var>interval</var> milliseconds
+     * ago. In other words, the interval between two returned {@code true} values is never shorter than
+     * <var>interval</var> milliseconds.
      * <p>
      *   The returned producer is not synchronized and therefore not thread-safe; to get a thread-safe producer, use
      *   {@link ProducerUtil#synchronizedProducer(ProducerWhichThrows)}.
@@ -139,7 +139,7 @@ class ProducerUtil {
     }
 
     /**
-     * Creates and returns a {@link Producer} that produced the given {@code elements}.
+     * Creates and returns a {@link Producer} that produced the given <var>elements</var>.
      *
      * <p>
      *   The returned producer is not synchronized and therefore not thread-safe; to get a thread-safe producer, use
@@ -189,7 +189,7 @@ class ProducerUtil {
     }
 
     /**
-     * Produces the elements <var>from</var> ... <var>to</var>-1 of the {@code delegate} array, and after that an
+     * Produces the elements <var>from</var> ... <var>to</var>-1 of the <var>delegate</var> array, and after that an
      * infinite sequence of {@code null}s.
      * <p>
      *   The returned producer is not synchronized and therefore not thread-safe; to get a thread-safe producer, use
@@ -234,7 +234,8 @@ class ProducerUtil {
     }
 
     /**
-     * Produces the products of the {@code iterator}, or {@code null} iff the {@code iterator} has no more elements.
+     * Produces the products of the <var>delegate</var>, or {@code null} iff the <var>delegate</var> has no more
+     * elements.
      * <p>
      *   The returned producer is not synchronized and therefore not thread-safe; to get a thread-safe producer, use
      *   {@link ProducerUtil#synchronizedProducer(ProducerWhichThrows)}.
@@ -244,7 +245,8 @@ class ProducerUtil {
     fromIterator(final Iterator<T> delegate) { return ProducerUtil.fromIterator(delegate, false); }
 
     /**
-     * Produces the products of the {@code iterator}, or {@code null} iff the {@code iterator} has no more elements.
+     * Produces the products of the <var>delegate</var>, or {@code null} iff the <var>delegate</var> has no more
+     * elements.
      * <p>
      *   If <var>remove</var> is {@code true}, then products are removed from the underlying collections as the
      *   elements are iterated.
@@ -272,7 +274,7 @@ class ProducerUtil {
     }
 
     /**
-     * Produces objects based on the number of preceding invocations, i.e. the {@code indexTransformer} is invoked
+     * Produces objects based on the number of preceding invocations, i.e. the <var>indexTransformer</var> is invoked
      * with subjects '0', '1', '2', ...
      * <p>
      *   The returned producer is not synchronized and therefore not thread-safe; to get a thread-safe producer, use
@@ -292,7 +294,7 @@ class ProducerUtil {
     }
 
     /**
-     * Produces objects based on the number of preceding invocations, i.e. the {@code indexTransformer} is invoked
+     * Produces objects based on the number of preceding invocations, i.e. the <var>indexTransformer</var> is invoked
      * with subjects '0', '1', '2', ...
      * <p>
      *   The returned producer is not synchronized and therefore not thread-safe; to get a thread-safe producer, use

@@ -82,9 +82,9 @@ class Main {
         }
 
         /**
-         * Replaces all matches of the pattern within the {@code subject} with the replacement
+         * Replaces all matches of the pattern within the <var>subject</var> with the replacement
          *
-         * @return The modified {@code subject}
+         * @return The modified <var>subject</var>
          */
         public String
         apply(String subject) {

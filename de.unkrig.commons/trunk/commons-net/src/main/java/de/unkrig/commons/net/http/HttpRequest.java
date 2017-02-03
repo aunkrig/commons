@@ -212,7 +212,7 @@ class HttpRequest extends HttpMessage {
         this.parameterMap  = null;
     }
 
-    /** @return The values of all parameters with the given {@code name} */
+    /** @return The values of all parameters with the given <var>name</var> */
     @Nullable public String[]
     getParameter(String name) throws IOException {
 
@@ -498,8 +498,8 @@ class HttpRequest extends HttpMessage {
     }
 
     /**
-     * Reads one HTTP request from {@code in} through the {@code multiplexer} and passes it to the {@code
-     * requestConsumer}.
+     * Reads one HTTP request from <var>in</var> through the <var>multiplexer</var> and passes it to the
+     * <var>requestConsumer</var>.
      */
     public static void
     read(

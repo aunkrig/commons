@@ -34,11 +34,12 @@ import java.io.InputStream;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 
 /**
- * Signals end-of-input after exactly {@code limit} bytes were read from the delegate. Throws an EOFException iff
- * the delegate produces less than {@code limit} bytes.
+ * Signals end-of-input after exactly <var>limit</var> bytes were read from the delegate. Throws an EOFException iff
+ * the delegate produces less than <var>limit</var> bytes.
  */
 @NotNullByDefault(false) public
 class FixedLengthInputStream extends FilterInputStream {
+
     private final long limit;
     private long       count;
 

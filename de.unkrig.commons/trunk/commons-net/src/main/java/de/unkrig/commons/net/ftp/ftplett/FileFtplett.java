@@ -166,8 +166,8 @@ class FileFtplett implements Ftplett {
     }
 
     /**
-     * @return The file or directory denoted by the {@code path}, or the current working directory if the {@code path}
-     *         is {@code null}.
+     * @return The file or directory denoted by the <var>path</var>, or the current working directory if the
+     *         <var>path</var> is {@code null}
      */
     private File
     toFile(@Nullable String path) throws IOException {

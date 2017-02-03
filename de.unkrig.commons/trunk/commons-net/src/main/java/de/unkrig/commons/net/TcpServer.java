@@ -104,16 +104,16 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
     /**
      * Creates a (non-secure) server with the specified endpoint and listen backlog.
      * <p>
-     *   The address of the {@code endpoint} can be used on a multi-homed host for a server that will only accept
-     *   connect requests to one of its addresses. If address of the {@code endpoint} is the wildcard address, it will
-     *   default accepting connections on any/all local addresses.
+     *   The address of the <var>endpoint</var> can be used on a multi-homed host for a server that will only accept
+     *   connect requests to one of its addresses. If address of the <var>endpoint</var> is the wildcard address, it
+     *   will default accepting connections on any/all local addresses.
      * </p>
      * <p>
-     *   The port of the {@code endpoint} must be between 0 and 65535, inclusive. If it is zero, then an ephemeral port
-     *  will be picked for the server socket.
+     *   The port of the <var>endpoint</var> must be between 0 and 65535, inclusive. If it is zero, then an ephemeral
+     *   port will be picked for the server socket.
      *</p>
      * <p>
-     *   The {@code backlog} argument must be a positive value greater than 0. If the value passed if equal or less
+     *   The <var>backlog</var> argument must be a positive value greater than 0. If the value passed if equal or less
      *   than 0, then the default value will be assumed.
      * </p>
      *
@@ -130,15 +130,18 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
     /**
      * Creates a secure server with the specified endpoint and listen backlog.
      * <p>
-     * The address of the {@code endpoint} can be used on a multi-homed host for a server that will only accept connect
-     * requests to one of its addresses. If address of the {@code endpoint} is the wildcard address, it will default
-     * accepting connections on any/all local addresses.
+     *   The address of the <var>endpoint</var> can be used on a multi-homed host for a server that will only accept
+     *   connect requests to one of its addresses. If address of the <var>endpoint</var> is the wildcard address, it
+     *   will default accepting connections on any/all local addresses.
+     * </p>
      * <p>
-     * The port of the {@code endpoint} must be between 0 and 65535, inclusive. If it is zero, then an ephemoral port
-     * will be picked for the server socket.
+     *   The port of the <var>endpoint</var> must be between 0 and 65535, inclusive. If it is zero, then an ephemoral
+     *   port will be picked for the server socket.
+     * </p>
      * <p>
-     * The {@code backlog} argument must be a positive value greater than 0. If the value passed if equal or less than
-     * 0, then the default value will be assumed.
+     *   The <var>backlog</var> argument must be a positive value greater than 0. If the value passed if equal or less
+     *   than 0, then the default value will be assumed.
+     * </p>
      *
      * @param endpoint The local port and {@link InetAddress} the server will bind to. If {@code null}, then the
      *                 system will pick up an ephemeral port and a valid local address to bind the socket.
@@ -169,16 +172,16 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
     /**
      * Create a server socket with the specified endpoint and listen backlog.
      * <p>
-     *   The address of the {@code endpoint} can be used on a multi-homed host for a server that will only accept
-     *   connect requests to one of its addresses. If address of the {@code endpoint} is the
+     *   The address of the <var>endpoint</var> can be used on a multi-homed host for a server that will only accept
+     *   connect requests to one of its addresses. If address of the <var>endpoint</var> is the
      *   {@link InetAddress#anyLocalAddress() wildcard address}, it will default accepting connections on any/all local
      *   addresses.
      * <p>
-     *   The port of the {@code endpoint} must be between 0 and 65535, inclusive. If it is zero, then an ephemoral port
+     *   The port of the <var>endpoint</var> must be between 0 and 65535, inclusive. If it is zero, then an ephemoral port
      *   will be picked for the server socket.
      * </p>
      * <p>
-     *   The {@code backlog} argument must be a positive value greater than 0. If the value passed if equal or less
+     *   The <var>backlog</var> argument must be a positive value greater than 0. If the value passed if equal or less
      *   than 0, then the default value will be assumed.
      * </p>
      *
@@ -202,15 +205,18 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
     /**
      * Creates a secure server socket with the specified endpoint and listen backlog.
      * <p>
-     * The address of the {@code endpoint} can be used on a multi-homed host for a server that will only accept connect
-     * requests to one of its addresses. If the address of the {@code endpoint} is the wildcard address, it will
-     * default accepting connections on any/all local addresses.
+     *   The address of the <var>endpoint</var> can be used on a multi-homed host for a server that will only accept
+     *   connect requests to one of its addresses. If the address of the <var>endpoint</var> is the wildcard address,
+     *   it will default accepting connections on any/all local addresses.
+     * </p>
      * <p>
-     * The port of the {@code endpoint} must be between 0 and 65535, inclusive. If it is zero, then an ephemoral port
-     * will be picked for the server socket.
+     *   The port of the <var>endpoint</var> must be between 0 and 65535, inclusive. If it is zero, then an ephemoral
+     *   port will be picked for the server socket.
+     * </p>
      * <p>
-     * The {@code backlog} argument must be a positive value greater than 0. If the value passed if equal or less than
-     * 0, then the default value will be assumed.
+     *   The <var>backlog</var> argument must be a positive value greater than 0. If the value passed if equal or less
+     *   than 0, then the default value will be assumed.
+     * </p>
      *
      * @param endpoint The local port and {@link InetAddress} the server will bind to. If {@code null}, then the
      *                 system will pick up an ephemeral port and a valid local address to bind the socket.

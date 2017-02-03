@@ -178,7 +178,7 @@ class ContentsProcessings {
      * normalContentsProcessor}, but automagically detects various archive and compression formats and processes the
      * <i>entries of the archive</i> and the <i>uncompressed contents</i> instead of the "raw" contents.
      * <p>
-     *   Archive files and compressed files are introspected iff {@code lookIntoFormat} evaluates {@code true} for
+     *   Archive files and compressed files are introspected iff <var>lookIntoFormat</var> evaluates {@code true} for
      *   "<i>format</i><b>:</b><i>path</i>".
      * </p>
      */
@@ -257,7 +257,7 @@ class ContentsProcessings {
      * nested) and processes the <i>entries of the archive</i> and the <i>uncompressed contents</i> instead of the
      * "raw" contents.
      * <p>
-     *   Archive streams/entries and compressed streams/entries are introspected iff {@code lookIntoFormat} evaluates
+     *   Archive streams/entries and compressed streams/entries are introspected iff <var>lookIntoFormat</var> evaluates
      *   {@code true} for "<i>format</i><b>:</b><i>path</i>".
      * </p>
      */
@@ -305,7 +305,7 @@ class ContentsProcessings {
 
     /**
      * Creates and returns an {@link ArchiveHandler} which processes {@link ArchiveInputStream}s by feeding their
-     * entries into the {@code contentsProcessor}.
+     * entries into the <var>contentsProcessor</var>.
      *
      * @param opener Will be invoked later when the returned archive handler processes a concrete archive
      */
@@ -352,7 +352,7 @@ class ContentsProcessings {
 
     /**
      * Creates and returns a {@link CompressorHandler} which processes an {@link ArchiveInputStream} by feeding its
-     * entries to the given {@code contentsProcessor}.
+     * entries to the given <var>contentsProcessor</var>.
      *
      * @param opener Re-produces the input stream
      */
@@ -393,7 +393,7 @@ class ContentsProcessings {
 
     /**
      * Creates and returns a {@link TransformerWhichThrows} which processes an {@link InputStream} by feeding it into
-     * the given {@code contentsProcessor}.
+     * the given <var>contentsProcessor</var>.
      *
      * @param size   -1 if unknown
      * @param crc32  See {@link ContentsProcessor#process(String, InputStream, long, long, ProducerWhichThrows)}

@@ -87,12 +87,12 @@ class NioTcpServer implements Stoppable {
     /**
      * Create a server socket with the specified endpoint and listen backlog.
      * <p>
-     * The address of the {@code endpoint} can be used on a multi-homed host for a server that will only accept connect
-     * requests to one of its addresses. If address of the {@code endpoint} is the wildcard address, it will default
-     * accepting connections on any/all local addresses.
+     * The address of the <var>endpoint</var> can be used on a multi-homed host for a server that will only accept
+     * connect requests to one of its addresses. If address of the <var>endpoint</var> is the wildcard address, it will
+     * default accepting connections on any/all local addresses.
      * <p>
-     * The port of the {@code endpoint} must be between 0 and 65535, inclusive. If it is zero, then an ephemoral port
-     * will be picked for the server socket.
+     * The port of the <var>endpoint</var> must be between 0 and 65535, inclusive. If it is zero, then an ephemoral
+     * port will be picked for the server socket.
      * <p>
      * The backlog argument must be a positive value greater than 0. If the value passed if equal or less than 0, then
      * the default value will be assumed.
@@ -122,7 +122,7 @@ class NioTcpServer implements Stoppable {
     interface ConnectionHandler {
 
         /**
-         * A connection was accepted; use the {@code multiplexer} to wait until {@code in}, {@code out} or some
+         * A connection was accepted; use the <var>multiplexer</var> to wait until <var>in</var>, <var>out</var> or some
          * other {@link SelectableChannel} becomes readable or writable.
          *
          * @param stoppable Stopping this will break the connection
@@ -141,12 +141,12 @@ class NioTcpServer implements Stoppable {
     /**
      * Create a server with the specified endpoint and listen backlog.
      * <p>
-     * The address of the {@code endpoint} can be used on a multi-homed host for a server that will only accept connect
-     * requests to one of its addresses. If address of the {@code endpoint} is the wildcard address, it will default
-     * accepting connections on any/all local addresses.
+     * The address of the <var>endpoint</var> can be used on a multi-homed host for a server that will only accept
+     * connect requests to one of its addresses. If address of the <var>endpoint</var> is the wildcard address, it will
+     * default accepting connections on any/all local addresses.
      * <p>
-     * The port of the {@code endpoint} must be between 0 and 65535, inclusive. If it is zero, then an ephemoral port
-     * will be picked for the server socket.
+     * The port of the <var>endpoint</var> must be between 0 and 65535, inclusive. If it is zero, then an ephemoral
+     * port will be picked for the server socket.
      * <p>
      * The backlog argument must be a positive value greater than 0. If the value passed if equal or less than 0, then
      * the default value will be assumed.
@@ -221,7 +221,7 @@ class NioTcpServer implements Stoppable {
      *
      * @param multiplexerThreadCount Number of threads accepting connections. Notice that <i>accepted connections</i>
      *                               are handled by <i>additional</i> threads, so a value of 1 is appropriate in many
-     *                               cases. 
+     *                               cases.
      */
     public void
     start(int multiplexerThreadCount) {

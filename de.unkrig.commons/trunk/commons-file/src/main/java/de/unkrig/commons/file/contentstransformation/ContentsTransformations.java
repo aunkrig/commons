@@ -90,7 +90,7 @@ class ContentsTransformations {
      * normalContentsTransformer}, but automagically detects various archive and compression formats and processes the
      * <i>entries of the archive</i> and the <i>uncompressed contents</i> instead of the "raw" contents.
      * <p>
-     *   Archive files and compressed files are introspected iff {@code lookIntoFormat} evaluates {@code true} for
+     *   Archive files and compressed files are introspected iff <var>lookIntoFormat</var> evaluates {@code true} for
      *   "<i>format</i><b>:</b><i>path</i>".
      * </p>
      */
@@ -157,12 +157,12 @@ class ContentsTransformations {
     }
 
     /**
-     * Returns a {@link ContentsTransformer} which transforms a stream by feeding it through the {@code delegate}, but
-     * automagically detects various archive formats and compression formats (also nested) and processes the
+     * Returns a {@link ContentsTransformer} which transforms a stream by feeding it through the <var>delegate</var>,
+     * but automagically detects various archive formats and compression formats (also nested) and processes the
      * <i>entries of the archive</i> and the <i>uncompressed contents</i> instead of the "raw" contents.
      * <p>
-     *   Archive streams/entries and compressed streams/entries are introspected iff {@code lookIntoFormat} evaluates
-     *   {@code true} for "<i>format</i><b>:</b><i>path</i>".
+     *   Archive streams/entries and compressed streams/entries are introspected iff <var>lookIntoFormat</var>
+     *   evaluates {@code true} for "<i>format</i><b>:</b><i>path</i>".
      * </p>
      */
     public static ContentsTransformer
@@ -201,9 +201,9 @@ class ContentsTransformations {
     }
 
     /**
-     * Transforms the given {@code archiveInputStream} into the given {@code archiveOutputStream}, honoring the given
-     * {@code archiveEntryRemoval}, {@code archiveEntryRenaming} and {@code archiveEntryAddition}, and using the given
-     * {@code contentsTransformer}.
+     * Transforms the given <var>archiveInputStream</var> into the given <var>archiveOutputStream</var>, honoring the
+     * given <var>archiveEntryRemoval</var>, <var>archiveEntryRenaming</var> and <var>archiveEntryAddition</var>, and
+     * using the given <var>contentsTransformer</var>.
      */
     public static void
     transformArchive(
@@ -299,8 +299,8 @@ class ContentsTransformations {
 
     /**
      * Creates and returns an {@link ArchiveHandler} which transforms {@link ArchiveInputStream}s into {@link
-     * ArchiveOutputStream}s, honoring the given {@code archiveEntryRemoval}, {@code archiveEntryRenaming} and {@code
-     * archiveEntryAddition}, and using the given {@code contentsTransformer}.
+     * ArchiveOutputStream}s, honoring the given <var>archiveEntryRemoval</var>, <var>archiveEntryRenaming</var> and
+     * <var>archiveFileCombiner</var>, and using the given <var>contentsTransformer</var>.
      */
     public static ArchiveHandler<Void>
     archiveHandler(
@@ -345,7 +345,7 @@ class ContentsTransformations {
 
     /**
      * Creates and returns a {@link CompressorHandler} which transforms an {@link ArchiveInputStream} into an {@link
-     * OutputStream}, using the given {@code contentsTransformer}.
+     * OutputStream}, using the given <var>contentsTransformer</var>.
      */
     public static CompressorHandler<Void>
     compressorHandler(
@@ -377,7 +377,7 @@ class ContentsTransformations {
 
     /**
      * Creates and returns a handler which transforms an {@link InputStream} into an {@link OutputStream} using the
-     * given {@code contentsTransformer}.
+     * given <var>contentsTransformer</var>.
      */
     public static NormalContentsHandler<Void>
     normalContentsHandler(final String path, final OutputStream os, final ContentsTransformer contentsTransformer) {

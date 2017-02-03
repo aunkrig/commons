@@ -56,7 +56,7 @@ class ConsumerUtil {
     ConsumerUtil() {}
 
     /**
-     * @return A consumer that forwards the subjects to both {@code delegate1} and {@code delegate2}
+     * @return A consumer that forwards the subjects to both <var>delegate1</var> and <var>delegate2</var>
      */
     public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>
     tee(final ConsumerWhichThrows<? super T, EX> delegate1, final ConsumerWhichThrows<? super T, EX> delegate2) {
@@ -72,7 +72,7 @@ class ConsumerUtil {
     }
 
     /**
-     * @return A consumer that forwards the subjects to both {@code delegate1} and {@code delegate2}
+     * @return A consumer that forwards the subjects to both <var>delegate1</var> and <var>delegate2</var>
      */
     public static <T> Consumer<T>
     tee(final Consumer<? super T> delegate1, final Consumer<? super T> delegate2) {
@@ -88,7 +88,7 @@ class ConsumerUtil {
     }
 
     /**
-     * @return A consumer that forwards the subjects to all the {@code delegates}
+     * @return A consumer that forwards the subjects to all the <var>delegates</var>
      */
     public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>
     tee(final Collection<ConsumerWhichThrows<? super T, EX>> delegates) {
@@ -149,7 +149,7 @@ class ConsumerUtil {
      * Converts the <var>source</var> into a {@link ConsumerWhichThrows ConsumerWhichThrows&lt;T, EX>}.
      * <p>
      *   This is always possible, because the <var>source</var> consumes a superclass of <var>T</var>, and the
-     *   <var>source</var> is only allowed to throw a {@code RuntimeException}s.
+     *   <var>source</var> is only allowed to throw a {@link RuntimeException}.
      * </p>
      *
      * @param <T>  The element type
@@ -210,7 +210,7 @@ class ConsumerUtil {
 
     /**
      * Creates and returns a {@link Consumer Consumer&lt;Character>} which aggregates characters to lines, which it
-     * passes to the {@code delegate}.
+     * passes to the <var>delegate</var>.
      * <p>
      *   Notice that iff the last consumed character is neither a CR nor an LF (a.k.a. "last line lacks a line
      *   separator"), then that last line will not be sent to the <var>delegate</var>.
@@ -312,7 +312,7 @@ class ConsumerUtil {
 
     /**
      * The returned producer is a factory for consumers of {@code T}. The subjects sent to these consumers are
-     * forwarded immediately to the given {@code target}.
+     * forwarded immediately to the given <var>target</var>.
      *
      * @see #combineInOrder(ConsumerWhichThrows)
      */
@@ -337,7 +337,7 @@ class ConsumerUtil {
 
     /**
      * The returned producer is a factory for consumers of {@code T}. The first subject sent to each of these consumers
-     * is passed to the given {@code target} <i>in the order the consumers were created</i> (not in the order in
+     * is passed to the given <var>target</var> <i>in the order the consumers were created</i> (not in the order in
      * which the subjects were sent to the consumers).
      *
      * @see #combine(Consumer)
@@ -396,9 +396,9 @@ class ConsumerUtil {
     }
 
     /**
-     * Returns a list of consumers of size {@code n}. When all comsumers have consumed their first subject, then these
-     * subjects are passed to the {@code target} consumer; then again when all consumers have consumed their second
-     * subject, and so on.
+     * Returns a list of consumers of size <var>n</var>. When all comsumers have consumed their first subject, then
+     * these subjects are passed to the <var>target</var> consumer; then again when all consumers have consumed their
+     * second subject, and so on.
      */
     public static <T, EX extends Throwable> List<ConsumerWhichThrows<T, EX>>
     splice(final int n, final ConsumerWhichThrows<? super List<T>, EX> target) {
