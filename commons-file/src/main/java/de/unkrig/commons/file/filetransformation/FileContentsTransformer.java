@@ -61,8 +61,8 @@ class FileContentsTransformer implements FileTransformer {
     }
 
     /**
-     * Opens the {@code in} file for reading, opens the {@code out} file for writing, reads the contents, feeds it
-     * through the given {@link ContentsTransformer}, and writes it to the {@code out} file.
+     * Opens the <var>in</var> file for reading, opens the <var>out</var> file for writing, reads the contents, feeds
+     * it through the given {@link ContentsTransformer}, and writes it to the <var>out</var> file.
      */
     @Override public void
     transform(String path, File in, File out, Mode mode) throws IOException {
@@ -202,7 +202,7 @@ class FileContentsTransformer implements FileTransformer {
     }
 
     /**
-     * Consumes the {@code inputStream} and feeds it through the {@code contentsTransformer}.
+     * Consumes the <var>inputStream</var> and feeds it through the <var>contentsTransformer</var>.
      *
      * @throws RuntimeException {@link FileTransformer#NOT_IDENTICAL} iff the transformer contents differs from the
      *                          original contents

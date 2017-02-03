@@ -83,9 +83,9 @@ class ParametrizedHeaderValue {
     }
 
     /**
-     * Adds the given parameter, or changes the value of an existing parameter with that {@code name}.
+     * Adds the given parameter, or changes the value of an existing parameter with that <var>name</var>.
      *
-     * @return The previous value of the named parameter, or {@code null} iff a parameter with that {@code name} did
+     * @return The previous value of the named parameter, or {@code null} iff a parameter with that <var>name</var> did
      *         not exist before
      */
     public String

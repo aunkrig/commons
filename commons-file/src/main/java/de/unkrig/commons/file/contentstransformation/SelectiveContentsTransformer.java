@@ -36,12 +36,12 @@ import de.unkrig.commons.lang.protocol.PredicateUtil;
 
 /**
  * A {@link ContentsTransformer} that delegates contents transformation to one of two delegates, depending on whether
- * the {@code name} argument matches a string {@link Predicate} or not.
+ * the <var>path</var> argument matches a string {@link Predicate} or not.
  */
 public
 class SelectiveContentsTransformer implements ContentsTransformer {
 
-    private final Predicate<? super String> namePredicate;
+    private final Predicate<? super String> pathPredicate;
     private final ContentsTransformer       transformer;
     private final ContentsTransformer       delegate;
 
@@ -49,79 +49,79 @@ class SelectiveContentsTransformer implements ContentsTransformer {
      * Equivalent with {@link SelectiveContentsTransformer#SelectiveContentsTransformer(Predicate, ContentsTransformer,
      * ContentsTransformer)}, but conducts certain optimizations.
      * <ul>
-     *   <li>When <var>namePredicate</var> is {@link PredicateUtil#always()}</li>
-     *   <li>When <var>namePredicate</var> is {@link PredicateUtil#never()}</li>
+     *   <li>When <var>pathPredicate</var> is {@link PredicateUtil#always()}</li>
+     *   <li>When <var>pathPredicate</var> is {@link PredicateUtil#never()}</li>
      *   <li>When <var>transformer</var> is {@link ContentsTransformations#COPY}</li>
      *   <li>When <var>delegate</var> is {@link ContentsTransformations#COPY}</li>
      * </ul>
      */
     public static ContentsTransformer
     create(
-        Predicate<? super String> namePredicate,
+        Predicate<? super String> pathPredicate,
         ContentsTransformer       transformer,
         ContentsTransformer       delegate
     ) {
 
-        if (namePredicate == PredicateUtil.always()) return ContentsTransformations.chain(transformer, delegate);
+        if (pathPredicate == PredicateUtil.always()) return ContentsTransformations.chain(transformer, delegate);
 
-        if (namePredicate == PredicateUtil.never()) return delegate;
+        if (pathPredicate == PredicateUtil.never()) return delegate;
 
         if (transformer == ContentsTransformations.COPY) return delegate;
 
-        return new SelectiveContentsTransformer(namePredicate, transformer, delegate);
+        return new SelectiveContentsTransformer(pathPredicate, transformer, delegate);
     }
 
     /**
-     * If the {@code namePredicate} does not match the node's name, then the {@code delegate} is called.
-     * Otherwise the {@code delegate} is called, and its output is piped through the {@code transformer}.
+     * If the <var>pathPredicate</var> does not match the node's path, then the <var>delegate</var> is called.
+     * Otherwise the <var>delegate</var> is called, and its output is piped through the <var>transformer</var>.
      * <p>
-     *   Notice that the preformance is particularly good if the {@code transformer} and/or the {@code delegate} is
-     *   {@link ContentsTransformations#COPY}.
+     *   Notice that the preformance is particularly good if the <var>transformer</var> and/or the <var>delegate</var>
+     *   is {@link ContentsTransformations#COPY}.
      * </p>
      */
     public
     SelectiveContentsTransformer(
-        Predicate<? super String> namePredicate,
+        Predicate<? super String> pathPredicate,
         ContentsTransformer       transformer,
         ContentsTransformer       delegate
     ) {
-        this.namePredicate = namePredicate;
+        this.pathPredicate = pathPredicate;
         this.transformer   = transformer;
         this.delegate      = delegate;
     }
 
     /**
-     * If the {@code namePredicate} does not match the {@code name}, then the {@code delegate} is called with
-     * arguments {@code is} and {@code os}.
-     * Otherwise the {@code delegate} is called with argument {@code is}, and its output is piped through the {@code
-     * transformer} before it is written to {@code os}.
+     * If the <var>pathPredicate</var> does not match the <var>path</var>, then the <var>delegate</var> is called with
+     * arguments <var>is</var> and <var>os</var>.
+     * Otherwise the <var>delegate</var> is called with argument <var>is</var>, and its output is piped through the
+     * {@code transformer} before it is written to <var>os</var>.
      */
     @Override public void
-    transform(final String name, InputStream is, OutputStream os) throws IOException {
+    transform(final String path, InputStream is, OutputStream os) throws IOException {
 
-        // Check the name predicate.
-        if (!this.namePredicate.evaluate(name)) {
-            this.delegate.transform(name, is, os);
+        // Check the path predicate.
+        if (!this.pathPredicate.evaluate(path)) {
+            this.delegate.transform(path, is, os);
             return;
         }
 
         // Avoid the creation of an unnecessary ByteFilterInputStream if the delegate is
         // 'ContentsTransformerUtil.copy()'.
         if (this.delegate == ContentsTransformations.COPY) {
-            this.transformer.transform(name, is, os);
+            this.transformer.transform(path, is, os);
             return;
         }
 
         // Avoid the creation of an unnecessary ByteFilterInputStream if the transformer is
         // 'ContentsTransformerUtil.copy()'.
         if (this.transformer == ContentsTransformations.COPY) {
-            this.delegate.transform(name, is, os);
+            this.delegate.transform(path, is, os);
             return;
         }
 
         this.delegate.transform(
-            name,
-            new ByteFilterInputStream(is, new ContentsTransformerByteFilter(this.transformer, name)),
+            path,
+            new ByteFilterInputStream(is, new ContentsTransformerByteFilter(this.transformer, path)),
             os
         );
     }
@@ -130,7 +130,7 @@ class SelectiveContentsTransformer implements ContentsTransformer {
     toString() {
         return (
             "("
-            + this.namePredicate
+            + this.pathPredicate
             + " ? "
             + this.delegate
             + " => "

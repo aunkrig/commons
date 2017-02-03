@@ -54,7 +54,7 @@ class ThreadUtil {
     ThreadUtil() {}
 
     /**
-     * Execute the given {@code runnable} in a background thread
+     * Execute the given <var>runnable</var> in a background thread
      *
      * @return The beckground runnable can be interrupted through this object
      */
@@ -119,7 +119,7 @@ class ThreadUtil {
     }
 
     /**
-     * Executes the given {@code runnable}.
+     * Executes the given <var>runnable</var>.
      */
     public static <EX extends Throwable> void
     runInForeground(RunnableWhichThrows<EX> runnable) throws EX {
@@ -127,7 +127,7 @@ class ThreadUtil {
     }
 
     /**
-     * Executes the two {@code runnable}s in parallel before it returns.
+     * Executes the two <var>runnable</var>s in parallel before it returns.
      */
     public static <EX extends Throwable> void
     parallel(
@@ -187,10 +187,10 @@ class ThreadUtil {
     }
 
     /**
-     * Invokes the {@link Runnable#run run} method of all {@code runnables} in parallel threads (including the current
-     * thread). When the first of these invocations returns, then all threads are {@link Thread#interrupt()
-     * interrupt}ed (which awakes them from blocking I/O), and also on all {@code stoppables} {@link Stoppable#stop()}
-     * is called. When all the threads have been {@link Thread#join() join}ed, this method returns.
+     * Invokes the {@link Runnable#run run} method of all <var>runnables</var> in parallel threads (including the
+     * current thread). When the first of these invocations returns, then all threads are {@link Thread#interrupt()
+     * interrupt}ed (which awakes them from blocking I/O), and also on all <var>stoppables</var> {@link
+     * Stoppable#stop()} is called. When all the threads have been {@link Thread#join() join}ed, this method returns.
      */
     public static void
     parallel(Runnable[] runnables, final Iterable<Stoppable> stoppables) {
@@ -247,7 +247,7 @@ class ThreadUtil {
     }
 
     /**
-     * Runs all but the last of {@code runnables} in the background, and the last of {@code runnables} in the
+     * Runs all but the last of <var>runnables</var> in the background, and the last of <var>runnables</var> in the
      * foreground.
      */
     public static <R extends RunnableWhichThrows<EX>, EX extends Throwable> void

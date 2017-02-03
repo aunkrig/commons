@@ -69,7 +69,7 @@ class CompressUtil {
     interface ArchiveHandler<T> {
 
         /**
-         * May or may not read entries and data from the {@code archiveInputStream}, and may or may not close it.
+         * May or may not read entries and data from the <var>archiveInputStream</var>, and may or may not close it.
          *
          * @see #processFile(File, Predicate, ArchiveHandler, Predicate, CompressorHandler, NormalContentsHandler)
          * @see #processStream(InputStream, Predicate, ArchiveHandler, Predicate, CompressorHandler,
@@ -91,7 +91,7 @@ class CompressUtil {
     interface CompressorHandler<T> {
 
         /**
-         * May or may not read from the {@code compressorInputStream}.
+         * May or may not read from the <var>compressorInputStream</var>.
          *
          * @see #processFile(File, Predicate, ArchiveHandler, Predicate, CompressorHandler, NormalContentsHandler)
          * @see #processStream(InputStream, Predicate, ArchiveHandler, Predicate, CompressorHandler,
@@ -112,7 +112,7 @@ class CompressUtil {
     interface NormalContentsHandler<T> {
 
         /**
-         * May or may not read from the {@code inputStream}, and may or may not close it.
+         * May or may not read from the <var>inputStream</var>, and may or may not close it.
          *
          * @see #processFile(File, Predicate, ArchiveHandler, Predicate, CompressorHandler, NormalContentsHandler)
          * @see CompressUtil#processStream(InputStream, Predicate, ArchiveHandler, Predicate, CompressorHandler,
@@ -123,14 +123,14 @@ class CompressUtil {
     }
 
     /**
-     * Invokes exactly <i>one</i> of {@code archiveHandler}, {@code compressorHandler} or {@code
-     * normalContentsHandler}.
+     * Invokes exactly <i>one</i> of <var>archiveHandler</var>, <var>compressorHandler</var> or
+     * <var>normalContentsHandler</var>.
      * <p>
-     *   An archive file is introspected iff {@code lookIntoFormat} evaluates to {@code true} for {@code
+     *   An archive file is introspected iff <var>lookIntoFormat</var> evaluates to {@code true} for {@code
      *   "<i>archive-format-name</i>:<i>path</i>"}.
      * </p>
      * <p>
-     *   A compressed file is introspected iff {@code lookIntoFormat} evaluates to {@code true} for {@code
+     *   A compressed file is introspected iff <var>lookIntoFormat</var> evaluates to {@code true} for {@code
      *   "<i>compression-format-name</i>:<i>path</i>"}.
      * </p>
      *
@@ -158,13 +158,13 @@ class CompressUtil {
     }
 
     /**
-     * Invokes exactly <i>one</i> of {@code archiveHandler}, {@code compressorHandler} or {@code
-     * normalContentsHandler}.
+     * Invokes exactly <i>one</i> of <var>archiveHandler</var>, <var>compressorHandler</var> or
+     * <var>normalContentsHandler</var>.
      *
-     * @param lookIntoArchive    An archive stream is introspected iff {@code lookIntoArchive} evaluates to {@code true}
-     *                           for the archive format
-     * @param lookIntoCompressed A compressed stream is introspected iff {@code lookIntoCompressed} evaluates to {@code
-     *                           true} for the compression format
+     * @param lookIntoArchive    An archive stream is introspected iff <var>lookIntoArchive</var> evaluates to {@code
+     *                           true} for the archive format
+     * @param lookIntoCompressed A compressed stream is introspected iff <var>lookIntoCompressed</var> evaluates to
+     *                           {@code true} for the compression format
      * @see                      CompressionFormatFactory#allFormats()
      */
     @Nullable public static <T> T
@@ -215,14 +215,14 @@ class CompressUtil {
     }
 
     /**
-     * Invokes exactly <i>one</i> of {@code archiveHandler}, {@code compressorHandler} or {@code
-     * normalContentsHandler}.
+     * Invokes exactly <i>one</i> of <var>archiveHandler</var>, <var>compressorHandler</var> or
+     * <var>normalContentsHandler</var>.
      * <p>
-     *   An archive file is introspected iff {@code lookIntoFormat} evaluates to {@code true} for
+     *   An archive file is introspected iff <var>lookIntoFormat</var> evaluates to {@code true} for
      *   "<i>{@code archive-format-name}</i>{@code :}<i>{@code path}</i>".
      * </p>
      * <p>
-     *   A compressed file is introspected iff {@code lookIntoFormat} evaluates to {@code true} for "<i>{@code
+     *   A compressed file is introspected iff <var>lookIntoFormat</var> evaluates to {@code true} for "<i>{@code
      *   compression-format-name}</i>{@code :}<i>{@code path}</i>".
      * </p>
      *
@@ -249,13 +249,13 @@ class CompressUtil {
     }
 
     /**
-     * Invokes exactly <i>one</i> of {@code archiveHandler}, {@code compressorHandler} or {@code
-     * normalContentsHandler}.
+     * Invokes exactly <i>one</i> of <var>archiveHandler</var>, <var>compressorHandler</var> or
+     * <var>normalContentsHandler</var>.
      *
-     * @param lookIntoArchive    An archive file is introspected iff {@code lookIntoArchive} evaluates to {@code true}
-     *                           for the archive format
-     * @param lookIntoCompressed A compressed file is introspected iff {@code lookIntoCompressed} evaluates to {@code
-     *                           true} for the compression format
+     * @param lookIntoArchive    An archive file is introspected iff <var>lookIntoArchive</var> evaluates to {@code
+     *                           true} for the archive format
+     * @param lookIntoCompressed A compressed file is introspected iff <var>lookIntoCompressed</var> evaluates to
+     *                           {@code true} for the compression format
      * @see                      CompressionFormatFactory#allFormats()
      */
     @Nullable public static <T> T

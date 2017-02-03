@@ -89,7 +89,7 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
     }
 
     /**
-     * Clears the set of currently registerd {@link Servlett}s and registers the given {@code servlett}.
+     * Clears the set of currently registerd {@link Servlett}s and registers the given <var>servlett</var>.
      */
     public void
     setServlett(Servlett servlett) {
@@ -97,7 +97,7 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
     }
 
     /**
-     * Clears the set of currently registerd {@link Servlett}s and registers the given {@code servletts}.
+     * Clears the set of currently registerd {@link Servlett}s and registers the given <var>servletts</var>.
      */
     public void
     setServletts(Iterable<Servlett> servletts) {

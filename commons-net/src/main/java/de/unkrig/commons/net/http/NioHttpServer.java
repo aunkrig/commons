@@ -48,7 +48,7 @@ class NioHttpServer implements Stoppable {
     private final NioTcpServer nioTcpServer;
 
     /**
-     * Accepts connections on the {@code endpoint}; obtains a new {@link Servlett} from the {@code
+     * Accepts connections on the <var>endpoint</var>; obtains a new {@link Servlett} from the {@code
      * httpClientConnectionHandlerFactory} for each accepted connection, and then calls {@link
      * Servlett#handleRequest(HttpRequest, de.unkrig.commons.lang.protocol.ConsumerWhichThrows)} for each received
      * request.

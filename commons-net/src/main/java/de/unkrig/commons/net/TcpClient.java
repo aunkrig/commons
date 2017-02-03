@@ -72,7 +72,7 @@ class TcpClient implements Closeable {
     }
 
     /**
-     * Connects to the given {@code address} and {@code port}. Data can be sent to the remote server through the
+     * Connects to the given <var>address</var> and <var>port</var>. Data can be sent to the remote server through the
      * {@link OutputStream} returned by {@link #getOutputStream()}, and data can be read from the remote server
      * through the {@link InputStream} returned by {@link #getInputStream()}.
      */

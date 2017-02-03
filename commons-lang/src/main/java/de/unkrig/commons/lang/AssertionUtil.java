@@ -41,8 +41,8 @@ class AssertionUtil {
     AssertionUtil() {}
 
     /**
-     * Enables assertions for the given {@code clasS} and the local and anonymous classes that it encloses, regardless
-     * of the "enable assertions" command line options that the JVM was started with.
+     * Enables assertions for the given <var>clasS</var> and the local and anonymous classes that it encloses,
+     * regardless of the "enable assertions" command line options that the JVM was started with.
      * <p>
      *   Enabling assertions programmatically makes them much more useful, because unfortunately assertions are
      *   disabled by default and hardly any runtime environment provides a simple way to enable them.
@@ -128,9 +128,9 @@ class AssertionUtil {
     }
 
     /**
-     * Verifies that the {@code subject} is not {@code null}.
+     * Verifies that the <var>subject</var> is not {@code null}.
      *
-     * @return The {@code subject}
+     * @return The <var>subject</var>
      * @throws NullPointerException
      */
     public static <T> T
@@ -140,10 +140,10 @@ class AssertionUtil {
     }
 
     /**
-     * Verifies that the {@code subject} is not {@code null}.
+     * Verifies that the <var>subject</var> is not {@code null}.
      *
-     * @return The {@code subject}
-     * @throws NullPointerException with the given {@code message} iff the {@code subject} is {@code null}
+     * @return The <var>subject</var>
+     * @throws NullPointerException with the given <var>message</var> iff the <var>subject</var> is {@code null}
      */
     public static <T> T
     notNull(@Nullable T subject, String message) {

@@ -49,7 +49,7 @@ public
 interface PredicateWhichThrows<T, EX extends Throwable> {
 
     /**
-     * @return Whether the {@code subject} fulfils a particular condition
+     * @return Whether the <var>subject</var> fulfils a particular condition
      */
     boolean
     evaluate(T subject) throws EX;

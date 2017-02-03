@@ -56,8 +56,8 @@ class SelectiveContentsProcessor<T> implements ContentsProcessor<T> {
     }
 
     /**
-     * If the {@code pathPredicate} evaluates to {@code true} for the {@code path}, then the {@code trueDelegate} is
-     * called, otherwise the {@code falseDelegate}.
+     * If the <var>pathPredicate</var> evaluates to {@code true} for the <var>path</var>, then the
+     * <var>trueDelegate</var> is called, otherwise the <var>falseDelegate</var>.
      */
     @Override @Nullable public T
     process(

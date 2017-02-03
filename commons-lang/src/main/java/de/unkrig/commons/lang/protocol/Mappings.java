@@ -119,7 +119,7 @@ class Mappings {
     }
 
     /**
-     * Returns a mapping of property names to property values for the given {@code subject} object.
+     * Returns a mapping of property names to property values for the given <var>subject</var> object.
      * <p>
      *   The existence of a property "<code><i>propertyName</i></code>" is determined by the existence of one of the
      *   following, in this order:
@@ -205,8 +205,8 @@ class Mappings {
     }
 
     /**
-     * Invokes {@link Mapping#get(Object)} on the {@code mapping} and, if the result is not {@code null}, converts it
-     * to the given {@code targetType}.
+     * Invokes {@link Mapping#get(Object)} on the <var>mapping</var> and, if the result is not {@code null}, converts
+     * it to the given <var>targetType</var>.
      *
      * @throws IllegalArgumentException The type of the value of the property is not assignable to {@code T}
      */
@@ -247,10 +247,10 @@ class Mappings {
     }
 
     /**
-     * @return                          The value to which the {@code mapping} maps the {@code key}
-     * @throws IllegalArgumentException The {@code mapping} does not contain the given {@code key}
-     * @throws IllegalArgumentException The {@code mapping} contains the {@code key}, but the mapped value is {@code
-     *                                  null}
+     * @return                          The value to which the <var>mapping</var> maps the <var>key</var>
+     * @throws IllegalArgumentException The <var>mapping</var> does not contain the given <var>key</var>
+     * @throws IllegalArgumentException The <var>mapping</var> contains the <var>key</var>, but the mapped value is
+     *                                  {@code null}
      */
     public static <K> Object
     getNonNull(Mapping<K, ?> mapping, String key) {
@@ -270,11 +270,11 @@ class Mappings {
     }
 
     /**
-     * @return                          The value to which the {@code mapping} maps the {@code key}
-     * @throws IllegalArgumentException The {@code mapping} does not contain the given {@code key}
-     * @throws IllegalArgumentException The {@code mapping} contains the {@code key}, but the mapped value is {@code
-     *                                  null}
-     * @throws IllegalArgumentException The {@code mapping} contains the {@code key}, but the mapped value is not
+     * @return                          The value to which the <var>mapping</var> maps the <var>key</var>
+     * @throws IllegalArgumentException The <var>mapping</var> does not contain the given <var>key</var>
+     * @throws IllegalArgumentException The <var>mapping</var> contains the <var>key</var>, but the mapped value is
+     *                                  {@code null}
+     * @throws IllegalArgumentException The <var>mapping</var> contains the <var>key</var>, but the mapped value is not
      *                                  assignable to {@code T}
      */
     public static <K, T> T
@@ -302,7 +302,7 @@ class Mappings {
      * <ul>
      *   <li>A key is contained in the result iff it is contained in (at least) one of the operands.
      *   <li>The value mapped to a key is the value mapped to the key in the <i>first</i> of the operands which
-     *       contains the key, or {@code null} iff none of the {@code operands} contain the key.
+     *       contains the key, or {@code null} iff neither of <var>op1</var> and <var>op2</var> contain the key.
      * </ul>
      */
     public static <K, V> Mapping<K, V>
@@ -325,8 +325,8 @@ class Mappings {
     }
 
     /**
-     * Equivalent with {@link #union(Mapping, Mapping)}, where the first argument is {@code in} and the second is
-     * constructed from the given {@code keyValuePairs}.
+     * Equivalent with {@link #union(Mapping, Mapping)}, where the first argument is <var>in</var> and the second is
+     * constructed from the given <var>keyValuePairs</var>.
      *
      * @param keysAndValues An alternating sequence of keys and values; even elements must have type {@code K}, odd
      *                      elements must have type {@code V} or {@link Producer Producer&lt;V>}
@@ -338,7 +338,7 @@ class Mappings {
 
     /**
      * Equivalent with {@link #union(Mapping, Mapping)}, where the first argument is constructed from the given {@code
-     * keyValuePairs} and the second argument is {@code in}.
+     * keyValuePairs} and the second argument is <var>in</var>.
      *
      * @param keysAndValues An alternating sequence of keys and values; even elements must have type {@code K}, odd
      *                      elements must have type {@code V} or {@link Producer Producer&lt;V>}

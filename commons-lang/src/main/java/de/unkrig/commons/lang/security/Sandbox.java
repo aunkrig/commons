@@ -134,10 +134,10 @@ class Sandbox {
     // --------------------------
 
     /**
-     * All future actions that are executed through the given {@code clasS} will be checked against the given {@code
+     * All future actions that are executed through the given <var>clasS</var> will be checked against the given {@code
      * accessControlContext}.
      *
-     * @throws SecurityException Permissions are already confined for the {@code clasS}
+     * @throws SecurityException Permissions are already confined for the <var>clasS</var>
      */
     public static void
     confine(Class<?> clasS, AccessControlContext accessControlContext) {
@@ -150,10 +150,10 @@ class Sandbox {
     }
 
     /**
-     * All future actions that are executed through the given {@code clasS} will be checked against the given {@code
+     * All future actions that are executed through the given <var>clasS</var> will be checked against the given {@code
      * protectionDomain}.
      *
-     * @throws SecurityException Permissions are already confined for the {@code clasS}
+     * @throws SecurityException Permissions are already confined for the <var>clasS</var>
      */
     public static void
     confine(Class<?> clasS, ProtectionDomain protectionDomain) {
@@ -161,10 +161,10 @@ class Sandbox {
     }
 
     /**
-     * All future actions that are executed through the given {@code clasS} will be checked against the given {@code
+     * All future actions that are executed through the given <var>clasS</var> will be checked against the given {@code
      * permissions}.
      *
-     * @throws SecurityException Permissions are already confined for the {@code clasS}
+     * @throws SecurityException Permissions are already confined for the <var>clasS</var>
      */
     public static void
     confine(Class<?> clasS, Permissions permissions) {
@@ -177,7 +177,7 @@ class Sandbox {
      * All future actions that are executed through the named class will be checked against the given {@code
      * accessControlContext}.
      *
-     * @throws SecurityException Permissions are already confined for the {@code className}
+     * @throws SecurityException Permissions are already confined for the <var>className</var>
      */
     public static void
     confine(String className, AccessControlContext accessControlContext) {
@@ -193,7 +193,7 @@ class Sandbox {
      * All future actions that are executed through the named class will be checked against the given {@code
      * protectionDomain}.
      *
-     * @throws SecurityException Permissions are already confined for the {@code className}
+     * @throws SecurityException Permissions are already confined for the <var>className</var>
      */
     public static void
     confine(String className, ProtectionDomain protectionDomain) {
@@ -204,7 +204,7 @@ class Sandbox {
      * All future actions that are executed through the named class will be checked against the given {@code
      * permissions}.
      *
-     * @throws SecurityException Permissions are already confined for the {@code className}
+     * @throws SecurityException Permissions are already confined for the <var>className</var>
      */
     public static void
     confine(String className, Permissions permissions) {
@@ -214,10 +214,10 @@ class Sandbox {
     // --------------------------
 
     /**
-     * All future actions that are executed through classes that were loaded through the given {@code classLoader}
-     * will be checked against the given {@code accessControlContext}.
+     * All future actions that are executed through classes that were loaded through the given <var>classLoader</var>
+     * will be checked against the given <var>accessControlContext</var>.
      *
-     * @throws SecurityException Permissions are already confined for the {@code classLoader}
+     * @throws SecurityException Permissions are already confined for the <var>classLoader</var>
      */
     public static void
     confine(ClassLoader classLoader, AccessControlContext accessControlContext) {
@@ -230,10 +230,10 @@ class Sandbox {
     }
 
     /**
-     * All future actions that are executed through classes that were loaded through the given {@code classLoader}
-     * will be checked against the given {@code protectionDomain}.
+     * All future actions that are executed through classes that were loaded through the given <var>classLoader</var>
+     * will be checked against the given <var>protectionDomain</var>.
      *
-     * @throws SecurityException Permissions are already confined for the {@code classLoader}
+     * @throws SecurityException Permissions are already confined for the <var>classLoader</var>
      */
     public static void
     confine(ClassLoader classLoader, ProtectionDomain protectionDomain) {
@@ -241,10 +241,10 @@ class Sandbox {
     }
 
     /**
-     * All future actions that are executed through classes that were loaded through the given {@code classLoader}
-     * will be checked against the given {@code permissions}.
+     * All future actions that are executed through classes that were loaded through the given <var>classLoader</var>
+     * will be checked against the given <var>permissions</var>.
      *
-     * @throws SecurityException Permissions are already confined for the {@code classLoader}
+     * @throws SecurityException Permissions are already confined for the <var>classLoader</var>
      */
     public static void
     confine(ClassLoader classLoader, Permissions permissions) {

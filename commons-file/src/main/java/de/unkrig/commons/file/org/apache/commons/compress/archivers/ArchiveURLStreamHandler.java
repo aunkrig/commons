@@ -51,8 +51,7 @@ public abstract
 class ArchiveURLStreamHandler extends URLStreamHandler {
 
     /**
-     * Opens the given {@code container}, finds the entry with the given {@code entryName} and returns an
-     * {@link InputStream} that reads from it.
+     * Wraps the <var>containerInputStream</var> in an {@link ArchiveInputStream}.
      */
     protected abstract ArchiveInputStream open(InputStream containerInputStream) throws ArchiveException;
 

@@ -66,18 +66,19 @@ class DataConnectionProxy {
     /**
      * Defines the port that will be used for the server socket for all data connection proxies.
      * <p>
-     *   If {@code first} and {@code last} are zero (which is the default), then an "ephemeral port" is picked for each
-     *   data connection proxy (see {@link InetSocketAddress#InetSocketAddress(int)}).
+     *   If <var>first</var> and <var>last</var> are zero (which is the default), then an "ephemeral port" is picked
+     *   for each data connection proxy (see {@link InetSocketAddress#InetSocketAddress(int)}).
      * </p>
      * <p>
-     *   Otherwise, if {@code first} and {@code last} are equal, then exactly that port is used for the server socket
-     *   of each data connection proxy (this limits the number of data connections to one at any given time).
+     *   Otherwise, if <var>first</var> and <var>last</var> are equal, then exactly that port is used for the server
+     *   socket of each data connection proxy (this limits the number of data connections to one at any given time).
      * </p>
      * <p>
-     *   Otherwise, {@code first} is used for the server socket of the first data connection proxy, then {@code
-     *   first + 1} (or {@code first - 1}, if {@code last < first}), and so on up to and including {@code last},
-     *   then {@code first} again, and so on. If the port is already in use, then the next port is tried, until a
-     *   "free" port is found, and a {@code BindException} is only thrown if <i>all</i> ports are already in use.
+     *   Otherwise, <var>first</var> is used for the server socket of the first data connection proxy, then
+     *   <var>first</var> {@code + 1} (or <var>first</var> {@code - 1}, if <var>last</var> {@code <} <var>first</var>),
+     *   and so on up to and including <var>last</var>, then <var>first</var> again, and so on. If the port is already
+     *   in use, then the next port is tried, until a "free" port is found, and a {@link BindException} is only thrown
+     *   if <i>all</i> ports are already in use.
      * </p>
      * <p>
      *   Must not be invoked after the first call to {@link #start(InetAddress, InetSocketAddress)}.

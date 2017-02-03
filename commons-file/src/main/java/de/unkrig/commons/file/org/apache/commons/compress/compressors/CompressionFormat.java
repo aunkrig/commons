@@ -46,20 +46,20 @@ interface CompressionFormat {
     String
     getName();
 
-    /** @return Whether the given {@code fileName} is typical for this {@link CompressionFormat} */
+    /** @return Whether the given <var>fileName</var> is typical for this {@link CompressionFormat} */
     boolean
     isCompressedFileName(String fileName);
 
     /**
-     * Maps the given {@code fileName} to the name that a corresponding compressed file would have. This is typically
+     * Maps the given <var>fileName</var> to the name that a corresponding compressed file would have. This is typically
      * achieved by appending a suffix, like '.bzip2', '.gz', '.Z'.
      */
     String
     getCompressedFileName(String fileName);
 
     /**
-     * Maps the given {@code fileName} to the name that a corresponding uncompressed file would have. This is typically
-     * achieved by removing a suffix, like '.bzip2', '.gz', '.Z', or by changing the suffix, e.g. from '.tgz' to '.tar'.
+     * Maps the given <var>fileName</var> to the name that a corresponding uncompressed file would have. This is
+     * typically achieved by removing a suffix, like '.bzip2', '.gz', '.Z', or by changing the suffix, e.g. from '.tgz' to '.tar'.
      */
     String
     getUncompressedFileName(String fileName);
@@ -73,7 +73,7 @@ interface CompressionFormat {
     /**
      * Opens an existing compressed file for reading.
      *
-     * @return An {@link CompressorInputStream} for this format which reads from the given {@code compressedFile}
+     * @return An {@link CompressorInputStream} for this format which reads from the given <var>compressedFile</var>
      */
     CompressorInputStream
     open(File compressedFile) throws IOException;

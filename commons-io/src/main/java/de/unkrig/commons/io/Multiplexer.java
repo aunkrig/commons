@@ -147,9 +147,9 @@ class Multiplexer implements RunnableWhichThrows<IOException>, Stoppable {
 
     /**
      * Registers the given runnable for exactly one execution by this {@link Multiplexer}'s {@link #run()} method
-     * when the current time is equal to (or slightly greater than) {@code expiry}.
+     * when the current time is equal to (or slightly greater than) <var>expiry</var>.
      * <p>
-     *   Registering the same runnable more than once (and even with equal {@code expiry}) will lead to the runnable
+     *   Registering the same runnable more than once (and even with equal <var>expiry</var>) will lead to the runnable
      *   being run that many times.
      * </p>
      * <p>
@@ -204,8 +204,8 @@ class Multiplexer implements RunnableWhichThrows<IOException>, Stoppable {
     private final Selector selector = Selector.open();
 
     /**
-     * Returns the {@link List} associated with the {@code key}, or, if no {@link List} is associated with the {@code
-     * key} yet, creates an {@link ArrayList}, associates it with the {@code key}, and returns it.
+     * Returns the {@link List} associated with the <var>key</var>, or, if no {@link List} is associated with the
+     * <var>key</var> yet, creates an {@link ArrayList}, associates it with the <var>key</var>, and returns it.
      */
     private static <K, LE> List<LE>
     get2(Map<K, List<LE>> map, K key) {

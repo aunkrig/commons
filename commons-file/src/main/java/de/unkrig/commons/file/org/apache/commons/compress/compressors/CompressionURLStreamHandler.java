@@ -46,7 +46,7 @@ public abstract
 class CompressionURLStreamHandler extends URLStreamHandler {
 
     /**
-     * Opens the given {@code container} and returns an {@link InputStream} that reads from it.
+     * Wraps the <var>containerInputStream</var> in a decompressing stream.
      */
     protected abstract InputStream open(InputStream containerInputStream) throws IOException;
 

@@ -49,7 +49,7 @@ class Sequences {
 
     /**
      * Produces a periodic sequence of random, but unique {@link Long}s with values ranging from 0 to {@code period -
-     * 1}. For identical {@code seed}s, the returned sequences will be identical.
+     * 1}. For identical <var>seed</var>s, the returned sequences will be identical.
      */
     public static Producer<Long>
     randomSequence(final long seed, final long period) {
@@ -118,9 +118,9 @@ class Sequences {
     };
 
     /**
-     * Produces a periodic sequence of random, but unique {@link Long}s with values ranging from {@code min} to {@code
-     * max - 1}. The period of the sequence is {@code max - min}. For identical {@code seed}s, the returned sequences
-     * will be identical.
+     * Produces a periodic sequence of random, but unique {@link Long}s with values ranging from <var>min</var> to
+     * <var>max</var>{@code - 1}. The period of the sequence is {@code max - min}. For identical <var>seed</var>s, the
+     * returned sequences will be identical.
      */
     public static Producer<Long>
     randomSequence(long seed, final long min, long max) {

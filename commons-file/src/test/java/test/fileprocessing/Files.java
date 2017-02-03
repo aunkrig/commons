@@ -97,7 +97,7 @@ class Files {
         return Files.loadPlainFile(file);
     }
 
-    /** @return Pairs of name and contents (iff {@code is} is an archive, or the plain text in the file */
+    /** @return Pairs of name and contents (iff <var>is</var> is an archive, or the plain text in the file */
     private static Object
     load(InputStream is) throws IOException, ArchiveException, CompressorException {
 
@@ -160,8 +160,8 @@ class Files {
     }
 
     /**
-     * @return {@code null} if {@code this} and {@code that} are equal, or a human-readable text that describes the
-     *         first difference between {@code this} and {@code that}
+     * @return {@code null} if {@code this} and <var>that</var> are equal, or a human-readable text that describes the
+     *         first difference between {@code this} and <var>that</var>
      */
     @Nullable public String
     diff(Files that) {
@@ -170,8 +170,8 @@ class Files {
 
     /**
      * @param name Is included in the return value
-     * @return     {@code null} if {@code desc1} and {@code desc2} are equal, or a human-readable text that describes
-     *             the first difference between {@code desc1} and {@code desc2}
+     * @return     {@code null} if <var>desc1</var> and <var>desc2</var> are equal, or a human-readable text that
+     *             describes the first difference between <var>desc1</var> and <var>desc2</var>
      */
     @Nullable public static String
     diff(String name, Object desc1, Object desc2) {
@@ -433,7 +433,7 @@ class Files {
         return oa;
     }
 
-    /** @return The {@code file}'s contents; lines separated with '\n' */
+    /** @return The <var>file</var>'s contents; lines separated with '\n' */
     public static Object
     loadPlainFile(File file) throws IOException {
         Reader r = new FileReader(file);

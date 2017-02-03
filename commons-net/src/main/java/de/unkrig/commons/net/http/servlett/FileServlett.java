@@ -190,7 +190,7 @@ class FileServlett extends AbstractServlett {
     }
 
     /**
-     * Generates an HTML listing for the given {@code directory}.
+     * Generates an HTML listing for the given <var>directory</var>.
      */
     static HttpResponse
     processDirectoryListing(final File directory) {
@@ -251,7 +251,7 @@ class FileServlett extends AbstractServlett {
     }
 
     /**
-     * Serves the given {@code file} to the HTTP client.
+     * Serves the given <var>file</var> to the HTTP client.
      *
      * @param from Index of the first byte in the file; must be &gt;= 0
      * @param to   Index of the last byte in the file +plus on; must be &gt; <var>from</var>

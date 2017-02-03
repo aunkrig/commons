@@ -94,7 +94,7 @@ class PipeUtil {
      *   Closing the output stream indicates an end-of-input condition to the input stream.
      * </p>
      * <p>
-     *   Closing the input stream closes the {@code pipe}, and the next write attempt to the output stream will cause
+     *   Closing the input stream closes the <var>pipe</var>, and the next write attempt to the output stream will cause
      *   an {@link EOFException}.
      * </p>
      */
@@ -220,8 +220,8 @@ class PipeUtil {
     }
 
     /**
-     * @return A pipe which forwards all operations to the given {@code delegate}, and, in addition, runs the given
-     *         {@code runnable} on {@link Pipe#close()} AFTER having closed the {@code delegate}
+     * @return A pipe which forwards all operations to the given <var>delegate</var>, and, in addition, runs the given
+     *         <var>runnable</var> on {@link Pipe#close()} AFTER having closed the <var>delegate</var>
      */
     public static Pipe
     onClose(final Pipe delegate, final RunnableWhichThrows<IOException> runnable) {
@@ -256,8 +256,8 @@ class PipeUtil {
     }
 
     /**
-     * Creates a temporary {@link PipeFactory#elasticPipe()}, invokes the {@code filler} (which fills the pipe), then
-     * invokes the {@code drainer} (which drains the pipe), and eventually closes the pipe.
+     * Creates a temporary {@link PipeFactory#elasticPipe()}, invokes the <var>filler</var> (which fills the pipe),
+     * then invokes the <var>drainer</var> (which drains the pipe), and eventually closes the pipe.
      */
     public static void
     temporaryStorage(Filler filler, Drainer drainer) throws IOException {

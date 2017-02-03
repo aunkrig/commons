@@ -32,8 +32,8 @@ import java.io.IOException;
 import de.unkrig.commons.lang.protocol.Predicate;
 
 /**
- * A {@link FileTransformer} that feeds the file to the {@code trueDelegate} iff the {@code path} matches a given
- * {@link Predicate}, and otherwise to the {@code falseDelegate}.
+ * A {@link FileTransformer} that feeds the file to the <var>trueDelegate</var> iff the <var>path</var> matches a given
+ * {@link Predicate}, and otherwise to the <var>falseDelegate</var>.
  */
 public
 class SelectiveFileTransformer implements FileTransformer {

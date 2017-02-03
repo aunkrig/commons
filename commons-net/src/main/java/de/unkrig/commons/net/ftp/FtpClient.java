@@ -229,7 +229,7 @@ class FtpClient {
     @Nullable private ServerSocket                         activeDataConnectionServerSocket;
 
     /**
-     * Establishes the data connection, calls the {@code action}, then closes the data connection.
+     * Establishes the data connection.
      */
     private Socket
     dataConnection() throws IOException {
@@ -287,7 +287,7 @@ class FtpClient {
     }
 
     /**
-     * @return One of the {@code statusCodes}
+     * @return One of the <var>statusCodes</var>
      */
     private int
     receiveReply(int... statusCodes) throws IOException {

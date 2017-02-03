@@ -45,8 +45,8 @@ interface ContentsProcessor<T> {
      * @param path         E.g. "c:/dir/zipfile!dir/zipfile!dir/file"
      * @param size         -1 if unknown
      * @param crc32        -1 if unknown
-     * @param opener       Re-produces the {@code inputStream}
-     * @throws IOException Message should NOT include the {@code path}
+     * @param opener       Re-produces the <var>inputStream</var>
+     * @throws IOException Message should NOT include the <var>path</var>
      */
     @Nullable T
     process(

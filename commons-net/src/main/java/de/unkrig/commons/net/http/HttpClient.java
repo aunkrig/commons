@@ -55,7 +55,7 @@ class HttpClient implements Closeable {
     }
 
     /**
-     * Connects to the given {@code address} and {@code port}.
+     * Connects to the given <var>address</var> and <var>port</var>.
      */
     public
     HttpClient(InetAddress address, int port) throws IOException {
@@ -63,7 +63,7 @@ class HttpClient implements Closeable {
     }
 
     /**
-     * Sends the given {@code httpRequest} to the server, waits for the response from the server.
+     * Sends the given <var>httpRequest</var> to the server, waits for the response from the server.
      *
      * @return The parsed response from the server
      */

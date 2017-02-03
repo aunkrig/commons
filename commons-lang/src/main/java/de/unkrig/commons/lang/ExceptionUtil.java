@@ -120,7 +120,7 @@ class ExceptionUtil {
 
     /**
      * Wraps a given 'cause' in another throwable of the given wrapper class type, with a detail message composed
-     * from {@code prefix}, a colon, a space, and the cause.
+     * from <var>prefix</var>, a colon, a space, and the cause.
      *
      * @param prefix       The text to prepend to the cause throwable's detail message
      * @param cause        The throwable to wrap

@@ -49,7 +49,7 @@ class HttpServer implements RunnableWhichThrows<IOException>, Stoppable {
     private final TcpServer tcpServer;
 
     /**
-     * This {@link HttpServer} will accept connections on the {@code endpoint} and will handle each with the
+     * This {@link HttpServer} will accept connections on the <var>endpoint</var> and will handle each with the
      * <var>httpClientConnectionHandler</var>.
      *
      * @param endpoint The {@link InetAddress} and local port the server will bind to; {@link
@@ -65,7 +65,7 @@ class HttpServer implements RunnableWhichThrows<IOException>, Stoppable {
     }
 
     /**
-     * This {@link HttpServer} will accept secure (HTTPS) connections on the {@code endpoint} and will handle each
+     * This {@link HttpServer} will accept secure (HTTPS) connections on the <var>endpoint</var> and will handle each
      * with the <var>httpClientConnectionHandler</var>.
      *
      * @param endpoint The {@link InetAddress} and local port the server will bind to; {@link

@@ -38,7 +38,7 @@ public
 interface Duplexer<T> {
 
     /**
-     * @return An entity that creates an object based on {@code delegate1} and {@code delegate2}
+     * @return An entity that creates an object based on <var>delegate1</var> and <var>delegate2</var>
      */
     T produce(T delegate1, T delegate2);
 }

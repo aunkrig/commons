@@ -164,7 +164,7 @@ class ArchiveFormatFactory {
 
     /**
      * @return The {@link ArchiveFormat} for the given file name, or {@code null} iff an archive format cannot
-     *         be deduced from the {@code fileName}
+     *         be deduced from the <var>fileName</var>
      * @see    FileNameUtil#isCompressedFilename(String)
      */
     @Nullable public static ArchiveFormat
@@ -176,8 +176,8 @@ class ArchiveFormatFactory {
     }
 
     /**
-     * @return The {@link ArchiveFormat} for the given {@code archiveFormatName}
-     * @throws ArchiveException The {@code archiveFormatName} is unknown
+     * @return The {@link ArchiveFormat} for the given <var>archiveFormatName</var>
+     * @throws ArchiveException The <var>archiveFormatName</var> is unknown
      */
     public static ArchiveFormat
     forFormatName(String archiveFormatName) throws ArchiveException {
@@ -228,7 +228,7 @@ class ArchiveFormatFactory {
     }
 
     /**
-     * @return     The {@link ArchiveFormat} corresponding with the {@code archiveOutputStream}
+     * @return     The {@link ArchiveFormat} corresponding with the <var>archiveOutputStream</var>
      * @deprecated Should be replaced by a new method {@code ArchiveOutputStream.getFormat()}
      */
     @Deprecated public static ArchiveFormat
@@ -266,7 +266,7 @@ class ArchiveFormatFactory {
     }
 
     /**
-     * Determines the archive format from the first few bytes of the {@code inputStream} and then wraps it in the
+     * Determines the archive format from the first few bytes of the <var>inputStream</var> and then wraps it in the
      * appropriate {@link ArchiveInputStream}.
      */
     public static ArchiveInputStream
@@ -281,8 +281,8 @@ class ArchiveFormatFactory {
     }
 
     /**
-     * Determines the archive format from the first few bytes of the {@code archiveFile} and then returns a
-     * {@link ArchiveInputStream} reading from the {@code archiveFile}.
+     * Determines the archive format from the first few bytes of the <var>archiveFile</var> and then returns a
+     * {@link ArchiveInputStream} reading from the <var>archiveFile</var>.
      * <p>
      *   Is typically faster than {@code
      *   ArchiveFormatFactory.forContents(archiveFile).archiveInputStream(archiveFile)}.

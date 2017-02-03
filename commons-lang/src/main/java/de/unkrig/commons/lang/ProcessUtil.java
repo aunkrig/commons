@@ -37,7 +37,7 @@ import de.unkrig.commons.lang.protocol.Stoppable;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
- * Various {@code Process}-related utility methods.
+ * Various {@link Process}-related utility methods.
  */
 public final
 class ProcessUtil {
@@ -48,8 +48,8 @@ class ProcessUtil {
     interface ProcessStarter {
 
         /**
-         * Starts a processes from the {@code processBuilder} such that the process reads from {@code stdin} and
-         * writes to {@code stdout} and {@code stderr}.
+         * Starts a processes from the <var>processBuilder</var> such that the process reads from <var>stdin</var> and
+         * writes to <var>stdout</var> and <var>stderr</var>.
          */
         Process
         startProcess(
@@ -179,16 +179,16 @@ class ProcessUtil {
     }
 
     /**
-     * Executes the given {@code command} and waits until it completes.
+     * Executes the given <var>command</var> and waits until it completes.
      *
      * @param workingDirectory See {@link ProcessBuilder#directory(File)}
-     * @param stdin            Where the {@code command}'s standard input is read from
-     * @param closeStdin       Whether {@code stdin} should be closed
-     * @param stdout           Where the {@code command}'s standard output is written to
-     * @param closeStdout      Whether {@code stdout} should be closed
-     * @param stderr           Where the {@code command}'s standard error is written to
-     * @param closeStderr      Whether {@code stderr} should be closed
-     * @return                 Whether the {@code command} terminated with exit status zero (i.e. success)
+     * @param stdin            Where the <var>command</var>'s standard input is read from
+     * @param closeStdin       Whether <var>stdin</var> should be closed
+     * @param stdout           Where the <var>command</var>'s standard output is written to
+     * @param closeStdout      Whether <var>stdout</var> should be closed
+     * @param stderr           Where the <var>command</var>'s standard error is written to
+     * @param closeStderr      Whether <var>stderr</var> should be closed
+     * @return                 Whether the <var>command</var> terminated with exit status zero (i.e. success)
      * @throws IOException
      * @throws InterruptedException
      */

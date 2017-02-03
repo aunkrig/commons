@@ -98,9 +98,9 @@ class FileProcessings {
     }
 
     /**
-     * Invokes the {@code fileProcessor} for each of the {@code files}.
+     * Invokes the <var>fileProcessor</var> for each of the <var>files</var>.
      *
-     * @param exceptionHandler Called if the processing of one of the {@code inputFiles} throws an {@link IOException}
+     * @param exceptionHandler Called if the processing of one of the <var>files</var> throws an {@link IOException}
      *                         or a {@link RuntimeException}
      */
     public static <T> void
@@ -180,39 +180,39 @@ class FileProcessings {
      * </p>
      * <ul>
      *   <li>
-     *     Iff the subject file is not a directory, the {@code regularFileProcessor} is invoked and its result is
+     *     Iff the subject file is not a directory, the <var>regularFileProcessor</var> is invoked and its result is
      *     returned.
      *   </li>
      *   <li>
      *     Otherwise the subject file is a directory.
      *     <ul>
      *       <li>
-     *         Iff, according to the {@code pathPredicate}, the directory can impossibly contain relevant documents,
+     *         Iff, according to the <var>pathPredicate</var>, the directory can impossibly contain relevant documents,
      *         {@code null} is returned.
      *       </li>
      *       <li>Otherwise, the directory members are listed.</li>
      *       <li>
-     *         Iff the {@code directoryMemberNameComparator} is not {@code null}, the members are sorted according to
-     *         the {@code directoryMemberNameComparator}
+     *         Iff the <var>directoryMemberNameComparator</var> is not {@code null}, the members are sorted according
+     *         to the <var>directoryMemberNameComparator</var>
      *       </li>
      *       <li>
-     *         The {@code directoryMemberProcessor} is invoked for each member, and the return values are stored in a
-     *         list.
+     *         The <var>directoryMemberProcessor</var> is invoked for each member, and the return values are stored in
+     *         a list.
      *       </li>
      *       <li>
-     *         The {@code directoryCombiner} is invoked with that list. (Notice that the list may contain {@code null}
-     *         values iff the <var>directoryMemberProcessor</var> returns {@code null} values.)
+     *         The <var>directoryCombiner</var> is invoked with that list. (Notice that the list may contain {@code
+     *         null} values iff the <var>directoryMemberProcessor</var> returns {@code null} values.)
      *       </li>
      *       <li>
-     *         The value produced by the {@code directoryCombiner} is returned.
+     *         The value produced by the <var>directoryCombiner</var> is returned.
      *       </li>
      *     </ul>
      *   </li>
      * </ul>
      * <p>
-     *   Notice that the {@code pathPredicate} is only used to avoid unnecessary directory scans; apart from that the
-     *   {@code regularFileProcessor} and the {@code directoryMemberProcessor} are called for <i>any</i> file without
-     *   further ado.
+     *   Notice that the <var>pathPredicate</var> is only used to avoid unnecessary directory scans; apart from that
+     *   the <var>regularFileProcessor</var> and the <var>directoryMemberProcessor</var> are called for <i>any</i> file
+     *   without further ado.
      * </p>
      * <p>
      *   If you use {@link Void} for {@code <T>}, then {@link #nopDirectoryCombiner()} is the right {@code
@@ -240,7 +240,7 @@ class FileProcessings {
         final FileProcessor<T> dp = new FileProcessor<T>() {
 
             /**
-             * @throws IOException {@code directory} is not a listable directory
+             * @throws IOException <var>directory</var> is not a listable directory
              * @see                #DirectoryProcessor(Comparator, FileProcessor, DirectoryCombiner, ExceptionHandler)
              */
             @Override @Nullable public T
@@ -314,7 +314,7 @@ class FileProcessings {
     }
 
     /**
-     * Transforms the return values of the invocations of {@code directoryMemberProcessor} for each member.
+     * Transforms the return values of the invocations of <var>directoryMemberProcessor</var> for each member.
      *
      * @param <T> The return type of {@link FileProcessor#process(String, File)}
      */
@@ -339,9 +339,9 @@ class FileProcessings {
 
     /**
      * Returns a {@link FileProcessor} which processes files by feeding their contents either to the {@code
-     * archiveContentsProcessor}, the {@code compressedContentsProcessor} or the normalContentsProcessor}.
+     * archiveContentsProcessor}, the <var>compressedContentsProcessor</var> or the <var>normalContentsProcessor</var>.
      * <p>
-     *   Archive files and compressed files are introspected iff {@code lookIntoFormat} evaluates {@code true} for
+     *   Archive files and compressed files are introspected iff <var>lookIntoFormat</var> evaluates {@code true} for
      *   "<i>format</i><b>:</b><i>path</i>".
      * </p>
      *
@@ -393,12 +393,12 @@ class FileProcessings {
     }
 
     /**
-     * Returns a {@link FileProcessor} which processes files by feeding their contents through the {@code delegate}
+     * Returns a {@link FileProcessor} which processes files by feeding their contents through the <var>delegate</var>
      * (just like the {@link FileContentsProcessor}), but automagically detects various archive and compression formats
      * (also nested) and processes the <i>entries of the archive</i> and the <i>uncompressed contents</i> instead of
      * the "raw" contents.
      * <p>
-     *   Archive files/entries and compressed files/entries are introspected iff {@code lookIntoFormat} evaluates
+     *   Archive files/entries and compressed files/entries are introspected iff <var>lookIntoFormat</var> evaluates
      *   {@code true} for "<i>format</i><b>:</b><i>path</i>".
      * </p>
      */

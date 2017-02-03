@@ -361,7 +361,7 @@ class HttpMessage {
     }
 
     /**
-     * Changes the value of the first header with the given {@code name}.
+     * Changes the value of the first header with the given <var>name</var>.
      */
     public void
     setHeader(String name, String value) {
@@ -375,7 +375,7 @@ class HttpMessage {
     }
 
     /**
-     * Changes the value of the first header with the given {@code name}.
+     * Changes the value of the first header with the given <var>name</var>.
      */
     public void
     setHeader(String name, int value) {
@@ -383,7 +383,7 @@ class HttpMessage {
     }
 
     /**
-     * Changes the value of the first header with the given {@code name}.
+     * Changes the value of the first header with the given <var>name</var>.
      */
     public void
     setHeader(String name, long value) {
@@ -391,7 +391,7 @@ class HttpMessage {
     }
 
     /**
-     * Changes the value of the first header with the given {@code name}.
+     * Changes the value of the first header with the given <var>name</var>.
      */
     public void
     setHeader(String name, Date value) {
@@ -399,7 +399,7 @@ class HttpMessage {
     }
 
     /**
-     * Remove all headers with the given {@code name}.
+     * Remove all headers with the given <var>name</var>.
      */
     public void
     removeHeader(String name) {
@@ -410,7 +410,7 @@ class HttpMessage {
     }
 
     /**
-     * @return the value of the first message header with that {@code name}, or {@code null}
+     * @return the value of the first message header with that <var>name</var>, or {@code null}
      */
     @Nullable public final String
     getHeader(String name) {
@@ -469,7 +469,7 @@ class HttpMessage {
     }
 
     /**
-     * @return the values of the message headers with that {@code name}, or an empty array
+     * @return the values of the message headers with that <var>name</var>, or an empty array
      */
     public String[]
     getHeaders(String name) {
@@ -845,8 +845,8 @@ class HttpMessage {
     }
 
     /**
-     * Reads one HTTP request from {@code in} through the {@code multiplexer} and passes it to the {@code
-     * requestConsumer}.
+     * Reads one HTTP request from <var>in</var> through the <var>multiplexer</var> and passes it to the
+     * <var>requestConsumer</var>.
      */
     public static void
     readLine(
@@ -1004,7 +1004,7 @@ class HttpMessage {
     }
 
     /**
-     * Reads a chunked message body from {@code in} into the {@code buffer} and runs {@code finished}.
+     * Reads a chunked message body from <var>in</var> into the <var>buffer</var> and runs <var>finished</var>.
      */
     private static void
     readChunked(
@@ -1063,7 +1063,8 @@ class HttpMessage {
     }
 
     /**
-     * Reads exactly bytes from {@code in} until end-of-input into the {@code buffer} and then runs {@code finished}.
+     * Reads exactly bytes from <var>in</var> until end-of-input into the <var>buffer</var> and then runs
+     * <var>finished</var>.
      */
     private static void
     read(
@@ -1093,7 +1094,8 @@ class HttpMessage {
     }
 
     /**
-     * Reads exactly {@code n} bytes from {@code in} into the {@code buffer} and then runs {@code finished}.
+     * Reads exactly <var>n</var> bytes from <var>in</var> into the <var>buffer</var> and then runs
+     * <var>finished</var>.
      */
     private static void
     read(

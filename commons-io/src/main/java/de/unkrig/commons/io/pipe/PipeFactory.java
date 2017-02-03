@@ -250,7 +250,7 @@ class PipeFactory {
 
     /**
      * @param capacity          The number of bytes in the <var>file</var> to use for buffering
-     * @param deleteFileOnClose Whether the {@code file} should be deleted when the pipe is closed
+     * @param deleteFileOnClose Whether the <var>file</var> should be deleted when the pipe is closed
      * @return                  A pipe which is backed by the {@link FileChannel#map(MapMode, long, long)
      *                          memory-mapped} <var>file</var>, which will be unmapped and (optionally) deleted when
      *                          the pipe is closed

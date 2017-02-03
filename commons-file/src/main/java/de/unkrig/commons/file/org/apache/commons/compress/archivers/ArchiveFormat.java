@@ -50,12 +50,12 @@ interface ArchiveFormat {
     String
     getName();
 
-    /** @return Whether the given {@code fileName} is typical for this {@link ArchiveFormat} */
+    /** @return Whether the given <var>fileName</var> is typical for this {@link ArchiveFormat} */
     boolean
     isArchiveFileName(String fileName);
 
     /**
-     * Maps the given {@code fileName} to the name that a corresponding archive file would have. This is typically
+     * Maps the given <var>fileName</var> to the name that a corresponding archive file would have. This is typically
      * achieved by appending a suffix, like '.7z', '.zip', '.tar'.
      */
     String
@@ -73,7 +73,7 @@ interface ArchiveFormat {
     /**
      * Opens an existing archive file for reading.
      *
-     * @return An {@link ArchiveInputStream} for this format which reads from the given {@code archiveFile}
+     * @return An {@link ArchiveInputStream} for this format which reads from the given <var>archiveFile</var>
      */
     ArchiveInputStream
     open(File archiveFile) throws IOException, ArchiveException;
@@ -99,16 +99,16 @@ interface ArchiveFormat {
 
     /**
      * Appends a 'normal' entry (as opposed to a 'directory entry') with the given contents to the given {@code
-     * archiveOutputStream}. The archive entry is filled with "standard values", except for the entry {@code name}.
+     * archiveOutputStream}. The archive entry is filled with "standard values", except for the entry <var>name</var>.
      * <p>
-     *   {@code writeContents} is called exactly once unless the {@code name} designates a directory entry.
+     *   <var>writeContents</var> is called exactly once unless the <var>name</var> designates a directory entry.
      * </p>
      *
      * @param archiveOutputStream       <i>Must</i> match this {@link ArchiveFormat}
      * @param name                      The name for the entry; may be slightly changed (in particulary wrt/ leading
      *                                  and trailing slashes) before the entry is created
      * @param writeContents             Writes the entry's contents to the 'subject' output stream
-     * @throws IllegalArgumentException The type of the {@code archiveOutputStream} does not match this {@link
+     * @throws IllegalArgumentException The type of the <var>archiveOutputStream</var> does not match this {@link
      *                                  ArchiveFormat}
      * @see                             #writeDirectoryEntry(ArchiveOutputStream, String)
      */
@@ -120,13 +120,13 @@ interface ArchiveFormat {
     ) throws IOException;
 
     /**
-     * Appends a 'directory entry', i.e. an entry without contents, to the given {@code archiveOutputStream}. The
-     * archive entry is filled with "standard values", except for the entry {@code name}.
+     * Appends a 'directory entry', i.e. an entry without contents, to the given <var>archiveOutputStream</var>. The
+     * archive entry is filled with "standard values", except for the entry <var>name</var>.
      *
      * @param archiveOutputStream            <i>Must</i> match this {@link ArchiveFormat}
      * @param name                           The name for the entry; may be slightly changed (in particulary wrt/
      *                                       leading and trailing slashes) before the entry is created
-     * @throws IllegalArgumentException      The type of the {@code archiveOutputStream} does not match this {@link
+     * @throws IllegalArgumentException      The type of the <var>archiveOutputStream</var> does not match this {@link
      *                                       ArchiveFormat}
      * @throws UnsupportedOperationException This archive format does not support 'directory entries'
      */
@@ -134,21 +134,21 @@ interface ArchiveFormat {
     writeDirectoryEntry(ArchiveOutputStream archiveOutputStream, String name) throws IOException;
 
     /**
-     * Appends the given {@code archiveEntry} with the given contents to the given {@code archiveOutputStream}. If
-     * {@code name} is not {@code null}, then it overrides the name in the archive entry.
+     * Appends the given <var>archiveEntry</var> with the given contents to the given <var>archiveOutputStream</var>.
+     * If <var>name</var> is not {@code null}, then it overrides the name in the archive entry.
      * <p>
-     *   If the type of the {@code archiveEntry} does not match this {@link ArchiveFormat}, then it is automatically
+     *   If the type of the <var>archiveEntry</var> does not match this {@link ArchiveFormat}, then it is automatically
      *   converted to the correct type, preserving as much information as possible ('re-archiving').
      * </p>
      * <p>
-     *   {@code writeContents} is called exactly once unless the {@code archiveEntry} is a directory entry.
+     *   <var>writeContents</var> is called exactly once unless the <var>archiveEntry</var> is a directory entry.
      * </p>
      *
      * @param archiveOutputStream       <i>Must</i> match this {@link ArchiveFormat}
      * @param archiveEntry              May or may not match this {@link ArchiveFormat} (see above)
-     * @param name                      Overrides the name in the {@code archiveEntry}, or {@code null}
+     * @param name                      Overrides the name in the <var>archiveEntry</var>, or {@code null}
      * @param writeContents             Writes the entry's contents to the 'subject' output stream
-     * @throws IllegalArgumentException The type of the {@code archiveOutputStream} does not match this {@link
+     * @throws IllegalArgumentException The type of the <var>archiveOutputStream</var> does not match this {@link
      *                                  ArchiveFormat}
      */
     void
