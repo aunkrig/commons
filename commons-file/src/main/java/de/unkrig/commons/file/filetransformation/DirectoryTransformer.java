@@ -210,6 +210,15 @@ class DirectoryTransformer implements FileTransformer {
 
         // Transform all directory members.
         String[] memberNames = inputDirectory.list();
+        if (memberNames == null) {
+
+            // MS WINDOWS 7: Read-protected directory produces:
+            // isDirectory() => true
+            // canRead()     => true
+            // list()        => null
+            // listFiles()   => null
+            throw new IOException(inputDirectory + ": Permission denied");
+        }
 
         // Sort the members, if requested.
         if (this.directoryMemberNameComparator != null) Arrays.sort(memberNames, this.directoryMemberNameComparator);

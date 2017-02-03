@@ -58,7 +58,19 @@ class FileUtil {
 
         if (file.isDirectory()) {
             boolean success = true;
-            for (File member : file.listFiles()) {
+
+            File[] members = file.listFiles();
+            if (members == null) {
+
+                // MS WINDOWS 7: Read-protected directory produces:
+                // isDirectory() => true
+                // canRead()     => true
+                // list()        => null
+                // listFiles()   => null
+                return false;
+            }
+
+            for (File member : members) {
                 success &= FileUtil.attemptToDeleteRecursively(member);
             }
             if (!success) return false;
@@ -76,7 +88,19 @@ class FileUtil {
     deleteRecursively(File file) throws IOException {
 
         if (file.isDirectory()) {
-            for (File member : file.listFiles()) {
+
+            File[] members = file.listFiles();
+            if (members == null) {
+
+                // MS WINDOWS 7: Read-protected directory produces:
+                // isDirectory() => true
+                // canRead()     => true
+                // list()        => null
+                // listFiles()   => null
+                throw new IOException(file + ": Permission denied");
+            }
+
+            for (File member : members) {
                 FileUtil.deleteRecursively(member);
             }
         }

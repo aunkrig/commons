@@ -239,7 +239,7 @@ class ClassLoaders {
     }
 
     private static Map<String, URL>
-    getFileResources(URL fileUrl, String namePrefix, boolean includeDirectories, boolean recurse) {
+    getFileResources(URL fileUrl, String namePrefix, boolean includeDirectories, boolean recurse) throws IOException {
 
         File file = new File(fileUrl.getFile());
 
@@ -252,7 +252,18 @@ class ClassLoaders {
 
             if (includeDirectories) result.put(namePrefix, fileUrl);
 
-            for (File member : file.listFiles()) {
+            File[] members = file.listFiles();
+            if (members == null) {
+
+                // MS WINDOWS 7: Read-protected directory produces:
+                // isDirectory() => true
+                // canRead()     => true
+                // list()        => null
+                // listFiles()   => null
+                throw new IOException(file + ": Permission denied");
+            }
+
+            for (File member : members) {
                 String memberName = namePrefix + member.getName();
                 URL    memberUrl  = ClassLoaders.fileUrl(member);
 

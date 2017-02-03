@@ -566,7 +566,18 @@ class IoUtil {
         }
         try {
 
-            for (String memberName : source.list()) {
+            String[] memberNames = source.list();
+            if (memberNames == null) {
+
+                // MS WINDOWS 7: Read-protected directory produces:
+                // isDirectory() => true
+                // canRead()     => true
+                // list()        => null
+                // listFiles()   => null
+                throw new IOException(source + ": Permission denied");
+            }
+
+            for (String memberName : memberNames) {
                 IoUtil.copyTree(new File(source, memberName), new File(destination, memberName), collisionStrategy);
             }
         } catch (IOException ioe) {
