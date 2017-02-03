@@ -144,13 +144,13 @@ class XmlUtil {
     }
 
     /**
-     * @return The location data of the given DOM {@code node}
+     * @return The location data of the given DOM <var>node</var>
      */
     @Nullable public static Locator
     getLocation(Node node) { return (Locator) node.getUserData(XmlUtil.LOCATOR_KEY); }
 
     /**
-     * @return An {@link XMLReader} that wraps the given {@code delegate} and annotates all nodes with their
+     * @return An {@link XMLReader} that wraps the given <var>delegate</var> and annotates all nodes with their
      *         locations
      * @see    #getLocation(Node)
      */

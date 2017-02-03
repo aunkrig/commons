@@ -68,7 +68,7 @@ public abstract
 class Glob implements Predicate<String> {
 
     /**
-     * @return Whether the {@code subject} matches this {@link Glob}.
+     * @return Whether the <var>subject</var> matches this {@link Glob}.
      */
     public abstract boolean
     matches(String subject);
@@ -79,7 +79,7 @@ class Glob implements Predicate<String> {
      * If your code uses only {@link Glob} and not {@link Predicate}, you should favor calling {@link #matches},
      * because that method name is more expressive.
      * <p>
-     * A {@code subject} value {@code null} evaluates to {@code false}.
+     * A <var>subject</var> value {@code null} evaluates to {@code false}.
      */
     @Override public boolean
     evaluate(@Nullable String subject) {
@@ -87,9 +87,9 @@ class Glob implements Predicate<String> {
     }
 
     /**
-     * Iff the {@code subject} matches this {@link Glob}, then a non-null string ist returned; the algorithm that
+     * Iff the <var>subject</var> matches this {@link Glob}, then a non-null string ist returned; the algorithm that
      * computes that string depends on the concrete {@link Glob} implementation; the default implementation simply
-     * returns the {@code subject}.
+     * returns the <var>subject</var>.
      * <p>
      * Otherwise, {@code null} is returned.
      */
@@ -206,8 +206,8 @@ class Glob implements Predicate<String> {
     }
 
     /**
-     * Returns a {@link Glob} who's {@link #replace(String)} method will return its {@code subject} argument if the
-     * subject matches the given regular expression.
+     * Returns a {@link Glob} who's {@link #replace(String)} method will return its <var>subject</var> argument if the
+     * subject matches the given <var>regex</var>.
      */
     public static Glob
     compileRegex(final Pattern regex) {
@@ -217,24 +217,25 @@ class Glob implements Predicate<String> {
     /**
      * The behavior of the {@link #matches(String)} method of the returned {@link Glob} is as follows:
      * <ul>
-     *   <li>If the {@code regex} matches the {@code subject}, then {@code true} is returned.</li>
+     *   <li>If the <var>regex</var> matches the <var>subject</var>, then {@code true} is returned.</li>
      *   <li>
-     *     Otherwise, if the {@code regex} matches a prefix of {@code subject}, and that prefix is followed by '/' or
-     *     '!', then {@code true} is returned. (Effectively, a glob 'dir' or 'dir/file.zip' matches all members and
-     *     entries under 'dir' resp. 'dir/file.zip'.)
+     *     Otherwise, if the <var>regex</var> matches a prefix of <var>subject</var>, and that prefix is followed by
+     *     '/' or '!', then {@code true} is returned. (Effectively, a glob 'dir' or 'dir/file.zip' matches all members
+     *     and entries under 'dir' resp. 'dir/file.zip'.)
      *   </li>
      *   <li>
-     *     Otherwise, if the subject ends with "!" or "/", and the {@code regex} could match the concatenation of the
-     *     {@code subject} and another string, then {@code true} is returned. (Example: The {@code subject} "dir/" is
-     *     matched by {@code regex}s "dir", "dir/", "dir/anything" and "**.c", but not by {@code regex}s
-     *     "dirr/anything", "file", "*.c" and "file.zip!file".)
+     *     Otherwise, if the subject ends with "!" or "/", and the <var>regex</var> could match the concatenation of
+     *     the <var>subject</var> and another string, then {@code true} is returned. (Example: The <var>subject</var>
+     *     {@code "dir/"} is matched by <var>regex</var>s {@code "dir"}, {@code "dir/"}, {@code "dir/anything"} and
+     *     {@code "**.c"}, but not by <var>regex</var>s {@code "dirr/anything"}, {@code "file"}, {@code "*.c"} and
+     *     {@code "file.zip!file"}.)
      *   </li>
      *   <li>Otherwise {@code false} is returned.</li>
      * </ul>
      * The behavior of the {@link #replace(String)} method of the returned {@link Glob} is as follows:
      * <ul>
      *   <li>
-     *     If the subject matches the {@code regex}, then a non-null string is returned:
+     *     If the subject matches the <var>regex</var>, then a non-null string is returned:
      *     <ul>
      *       <li>If <var>replacementString</var> is {@code null}, then the subject is returned.</li>
      *       <li>
@@ -329,8 +330,8 @@ class Glob implements Predicate<String> {
      *   "{@code $1}"... replaces with the match groups; otherwise the <var>subject</var> will be returned.
      * </p>
      *
-     * @param flags Modifies the semantics of the {@code pattern}, e.g. {@link Pattern2#WILDCARD} switches from regular
-     *              expressions to wildcards
+     * @param flags Modifies the semantics of the <var>pattern</var>, e.g. {@link Pattern2#WILDCARD} switches from
+     *              regular expressions to wildcards
      * @see         #INCLUDES_EXCLUDES
      * @see         #REPLACEMENT
      * @see         Pattern2#WILDCARD
@@ -389,12 +390,12 @@ class Glob implements Predicate<String> {
     }
 
     /**
-     * The {@link #matches(String)} method of the returned {@link Glob} returns whether its {@code subject}
-     * argument matches both {@code pattern1} and {@code pattern2}.
+     * The {@link #matches(String)} method of the returned {@link Glob} returns whether its <var>subject</var>
+     * argument matches both <var>pattern1</var> and <var>pattern2</var>.
      * <p>
-     * The {@link #replace(String)} method of the returned {@link Glob} returns checks whether the {@code subject}
-     * matches {@code pattern1}; if so, it calls {@link #replace(String)} on {@code pattern2} and returns the result;
-     * otherwise it returns {@code null}.
+     * The {@link #replace(String)} method of the returned {@link Glob} returns checks whether the <var>subject</var>
+     * matches <var>pattern1</var>; if so, it calls {@link #replace(String)} on <var>pattern2</var> and returns the
+     * result; otherwise it returns {@code null}.
      */
     public static Glob
     and(final Glob pattern1, final Glob pattern2) {
@@ -418,12 +419,12 @@ class Glob implements Predicate<String> {
     }
 
     /**
-     * The {@link #matches(String)} method of the returned {@link Glob} returns whether its {@code subject}
-     * argument matches {@code pattern1} or, if not, {@code pattern2}.
+     * The {@link #matches(String)} method of the returned {@link Glob} returns whether its <var>subject</var>
+     * argument matches <var>pattern1</var> or, if not, <var>pattern2</var>.
      * <p>
      * The {@link #replace(String)} method of the returned {@link Glob} returns calls {@link #replace(String)} on
-     * {@code pattern1} and returns the result if it is not {@code null}; otherwise it calls {@link
-     * #replace(String)} on {@code pattern2} and returns the result.
+     * <var>pattern1</var> and returns the result if it is not {@code null}; otherwise it calls {@link
+     * #replace(String)} on <var>pattern2</var> and returns the result.
      */
     public static Glob
     or(final Glob pattern1, final Glob pattern2) {
@@ -449,12 +450,12 @@ class Glob implements Predicate<String> {
     }
 
     /**
-     * The {@link #matches(String)} method of the returned {@link Glob} returns whether the {@code predicate} evaluates
-     * to {@code true} and the {@code subject} argument matches the {@code pattern}.
+     * The {@link #matches(String)} method of the returned {@link Glob} returns whether the <var>predicate</var>
+     * evaluates to {@code true} and the <var>subject</var> argument matches the <var>pattern</var>.
      * <p>
-     * The {@link #replace(String)} method of the returned {@link Glob} returns checks whether the {@code predicate}
-     * evaluates to {@code true}; if so, it calls {@link #replace(String)} on {@code pattern} and returns the result;
-     * otherwise it returns {@code null}.
+     * The {@link #replace(String)} method of the returned {@link Glob} returns checks whether the <var>predicate</var>
+     * evaluates to {@code true}; if so, it calls {@link #replace(String)} on <var>pattern</var> and returns the
+     * result; otherwise it returns {@code null}.
      */
     public static Glob
     and(final Predicate<? super String> predicate, final Glob pattern) {
@@ -478,12 +479,12 @@ class Glob implements Predicate<String> {
     }
 
     /**
-     * The {@link #matches(String)} method of the returned {@link Glob} returns whether the {@code subject} argument
-     * matches the {@code pattern} and the {@code predicate} evaluates to {@code true}.
+     * The {@link #matches(String)} method of the returned {@link Glob} returns whether the <var>subject</var> argument
+     * matches the <var>pattern</var> and the <var>predicate</var> evaluates to {@code true}.
      * <p>
      * The {@link #replace(String)} method of the returned {@link Glob} returns checks whether the {@link
-     * Glob#replace(String)} on the {@code pattern} returns nuon-{@code null} and the {@code predicate} evaluates to
-     * {@code true}; if so, it returns the result of the {@link Glob#replace(String)} call; otherwise it returns {@code
+     * Glob#replace(String)} on the <var>pattern</var> returns nuon-{@code null} and the <var>predicate</var> evaluates
+     * to {@code true}; if so, it returns the result of the {@link Glob#replace(String)} call; otherwise it returns {@code
      * null}.
      */
     public static Glob
@@ -508,7 +509,7 @@ class Glob implements Predicate<String> {
         };
     }
 
-    /** @return A glob that wraps the given {@code predicate} */
+    /** @return A glob that wraps the given <var>predicate</var> */
     public static Glob
     fromPredicate(final Predicate<? super String> predicate) {
         return new Glob() {

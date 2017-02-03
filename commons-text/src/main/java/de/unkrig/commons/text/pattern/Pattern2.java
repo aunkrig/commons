@@ -241,8 +241,8 @@ class Pattern2 {
     }
 
     /**
-     * Finds the next unescaped occurrence of one of the {@code metaCharacters} within {@code subject}, starting at
-     * position {@code offset}. Metacharacters can be escaped by backslashes or by '{@code \Q ... \E}'.
+     * Finds the next unescaped occurrence of one of the <var>metaCharacters</var> within <var>subject</var>, starting
+     * at position <var>offset</var>. Metacharacters can be escaped by backslashes or by '{@code \Q ... \E}'.
      *
      * @return The position of the next meta character, or {@code subject.length()} iff no meta character is found
      */

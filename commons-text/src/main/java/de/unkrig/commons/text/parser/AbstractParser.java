@@ -76,7 +76,7 @@ class AbstractParser<TT extends Enum<TT>> {
     /**
      * Checks the next token, but does not consume it.
      *
-     * @return The next token's text, or {@code null} if the next token's type is not {@code tokenType}, or if the
+     * @return The next token's text, or {@code null} if the next token's type is not <var>tokenType</var>, or if the
      *         scanner is at end-of-input
      */
     @Nullable public String
@@ -88,7 +88,7 @@ class AbstractParser<TT extends Enum<TT>> {
     /**
      * Checks the next token, but does not consume it.
      *
-     * @return Whether the next token's text equals {@code text}, or the scanner is not at end-of-input and
+     * @return Whether the next token's text equals <var>text</var>, or the scanner is not at end-of-input and
      *         <var>text</var> is {@code null}
      */
     public boolean
@@ -128,9 +128,9 @@ class AbstractParser<TT extends Enum<TT>> {
     // PEEK READ METHODS
 
     /**
-     * Checks the next token and consumes it if its type is {@code tokenType}.
+     * Checks the next token and consumes it if its type is <var>tokenType</var>.
      *
-     * @return The text of the next token, or {@code null} if the next token's type is not {@code tokenType}, or if
+     * @return The text of the next token, or {@code null} if the next token's type is not <var>tokenType</var>, or if
      *         the scanner is at end-of-input
      */
     @Nullable public String
@@ -146,7 +146,7 @@ class AbstractParser<TT extends Enum<TT>> {
     /**
      * Checks the next token and consumes it if it matches.
      *
-     * @return Whether the next token's text equals {@code text}, or the scanner is at end-of-input and <var>text</var>
+     * @return Whether the next token's text equals <var>text</var>, or the scanner is at end-of-input and <var>text</var>
      *         is {@code null}
      */
     public boolean
@@ -190,7 +190,7 @@ class AbstractParser<TT extends Enum<TT>> {
 
     /**
      * Checks the next token and consumes it if its text equals the return value of {@link Object#toString()
-     * toString()} of one of the {@code values}.
+     * toString()} of one of the <var>values</var>.
      *
      * @return The matched value, or {@code null} if none match, or the scanner is at end-of-input
      */
@@ -210,7 +210,7 @@ class AbstractParser<TT extends Enum<TT>> {
     }
 
     /**
-     * Checks the next token and consumes it if its type is one of the {@code tokenTypes}.
+     * Checks the next token and consumes it if its type is one of the <var>tokenTypes</var>.
      *
      * @return The matched token, or {@code null} iff none match, or the scanner is at end-of-input
      */
@@ -252,7 +252,7 @@ class AbstractParser<TT extends Enum<TT>> {
      * Consumes the next token.
      *
      * @return                The next token's text
-     * @throws ParseException The next token's type is not {@code tokenType}
+     * @throws ParseException The next token's type is not <var>tokenType</var>
      * @throws ParseException The scanner is at end-of-input
      */
     public String
@@ -267,7 +267,7 @@ class AbstractParser<TT extends Enum<TT>> {
     /**
      * Consumes the next token.
      *
-     * @throws ParseException The next token's text does not equal {@code text}
+     * @throws ParseException The next token's text does not equal <var>text</var>
      * @throws ParseException The scanner is at end-of-input
      * @see #eoi()
      */
@@ -289,7 +289,7 @@ class AbstractParser<TT extends Enum<TT>> {
      * </ul>
      *
      * @return                The index of the first element of <var>tokenTypeOrText</var> that matches
-     * @throws ParseException Neither the next token's type nor its text equals any of {@code tokenTypeOrText}
+     * @throws ParseException Neither the next token's type nor its text equals any of <var>tokenTypeOrText</var>
      * @throws ParseException The scanner is at end-of-input
      */
     public int
