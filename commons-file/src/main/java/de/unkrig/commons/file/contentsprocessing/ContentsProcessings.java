@@ -91,12 +91,16 @@ class ContentsProcessings {
     };
 
     /**
-     * Process the given {@code archiveInputStream} by feeding the contents of each archive entry through the given
-     * {@code contentsProcessor}.
+     * Process the given <var>archiveInputStream</var> by feeding the contents of each archive entry through the given
+     * <var>contentsProcessor</var>.
+     * <p>
+     *   "Directory archive entries" are silently ignored, because they have no contents and thus it makes no sense to
+     *   process them with the <var>contentsProcessor</var>.
+     * </p>
      *
      * @param archiveOpener    Re-produces the archive input stream
-     * @param exceptionHandler Invoked if the {@code contentsProcessor} throws an exception; if it completes normally,
-     *                         then processing continues with the next archive entry
+     * @param exceptionHandler Invoked if the <var>contentsProcessor</var> throws an exception; if it completes
+     *                         normally, then processing continues with the next archive entry
      */
     @Nullable public static <T> T
     processArchive(
@@ -110,6 +114,8 @@ class ContentsProcessings {
 
         List<T> combinables = new ArrayList<T>();
         for (ArchiveEntry ae = archiveInputStream.getNextEntry(); ae != null; ae = archiveInputStream.getNextEntry()) {
+
+            if (ae.isDirectory()) continue;
 
             final String entryName = ArchiveFormatFactory.normalizeEntryName(ae.getName());
             final String entryPath = archivePath + '!' + entryName;
