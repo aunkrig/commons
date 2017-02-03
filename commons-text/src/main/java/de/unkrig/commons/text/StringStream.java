@@ -114,7 +114,7 @@ class StringStream<EX extends Throwable> {
     }
 
     /**
-     * @return Whether the next string matches the {@code pattern}
+     * @return Whether the next string matches the <var>pattern</var>
      */
     public boolean
     peek(Pattern pattern) throws EX {
@@ -124,9 +124,9 @@ class StringStream<EX extends Throwable> {
     }
 
     /**
-     * Consumes the next string iff it equals the {@code expected} string.
+     * Consumes the next string iff it equals the <var>expected</var> string.
      *
-     * @return Whether the next string equals the {@code expected} string
+     * @return Whether the next string equals the <var>expected</var> string
      */
     public boolean
     peekRead(@Nullable String expected) throws EX {
@@ -138,9 +138,9 @@ class StringStream<EX extends Throwable> {
     }
 
     /**
-     * Consumes the next string iff it matches the given {@code pattern}.
+     * Consumes the next string iff it matches the given <var>pattern</var>.
      *
-     * @return Whether the next string matches the {@code pattern}
+     * @return Whether the next string matches the <var>pattern</var>
      * @see #group(int)
      */
     public boolean
@@ -157,7 +157,7 @@ class StringStream<EX extends Throwable> {
     }
 
     /**
-     * Consumes the next string iff it equals one of the {@code expected} strings.
+     * Consumes the next string iff it equals one of the <var>expected</var> strings.
      *
      * @return The index of the equl string, or -1
      */
@@ -190,9 +190,9 @@ class StringStream<EX extends Throwable> {
     }
 
     /**
-     * Verifies that the next string equals the given {@code expected} string, and consumes it.
+     * Verifies that the next string equals the given <var>expected</var> string, and consumes it.
      *
-     * @throws UnexpectedElementException The next string does equal the {@code expected} string
+     * @throws UnexpectedElementException The next string does equal the <var>expected</var> string
      */
     public void
     read(String expected) throws UnexpectedElementException, EX {
@@ -209,9 +209,9 @@ class StringStream<EX extends Throwable> {
     }
 
     /**
-     * Verifies that the next string matches the given {@code pattern}.
+     * Verifies that the next string matches the given <var>pattern</var>.
      *
-     * @throws UnexpectedElementException The next string does match the {@code pattern}
+     * @throws UnexpectedElementException The next string does match the <var>pattern</var>
      */
     public void
     read(Pattern pattern) throws EX, UnexpectedElementException {

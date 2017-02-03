@@ -183,7 +183,8 @@ class AbstractPrinter implements Printer {
      * Creates and returns an {@link AbstractPrinter} which writes messages of the given <var>level</var>to the given
      * <var>writer</var>, and forwards all other messages to {@code this} {@link AbstractWriter}.
      * <p>
-     *   Iff <var>level</var> {@code == null ||} <var>writer</var> {@code == null}, then {@code this} object is returned instead.
+     *   Iff <var>level</var> {@code == null ||} <var>writer</var> {@code == null}, then {@code this} object is
+     *   returned instead.
      * </p>
      */
     public final AbstractPrinter
