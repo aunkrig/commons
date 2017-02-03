@@ -121,7 +121,7 @@ class ExpressionUtil {
      * '#' characters is parsed as an expression.
      *
      * @param s                   The string to expand
-     * @param isValidVariableName Evalutaes to whether the {@code subject} is a valid variable name
+     * @param isValidVariableName Evalutaes to whether the <var>subject</var> is a valid variable name
      * @return                    The expanded string
      */
     public static Expression
@@ -196,8 +196,8 @@ class ExpressionUtil {
     }
 
     /**
-     * @param parameterName The name under which the predicate subject is accessible for the {@code expression}
-     * @return              A {@link Predicate} which evaluates to the value of the given {@code expression}
+     * @param parameterName The name under which the predicate subject is accessible for the <var>expression</var>
+     * @return              A {@link Predicate} which evaluates to the value of the given <var>expression</var>
      */
     public static <T> Predicate<T>
     toPredicate(final Expression expression, final String parameterName) {
@@ -223,7 +223,7 @@ class ExpressionUtil {
     }
 
     /**
-     * @return An {@link Expression} which evaluates to the result of the given {@code predicate}, where the subject
+     * @return An {@link Expression} which evaluates to the result of the given <var>predicate</var>, where the subject
      *         to the predicate is the value of the named variable of the expression
      */
     public static Expression
@@ -252,8 +252,8 @@ class ExpressionUtil {
     }
 
     /**
-     * @return An {@link Expression} which evaluates the {@code operand1}, and, if that is {@code true} the
-     *         {@code operand2}
+     * @return An {@link Expression} which evaluates the <var>operand1</var>, and, if that is {@code true} the
+     *         <var>operand2</var>
      */
     public static Expression
     logicalAnd(final Expression operand1, final Expression operand2) {
@@ -278,8 +278,8 @@ class ExpressionUtil {
     }
 
     /**
-     * @return An {@link Expression} which evaluates the {@code operand1}, and, if that is {@code false} the
-     *         {@code operand2}
+     * @return An {@link Expression} which evaluates the <var>operand1</var>, and, if that is {@code false} the
+     *         <var>operand2</var>
      */
     public static Expression
     logicalOr(final Expression operand1, final Expression operand2) {

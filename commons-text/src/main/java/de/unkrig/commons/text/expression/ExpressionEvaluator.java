@@ -142,7 +142,7 @@ class ExpressionEvaluator {
     }
 
     /**
-     * Parses an expression from a {@code tokenProducer}.
+     * Parses an expression from a <var>tokenProducer</var>.
      *
      * @see Parser The expression syntax
      */
@@ -461,7 +461,7 @@ class ExpressionEvaluator {
     /**
      * Scans, parses and evaluates an expression.
      *
-     * @throws ParseException {@code spec} refers to a variable which is not contained in {@code variables}
+     * @throws ParseException <var>spec</var> refers to a variable which is not contained in <var>variables</var>
      * @throws ParseException Any other parse error
      * @see Parser            The expression syntax
      */
@@ -674,7 +674,7 @@ class ExpressionEvaluator {
     }
 
     /**
-     * Return the value of the given attribute of the given {@code target} object. An attribute is either a PUBLIC
+     * Return the value of the given attribute of the given <var>target</var> object. An attribute is either a PUBLIC
      * field, or it is retrieved by invoking a getter ("xyz()" or "getXyz()").
      */
     @Nullable private static <E extends Exception> Object
@@ -717,7 +717,7 @@ class ExpressionEvaluator {
     }
 
     /**
-     * Return the value of the given attribute of the given {@code target} object. An attribute is either a PUBLIC
+     * Return the value of the given attribute of the given <var>target</var> object. An attribute is either a PUBLIC
      * field, or it is retrieved by invoking a getter ("xyz()" or "getXyz()").
      */
     @Nullable private static <E extends Exception> Object
@@ -977,14 +977,14 @@ class ExpressionEvaluator {
     }
 
     /**
-     * Converts and returns the {@code value} to {@link Integer}, {@link Long}, {@link Float}, {@link Double} or {@link
-     * String} as appropriate for comparison with {@code other}.
+     * Converts and returns the <var>value</var> to {@link Integer}, {@link Long}, {@link Float}, {@link Double} or
+     * {@link String} as appropriate for comparison with <var>other</var>.
      *
-     * <p>Returns the original {@code value} iff the {@code value} is incomparable with {@code other}.
+     * <p>Returns the original <var>value</var> iff the <var>value</var> is incomparable with <var>other</var>.
      *
      * <p>Examples:
      * <table border="1">
-     *   <tr><th>{@code value}</th><th>{@code other}</th><th>Result</th></tr>
+     *   <tr><th><var>value</var></th><th><var>other</var></th><th>Result</th></tr>
      *   <tr><td>null</td><td>any</td><td>null</td></tr>
      *   <tr><td>any</td><td>null</td><td>value</td></tr>
      *   <tr><td>non-primitive</td><td>any</td><td>value</td></tr>
@@ -1098,7 +1098,7 @@ class ExpressionEvaluator {
     /**
      * Scans, parses and evaluates an expression.
      *
-     * @return     {@code null} iff the {@code spec} is {@code null}; otherwise the expresasion value
+     * @return     {@code null} iff the <var>spec</var> is {@code null}; otherwise the expresasion value
      * @see Parser The expression syntax
      */
     public boolean
@@ -1108,7 +1108,7 @@ class ExpressionEvaluator {
     }
 
     /**
-     * Converts the given {@code subject} to the given {@code targetType}.
+     * Converts the given <var>subject</var> to the given <var>targetType</var>.
      * Special processing applies for target types {@link String} and {@link Boolean}.
      *
      * @see #toBoolean(Object)
@@ -1141,12 +1141,12 @@ class ExpressionEvaluator {
     }
 
     /**
-     * Converts the given {@code subject} to the given primitive target type. Special processing applies for target
+     * Converts the given <var>subject</var> to the given primitive target type. Special processing applies for target
      * type {@code boolean.class}, see {@link #toBoolean(Object)}.
      *
-     * @throws EvaluationException The {@code subject} is {@code null} (and the {@code targetType} is not {@code
+     * @throws EvaluationException The <var>subject</var> is {@code null} (and the <var>targetType</var> is not {@code
      *                             boolean.class})
-     * @throws EvaluationException The {@code subject} cannot be converted to the given {@code targetType}
+     * @throws EvaluationException The <var>subject</var> cannot be converted to the given <var>targetType</var>
      */
     @SuppressWarnings("unchecked") public static <T> T
     toPrimitive(@Nullable Object subject, Class<T> targetType) throws EvaluationException {
@@ -1178,7 +1178,7 @@ class ExpressionEvaluator {
     }
 
     /**
-     * @return Whether the {@code subject} equals on of the {@link #FALSES}
+     * @return Whether the <var>subject</var> equals on of the {@link #FALSES}
      */
     public static boolean
     toBoolean(@Nullable Object subject) { return !ExpressionEvaluator.FALSES.contains(subject); }

@@ -45,7 +45,7 @@ interface Expression {
      * @param variables            The values of the variables that were named when the expression was parsed. Allowed
      *                             values are {@link String}, {@link Integer}, {@link Boolean}, any other {@code
      *                             Object}, or {@code null}.
-     * @return                     A {@link String}, {@link Integer}, {@link Boolean}, any other {@code Object}, or
+     * @return                     A {@link String}, {@link Integer}, {@link Boolean}, any other {link Object}, or
      *                             {@code null}
      * @throws EvaluationException A problem occurred during evaluation, e.g. any array element access was attempted
      *                             and the index value could not be converted to {@code int}
