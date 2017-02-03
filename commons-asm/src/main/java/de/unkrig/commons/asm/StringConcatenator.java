@@ -105,7 +105,7 @@ class StringConcatenator {
     /**
      * Registers the given code fragment, which will be executed, and the result added on {@link #finish()}.
      *
-     * @param insns Instructions which must produce exactly one value of {@code type} on the operand stack
+     * @param insns Instructions which must produce exactly one value of <var>type</var> on the operand stack
      * @return      {@code this}
      */
     public StringConcatenator
@@ -116,10 +116,10 @@ class StringConcatenator {
 
     /**
      * Registers the given code fragment, which will be executed, and the result added on {@link #finish()}. If the
-     * {@code type} is an array, a string, {@link StringBuffer}, {@link StringBuilder}, {@link CharSequence} or a
+     * <var>type</var> is an array, a string, {@link StringBuffer}, {@link StringBuilder}, {@link CharSequence} or a
      * {@code char}, then it is 'pretty-printed' i nthe style of a Java constant.
      *
-     * @param code Instructions which must produce exactly one value of {@code type} on the operand stack
+     * @param code Instructions which must produce exactly one value of <var>type</var> on the operand stack
      * @return     {@code this}
      */
     public StringConcatenator
