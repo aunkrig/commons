@@ -46,8 +46,8 @@ public
 class StatelessScanner<TT extends Enum<TT>> extends AbstractScanner<TT> {
 
     /**
-     * Adds a rule that produces the given {@code tokenType} if the next characters of the input match the given
-     * {@code regex}.
+     * Adds a rule that produces the given <var>tokenType</var> if the next characters of the input match the given
+     * <var>regex</var>.
      */
     public void
     addRule(String regex, TT tokenType) {

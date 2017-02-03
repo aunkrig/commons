@@ -116,8 +116,8 @@ class ScannerUtil {
     }
 
     /**
-     * @return A {@link Producer} who's {@link #toString()} method prepends the given {@code prefix}, a colon and a
-     *         space to the string returned by the {@code delegate}'s {@link #toString()} method
+     * @return A {@link Producer} who's {@link #toString()} method prepends the given <var>prefix</var>, a colon and a
+     *         space to the string returned by the <var>delegate</var>'s {@link #toString()} method
      */
     public static <T, EX extends Throwable> ProducerWhichThrows<T, EX>
     augmentScanningLocation(
@@ -138,8 +138,8 @@ class ScannerUtil {
     }
 
     /**
-     * @return A {@link StringScanner} which produces tokens through a {@code delegate}, but only those for which
-     *         the {@code predicate} returns {@code true}
+     * @return A {@link StringScanner} which produces tokens through a <var>delegate</var>, but only those for which
+     *         the <var>predicate</var> returns {@code true}
      */
     public static <TT extends Enum<TT>> StringScanner<TT>
     filter(final StringScanner<TT> delegate, final Predicate<? super Token<TT>> predicate) {
@@ -217,10 +217,10 @@ class ScannerUtil {
 
     /**
      * @return               The input string, unescaped according to the rules defined in JLS7
-     * @throws ScanException {@code s} contains control characters
+     * @throws ScanException <var>s</var> contains control characters
      * @throws ScanException <code>\&#92;</code> is not followed by exactly four hex digits
      * @throws ScanException A backslash is not followed by an allowed character
-     * @throws ScanException {@code s} ends in the middle of an escape sequence
+     * @throws ScanException <var>s</var> ends in the middle of an escape sequence
      * @see #UNESCAPE_NUL
      * @see #UNESCAPE_DOUBLE_QUOTE
      * @see #UNESCAPE_SINGLE_QUOTE

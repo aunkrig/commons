@@ -122,7 +122,7 @@ class IncludeExclude extends Glob {
     }
 
     /**
-     * All includes and excludes are matched against the {@code subject}. On the first successful match,
+     * All includes and excludes are matched against the <var>subject</var>. On the first successful match,
      * {@code true} or {@code false} is returned, depending on whether the match was an INCLUDE or an EXCLUDE.
      * If none of the includes and excludes match, {@code true} or {@code false} is returned, depending on whether the
      * lowest-priority rule is an EXCLUDE or an INCLUDE.
@@ -145,7 +145,7 @@ class IncludeExclude extends Glob {
     }
 
     /**
-     * The {@code subject} is transformed by all matching includes, until an exclude matches.
+     * The <var>subject</var> is transformed by all matching includes, until an exclude matches.
      *
      * @return The transformed subject, or {@code null} iff an exclude matches before the first include matches
      */
