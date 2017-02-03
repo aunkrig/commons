@@ -41,7 +41,7 @@ class CamelCase {
     private CamelCase() {}
 
     /**
-     * Concatenates the given {@code strings}, with the first letter of each string <i>except the first string</i>
+     * Concatenates the given <var>strings</var>, with the first letter of each string <i>except the first string</i>
      * capitalized.
      * <p>
      * Examples:
@@ -52,8 +52,8 @@ class CamelCase {
      * </table>
      *
      * @throws ArrayIndexOutOfBoundsException {@code strings.length} was zero
-     * @throws IndexOutOfBoundsException      One of the {@code strings} has zero length
-     * @throws NullPointerException           One of the {@code strings} was {@code null}
+     * @throws IndexOutOfBoundsException      One of the <var>strings</var> has zero length
+     * @throws NullPointerException           One of the <var>strings</var> was {@code null}
      */
     public static String
     cat(String... strings) {

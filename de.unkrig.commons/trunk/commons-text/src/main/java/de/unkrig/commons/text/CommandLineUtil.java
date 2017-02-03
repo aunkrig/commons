@@ -47,7 +47,7 @@ class CommandLineUtil {
      * @param mapping Triplets of {@link Character}s, {@link String}s and {@link Integer}s representing unexpanded
      *                option, expanded option and option argument count, e.g. {@code 'a', "-alpha", 1, 'b', "-beta", 0,
      *                'c', "-gamma", 1 }
-     * @return        The expanded {@code args}, e.g. {@code "-foo", "-alpha", "arg1", "-beta", "-gamma", "arg2",
+     * @return        The expanded <var>args</var>, e.g. {@code "-foo", "-alpha", "arg1", "-beta", "-gamma", "arg2",
      *                "-bar"}
      */
     public static String[]
