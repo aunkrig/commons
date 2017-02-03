@@ -73,7 +73,7 @@ class ArchivingFileHandler extends AbstractStreamHandler {
      * <dl>
      *   <dt><var>class-name</var>{@code .pattern}</dt>
      *   <dd>
-     *     Determines the pathes of the log files; see the {@code pattern} parameter of {@link
+     *     Determines the pathes of the log files; see the <var>pattern</var> parameter of {@link
      *     #ArchivingFileHandler(String, long, TimeTable, boolean, boolean, Level, Filter, Formatter, String)}.
      *     Defaults to {@value #DEFAULT_PATTERN}.
      *   </dd>
@@ -411,7 +411,7 @@ class ArchivingFileHandler extends AbstractStreamHandler {
     // CONSTANTS
 
     /**
-     * A special value for the {@code sizeLimit} paramter of {@link ArchivingFileHandler#ArchivingFileHandler(String,
+     * A special value for the <var>sizeLimit</var> paramter of {@link ArchivingFileHandler#ArchivingFileHandler(String,
      * long, TimeTable, boolean, boolean, Level, Filter, Formatter, String)} indicating that no limit should apply.
      */
     public static final long NO_LIMIT = Long.MAX_VALUE;
@@ -539,7 +539,7 @@ class ArchivingFileHandler extends AbstractStreamHandler {
     }
 
     /**
-     * Replace all occurrences of {@code infix} within {@subject} with the given {@code replacement}.
+     * Replace all occurrences of <var>infix</var> within {@subject} with the given <var>replacement</var>.
      */
     private static String
     replaceAll(String subject, String infix, String replacement) {

@@ -154,32 +154,32 @@ class TreeComparator<N extends TreeComparator.Node<N>, EX extends Throwable> {
     }
 
     /**
-     * This abstract method is invoked by {@link #compare(Node, Node)} for every node that does not exist under {@code
-     * node1}, but under {@code node2}.
+     * This abstract method is invoked by {@link #compare(Node, Node)} for every node that does not exist under
+     * <var>node1</var>, but under <var>node2</var>.
      */
     protected abstract void nodeAdded(N node) throws EX;
 
     /**
-     * This abstract method is invoked by {@link #compare(Node, Node)} for every node that exists under {@code node1},
-     * but not under {@code node2}.
+     * This abstract method is invoked by {@link #compare(Node, Node)} for every node that exists under
+     * <var>node1</var>, but not under <var>node2</var>.
      */
     protected abstract void nodeDeleted(N node) throws EX;
 
     /**
      * This abstract method is invoked by {@link #compare(Node, Node)} for every node that is a non-leaf node under
-     * {@code node1} and a leaf node under {@code node2}.
+     * <var>node1</var> and a leaf node under <var>node2</var>.
      */
     protected abstract void nonLeafNodeChangedToLeafNode(N node1, N node2) throws EX;
 
     /**
-     * This abstract method is invoked by {@link #compare(Node, Node)} for every node that is a leaf node under {@code
-     * node1} and a non-leaf node under {@code node2}.
+     * This abstract method is invoked by {@link #compare(Node, Node)} for every node that is a leaf node under
+     * <var>node1</var> and a non-leaf node under <var>node2</var>.
      */
     protected abstract void leafNodeChangedToNonLeafNode(N node1, N node2) throws EX;
 
     /**
-     * This abstract method is invoked by {@link #compare(Node, Node)} for every leaf node that exists under {@code
-     * node1} and under {@code node2}.
+     * This abstract method is invoked by {@link #compare(Node, Node)} for every leaf node that exists under
+     * <var>node1</var> and under <var>node2</var>.
      */
     protected abstract void leafNodeRemains(N node1, N node2) throws EX;
 }

@@ -435,15 +435,15 @@ class Duration {
         return sb.toString();
     }
 
-    /** @return A duration that represents the sum of {@code this} and {@code other} */
+    /** @return A duration that represents the sum of {@code this} and <var>other</var> */
     public Duration
     add(Duration other) { return new Duration(this.ms + other.ms); }
 
-    /** @return A duration that is {@code factor} as long as this duration */
+    /** @return A duration that is <var>factor</var> as long as this duration */
     public Duration
     multiply(double factor) { return new Duration((long) (this.ms * factor)); }
 
-    /** @return A duration which is one {@code divisor}th of this duration long */
+    /** @return A duration which is one <var>divisor</var>th of this duration long */
     public Duration
     divide(double divisor) { return new Duration((long) (this.ms / divisor)); }
 

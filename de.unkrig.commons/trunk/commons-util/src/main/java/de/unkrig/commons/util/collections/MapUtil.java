@@ -56,7 +56,7 @@ class MapUtil {
      * supported.
      *
      * @param keyValuePairs                   An alternating sequence of keys and values
-     * @throws ArrayIndexOutOfBoundsException The length of {@code keyValuePairs} is odd
+     * @throws ArrayIndexOutOfBoundsException The length of <var>keyValuePairs</var> is odd
      * @throws IllegalArgumentException       Two of the keys are equal
      */
     @SuppressWarnings("unchecked") public static <K, V> Map<K, V>
@@ -87,7 +87,7 @@ class MapUtil {
      * Returns an unmodifiable map, mapping the given key-value pairs. {@code null} keys and {@code null} values are
      * supported.
      *
-     * @throws ArrayIndexOutOfBoundsException The length of {@code keyValuePairs} is odd
+     * @throws ArrayIndexOutOfBoundsException The length of <var>keyValuePairs</var> is odd
      * @throws IllegalArgumentException       Two of the keys are equal
      */
     public static <K, V> Map<K, V>

@@ -69,15 +69,15 @@ class PointOfTime implements Serializable {
     @Override public String
     toString() { return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(this.ms); }
 
-    /** @return The given number of {@code seconds} after this {@link PointOfTime} */
+    /** @return The given number of <var>seconds</var> after this {@link PointOfTime} */
     public PointOfTime
     add(double seconds) { return new PointOfTime(this.ms + (long) (1000.0 * seconds)); }
 
-    /** @return The given {@code duration} after this {@link PointOfTime} */
+    /** @return The given <var>duration</var> after this {@link PointOfTime} */
     public PointOfTime
     add(Duration duration) { return new PointOfTime(this.ms + duration.milliseconds()); }
 
-    /** @return The length of the interval from {@code other} to {@code this} */
+    /** @return The length of the interval from <var>other</var> to {@code this} */
     public Duration
     subtract(PointOfTime other) { return new Duration(this.ms - other.ms); }
 

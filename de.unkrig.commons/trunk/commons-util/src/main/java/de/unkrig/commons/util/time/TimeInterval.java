@@ -65,8 +65,8 @@ class TimeInterval {
      * Changes the beginning of this interval.
      *
      * @return                       This object
-     * @throws IllegalStateException The {@code beginning} is inconsistent with this object's duration and ending, i.e.
-     *                               all three are non-{@code null}, and beginning + duration != ending
+     * @throws IllegalStateException The <var>beginning</var> is inconsistent with this object's duration and ending,
+     *                               i.e. all three are non-{@code null}, and beginning + duration != ending
      */
     public TimeInterval
     setBeginning(@Nullable PointOfTime beginning) { this.beginning = beginning; this.checkConsistency(); return this; }
@@ -75,8 +75,8 @@ class TimeInterval {
      * Changes the duration of this interval.
      *
      * @return                       This object
-     * @throws IllegalStateException The {@code duration} is inconsistent with this object's beginning and ending, i.e.
-     *                               all three are non-{@code null}, and beginning + duration != ending
+     * @throws IllegalStateException The <var>duration</var> is inconsistent with this object's beginning and ending,
+     *                               i.e. all three are non-{@code null}, and beginning + duration != ending
      */
     public TimeInterval
     setDuration(@Nullable Duration duration) { this.duration = duration; this.checkConsistency(); return this; }
@@ -85,8 +85,8 @@ class TimeInterval {
      * Changes the ending of this interval.
      *
      * @return                       This object
-     * @throws IllegalStateException The {@code ending} is inconsistent with this object's beginning and duration, i.e.
-     *                               all three are non-{@code null}, and beginning + duration != ending
+     * @throws IllegalStateException The <var>ending</var> is inconsistent with this object's beginning and duration,
+     *                               i.e. all three are non-{@code null}, and beginning + duration != ending
      */
     public TimeInterval
     setEnding(@Nullable PointOfTime ending) { this.ending = ending; this.checkConsistency(); return this; }

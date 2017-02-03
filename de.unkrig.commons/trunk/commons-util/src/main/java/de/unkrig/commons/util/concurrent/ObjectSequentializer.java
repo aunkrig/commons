@@ -139,7 +139,7 @@ class ObjectSequentializer<T, EX extends Throwable> {
     /**
      * Returns when all tasks that were previously submitted with {@link #submit(Consumer)
      * Object)}, {@link #submit(Runnable, Object)} and {@link #execute(Runnable)} have completed, or when then
-     * {@code timeout} expires.
+     * <var>timeout</var> expires.
      *
      * @throws CancellationException One of the tasks was cancelled
      * @throws ExecutionException    One of the tasks threw an exception

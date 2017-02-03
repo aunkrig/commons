@@ -75,7 +75,7 @@ import de.unkrig.commons.util.annotation.CommandLineOptionGroup;
 import de.unkrig.commons.util.annotation.RegexFlags;
 
 /**
- * Parses "command line options" from the {@code args} of your {@code main()} method and configures a Java bean
+ * Parses "command line options" from the <var>args</var> of your {@code main()} method and configures a Java bean
  * accordingly.
  *
  * @see #parse(String[], Object)
@@ -560,7 +560,7 @@ class CommandLineOptions {
         }
 
         /**
-         * @return {@code Null} iff there is no applicable method
+         * @return {@code null} iff there is no applicable method
          */
         @Nullable public Method
         getOptionByName(String optionName) {

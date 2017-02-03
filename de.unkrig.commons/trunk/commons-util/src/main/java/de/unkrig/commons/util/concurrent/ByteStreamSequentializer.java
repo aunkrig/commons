@@ -164,7 +164,7 @@ class ByteStreamSequentializer {
 
     /**
      * Returns when all tasks that were previously submitted with {@link #submit(Consumer)} and {@link
-     * #submit(ConsumerWhichThrows)} have completed, or when then {@code timeout} expires.
+     * #submit(ConsumerWhichThrows)} have completed, or when then <var>timeout</var> expires.
      *
      * @throws CancellationException One of the tasks was cancelled
      * @throws ExecutionException    One of the tasks threw an exception

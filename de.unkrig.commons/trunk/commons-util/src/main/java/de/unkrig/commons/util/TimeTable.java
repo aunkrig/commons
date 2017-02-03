@@ -47,15 +47,15 @@ class TimeTable {
     TimeTable() {}
 
     /**
-     * @return The next scheduled point in time after {@code previous}, or {@link #MAX_DATE} iff there is no "next"
+     * @return The next scheduled point in time after <var>previous</var>, or {@link #MAX_DATE} iff there is no "next"
      *         execution
      */
     public abstract Date
     next(Date previous);
 
     /**
-     * A {@link TimeTable} who's {@link #next(Date)} method will return {@code date} if {@code previous} is before
-     * {@code date}, and {@link #MAX_DATE} otherwise.
+     * A {@link TimeTable} who's {@link #next(Date)} method will return <var>date</var> if <var>previous</var> is
+     * before <var>date</var>, and {@link #MAX_DATE} otherwise.
      */
     public static TimeTable
     once(final Date date) {
@@ -469,8 +469,8 @@ class TimeTable {
          * integer-pattern :=
          *     '*' [ '/ integer ]
          *     | '(' integer-range { ',' integer-range } ')'
-         *     | integer-range      <= Iff {@code allowUnparenthesizedRange}
-         *     | integer            <= Iff {@code !allowUnparenthesizedRange}
+         *     | integer-range      <= Iff <var>allowUnparenthesizedRange</var>
+         *     | integer            <= Iff !<var>allowUnparenthesizedRange</var>
          * </pre>
          */
         private IntegerPattern
