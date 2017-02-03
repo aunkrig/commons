@@ -78,7 +78,7 @@ class IterableUtil {
     }
 
     /**
-     * @return An {@link Iterable} producing the  given {@code subject} {@code n} times
+     * @return An {@link Iterable} producing the  given <var>subject</var> <var>n</var> times
      */
     public static <T> Iterable<T>
     repeat(final T subject, final int n) {
@@ -140,7 +140,7 @@ class IterableUtil {
     }
 
     /**
-     * @return An iterator for {@code element1} and the elements of {@code element2}
+     * @return An iterator for <var>element1</var> and the elements of <var>element2</var>
      */
     public static <T> Iterable<T>
     concat(T element1, Iterable<? extends T> element2) {
@@ -156,7 +156,7 @@ class IterableUtil {
     }
 
     /**
-     * @return An iterator for the elements of {@code element1} and {@code element2}
+     * @return An iterator for the elements of <var>element1</var> and <var>element2</var>
      */
     public static <T> Iterable<T>
     concat(Iterable<? extends T> element1, T... element2) {
@@ -164,7 +164,7 @@ class IterableUtil {
     }
 
     /**
-     * @return An iterator for the elements of {@code element1} and {@code element2}
+     * @return An iterator for the elements of <var>element1</var> and <var>element2</var>
      */
     public static <T> Iterable<T>
     concat(Iterable<? extends T> element1, Iterable<? extends T> element2) {
@@ -175,7 +175,7 @@ class IterableUtil {
     }
 
     /**
-     * @return An iterator for the elements of {@code element1}, {@code element2} and {@code element3}
+     * @return An iterator for the elements of <var>element1</var>, <var>element2</var> and <var>element3</var>
      */
     public static <T> Iterable<T>
     concat(Iterable<? extends T> element1, Iterable<? extends T> element2, Iterable<? extends T> element3) {
@@ -187,7 +187,8 @@ class IterableUtil {
     }
 
     /**
-     * @return An iterator for the elements of {@code element1}, {@code element2}, {@code element3} and {@code element4}
+     * @return An iterator for the elements of <var>element1</var>, <var>element2</var>, <var>element3</var> and
+     *         <var>element4</var>
      */
     public static <T> Iterable<T>
     concat(
@@ -205,7 +206,7 @@ class IterableUtil {
     }
 
     /**
-     * @return An iterator for the elements of the given {@code elements}
+     * @return An iterator for the elements of the given <var>elements</var>
      */
     public static <T> Iterable<T>
     concat(final Iterable<? extends Iterable<? extends T>> elements) {

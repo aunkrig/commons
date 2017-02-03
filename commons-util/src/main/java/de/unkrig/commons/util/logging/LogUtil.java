@@ -123,7 +123,7 @@ class LogUtil {
     }
 
     /**
-     * @return A {@link Filter} that regards levels <i>lower</i> than {@code upperBound} as loggable
+     * @return A {@link Filter} that regards levels <i>lower</i> than <var>upperBound</var> as loggable
      */
     @NotNullByDefault(false) public static Filter
     levelLimitFilter(Level upperBound) {
@@ -153,7 +153,7 @@ class LogUtil {
     public static final Filter LESS_THAN_CONFIG = LogUtil.levelLimitFilter(Level.CONFIG);
 
     /**
-     * @return The boolean value of the named logging property, or the {@code defaulT}
+     * @return The boolean value of the named logging property, or the <var>defaulT</var>
      */
     public static Boolean
     getLoggingProperty(String propertyName, Boolean defaulT) {
@@ -163,7 +163,7 @@ class LogUtil {
     }
 
     /**
-     * Evaluates the value of the named property to an object of the given {@code type} and returns it.
+     * Evaluates the value of the named property to an object of the given <var>type</var> and returns it.
      *
      * @throws IllegalArgumentException The logging property is not defined
      * @throws EvaluationException      The property evaluates to {@code null}
@@ -182,8 +182,8 @@ class LogUtil {
     }
 
     /**
-     * Evaluates the value of the named property to an object of the given {@code type} and returns it, or the
-     * {@code defaulT}.
+     * Evaluates the value of the named property to an object of the given <var>type</var> and returns it, or the
+     * <var>defaulT</var>.
      *
      * @see Parser The expression syntax of the property value
      */
@@ -205,7 +205,7 @@ class LogUtil {
     }
 
     /**
-     * @return                          The level value of the named logging property, or the given {@code defaulT}
+     * @return                          The level value of the named logging property, or the given <var>defaulT</var>
      * @throws IllegalArgumentException The value could not be parsed to a valid level
      */
     public static Level
@@ -258,7 +258,7 @@ class LogUtil {
     private static final Pattern QUANTITY_FORMAT = Pattern.compile("(\\d+)([kMGTP])?");
 
     /**
-     * @return The value of the named logging property, or the {@code defaulT}
+     * @return The value of the named logging property, or the <var>defaulT</var>
      */
     @Nullable public static String
     getLoggingProperty(String propertyName, @Nullable String defaulT) {

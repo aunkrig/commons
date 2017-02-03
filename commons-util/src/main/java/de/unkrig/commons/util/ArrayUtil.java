@@ -37,8 +37,8 @@ class ArrayUtil {
     private ArrayUtil() {}
 
     /**
-     * @return An array of size {@code a.length + values.length}, filled with the values from {@code a} and {@code
-     *         values}
+     * @return An array of size {@code a.length + values.length}, filled with the values from <var>a</var> and
+     *         <var>values</var>
      */
     public static <T> T[]
     append(T[] a, T... values) {

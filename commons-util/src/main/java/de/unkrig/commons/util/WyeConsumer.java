@@ -88,8 +88,8 @@ class WyeConsumer<T, EX extends Throwable> implements RunnableWhichThrows<EX> {
 
     /**
      * Copies the subjects that are sent to the {@link Consumer} that was returned by the first call to {@link
-     * #newConsumer(int)} up to, but not including, the first {@code null} reference, to the {@code target} consumer,
-     * then the objects that are sent to the {@link Consumer} that was returned by the second call to {@link
+     * #newConsumer(int)} up to, but not including, the first {@code null} reference, to the <var>target</var>
+     * consumer, then the objects that are sent to the {@link Consumer} that was returned by the second call to {@link
      * #newConsumer(int)}, and so forth.
      */
     @Override public void

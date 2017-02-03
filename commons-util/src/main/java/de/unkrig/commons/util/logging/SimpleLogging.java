@@ -96,7 +96,7 @@ import de.unkrig.commons.util.logging.handler.StdoutHandler;
  *   trace.
  * </p>
  * <p>
- *   Alternatively, you can call {@link #setLevel(Level)} with a respective {@code level} parameter.
+ *   Alternatively, you can call {@link #setLevel(Level)} with a respective <var>level</var> parameter.
  * </p>
  * <p>
  *   Alternatively, you may want to call {@link #configureLoggers(String)} to configure log levels, handlers and

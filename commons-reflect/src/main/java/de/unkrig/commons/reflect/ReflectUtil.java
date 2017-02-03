@@ -44,7 +44,7 @@ class ReflectUtil {
     ReflectUtil() {}
 
     /**
-     * @return The types of the {@code values}
+     * @return The types of the <var>values</var>
      */
     public static Class<?>[]
     getTypes(List<Object> values) {
@@ -57,7 +57,7 @@ class ReflectUtil {
     }
 
     /**
-     * @return     The most specific applicable public method of the {@code targetType}
+     * @return     The most specific applicable public method of the <var>targetType</var>
      * @throws NoSuchMethodException
      *             No <a
      *             href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.12.2.1">applicable</a>
@@ -109,7 +109,7 @@ class ReflectUtil {
     }
 
     /**
-     * @return         The most specific applicable constructor of the {@code type}
+     * @return         The most specific applicable constructor of the <var>type</var>
      * @throws NoSuchMethodException
      *                 No <a
      *                 href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.12.2.1">applicable</a>
@@ -180,7 +180,7 @@ class ReflectUtil {
      * wrapper types, and including widening primitive conversion, as available through {@link Method#invoke(Object,
      * Object...)}.
      * <p>
-     * Also, any {@code parameterType} is always applicable from a {@code null} {@code argumentType}.
+     * Also, any <var>parameterType</var> is always applicable from a {@code null} <var>argumentType</var>.
      */
     private static boolean
     isApplicable(Class<?> parameterType, @Nullable Class<?> argumentType) {

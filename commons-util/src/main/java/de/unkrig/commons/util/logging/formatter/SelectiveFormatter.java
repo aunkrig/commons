@@ -46,8 +46,8 @@ class SelectiveFormatter extends Formatter {
     private final Formatter                    delegate1, delegate2;
 
     /**
-     * @param delegate1 Is called for {@link LogRecord} for which the {@code predicate} evaluates to {@code true}
-     * @param delegate2 Is called for {@link LogRecord} for which the {@code predicate} evaluates to {@code false}
+     * @param delegate1 Is called for {@link LogRecord} for which the <var>predicate</var> evaluates to {@code true}
+     * @param delegate2 Is called for {@link LogRecord} for which the <var>predicate</var> evaluates to {@code false}
      */
     public
     SelectiveFormatter(Predicate<? super LogRecord> predicate, Formatter delegate1, Formatter delegate2) {
@@ -57,8 +57,8 @@ class SelectiveFormatter extends Formatter {
     }
 
     /**
-     * Calls {@code delegate1} if the {@code predicate} evaluates to {@code true} for the {@code logRecord},
-     * otherwise {@code delegate2}.
+     * Calls <var>delegate1</var> if the <var>predicate</var> evaluates to {@code true} for the <var>logRecord</var>,
+     * otherwise <var>delegate2</var>.
      *
      * @see #SelectiveFormatter(Predicate, Formatter, Formatter)
      */
@@ -72,8 +72,8 @@ class SelectiveFormatter extends Formatter {
     }
 
     /**
-     * Returns a {@link Formatter} that for each {@link LogRecord} invokes {@code delegate1} if the level of the
-     * processing {@link Logger} is greater than {@code threshold}, and for all other the {@code delegate2}.
+     * Returns a {@link Formatter} that for each {@link LogRecord} invokes <var>delegate1</var> if the level of the
+     * processing {@link Logger} is greater than <var>threshold</var>, and for all other the <var>delegate2</var>.
      * <p>
      * A typical application is to format log records WITHOUT stack traces, except if the logger's level is set to
      * {@link Level#FINE} or lower.
@@ -95,8 +95,8 @@ class SelectiveFormatter extends Formatter {
     }
 
     /**
-     * Returns a {@link Formatter} that for each {@link LogRecord} invokes {@code delegate1} if the level of the log
-     * record is greater than ("more severe than") {@code threshold}, and for all other the {@code delegate2}.
+     * Returns a {@link Formatter} that for each {@link LogRecord} invokes <var>delegate1</var> if the level of the log
+     * record is greater than ("more severe than") <var>threshold</var>, and for all other the <var>delegate2</var>.
      * <p>
      * A typical application is to format log records WITHOUT stack traces, except if the logger's level is set to
      * {@link Level#FINE} or lower.

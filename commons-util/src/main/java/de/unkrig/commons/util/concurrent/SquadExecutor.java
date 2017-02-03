@@ -133,7 +133,7 @@ class SquadExecutor<T> implements Executor {
     /**
      * Returns when all tasks that were previously submitted with {@link #submit(Callable)}, {@link #submit(Runnable,
      * Object)}, {@link #submit(Runnable, Object)} and {@link #execute(Runnable)} have completed, or when then
-     * {@code timeout} expires.
+     * <var>timeout</var> expires.
      *
      * @return                       The futures of the tasks
      * @throws CancellationException One of the tasks was cancelled
