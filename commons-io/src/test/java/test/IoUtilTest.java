@@ -28,6 +28,7 @@ package test;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
@@ -37,12 +38,14 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import de.unkrig.commons.io.IoUtil;
 import de.unkrig.commons.io.IoUtil.WritingRunnable;
+import de.unkrig.commons.nullanalysis.NotNullByDefault;
 
 // CHECKSTYLE JavadocMethod:OFF
 // CHECKSTYLE JavadocType:OFF
@@ -148,23 +151,48 @@ class IoUtilTest {
     }
 
     @Test public void
-    findOnPathTest() throws IOException {
-        Assert.assertEquals(
-            new File(System.getProperty("user.dir")).toURI() + "target/test-classes/test/IoUtilTest.class",
-            String.valueOf(IoUtil.findOnPath(
-                new File[] { new File("target/test-classes") },
-                this.getClass().getName().replace('.', '/') + ".class"
-            ))
+    findOnPathTest1() throws IOException {
+
+        URL url = IoUtil.findOnPath(
+            new File[] { new File("target/test-classes") },
+            this.getClass().getName().replace('.', '/') + ".class"
         );
 
-        URL loc = IoUtil.findOnPath(
-            new File[] { new File("../commons-lang/target/commons-lang-1.2.9.jar") },
-            "de/unkrig/commons/lang/AssertionUtil.class"
-        );
         Assert.assertEquals(
-            "jar:" + new File(System.getProperty("user.dir")).toURI() + "../commons-lang/target/commons-lang-1.2.9.jar!/de/unkrig/commons/lang/AssertionUtil.class",
-            String.valueOf(loc)
+            new File(System.getProperty("user.dir")).toURI() + "target/test-classes/test/IoUtilTest.class",
+            String.valueOf(url)
         );
-        if (loc != null) loc.openStream().close();
+    }
+
+    /**
+     * Find "AssertionUtil.class" in "commons-lang-*.jar". This is test is not so good, because it is not
+     * deterministic: "commons-lang-*.jar" may not exist, or may exist in multiple incarnations.
+     */
+    @Test public void
+    findOnPathTest2() throws IOException {
+        final Pattern p = Pattern.compile("commons-lang-\\d+(\\.\\d+)*(-SNAPSHOT)?\\.jar");
+        File[] jarFiles = new File("../commons-lang/target").listFiles(new FilenameFilter() {
+
+            @NotNullByDefault(false) @Override public boolean
+            accept(File dir, String name) { return p.matcher(name).matches(); }
+        });
+
+        for (File jarFile : jarFiles) {
+            URL loc = IoUtil.findOnPath(
+                new File[] { jarFile },
+                "de/unkrig/commons/lang/AssertionUtil.class"
+            );
+            Assert.assertEquals(
+                (
+                    "jar:"
+                    + new File(System.getProperty("user.dir")).toURI()
+                    + jarFile.toString().replace(File.separatorChar, '/')
+                    + "!/de/unkrig/commons/lang/AssertionUtil.class"
+                ),
+                String.valueOf(loc)
+            );
+
+            if (loc != null) loc.openStream().close();
+        }
     }
 }
