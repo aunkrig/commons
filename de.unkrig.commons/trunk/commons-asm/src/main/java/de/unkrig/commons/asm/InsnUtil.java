@@ -47,7 +47,7 @@ class InsnUtil {
     InsnUtil() {}
 
     /**
-     * @return An {@link InsnList} with the single instruction {@code ain}.
+     * @return An {@link InsnList} with the single instruction <var>ain</var>.
      */
     public static InsnList
     il(AbstractInsnNode ain) {
@@ -70,7 +70,7 @@ class InsnUtil {
 
     /**
      * @param  il {@link InsnList}s that each create exactly one {@link Object} on the operand stack
-     * @return Code that produces an object array filled with the values produced by the {@code il}s
+     * @return Code that produces an object array filled with the values produced by the <var>il</var>s
      */
     public static InsnList
     oa(InsnList... il) {
@@ -88,7 +88,7 @@ class InsnUtil {
 
     /**
      * @param  insnLists {@link InsnList}s that each create exactly one {@link Object} on the operand stack
-     * @return Code that produces an object array filled with the values produced by the {@code insnLists}
+     * @return Code that produces an object array filled with the values produced by the <var>insnLists</var>
      */
     public static InsnList
     oa(List<InsnList> insnLists) {

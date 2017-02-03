@@ -237,7 +237,7 @@ class OpcodeUtil {
     }
 
     /**
-     * @return Metainformation about the given {@code opcode}
+     * @return Metainformation about the given <var>opcode</var>
      */
     public static InsnDescription
     getInsnDescription(int opcode) {
