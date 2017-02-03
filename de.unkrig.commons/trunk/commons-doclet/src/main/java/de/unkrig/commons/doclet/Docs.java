@@ -63,10 +63,10 @@ class Docs {
     private Docs() {}
 
     /**
-     * @param from  The 'reference' for {@code s}, e.g. the {@link MethodDoc} if this is a method doc comment
+     * @param from  The 'reference' for <var>to</var>, e.g. the {@link MethodDoc} if this is a method doc comment
      * @param to    E.g. "pkg.MyClass" or "MyClass#meth" or "MyClass#meth(String)"
-     * @return      The {@link Doc} specified by {@code s}, relative to {@code ref}, or {@code null} iff a doc cannot
-     *              be found
+     * @return      The {@link Doc} specified by <var>to</var>, relative to <var>from</var>, or {@code null} iff a doc
+     *              cannot be found
      */
     @Nullable public static Doc
     findDoc(Doc from, String to, RootDoc rootDoc) throws Longjump {
@@ -308,7 +308,7 @@ class Docs {
     }
 
     /**
-     * @return The {@link ClassDoc} containing the given {@code doc}, or {@code null} iff {@code doc} is a
+     * @return The {@link ClassDoc} containing the given <var>doc</var>, or {@code null} iff <var>doc</var> is a
      *         {@link PackageDoc} or a {@link RootDoc}
      */
     @Nullable public static ClassDoc
@@ -322,7 +322,7 @@ class Docs {
     }
 
     /**
-     * @return The {@link PackageDoc} containing the given {@code doc}, or {@code null} iff {@code doc} is a
+     * @return The {@link PackageDoc} containing the given <var>doc</var>, or {@code null} iff <var>doc</var> is a
      *         {@link RootDoc}
      */
     @Nullable public static PackageDoc
@@ -385,7 +385,7 @@ class Docs {
     }
 
     /**
-     * @return Whether {@code b} is {@code a}, or an interface or superclass of {@code a}
+     * @return Whether <var>b</var> is <var>a</var>, or an interface or superclass of <var>a</var>
      */
     public static boolean
     isSubclassOf(ClassDoc a, ClassDoc b) {
