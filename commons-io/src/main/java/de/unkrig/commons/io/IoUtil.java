@@ -657,7 +657,7 @@ class IoUtil {
     }
 
     /**
-     * @return A {@code Comsumer<OutputStream>} which copies <var>inputStream</var> to its subject
+     * @return A {@code Consumer<OutputStream>} which copies <var>inputStream</var> to its subject
      */
     public static ConsumerWhichThrows<OutputStream, IOException>
     copyFrom(final InputStream inputStream) {
