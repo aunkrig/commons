@@ -273,8 +273,13 @@ class IterableUtil {
     }
 
     /**
-     * Wraps the given {@link Iterable} in a collection, which, as enforced by the nature of the {@link Iterable},
-     * supports only element removal.
+     * Wraps the given {@link Iterable} in a collection. As enforced by the nature of the {@link Iterable}, the only
+     * supported modifying operation of the returned collection is element removal.
+     *
+     * @see Collection#remove(Object)
+     * @see Collection#removeAll(Collection)
+     * @see Collection#retainAll(Collection)
+     * @see Collection#clear()
      */
     public static <T> Collection<T>
     asCollection(final Iterable<T> delegate) {
