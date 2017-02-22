@@ -556,6 +556,35 @@ class ProducerUtil {
     }
 
     /**
+     * Constantly produces the first product of the <var>delegate</var>. In other words, the returned producer caches
+     * the first product of the <var>delegate</var> forever.
+     * <p>
+     *   The returned producer is not synchronized and therefore not thread-safe; to get a thread-safe producer, use
+     *   {@link ProducerUtil#synchronizedProducer(ProducerWhichThrows)}.
+     * </p>
+     */
+    public static <T, EX extends Throwable> ProducerWhichThrows<T, EX>
+    cache(final ProducerWhichThrows<T, ? extends EX> delegate) {
+
+        return new ProducerWhichThrows<T, EX>() {
+
+            @Nullable T cache;
+            boolean     isCached;
+
+            @Override @Nullable public T
+            produce() throws EX {
+
+                if (this.isCached) return this.cache;
+
+                T result = delegate.produce();
+                this.isCached = true;
+                this.cache    = result;
+                return result;
+            }
+        };
+    }
+
+    /**
      * The first product is the first product of the <var>delegate</var>; each following product is the next product
      * of the <var>delegate</var> if the <var>invalidationCondition</var> evaluates to {@code true}, otherwise it is
      * the <em>previous</em> product.
