@@ -48,7 +48,8 @@ class AbstractParser<TT extends Enum<TT>> {
     protected final ProducerWhichThrows<? extends Token<TT>, ? extends ScanException> scanner;
 
     /**
-     * One token read-ahead.
+     * One token read-ahead. Value {@code null} means that (A) no token was currently read-ahead, or (B) the scanner is
+     * at end-of-input.
      */
     @Nullable private Token<TT> current;
 
@@ -315,10 +316,62 @@ class AbstractParser<TT extends Enum<TT>> {
             }
         }
 
-        throw new ParseException("One of " + Arrays.toString(tokenTypeOrText) + " expected instead of '" + t + "'");
+        switch (tokenTypeOrText.length) {
+
+        case 0:
+            throw new ParseException("One of [none] expected instead of '" + t + "'");
+
+        case 1:
+            throw new ParseException(AbstractParser.tokenTypeOrTextToString(tokenTypeOrText[0]) + " expected instead of '" + t + "'");
+
+        default:
+            {
+                StringBuilder sb = new StringBuilder();
+
+                for (int i = 0;;) {
+                    sb.append(AbstractParser.tokenTypeOrTextToString(tokenTypeOrText[i]));
+                    if (++i == tokenTypeOrText.length) break;
+                    sb.append(i == tokenTypeOrText.length - 1 ? " or " : ", ");
+                }
+                throw new ParseException("One of " + sb + " expected instead of '" + t + "'");
+            }
+        }
+    }
+
+    private static String
+    tokenTypeOrTextToString(@Nullable Object o) {
+        return o == null ? "end-of-input" : o instanceof String ? ('"' + (String) o + '"') : String.valueOf(o);
     }
 
     /**
+     * Modifies this parser such that <var>t</var> will appear as the "next token" before the <em>actual</em> next
+     * token.
+     * <p>
+     *   This operation is only permitted iff the next token has not been read-ahead.
+     * </p>
+     *
+     * @throws IllegalStateException Another token has already been read-ahead, either by one of the {@code peek()}
+     *                               operations, or an unsuccessful {@code peekRead()} operation
+     */
+    public void
+    unread(Token<TT> t) {
+
+        if (this.current != null) {
+            throw new IllegalStateException((
+                "Cannot unread \""
+                + t
+                + "\" because the next token, \""
+                + this.current
+                + "\", has already been read-ahead"
+            ));
+        }
+
+        this.current = t;
+    }
+
+    /**
+     * Asserts that the scanner is at end-of-input.
+     *
      * @throws ParseException Iff the scanner is <i>not</i> at end-of-input
      */
     public void
