@@ -229,6 +229,7 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
                 this.currentStateRules   = rule.nextStateRules;
                 this.previousTokenOffset = this.offset;
                 this.offset              = matcher.end();
+
                 return new Token<TT>(rule.tokenType, matcher.group());
             }
         }
@@ -265,6 +266,9 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
             this.tokenType      = tokenType;
             this.nextStateRules = nextStateRules;
         }
+
+        @Override public String
+        toString() { return ">>" + this.regex + "<< => " + this.tokenType; }
     }
 
     // CONFIGURATION
