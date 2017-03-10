@@ -26,8 +26,10 @@
 
 package de.unkrig.commons.lang.protocol;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.WeakHashMap;
 
 import de.unkrig.commons.lang.AssertionUtil;
@@ -208,22 +210,40 @@ class TransformerUtil {
     /**
      * A transformer which lets a <var>delegate</var> transform the inputs, but at most once for each non-equal
      * input.
+     * <p>
+     *   This method is not thread-safe. To get a thread-safe cache, use {@link #cache(Transformer, Map)}.
+     * </p>
      */
     public static <I, O> Transformer<I, O>
     cache(final Transformer<? super I, O> delegate) {
 
-        return new Transformer<I, O>() {
+        return TransformerUtil.cache(delegate, new WeakHashMap<I, O>());
+    }
 
-            final WeakHashMap<I, O> cache = new WeakHashMap<I, O>();
+    /**
+     * A transformer which lets a <var>delegate</var> transform the inputs, and remembers the result in the
+     * <var>cache</var> map.
+     * <p>
+     *   This method is not thread-safe. To make it thread-safe, pass a {@link Collections#synchronizedMap(Map)} as
+     *   the <var>cache</var> argument.
+     * </p>
+     *
+     * @param cache Typically a {@link HashMap}, or a {@link TreeMap#TreeMap(java.util.Comparator)}, or a
+     *              {@link WeakHashMap}, or a {@link Collections#synchronizedMap(Map)} (for thread-safety)
+     */
+    public static <I, O> Transformer<I, O>
+    cache(final Transformer<? super I, O> delegate, final Map<I, O> cache) {
+
+        return new Transformer<I, O>() {
 
             @Override @NotNull public O
             transform(I in) {
 
-                O out = this.cache.get(in);
+                O out = cache.get(in);
                 if (out != null) return out;
 
                 out = delegate.transform(in);
-                this.cache.put(in, out);
+                cache.put(in, out);
 
                 return out;
             }
