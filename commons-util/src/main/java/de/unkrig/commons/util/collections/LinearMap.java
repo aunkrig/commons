@@ -245,6 +245,7 @@ class LinearMap<K, V> extends AbstractMap<K, V> {
 
         private Entry<K, V>
         newEntry(final int idx) {
+
             return new Entry<K, V>() {
 
                 @Override public K
@@ -258,6 +259,11 @@ class LinearMap<K, V> extends AbstractMap<K, V> {
                     final Object result = LinearMap.this.values[idx];
                     LinearMap.this.values[idx] = newValue;
                     return (V) result;
+                }
+
+                @Override
+                public String toString() {
+                    return LinearMap.this.keys[idx] + "=" + LinearMap.this.values[idx];
                 }
             };
         }
