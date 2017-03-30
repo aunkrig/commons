@@ -517,7 +517,7 @@ class Html {
                 return argument;
             }
 
-            return this.makeLink(ref, doc, true, cv.toString(), null, rootDoc);
+            return this.makeLink(ref, doc, true, Html.escapeSgmlEntities(cv.toString()), null, rootDoc);
         }
 
         if ("@link".equals(tagName) || "@linkplain".equals(tagName)) {
