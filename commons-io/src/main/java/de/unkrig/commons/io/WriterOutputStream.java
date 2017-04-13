@@ -29,28 +29,60 @@ package de.unkrig.commons.io;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CoderResult;
+import java.nio.charset.CodingErrorAction;
 
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 
 /**
- * Decodes the data bytes (assuming ISO-8859-1 encoding) into characters, and writes them to the given delegate writer.
- * In a sense, this class is the complement of the {@link java.io.InputStreamReader}.
+ * Decodes the data bytes into characters, and writes them to a given delegate {@link Writer}. In a sense, this class
+ * is the complement of the {@link java.io.OutputStreamWriter}.
  */
 @NotNullByDefault(false) public
 class WriterOutputStream extends OutputStream {
 
-    private final Writer delegate;
+    private final Writer         delegate;
+    private final CharsetDecoder decoder;
 
-    /**
-     * @see WriterOutputStream
-     */
+    private final ByteBuffer in  = ByteBuffer.allocate(128);
+    private final CharBuffer out = CharBuffer.allocate(128);
+
+    /** @see WriterOutputStream */
     public
-    WriterOutputStream(Writer delegate) {
+    WriterOutputStream(Writer delegate) { this(delegate, Charset.defaultCharset()); }
+
+    /** @see WriterOutputStream */
+    public
+    WriterOutputStream(Writer delegate, String charsetName) { this(delegate, Charset.forName(charsetName)); }
+
+    /** @see WriterOutputStream */
+    public
+    WriterOutputStream(Writer delegate, Charset charset) {
+        this(
+            delegate,
+            (
+                charset
+                .newDecoder()
+                .onMalformedInput(CodingErrorAction.REPLACE)
+                .onUnmappableCharacter(CodingErrorAction.REPLACE)
+            ).replaceWith("?")
+        );
+    }
+
+    /** @see WriterOutputStream */
+    public
+    WriterOutputStream(Writer delegate, CharsetDecoder decoder) {
         this.delegate = delegate;
+        this.decoder  = decoder;
     }
 
     @Override public void
     close() throws IOException {
+        this.processInput(true);
         this.delegate.close();
     }
 
@@ -61,13 +93,48 @@ class WriterOutputStream extends OutputStream {
 
     @Override public void
     write(byte[] buf, int off, int len) throws IOException {
-        for (; len > 0; len--) {
-            this.delegate.write(0xff & buf[off++]);
+
+        while (len > 0) {
+            int n = Math.min(len, this.in.remaining());
+            this.in.put(buf, off, n);
+            this.processInput(false);
+            len -= n;
+            off += n;
         }
+
+        this.writeOutput();
     }
 
     @Override public void
-    write(int c) throws IOException {
-        this.delegate.write(c);
+    write(int b) throws IOException { this.write(new byte[] { (byte) b }, 0, 1); }
+
+    private void
+    processInput(boolean endOfInput) throws IOException {
+
+        this.in.flip();
+
+        for (;;) {
+
+            CoderResult coderResult = this.decoder.decode(this.in, this.out, endOfInput);
+
+            if (coderResult.isUnderflow()) break;
+
+            if (coderResult.isOverflow()) {
+                this.writeOutput();
+            } else {
+                throw new AssertionError(coderResult);
+            }
+        }
+
+        this.in.compact();
+    }
+
+    private void
+    writeOutput() throws IOException {
+
+        if (this.out.position() == 0) return;
+
+        this.delegate.write(this.out.array(), 0, this.out.position());
+        this.out.rewind();
     }
 }
