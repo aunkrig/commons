@@ -39,7 +39,7 @@ import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * A {@link FilterReader} which transforms the character stream on-the-fly with a {@link Transformer
- * Transformer&lt;String>}.
+ * Transformer&lt;? super CharSequence, ? super CharSequence>}.
  * <p>
  *   When the delegate reader is at end-of-input, then the <var>transformer</var> is invoked with an empty char
  *   sequence, which tells it to "flush itself". This is relevant for stateful transformers.
@@ -54,6 +54,8 @@ class TransformingFilterReader extends FilterReader {
      * Sometimes we have "too many" characters than we can return, so we set them aside in this buffer.
      */
     private String buffer = "";
+
+    private boolean hadEoi;
 
     /**
      * This method is sometimes more efficient than calling "{@code new TransformingFilterReader()}".
@@ -83,47 +85,17 @@ class TransformingFilterReader extends FilterReader {
     @Override public int
     read() throws IOException {
 
-        if (!this.buffer.isEmpty()) {
-            char c = this.buffer.charAt(0);
-            this.buffer = this.buffer.substring(1);
-            return c;
-        }
+        if (!this.fillBuffer()) return -1;
 
-        int c = this.in.read();
-        if (c == -1) {
-            CharSequence csq = this.transformer.transform("");
-            if (csq.length() == 0) return -1;
-            char c2 = csq.charAt(0);
-            this.buffer = csq.subSequence(1, csq.length()).toString();
-            return c2;
-        }
-
-        CharSequence csq = this.transformer.transform(new String(new char[] { (char) c }));
-        if (csq.length() == 0) return -1;
-        char c2 = csq.charAt(0);
-        this.buffer = csq.subSequence(1, csq.length()).toString();
-        return c2;
+        char result = this.buffer.charAt(0);
+        this.buffer = this.buffer.substring(1);
+        return result;
     }
 
     @Override public int
     read(@Nullable char[] cbuf, int off, int len) throws IOException {
 
-        while (this.buffer.isEmpty()) {
-            char[] ca = new char[1024];
-
-            int n = this.in.read(ca);
-            if (n < 0) {
-                this.buffer = this.transformer.transform("").toString();
-                if (this.buffer.isEmpty()) return -1;
-                break;
-            } else
-            if (n == 0) {
-                return 0;
-            } else
-            if (n > 0) {
-                this.buffer = this.transformer.transform(new Segment(ca, 0, n)).toString();
-            }
-        }
+        if (!this.fillBuffer()) return -1;
 
         int bl = this.buffer.length();
         if (bl < len) {
@@ -135,6 +107,29 @@ class TransformingFilterReader extends FilterReader {
             this.buffer = this.buffer.substring(len);
             return len;
         }
+    }
+
+    private boolean
+    fillBuffer() throws IOException {
+
+        while (this.buffer.isEmpty()) {
+            char[] ca = new char[1024];
+
+            if (this.hadEoi) return false;
+
+            int n = this.in.read(ca);
+            if (n < 0) {
+                this.buffer = this.transformer.transform("").toString();
+                return !this.buffer.isEmpty();
+            }
+
+            if (n > 0) {
+                this.buffer = this.transformer.transform(new Segment(ca, 0, n)).toString();
+                return true;
+            }
+        }
+
+        return true;
     }
 
     @Override public long
