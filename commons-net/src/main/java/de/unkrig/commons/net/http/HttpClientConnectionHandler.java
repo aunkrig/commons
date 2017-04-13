@@ -36,9 +36,11 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.WritableByteChannel;
+import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 import de.unkrig.commons.io.FileBufferedChannel;
@@ -165,7 +167,9 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
 
             this.stoppables.add(stoppable);
             LOGGER.fine("Reading request from client");
+            long t1 = System.currentTimeMillis();
             HttpRequest request = HttpRequest.read(in);
+            long t2 = System.currentTimeMillis();
 
             HttpResponse httpResponse;
             HANDLE:
@@ -204,7 +208,9 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
             assert httpResponse != null; // Redundant.
 
             LOGGER.fine("Sending response to client");
+            long t3 = System.currentTimeMillis();
             httpResponse.write(out);
+            long t4 = System.currentTimeMillis();
 
             request.removeBody().dispose();
 
@@ -213,13 +219,17 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
                     request.getMethod()
                     + " "
                     + request.getUri()
-                    + " => "
-                    + httpResponse.getStatus()
                     + " ("
                     + requestSize.produce()
-                    + "/"
+                    + " bytes) => "
+                    + httpResponse.getStatus()
+                    + " ("
                     + responseSize.produce()
-                    + " bytes)"
+                    + " bytes) completely processed; took "
+                    + NumberFormat.getNumberInstance(Locale.US).format(t3 - t2)
+                    + "/"
+                    + NumberFormat.getNumberInstance(Locale.US).format(t4 - t1)
+                    + " ms"
                 );
             }
         } finally {
