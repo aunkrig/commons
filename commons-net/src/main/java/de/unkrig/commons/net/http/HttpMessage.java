@@ -75,6 +75,7 @@ import de.unkrig.commons.io.XMLFormatterWriter;
 import de.unkrig.commons.lang.protocol.ConsumerUtil;
 import de.unkrig.commons.lang.protocol.ConsumerUtil.Produmer;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
+import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.lang.protocol.RunnableWhichThrows;
 import de.unkrig.commons.net.http.io.ChunkedInputStream;
 import de.unkrig.commons.net.http.io.ChunkedOutputStream;
@@ -260,19 +261,13 @@ class HttpMessage {
 
             // Insert a logging Wye-Reader if logging is enabled.
             if (LOGGER.isLoggable(FINE)) {
-                boolean isXml = false;
 
                 LOGGER.fine("Reading message body");
-                String contentType = this.getHeader("Content-Type");
-                if (contentType != null) {
-                    ParametrizedHeaderValue phv = new ParametrizedHeaderValue(contentType);
-                    if ("text/xml".equalsIgnoreCase(phv.getToken())) isXml = true;
-                }
-                Writer logWriter = LogUtil.logWriter(LOGGER, FINE, ">>> ");
+                Writer lw = LogUtil.logWriter(LOGGER, FINE, ">>> ");
                 in = InputStreams.wye(in, (
-                    isXml
-                    ? new WriterOutputStream(new XMLFormatterWriter(logWriter))
-                    : new HexOutputStream(logWriter)
+                    this.contentTypeIsXmlish()
+                    ? new WriterOutputStream(new XMLFormatterWriter(lw))
+                    : new HexOutputStream(lw)
                 ));
             }
 
@@ -315,9 +310,9 @@ class HttpMessage {
                     run() {
                         LOGGER.fine(
                             "Message body size was "
-                            + NumberFormat.getInstance().format(rawByteCount.produce())
+                            + NumberFormat.getInstance(Locale.US).format(rawByteCount.produce())
                             + " (raw) "
-                            + NumberFormat.getInstance().format(decodedByteCount.produce())
+                            + NumberFormat.getInstance(Locale.US).format(decodedByteCount.produce())
                             + " (decoded)"
                         );
                     }
@@ -326,6 +321,18 @@ class HttpMessage {
 
             this.setBody(HttpMessage.body(in));
         }
+    }
+
+    private boolean
+    contentTypeIsXmlish() {
+
+        String contentType = this.getHeader("Content-Type");
+        if (contentType == null) return false;
+
+        ParametrizedHeaderValue phv = new ParametrizedHeaderValue(contentType);
+
+        // There are MANY xml-like content types, e.g. "text/xml", "application/atomsvc+xml".
+        return phv.getToken().toLowerCase().contains("xml");
     }
 
     /**
@@ -603,6 +610,79 @@ class HttpMessage {
     }
 
     /**
+     * For the returned objects, {@link Body#string(Charset)}, {@link Body#inputStream()} and {@link
+     * Body#write(OutputStream)} will invoke <var>in</var> to produce an {@link InputStream} which will be read and
+     * eventually closed.
+     *
+     * @see Body
+     */
+    public static Body
+    body(final ProducerWhichThrows<InputStream, IOException> in) {
+
+        return new Body() {
+
+            /**
+             * {@code Null} means that that one of {@link Body#string(Charset)}, {@link Body#inputStream()}, {@link
+             * Body#write(OutputStream)}, {@link Body#dispose()} or {@link Body#dispose()} has been called before.
+             */
+            @Nullable ProducerWhichThrows<InputStream, IOException> in2 = in;
+            @Nullable InputStream                                   is;
+
+            @Override public String
+            string(Charset charset) throws IOException {
+
+                ProducerWhichThrows<InputStream, IOException> in3 = this.in2;
+                if (in3 == null) throw new IllegalStateException();
+
+                InputStream is = (this.is = in3.produce());
+                assert is != null;
+
+                final String result = Readers.readAll(new InputStreamReader(is, charset), true);
+
+                this.in2 = null;
+                return result;
+            }
+
+            @Override public InputStream
+            inputStream() throws IOException {
+
+                ProducerWhichThrows<InputStream, IOException> in3 = this.in2;
+                if (in3 == null) throw new IllegalStateException();
+
+                InputStream is = (this.is = in3.produce());
+                assert is != null;
+
+                this.in2 = null;
+                return is;
+            }
+
+            @Override public void
+            write(OutputStream stream) throws IOException {
+
+                ProducerWhichThrows<InputStream, IOException> in3 = this.in2;
+                if (in3 == null) throw new IllegalStateException();
+
+                InputStream is = (this.is = in3.produce());
+                assert is != null;
+
+                IoUtil.copy(is, true, stream, false);
+
+                this.in2 = null;
+            }
+
+            @Override public void
+            dispose() {
+                InputStream is = this.is;
+                if (is != null) {
+                    try { InputStreams.skipAll(is); } catch (Exception e) {}
+                    try { is.close();               } catch (Exception e) {}
+                }
+                this.is = null;
+            }
+        };
+    }
+
+    /**
      * @see Body
      */
     public static Body
@@ -611,6 +691,7 @@ class HttpMessage {
     }
 
     /**
+     * @param writer Consumes exactly one {@link OutputStream}, and writes the body data to it
      * @see Body
      */
     public static Body
@@ -789,17 +870,11 @@ class HttpMessage {
             out = (finishable = new GZIPOutputStream(out));
         }
 
-        final boolean isXml;
-        {
-            String ct = this.getHeader("Content-Type");
-            isXml = ct != null && ct.indexOf("text/xml") != -1;
-        }
-
         if (LOGGER.isLoggable(FINE)) {
             LOGGER.fine(prefix + "Writing message body:");
             Writer lw = LogUtil.logWriter(LOGGER, FINE, prefix);
             out = OutputStreams.tee(out, (
-                isXml
+                this.contentTypeIsXmlish()
                 ? new WriterOutputStream(new XMLFormatterWriter(lw))
                 : new HexOutputStream(lw)
             ));
@@ -961,19 +1036,13 @@ class HttpMessage {
                 }
 
                 if (LOGGER.isLoggable(FINE)) {
-                    boolean isXml = false;
 
                     LOGGER.fine("Reading message body");
-                    String contentType = HttpMessage.this.getHeader("Content-Type");
-                    if (contentType != null) {
-                        ParametrizedHeaderValue phv = new ParametrizedHeaderValue(contentType);
-                        if ("text/xml".equalsIgnoreCase(phv.getToken())) isXml = true;
-                    }
-                    Writer logWriter = LogUtil.logWriter(LOGGER, FINE, ">>> ");
+                    Writer lw = LogUtil.logWriter(LOGGER, FINE, ">>> ");
                     in = InputStreams.wye(in, (
-                        isXml
-                        ? new WriterOutputStream(new XMLFormatterWriter(logWriter))
-                        : new HexOutputStream(logWriter)
+                        HttpMessage.this.contentTypeIsXmlish()
+                        ? new WriterOutputStream(new XMLFormatterWriter(lw))
+                        : new HexOutputStream(lw)
                     ));
                 }
                 HttpMessage.this.setBody(HttpMessage.body(in));
