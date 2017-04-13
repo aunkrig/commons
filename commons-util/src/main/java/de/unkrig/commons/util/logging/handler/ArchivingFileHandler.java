@@ -54,8 +54,12 @@ import de.unkrig.commons.util.logging.LogUtil;
 /**
  * A log record handler which writes formatted records to files which are automatically archived.
  * <p>
- *   Initially, the "current log file" is created (or, if it already exists and the "append" option is {@code true},
- *   opened in "append" mode), and log records are written to it. When it is time to "archive" the current log file,
+ *   Intially, if the "current log file" exists, it renames it (or, if it already exists and the "append" option is
+ *   {@code true}, opens it in "append" mode).
+ * </p>
+ * <p>
+ *   Initially, the "current log file" is renamed and re-created
+ *   and log records are written to it. When it is time to "archive" the current log file,
  *   then it is closed, renamed and re-created.
  * </p>
  *
