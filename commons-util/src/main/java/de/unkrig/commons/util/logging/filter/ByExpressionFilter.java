@@ -59,7 +59,7 @@ import de.unkrig.commons.util.logging.LogUtil;
  *
  * @see ExpressionEvaluator
  */
-@NotNullByDefault(false) public
+public
 class ByExpressionFilter implements Filter {
 
     private static final Predicate<? super String> IS_VALID_VARIABLE_NAME = new Predicate<String>() {
@@ -91,7 +91,7 @@ class ByExpressionFilter implements Filter {
      * One-arg constructor for proxies
      */
     public
-    ByExpressionFilter(String propertyNamePrefix) throws ParseException {
+    ByExpressionFilter(@Nullable String propertyNamePrefix) throws ParseException {
 
         if (propertyNamePrefix == null) propertyNamePrefix = this.getClass().getName();
 
@@ -99,10 +99,10 @@ class ByExpressionFilter implements Filter {
         // by any filter zero-arg constructors, which makes debugging of logging configurations next to impossible,
         // so print a stack trace to STDERR before rethrowing the exception.
         try {
-            this.init(LogUtil.parseLoggingProperty(
+            this.condition = LogUtil.parseLoggingProperty(
                 propertyNamePrefix + ".condition",
                 ByExpressionFilter.IS_VALID_VARIABLE_NAME
-            ));
+            );
         } catch (ParseException pe) {
             pe.printStackTrace();
             throw pe;
@@ -116,17 +116,13 @@ class ByExpressionFilter implements Filter {
      * @see ByExpressionFilter
      */
     public
-    ByExpressionFilter(Expression condition) {
-        this.init(condition);
-    }
-
-    private void
-    init(Expression condition) {
+    ByExpressionFilter(@Nullable Expression condition) {
         if (condition == null) throw new NullPointerException("condition");
         this.condition = condition;
     }
 
-    @Override public boolean
+
+    @NotNullByDefault(false) @Override public boolean
     isLoggable(final LogRecord record) {
 
         Mapping<String, Object> variables = new Mapping<String, Object>() {
