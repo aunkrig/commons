@@ -34,8 +34,6 @@ import java.net.Socket;
 
 import de.unkrig.commons.lang.protocol.ProducerUtil;
 import de.unkrig.commons.lang.protocol.RunnableUtil;
-import de.unkrig.commons.nullanalysis.NotNull;
-import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -43,27 +41,27 @@ import de.unkrig.commons.nullanalysis.Nullable;
  * cannot be established or breaks, the data is silently discarded, but reconnection attempts are made every now and
  * then.
  */
-@NotNullByDefault(false) public
+public
 class ActiveSocketOutputStream extends OutputStream {
 
-    @NotNull private final InetSocketAddress  remoteAddress;
+    private final InetSocketAddress           remoteAddress;
     @Nullable private final InetSocketAddress localAddress;
 
     // STATE
 
-    private Socket       socket;             // null if unconnected or closed
-    private OutputStream socketOutputStream; // null if unconnected or closed
+    @Nullable private Socket       socket;             // null if unconnected or closed
+    @Nullable private OutputStream socketOutputStream; // null if unconnected or closed
 
     /**
      * Attempts to connect to currently unconnected servers every now and then. NULL if closed.
      */
-    private Runnable reconnector = RunnableUtil.sparingRunnable(
+    @Nullable private Runnable reconnector = RunnableUtil.sparingRunnable(
         new Runnable() {
 
             @Override public void
             run() { ActiveSocketOutputStream.this.reconnect(); }
         },
-        ProducerUtil.every(RECONNECT_INTERVAL)
+        ProducerUtil.every(ActiveSocketOutputStream.RECONNECT_INTERVAL)
     );
 
     // CONSTANTS
@@ -84,17 +82,13 @@ class ActiveSocketOutputStream extends OutputStream {
     private static final int SO_TIMEOUT = 1000;
 
     public
-    ActiveSocketOutputStream(@NotNull InetAddress addr, int port) {
-        this(new InetSocketAddress(addr, port));
-    }
+    ActiveSocketOutputStream(InetAddress addr, int port) { this(new InetSocketAddress(addr, port)); }
 
     public
-    ActiveSocketOutputStream(@NotNull String hostname, int port) {
-        this(new InetSocketAddress(hostname, port));
-    }
+    ActiveSocketOutputStream(String hostname, int port) { this(new InetSocketAddress(hostname, port)); }
 
     public
-    ActiveSocketOutputStream(@NotNull InetSocketAddress remoteAddress) {
+    ActiveSocketOutputStream(InetSocketAddress remoteAddress) {
         this.remoteAddress = remoteAddress;
         this.localAddress  = null;
         this.reconnect();
@@ -105,7 +99,7 @@ class ActiveSocketOutputStream extends OutputStream {
      * @param localAddress  See {@link Socket#bind(java.net.SocketAddress)}
      */
     public
-    ActiveSocketOutputStream(@NotNull InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress) {
+    ActiveSocketOutputStream(InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress) {
         this.remoteAddress = remoteAddress;
         this.localAddress  = localAddress;
         this.reconnect();
@@ -117,11 +111,13 @@ class ActiveSocketOutputStream extends OutputStream {
     }
 
     @Override public synchronized void
-    write(byte[] b, int off, int len) throws IOException {
-        if (this.reconnector == null) throw new IOException("closed");
+    write(@Nullable byte[] b, int off, int len) throws IOException {
+
+        Runnable r = this.reconnector;
+        if (r == null) throw new IOException("closed");
 
         // Attempt to connect if currently unconnected.
-        this.reconnector.run();
+        r.run();
 
         // Write the data to the connection.
         if (this.socketOutputStream != null) {
@@ -130,7 +126,10 @@ class ActiveSocketOutputStream extends OutputStream {
             } catch (IOException e) {
 
                 // Writing the data failed; close the socket silently.
-                try { this.socket.close(); } catch (IOException ioe) {}
+                Socket s = this.socket;
+                if (s != null) {
+                    try { s.close(); } catch (IOException ioe) {}
+                }
 
                 this.socketOutputStream = null;
                 this.socket             = null;
@@ -155,11 +154,11 @@ class ActiveSocketOutputStream extends OutputStream {
             try {
                 socket = new Socket();
                 socket.setReuseAddress(true);
-                socket.setSoTimeout(SO_TIMEOUT);
+                socket.setSoTimeout(ActiveSocketOutputStream.SO_TIMEOUT);
                 if (this.localAddress != null) socket.bind(this.localAddress);
                 socket.connect(
                     new InetSocketAddress(this.remoteAddress.getAddress(), this.remoteAddress.getPort()),
-                    CONNECT_TIMEOUT
+                    ActiveSocketOutputStream.CONNECT_TIMEOUT
                 );
                 socketOutputStream = socket.getOutputStream();
             } catch (IOException e) {
