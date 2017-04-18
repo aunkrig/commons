@@ -38,7 +38,7 @@ import de.unkrig.commons.lang.protocol.Consumer;
 import de.unkrig.commons.lang.protocol.ConsumerUtil;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
 import de.unkrig.commons.lang.protocol.ProxyConsumerWhichThrows;
-import de.unkrig.commons.nullanalysis.NotNullByDefault;
+import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * Executes multiple tasks asynchronously, but forwards their output to a delegate {@link Consumer} (or {@link
@@ -48,7 +48,7 @@ import de.unkrig.commons.nullanalysis.NotNullByDefault;
  * @param <T>  The type of the objects that pose the "output" of the tasks
  * @param <EX> The exception type that the tasks may throw
  */
-@NotNullByDefault(false) public
+public
 class ObjectSequentializer<T, EX extends Throwable> {
 
     private final SquadExecutor<Void> squadExecutor;
@@ -93,7 +93,7 @@ class ObjectSequentializer<T, EX extends Throwable> {
 
         this.squadExecutor.submit(new Callable<Void>() {
 
-            @Override public Void
+            @Nullable @Override public Void
             call() throws Exception {
 
                 // Run the task.

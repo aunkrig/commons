@@ -153,6 +153,12 @@ class LogUtil {
     public static final Filter LESS_THAN_CONFIG = LogUtil.levelLimitFilter(Level.CONFIG);
 
     /**
+     * @return The value of the named logging property, or the {@code null}
+     */
+    @Nullable public static String
+    getLoggingProperty(String propertyName) { return LogUtil.LOG_MANAGER.getProperty(propertyName); }
+
+    /**
      * @return The boolean value of the named logging property, or the <var>defaulT</var>
      */
     public static Boolean
@@ -165,30 +171,33 @@ class LogUtil {
     /**
      * Evaluates the value of the named property to an object of the given <var>type</var> and returns it.
      *
-     * @throws IllegalArgumentException The logging property is not defined
-     * @throws EvaluationException      The property evaluates to {@code null}
-     * @throws EvaluationException      The value of the property is not assignable to {@code T}
+     * @return                     {@code null} if the logging property is not defined, or if the expression evaluates
+     *                             to {@code null}
+     * @throws EvaluationException The value of the property is not assignable to {@code T}
      */
-    public static <T> T
+    @Nullable public static <T> T
     getLoggingProperty(String propertyName, Class<T> type) throws ParseException, EvaluationException {
+
+        String propertyValue = LogUtil.getLoggingProperty(propertyName);
+        if (propertyValue == null) return null;
 
         Map<String, Object> variables = MapUtil.map("propertyName", propertyName, "type", type);
 
         return new ExpressionEvaluator(variables.keySet()).setImports(LogUtil.LOGGING_IMPORTS).evaluateTo(
-            LogUtil.requireLoggingProperty(propertyName),
+            propertyValue,
             Mappings.fromMap(variables),
             type
         );
     }
 
     /**
-     * Evaluates the value of the named property to an object of the given <var>type</var> and returns it, or the
-     * <var>defaulT</var>.
+     * Evaluates the value of the named property to an object of the given <var>type</var> and returns it.
      *
+     * @return     <var>defaulT</var> if the property is not set, or evaluates to {@code null}
      * @see Parser The expression syntax of the property value
      */
-    @Nullable public static <T> T
-    getLoggingProperty(String propertyName, Class<T> type, @Nullable T defaulT)
+    public static <T> T
+    getLoggingProperty(String propertyName, Class<T> type, T defaulT)
     throws ParseException, EvaluationException {
 
         String spec = LogUtil.LOG_MANAGER.getProperty(propertyName);
@@ -197,11 +206,38 @@ class LogUtil {
 
         Map<String, Object> variables = MapUtil.map("propertyName", propertyName, "type", type);
 
-        return new ExpressionEvaluator(variables.keySet()).setImports(LogUtil.LOGGING_IMPORTS).evaluateTo(
+        T result = new ExpressionEvaluator(variables.keySet()).setImports(LogUtil.LOGGING_IMPORTS).evaluateTo(
             spec,
             Mappings.fromMap(variables),
             type
         );
+
+        if (result == null) return defaulT;
+
+        return result;
+    }
+
+    /**
+     * Evaluates the value of the named property to an object of the given <var>type</var> and returns it.
+     *
+     * @throws IllegalArgumentException The logging property is not defined
+     * @throws EvaluationException      The property evaluates to {@code null}
+     * @throws EvaluationException      The value of the property is not assignable to {@code T}
+     */
+    public static <T> T
+    requireLoggingProperty(String propertyName, Class<T> type) throws ParseException, EvaluationException {
+
+        Map<String, Object> variables = MapUtil.map("propertyName", propertyName, "type", type);
+
+        T result = new ExpressionEvaluator(variables.keySet()).setImports(LogUtil.LOGGING_IMPORTS).evaluateTo(
+            LogUtil.requireLoggingProperty(propertyName),
+            Mappings.fromMap(variables),
+            type
+        );
+
+        if (result == null) throw new EvaluationException("Evaluates to null");
+
+        return result;
     }
 
     /**
@@ -260,8 +296,8 @@ class LogUtil {
     /**
      * @return The value of the named logging property, or the <var>defaulT</var>
      */
-    @Nullable public static String
-    getLoggingProperty(String propertyName, @Nullable String defaulT) {
+    public static String
+    getLoggingProperty(String propertyName, String defaulT) {
         String result = LogUtil.LOG_MANAGER.getProperty(propertyName);
         if (result == null) return defaulT;
         return result;

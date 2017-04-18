@@ -45,7 +45,6 @@ import de.unkrig.commons.lang.protocol.Consumer;
 import de.unkrig.commons.lang.protocol.ConsumerUtil;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
 import de.unkrig.commons.lang.protocol.Producer;
-import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -53,7 +52,7 @@ import de.unkrig.commons.nullanalysis.Nullable;
  * order the tasks were submitted</em>, i.e. the last byte of output of one task appears <em>before</em> the output
  * of all subsequently submitted tasks.
  */
-@NotNullByDefault(false) public
+public
 class ByteStreamSequentializer {
 
     private final SquadExecutor<Void> squadExecutor;
@@ -118,7 +117,7 @@ class ByteStreamSequentializer {
 
         this.squadExecutor.submit(new Callable<Void>() {
 
-            @Override public Void
+            @Nullable @Override public Void
             call() throws Exception {
 
                 // Run the task.

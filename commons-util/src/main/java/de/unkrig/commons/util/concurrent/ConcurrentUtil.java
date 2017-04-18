@@ -43,7 +43,7 @@ import de.unkrig.commons.nullanalysis.NotNullByDefault;
 /**
  * Utility methods related to "{@code java.util.concurrent}".
  */
-@NotNullByDefault(false) public final
+public final
 class ConcurrentUtil {
 
     static { AssertionUtil.enableAssertionsForThisClass(); }
@@ -55,7 +55,7 @@ class ConcurrentUtil {
      */
     public static final ExecutorService SEQUENTIAL_EXECUTOR_SERVICE = new AbstractExecutorService() {
 
-        @Override public void
+        @NotNullByDefault(false) @Override public void
         execute(Runnable command) { command.run(); }
 
         @Override public List<Runnable>
@@ -70,7 +70,7 @@ class ConcurrentUtil {
         @Override public boolean
         isShutdown() { return false; }
 
-        @Override public boolean
+        @NotNullByDefault(false) @Override public boolean
         awaitTermination(long timeout, TimeUnit unit) { return true; }
     };
 
