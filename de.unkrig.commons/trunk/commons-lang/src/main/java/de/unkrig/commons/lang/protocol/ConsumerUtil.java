@@ -470,15 +470,21 @@ class ConsumerUtil {
     interface Produmer<PT, CT> extends Producer<PT>, Consumer<CT> {}
 
     /**
-     * The returned {@link Produmer} simply produces the <i>last consumed subject</i>, or {@code null} if no subject
-     * has been consumed yet.
+     * Equivalent with {@link #store(Object) store(null)}.
      */
     public static <T> Produmer<T, T>
-    store() {
+    store() { return ConsumerUtil.store(null); }
+
+    /**
+     * The returned {@link Produmer} simply produces the <i>last consumed subject</i>, or <var>initialValue</var> if no
+     * subject has been consumed yet.
+     */
+    public static <T> Produmer<T, T>
+    store(@Nullable final T initialValue) {
 
         return new Produmer<T, T>() {
 
-            @Nullable private T store;
+            @Nullable private T store = initialValue;
 
             @Override public void
             consume(T subject) { this.store = subject; }
@@ -487,6 +493,12 @@ class ConsumerUtil {
             produce() { return this.store; }
         };
     }
+    
+    /**
+     * Equivalent with {@link #cumulate(Consumer, long) cumulate(delegate)}.
+     */
+    public static Consumer<Number>
+    cumulate(final Consumer<? super Long> delegate) { return ConsumerUtil.cumulate(delegate, 0); }
 
     /**
      * Creates and returns a {@link Consumer} which forwards the <i>cumulated</i> quantity to the given {@code
@@ -503,6 +515,33 @@ class ConsumerUtil {
 
             @Override public void
             consume(Number n) { delegate.consume((this.count += n.longValue())); }
+        };
+    }
+    
+    /**
+     * Equivalent with {@link #cumulate(long) cumulate(0L)}.
+     */
+    public static Produmer<Long, Number>
+    cumulate() { return ConsumerUtil.cumulate(0L); }
+
+    /**
+     * Creates and returns a {@link Produmer} which adds up the quantities it consumes, and produces the current
+     * total.
+     *
+     * @param initialValue Initial value for the cumulated quantity, usually {@code 0L}
+     */
+    public static Produmer<Long, Number>
+    cumulate(final long initialValue) {
+
+        return new Produmer<Long, Number>() {
+
+            long count = initialValue;
+
+            @Override public void
+            consume(Number n) { this.count += n.longValue(); }
+
+            @Override @Nullable public Long
+            produce() { return this.count; }
         };
     }
 
