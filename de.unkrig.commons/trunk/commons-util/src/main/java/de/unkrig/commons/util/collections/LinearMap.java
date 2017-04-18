@@ -164,7 +164,7 @@ class LinearMap<K, V> extends AbstractMap<K, V> {
     }
     @Nullable private Set<Entry<K, V>> entrySet;
 
-    @NotNullByDefault(false) final
+    final
     class EntrySet extends AbstractSet<Entry<K, V>> {
 
         @Override public int
@@ -174,7 +174,7 @@ class LinearMap<K, V> extends AbstractMap<K, V> {
         isEmpty() { return LinearMap.this.size == 0; }
 
         @Override public boolean
-        contains(Object object) {
+        contains(@Nullable Object object) {
             if (!(object instanceof Entry)) return false;
             Entry entry = (Entry) object;
             for (int i = LinearMap.this.size - 1; i >= 0; i--) {
@@ -224,7 +224,7 @@ class LinearMap<K, V> extends AbstractMap<K, V> {
             return result;
         }
 
-        @Override public <T> T[]
+        @NotNullByDefault(false) @Override public <T> T[]
         toArray(T[] result) {
             int n = LinearMap.this.size;
             if (result.length < n) {
@@ -234,10 +234,10 @@ class LinearMap<K, V> extends AbstractMap<K, V> {
             return result;
         }
 
-        @Override public boolean
+        @NotNullByDefault(false) @Override public boolean
         add(Entry<K, V> entry) { return LinearMap.this.put(entry.getKey(), entry.getValue()) != null; }
 
-        @Override public boolean
+        @NotNullByDefault(false) @Override public boolean
         remove(Object key) { return LinearMap.this.remove(key) != null; }
 
         @Override public void
@@ -254,7 +254,7 @@ class LinearMap<K, V> extends AbstractMap<K, V> {
                 @Override public V
                 getValue() { return (V) LinearMap.this.values[idx]; }
 
-                @Override public V
+                @NotNullByDefault(false) @Override public V
                 setValue(Object newValue) {
                     final Object result = LinearMap.this.values[idx];
                     LinearMap.this.values[idx] = newValue;
