@@ -38,7 +38,7 @@ import de.unkrig.commons.nullanalysis.NotNullByDefault;
  * An {@link AbstractExecutorService} which {@link #execute(Runnable) execute}s runnables immediately in the calling
  * thread.
  */
-@NotNullByDefault(false) public
+public
 class LinearExecutorService extends AbstractExecutorService {
 
     private volatile int runState;
@@ -73,12 +73,12 @@ class LinearExecutorService extends AbstractExecutorService {
         return this.runState == LinearExecutorService.TERMINATED;
     }
 
-    @Override public boolean
+    @NotNullByDefault(false) @Override public boolean
     awaitTermination(long timeout, TimeUnit unit) {
         return this.runState == LinearExecutorService.TERMINATED;
     }
 
-    @Override public void
+    @NotNullByDefault(false) @Override public void
     execute(Runnable command) {
         if (this.runState != LinearExecutorService.RUNNING) throw new RejectedExecutionException();
         command.run();

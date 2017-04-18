@@ -41,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
+import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * An {@link Executor} which executes tasks through a delegate {@link ExecutorService}. The {@link #awaitCompletion()}
@@ -48,7 +49,7 @@ import de.unkrig.commons.nullanalysis.NotNullByDefault;
  *
  * @param <T> The futures' result type
  */
-@NotNullByDefault(false) public
+public
 class SquadExecutor<T> implements Executor {
 
     private final ExecutorService  delegate;
@@ -58,7 +59,7 @@ class SquadExecutor<T> implements Executor {
     public
     SquadExecutor(ExecutorService delegate) { this.delegate = delegate; }
 
-    @Override public void
+    @NotNullByDefault(false) @Override public void
     execute(Runnable command) { this.submit(command); }
 
     /**
@@ -68,7 +69,7 @@ class SquadExecutor<T> implements Executor {
      * @return     A future representing pending completion of the task
      */
     public Future<T>
-    submit(Runnable task) {
+    submit(@Nullable Runnable task) {
         if (task == null) throw new NullPointerException();
 
         FutureTask<T> ftask = new FutureTask<T>(task, null);
@@ -85,7 +86,7 @@ class SquadExecutor<T> implements Executor {
      * @return       A future representing pending completion of the task
      */
     public Future<T>
-    submit(Runnable task, T result) {
+    submit(@Nullable Runnable task, T result) {
         if (task == null) throw new NullPointerException();
 
         FutureTask<T> ftask = new FutureTask<T>(task, result);
@@ -101,8 +102,9 @@ class SquadExecutor<T> implements Executor {
      * @return     A future representing pending completion of the task
      */
     public Future<T>
-    submit(Callable<T> task) {
+    submit(@Nullable Callable<T> task) {
         if (task == null) throw new NullPointerException();
+
         FutureTask<T> ftask = new FutureTask<T>(task);
         this.futures.add(ftask);
         this.delegate.execute(ftask);
@@ -140,10 +142,9 @@ class SquadExecutor<T> implements Executor {
      * @throws ExecutionException    One of the tasks threw an exception
      * @throws InterruptedException  The current thread was interrupted while waiting
      */
-    public List<Future<T>>
+    @NotNullByDefault(false) public List<Future<T>>
     awaitCompletion(long timeout, TimeUnit unit)
     throws CancellationException, ExecutionException, InterruptedException {
-        if (unit == null) throw new NullPointerException();
 
         long            nanos    = unit.toNanos(timeout);
         List<Future<T>> result   = new ArrayList<Future<T>>();
