@@ -1059,18 +1059,17 @@ class ExpressionEvaluator {
     /**
      * Scans, parses, evaluates and returns an expression.
      *
-     * @return                     An object of type {@code T}
-     * @throws EvaluationException The expression evaluates to {@code null}
+     * @return                     An object of type {@code T}, or {@code null}
      * @throws EvaluationException The value is not assignable to {@code T}
      * @see Parser                 The expression syntax
      */
-    public <T> T
+    @Nullable public <T> T
     evaluateTo(String spec, Mapping<String, ?> variables, Class<T> targetType)
     throws ParseException, EvaluationException {
 
         Object o = this.evaluate(spec, variables);
 
-        if (o == null) throw new EvaluationException("Evaluates to null");
+        if (o == null) return null;
 
         if (!targetType.isAssignableFrom(o.getClass())) {
             throw new EvaluationException("'" + o + "' (type " + o.getClass() + ") is not a " + targetType);
