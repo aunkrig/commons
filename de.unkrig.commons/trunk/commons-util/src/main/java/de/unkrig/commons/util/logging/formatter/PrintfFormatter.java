@@ -37,7 +37,6 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import de.unkrig.commons.lang.StringUtil;
-import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.util.logging.LogUtil;
 
@@ -53,7 +52,7 @@ import de.unkrig.commons.util.logging.LogUtil;
  * This class is a COPY of {@code de.unkrig.ext.logging.formatter.PrintfFormatter}, and should be kept in sync
  * with that.
  */
-@NotNullByDefault(false) public
+public
 class PrintfFormatter extends Formatter {
 
     // Declare default values as PUBLIC constants so they can be used with the "{@value}" doc tag.
@@ -275,7 +274,7 @@ class PrintfFormatter extends Formatter {
 
         if (propertyNamePrefix == null) propertyNamePrefix = this.getClass().getName();
 
-        this.setFormat(LogUtil.getLoggingProperty(propertyNamePrefix + ".format", (String) null));
+        this.format = PrintfFormatter.cookFormat(LogUtil.getLoggingProperty(propertyNamePrefix + ".format"));
     }
 
     /**
@@ -294,7 +293,7 @@ class PrintfFormatter extends Formatter {
      */
     public
     PrintfFormatter(String format) {
-        this.setFormat(format);
+        this.format = PrintfFormatter.cookFormat(format);
     }
 
     /**
@@ -317,9 +316,12 @@ class PrintfFormatter extends Formatter {
      * @see #format(LogRecord)    The arguments' meanings
      */
     public final void
-    setFormat(String format) {
+    setFormat(String format) { this.format = PrintfFormatter.cookFormat(format); }
 
-        this.format = (
+    private static String
+    cookFormat(@Nullable String format) {
+
+        return (
             format == null                           ? PrintfFormatter.FORMAT_STRING_DEFAULT :
             "BENCHMARK".equals(format)               ? PrintfFormatter.FORMAT_STRING_BENCHMARK :
             "COMPACT".equals(format)                 ? PrintfFormatter.FORMAT_STRING_COMPACT :
@@ -439,7 +441,10 @@ class PrintfFormatter extends Formatter {
      * </table>
      */
     @Override public String
-    format(LogRecord record) {
+    format(@Nullable LogRecord record) {
+
+        if (record == null) return "null";
+
         Throwable thrown = record.getThrown();
 
         String thrownText;

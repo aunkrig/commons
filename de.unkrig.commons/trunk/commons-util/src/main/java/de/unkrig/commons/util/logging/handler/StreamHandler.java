@@ -70,8 +70,9 @@ class StreamHandler extends AbstractStreamHandler {
         // We cannot be sure how the LogManager processes exceptions thrown by this constructor, so we print a stack
         // trace to STDERR before we rethrow the exception.
         // (The JRE default log manager prints a stack trace, too, so we'll see two.)
+        OutputStream os;
         try {
-            this.init(LogUtil.getLoggingProperty(propertyNamePrefix + ".outputStream", OutputStream.class));
+            os = LogUtil.getLoggingProperty(propertyNamePrefix + ".outputStream", OutputStream.class);
         } catch (ParseException pe) {
             pe.printStackTrace();
             throw pe;
@@ -82,6 +83,8 @@ class StreamHandler extends AbstractStreamHandler {
             re.printStackTrace();
             throw re;
         }
+
+        this.setOutputStream(os);
     }
 
     public
@@ -94,13 +97,6 @@ class StreamHandler extends AbstractStreamHandler {
         String       encoding
     ) {
         super(autoFlush, level, filter, formatter, encoding);
-        this.init(outputStream);
-    }
-
-    private void
-    init(OutputStream outputStream) {
-
-        // Re-configure the underlying 'java.util.logging.StreamHandler' with the CORRECT values.
         this.setOutputStream(outputStream);
     }
 }

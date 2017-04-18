@@ -226,13 +226,20 @@ class SimpleLogging {
      */
     public static void
     setFormatter(String spec) throws ParseException, EvaluationException {
-        SimpleLogging.setFormatter(
-            SimpleLogging.FORMATTER_INSTANTIATOR.evaluateTo(
-                spec,
-                Mappings.<String, Object>none(),
-                Formatter.class
-            )
+
+        Formatter formatter = SimpleLogging.FORMATTER_INSTANTIATOR.evaluateTo(
+            spec,
+            Mappings.<String, Object>none(),
+            Formatter.class
         );
+
+        if (formatter == null) {
+            SimpleLogging.DEBUG_HANDLER.setFormatter(SimpleLogging.DEFAULT_DEBUG_FORMATTER);
+            SimpleLogging.OUT_HANDLER.setFormatter(SimpleLogging.DEFAULT_OUT_FORMATTER);
+            SimpleLogging.STDERR_HANDLER.setFormatter(SimpleLogging.DEFAULT_STDERR_FORMATTER);
+        } else {
+            SimpleLogging.setFormatter(formatter);
+        }
     }
 
     /**

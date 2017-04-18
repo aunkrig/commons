@@ -43,7 +43,6 @@ import java.util.logging.LogRecord;
 import de.unkrig.commons.io.OutputStreams;
 import de.unkrig.commons.lang.protocol.ConsumerUtil;
 import de.unkrig.commons.lang.protocol.ConsumerUtil.Produmer;
-import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.expression.EvaluationException;
 import de.unkrig.commons.text.expression.Parser;
@@ -66,7 +65,7 @@ import de.unkrig.commons.util.logging.LogUtil;
  * @see #ArchivingFileHandler() The zero-parameter constructor that is used for properties-based configuration
  *                              (as through the "{@code logging.properties}" file)
  */
-@NotNullByDefault(false) public
+public
 class ArchivingFileHandler extends AbstractStreamHandler {
 
     /**
@@ -124,16 +123,23 @@ class ArchivingFileHandler extends AbstractStreamHandler {
         // trace to STDERR before we rethrow the exception.
         // (The JRE default log manager prints a stack trace, too, so we'll see two.)
         try {
-            this.init(
-                LogUtil.getLoggingProperty(propertyNamePrefix + ".pattern",   ArchivingFileHandler.DEFAULT_PATTERN),
-                LogUtil.getLoggingProperty(propertyNamePrefix + ".sizeLimit", ArchivingFileHandler.DEFAULT_SIZE_LIMIT),
-                LogUtil.getLoggingProperty(
-                    propertyNamePrefix + ".timeTable",
-                    TimeTable.class,
-                    ArchivingFileHandler.DEFAULT_TIME_TABLE
-                ),
-                LogUtil.getLoggingProperty(propertyNamePrefix + ".append", false)
+
+            this.fileNamePattern = ArchivingFileHandler.preprocessPattern(
+                LogUtil.getLoggingProperty(propertyNamePrefix + ".pattern", ArchivingFileHandler.DEFAULT_PATTERN)
             );
+            this.currentFile = new File(ArchivingFileHandler.replaceAll(this.fileNamePattern, "%d", ""));
+
+            // Remember size limit and time table.
+            this.sizeLimit = LogUtil.getLoggingProperty(
+                propertyNamePrefix + ".sizeLimit", ArchivingFileHandler.DEFAULT_SIZE_LIMIT
+            );
+            this.timeTable = LogUtil.getLoggingProperty(
+                propertyNamePrefix + ".timeTable",
+                TimeTable.class,
+                ArchivingFileHandler.DEFAULT_TIME_TABLE
+            );
+            this.init(LogUtil.getLoggingProperty(propertyNamePrefix + ".append", false));
+            this.nextArchiving = this.timeTable.next(new Date());
         } catch (ParseException pe) {
             pe.printStackTrace();
             throw pe;
@@ -151,11 +157,11 @@ class ArchivingFileHandler extends AbstractStreamHandler {
      * {@link #DEFAULT_SIZE_LIMIT}{@code ,}
      * {@link #DEFAULT_TIME_TABLE}{@code ,}
      * {@value #DEFAULT_APPEND}{@code ,}
-     * {@value de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_ENCODING}{@code )}.
+     * {@value AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_ENCODING}{@code )}.
      */
     public
     ArchivingFileHandler(String pattern) throws IOException {
@@ -177,19 +183,19 @@ class ArchivingFileHandler extends AbstractStreamHandler {
      * {@value #DEFAULT_SIZE_LIMIT}{@code ,}
      * {@link #DEFAULT_TIME_TABLE}{@code ,}
      * <var>append</var>{@code ,}
-     * {@value de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_ENCODING}{@code )}.
+     * {@value AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_ENCODING}{@code )}.
      */
     public
     ArchivingFileHandler(String pattern, boolean append) throws IOException {
         this(
-            pattern,                                  // pattern
-            ArchivingFileHandler.DEFAULT_SIZE_LIMIT,  // sizeLimit
-            ArchivingFileHandler.DEFAULT_TIME_TABLE,  // timeTable
-            append,                                   // append
+            pattern,            // pattern
+            ArchivingFileHandler.DEFAULT_SIZE_LIMIT, // sizeLimit
+            ArchivingFileHandler.DEFAULT_TIME_TABLE, // timeTable
+            append,             // append
             AbstractStreamHandler.DEFAULT_AUTO_FLUSH, // autoFlush
             AbstractStreamHandler.DEFAULT_LEVEL,      // level
             AbstractStreamHandler.DEFAULT_FILTER,     // filter
@@ -203,11 +209,11 @@ class ArchivingFileHandler extends AbstractStreamHandler {
      * <var>sizeLimit</var>{@code ,}
      * {@link #DEFAULT_TIME_TABLE}{@code ,}
      * {@value de.unkrig.commons.util.logging.handler.ArchivingFileHandler#DEFAULT_APPEND}{@code ,}
-     * {@value de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_ENCODING}{@code )}.
+     * {@value AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_ENCODING}{@code )}.
      */
     public
     ArchivingFileHandler(String pattern, long sizeLimit) throws IOException {
@@ -229,11 +235,11 @@ class ArchivingFileHandler extends AbstractStreamHandler {
      * <var>sizeLimit</var>{@code ,}
      * {@link #DEFAULT_TIME_TABLE}{@code ,}
      * <var>append</var>{@code ,}
-     * {@value de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_ENCODING}{@code )}.
+     * {@value AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_ENCODING}{@code )}.
      */
     public
     ArchivingFileHandler(String pattern, long sizeLimit, boolean append) throws IOException {
@@ -255,11 +261,11 @@ class ArchivingFileHandler extends AbstractStreamHandler {
      * {@value #DEFAULT_SIZE_LIMIT}{@code ,}
      * <var>timeTable</var>{@code ,}
      * {@value #DEFAULT_APPEND}{@code ,}
-     * {@value de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_ENCODING}{@code )}.
+     * {@value AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_ENCODING}{@code )}.
      */
     public
     ArchivingFileHandler(String pattern, TimeTable timeTable) throws IOException {
@@ -281,11 +287,11 @@ class ArchivingFileHandler extends AbstractStreamHandler {
      * {@value #DEFAULT_SIZE_LIMIT}{@code ,}
      * <var>timeTable</var>{@code ,}
      * <var>append</var>{@code ,}
-     * {@value de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
-     * {@link de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_ENCODING}{@code )}.
+     * {@value AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
+     * {@link AbstractStreamHandler#DEFAULT_ENCODING}{@code )}.
      */
     public
     ArchivingFileHandler(String pattern, TimeTable timeTable, boolean append) throws IOException {
@@ -338,22 +344,30 @@ class ArchivingFileHandler extends AbstractStreamHandler {
      */
     public
     ArchivingFileHandler(
-        String    pattern,
-        long      sizeLimit,
-        TimeTable timeTable,
-        boolean   append,
-        boolean   autoFlush,
-        Level     level,
-        Filter    filter,
-        Formatter formatter,
-        String    encoding
+        String           pattern,
+        long             sizeLimit,
+        TimeTable        timeTable,
+        boolean          append,
+        boolean          autoFlush,
+        Level            level,
+        @Nullable Filter filter,
+        Formatter        formatter,
+        @Nullable String encoding
     ) throws IOException {
         super(autoFlush, level, filter, formatter, encoding);
-        this.init(pattern, sizeLimit, timeTable, append);
+
+        this.fileNamePattern = ArchivingFileHandler.preprocessPattern(pattern);
+        this.currentFile     = new File(ArchivingFileHandler.replaceAll(this.fileNamePattern, "%d", ""));
+
+        // Remember size limit and time table.
+        this.sizeLimit = sizeLimit;
+        this.timeTable = timeTable;
+        this.init(append);
+        this.nextArchiving = this.timeTable.next(new Date());
     }
 
     @Override public synchronized void
-    publish(LogRecord record) {
+    publish(@Nullable LogRecord record) {
 
         // Check the current time.
         if (new Date().compareTo(this.nextArchiving) >= 0) {
@@ -410,7 +424,7 @@ class ArchivingFileHandler extends AbstractStreamHandler {
     /**
      * Tracks the size of the current file.
      */
-    private Produmer<Long, Long> byteCount;
+    private Produmer<Long, Number> byteCount = ConsumerUtil.cumulate(0);
 
     // CONSTANTS
 
@@ -436,29 +450,7 @@ class ArchivingFileHandler extends AbstractStreamHandler {
     // IMPLEMENTATION
 
     private void
-    init(String pattern, long sizeLimit, TimeTable timeTable, boolean append)
-    throws IOException {
-
-        // Preprocess the file name pattern.
-        pattern = pattern.replace('/', File.separatorChar);
-        pattern = ArchivingFileHandler.replaceAll(pattern, "%%", "\u0001");
-        pattern = ArchivingFileHandler.replaceAll(
-            pattern,
-            "%h",
-            System.getProperty("user.home", ".") + File.separatorChar
-        );
-        pattern = ArchivingFileHandler.replaceAll(
-            pattern,
-            "%t",
-            System.getProperty("java.io.tmpdir", ".") + File.separatorChar
-        );
-        if (!pattern.contains("%d")) pattern += "%d";
-        this.fileNamePattern = (pattern = pattern.replace('\u0001', '%'));
-        this.currentFile     = new File(ArchivingFileHandler.replaceAll(pattern, "%d", ""));
-
-        // Remember size limit and time table.
-        this.sizeLimit = sizeLimit;
-        this.timeTable = timeTable;
+    init(boolean append) throws IOException {
 
         // Rename an existing "current file" if we're not in APPEND mode or the file is too large.
         if (this.currentFile.exists() && (!append || this.currentFile.length() >= this.sizeLimit)) {
@@ -470,11 +462,37 @@ class ArchivingFileHandler extends AbstractStreamHandler {
                 // current log file.
                 this.sizeLimit     = ArchivingFileHandler.NO_LIMIT;
                 this.nextArchiving = TimeTable.MAX_DATE;
+                return;
             }
         }
 
         this.openCurrentFile();
-        this.nextArchiving = this.timeTable.next(new Date());
+    }
+
+    private static String
+    preprocessPattern(String pattern) {
+
+        // Preprocess the file name pattern.
+        pattern = pattern.replace('/', File.separatorChar);
+
+        // Temporarily replace "%%" with "\u0001" to prevent misinterpretation of, e.g. "%%h".
+        pattern = ArchivingFileHandler.replaceAll(pattern, "%%", "\u0001");
+        {
+            pattern = ArchivingFileHandler.replaceAll(
+                pattern,
+                "%h",
+                System.getProperty("user.home", ".") + File.separatorChar
+            );
+            pattern = ArchivingFileHandler.replaceAll(
+                pattern,
+                "%t",
+                System.getProperty("java.io.tmpdir", ".") + File.separatorChar
+            );
+            if (!pattern.contains("%d")) pattern += "%d";
+        }
+        pattern = pattern.replace('\u0001', '%');
+
+        return pattern;
     }
 
     /**
@@ -509,11 +527,9 @@ class ArchivingFileHandler extends AbstractStreamHandler {
     private void
     openCurrentFile() throws IOException {
 
-        this.byteCount = ConsumerUtil.store();
-
         this.setOutputStream(OutputStreams.tee(
             new FileOutputStream(this.currentFile, true),
-            OutputStreams.lengthWritten(ConsumerUtil.cumulate(this.byteCount, 0L))
+            OutputStreams.lengthWritten((this.byteCount = ConsumerUtil.cumulate(0)))
         ));
     }
 
@@ -543,7 +559,7 @@ class ArchivingFileHandler extends AbstractStreamHandler {
     }
 
     /**
-     * Replace all occurrences of <var>infix</var> within {@subject} with the given <var>replacement</var>.
+     * Replace all occurrences of <var>infix</var> within <var>subject</var> with the given <var>replacement</var>.
      */
     private static String
     replaceAll(String subject, String infix, String replacement) {

@@ -32,7 +32,6 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
-import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.expression.EvaluationException;
 import de.unkrig.commons.text.parser.ParseException;
@@ -42,25 +41,23 @@ import de.unkrig.commons.util.logging.LogUtil;
  * Adds an 'autoFlush' feature to the {@link java.util.logging.StreamHandler}, and a one-arg constructor with a
  * <i>variable</i> property name prefix.
  */
-@NotNullByDefault(false) public abstract
+public abstract
 class AbstractStreamHandler extends java.util.logging.StreamHandler {
 
     // Declare a set of constants for the handler property default values, so they can be used with the {@value} doc
     // tag.
     // SUPPRESS CHECKSTYLE Javadoc:OFF
-    public static final Level           DEFAULT_LEVEL      = Level.INFO;
-    public static final boolean         DEFAULT_AUTO_FLUSH = true;
-    public static final SimpleFormatter DEFAULT_FORMATTER  = new SimpleFormatter();
-    public static final Filter          DEFAULT_FILTER     = null;
-    public static final String          DEFAULT_ENCODING   = null;
+    public static final Level            DEFAULT_LEVEL      = Level.INFO;
+    public static final boolean          DEFAULT_AUTO_FLUSH = true;
+    @Nullable public static final Filter DEFAULT_FILTER     = null;
+    public static final SimpleFormatter  DEFAULT_FORMATTER  = new SimpleFormatter();
+    @Nullable public static final String DEFAULT_ENCODING   = null;
     // SUPPRESS CHECKSTYLE Javadoc:ON
 
-    private boolean                      autoFlush;
+    private boolean autoFlush;
 
     public
-    AbstractStreamHandler() throws ParseException, EvaluationException {
-        this(null);
-    }
+    AbstractStreamHandler() throws ParseException, EvaluationException { this(null); }
 
     /**
      * One-arg constructor to be used by derived classes.
@@ -75,28 +72,11 @@ class AbstractStreamHandler extends java.util.logging.StreamHandler {
         // (The JRE default log manager prints a stack trace, too, so we'll see two.)
         try {
             this.init(
-                LogUtil.getLoggingProperty(
-                    propertyNamePrefix + ".autoFlush",
-                    AbstractStreamHandler.DEFAULT_AUTO_FLUSH
-                ),
-                LogUtil.getLoggingProperty(
-                    propertyNamePrefix + ".level",
-                    AbstractStreamHandler.DEFAULT_LEVEL
-                ),
-                LogUtil.getLoggingProperty(
-                    propertyNamePrefix + ".filter",
-                    Filter.class,
-                    AbstractStreamHandler.DEFAULT_FILTER
-                ),
-                LogUtil.getLoggingProperty(
-                    propertyNamePrefix + ".formatter",
-                    Formatter.class,
-                    AbstractStreamHandler.DEFAULT_FORMATTER
-                ),
-                LogUtil.getLoggingProperty(
-                    propertyNamePrefix + ".encoding",
-                    AbstractStreamHandler.DEFAULT_ENCODING
-                )
+                LogUtil.getLoggingProperty(propertyNamePrefix + ".autoFlush",                  AbstractStreamHandler.DEFAULT_AUTO_FLUSH), // SUPPRESS CHECKSTYLE LineLength:4
+                LogUtil.getLoggingProperty(propertyNamePrefix + ".level",                      AbstractStreamHandler.DEFAULT_LEVEL),
+                LogUtil.getLoggingProperty(propertyNamePrefix + ".filter",    Filter.class),   // DEFAULT_FILTER == null
+                LogUtil.getLoggingProperty(propertyNamePrefix + ".formatter", Formatter.class, AbstractStreamHandler.DEFAULT_FORMATTER),
+                LogUtil.getLoggingProperty(propertyNamePrefix + ".encoding")                   // DEFAULT_ENCODING == null
             );
         } catch (ParseException pe) {
             pe.printStackTrace();
@@ -111,12 +91,16 @@ class AbstractStreamHandler extends java.util.logging.StreamHandler {
     }
 
     public
-    AbstractStreamHandler(boolean autoFlush, Level level, Filter filter, Formatter formatter, String encoding) {
-        this.init(autoFlush, level, filter, formatter, encoding);
-    }
+    AbstractStreamHandler(
+        boolean          autoFlush,
+        Level            level,
+        @Nullable Filter filter,
+        Formatter        formatter,
+        @Nullable String encoding
+    ) { this.init(autoFlush, level, filter, formatter, encoding); }
 
     @Override public synchronized void
-    publish(LogRecord record) {
+    publish(@Nullable LogRecord record) {
         super.publish(record);
         if (this.autoFlush) this.flush();
     }
