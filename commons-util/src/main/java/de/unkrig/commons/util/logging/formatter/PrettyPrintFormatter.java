@@ -30,7 +30,7 @@ import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
 import de.unkrig.commons.lang.PrettyPrinter;
-import de.unkrig.commons.nullanalysis.NotNullByDefault;
+import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.expression.EvaluationException;
 import de.unkrig.commons.text.parser.ParseException;
 import de.unkrig.commons.util.logging.LogUtil;
@@ -39,29 +39,27 @@ import de.unkrig.commons.util.logging.LogUtil;
  * A {@link Formatter} that uses {@link PrettyPrinter} to beautify the log record's parameters, and then calls a
  * delegate {@link Formatter}.
  */
-@NotNullByDefault(false) public
+public
 class PrettyPrintFormatter extends Formatter {
 
-    private Formatter delegate;
+    private final Formatter delegate;
 
     public
     PrettyPrintFormatter() throws ParseException, EvaluationException {
         String propertyNamePrefix = this.getClass().getName();
-        this.init(LogUtil.getLoggingProperty(propertyNamePrefix + ".delegate", Formatter.class));
+        this.delegate = LogUtil.requireLoggingProperty(propertyNamePrefix + ".delegate", Formatter.class);
     }
 
     public
     PrettyPrintFormatter(Formatter delegate) {
-        this.init(delegate);
-    }
-
-    private void
-    init(Formatter delegate) {
         this.delegate = delegate;
     }
 
     @Override public String
-    format(LogRecord record) {
+    format(@Nullable LogRecord record) {
+
+        if (record == null) return "null";
+
         Object[] parameters = record.getParameters();
         if (parameters == null || parameters.length == 0) return this.delegate.format(record);
 

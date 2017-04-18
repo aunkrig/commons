@@ -31,7 +31,6 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.MemoryHandler;
 
-import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.expression.EvaluationException;
 import de.unkrig.commons.text.parser.ParseException;
@@ -45,7 +44,7 @@ import de.unkrig.commons.util.logging.LogUtil;
  * This may cause noticable costs if the objects' Object{@link #toString()} methods are expensive and/or return large
  * strings.
  */
-@NotNullByDefault(false) public
+public
 class EagerHandler extends ProxyHandler {
 
     public
@@ -62,18 +61,21 @@ class EagerHandler extends ProxyHandler {
     }
 
     @Override public void
-    publish(LogRecord record) {
+    publish(@Nullable LogRecord record) {
 
-        // Format the message eagerly.
-        Object[] parameters = record.getParameters();
-        if (parameters != null && parameters.length > 0) {
-            String message = record.getMessage();
-            if (message.contains("{0")) {
-                try {
-                    record.setMessage(MessageFormat.format(message, parameters));
-                    record.setParameters(null);
-                } catch (Exception e) {
-                    ;
+        if (record != null) {
+
+            // Format the message eagerly.
+            Object[] parameters = record.getParameters();
+            if (parameters != null && parameters.length > 0) {
+                String message = record.getMessage();
+                if (message.contains("{0")) {
+                    try {
+                        record.setMessage(MessageFormat.format(message, parameters));
+                        record.setParameters(null);
+                    } catch (Exception e) {
+                        ;
+                    }
                 }
             }
         }

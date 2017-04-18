@@ -29,27 +29,23 @@ package de.unkrig.commons.util.logging.handler;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
 
-import de.unkrig.commons.nullanalysis.NotNullByDefault;
+import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * Writes log records to {@link System#err}.
  */
-@NotNullByDefault(false) public
+public
 class StderrHandler extends StreamHandler {
 
     public
-    StderrHandler() {
-        this.setOutputStream(System.err);
-    }
+    StderrHandler() { this.setOutputStream(System.err); }
 
     @Override public void
-    publish(LogRecord record) {
+    publish(@Nullable LogRecord record) {
         super.publish(record);
         this.flush();
     }
 
     @Override public synchronized void
-    close() throws SecurityException {
-        this.flush();
-    }
+    close() throws SecurityException { this.flush(); }
 }

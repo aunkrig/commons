@@ -34,13 +34,12 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * A {@link Handler} that redirects all method calls to a delegate, which can be changed at runtime.
  */
-@NotNullByDefault(false) public
+public
 class ProxyHandler extends Handler {
 
     @Nullable private Handler delegate;
@@ -49,17 +48,13 @@ class ProxyHandler extends Handler {
      * Constructs a proxy handler <i>without</i> a delegate.
      */
     public
-    ProxyHandler() {
-        this.delegate = null;
-    }
+    ProxyHandler() {}
 
     /**
      * @param delegate {@code null} if a delegate is not (yet) desired
      */
     public
-    ProxyHandler(@Nullable Handler delegate) {
-        this.delegate = delegate;
-    }
+    ProxyHandler(@Nullable Handler delegate) { this.delegate = delegate; }
 
     /**
      * Changes the delegate handler.
@@ -67,63 +62,61 @@ class ProxyHandler extends Handler {
      * @param delegate {@code null} if a delegate is no longer desired
      */
     public void
-    setDelegate(@Nullable Handler delegate) {
-        this.delegate = delegate;
-    }
+    setDelegate(@Nullable Handler delegate) { this.delegate = delegate; }
 
     // Override getters.
 
-    @Override public Formatter
+    @Nullable @Override public Formatter
     getFormatter() { return this.delegate != null ? this.delegate.getFormatter() : null; }
 
-    @Override public String
+    @Nullable @Override public String
     getEncoding() { return this.delegate != null ? this.delegate.getEncoding() : null; }
 
-    @Override public Filter
+    @Nullable @Override public Filter
     getFilter() { return this.delegate != null ? this.delegate.getFilter() : null; }
 
-    @Override public ErrorManager
+    @Nullable @Override public ErrorManager
     getErrorManager() { return this.delegate != null ? this.delegate.getErrorManager() : null; }
 
-    @Override public Level
+    @Nullable @Override public Level
     getLevel() { return this.delegate != null ? this.delegate.getLevel() : null; }
 
     // Override setters.
 
     @Override public void
-    setFormatter(Formatter formatter) throws SecurityException {
+    setFormatter(@Nullable Formatter formatter) throws SecurityException {
         if (this.delegate != null) this.delegate.setFormatter(formatter);
     }
 
     @Override public void
-    setEncoding(String encoding) throws SecurityException, UnsupportedEncodingException {
+    setEncoding(@Nullable String encoding) throws SecurityException, UnsupportedEncodingException {
         if (this.delegate != null) this.delegate.setEncoding(encoding);
     }
 
     @Override public void
-    setFilter(Filter newFilter) throws SecurityException {
+    setFilter(@Nullable Filter newFilter) throws SecurityException {
         if (this.delegate != null) this.delegate.setFilter(newFilter);
     }
 
     @Override public void
-    setErrorManager(ErrorManager errorManager) {
+    setErrorManager(@Nullable ErrorManager errorManager) {
         if (this.delegate != null) this.delegate.setErrorManager(errorManager);
     }
 
     @Override public void
-    setLevel(Level level) throws SecurityException {
+    setLevel(@Nullable Level level) throws SecurityException {
         if (this.delegate != null) this.delegate.setLevel(level);
     }
 
     // Override services.
 
     @Override public boolean
-    isLoggable(LogRecord record) {
+    isLoggable(@Nullable LogRecord record) {
         return this.delegate != null ? this.delegate.isLoggable(record) : false;
     }
 
     @Override public void
-    publish(LogRecord record) {
+    publish(@Nullable LogRecord record) {
         if (this.delegate != null) this.delegate.publish(record);
     }
 

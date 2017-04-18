@@ -32,14 +32,13 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import de.unkrig.commons.lang.protocol.Predicate;
-import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * A {@link Formatter} calls one of two delegates, depending on the evaluation result of a {@link LogRecord} {@link
  * Predicate}.
  */
-@NotNullByDefault(false) public
+public
 class SelectiveFormatter extends Formatter {
 
     private final Predicate<? super LogRecord> predicate;
@@ -63,7 +62,10 @@ class SelectiveFormatter extends Formatter {
      * @see #SelectiveFormatter(Predicate, Formatter, Formatter)
      */
     @Override public String
-    format(LogRecord logRecord) {
+    format(@Nullable LogRecord logRecord) {
+
+        if (logRecord == null) return "null";
+
         return (
             this.predicate.evaluate(logRecord)
             ? this.delegate1.format(logRecord)
