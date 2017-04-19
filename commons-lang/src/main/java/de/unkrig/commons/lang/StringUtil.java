@@ -249,4 +249,15 @@ class StringUtil {
 
         return "";
     }
+
+    /**
+     * @return Whether the <var>subject</var> contains any of the <var>characters</var>
+     */
+    public static boolean
+    containsAny(String subject, String characters) {
+    	for (int i = characters.length() - 1; i >= 0; i--) {
+    		if (subject.indexOf(Character.codePointAt(characters, i)) != -1) return true;
+    	}
+    	return false;
+    }
 }
