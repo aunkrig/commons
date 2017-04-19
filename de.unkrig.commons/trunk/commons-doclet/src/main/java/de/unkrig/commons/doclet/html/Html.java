@@ -200,14 +200,14 @@ class Html {
                     toMember.containingClass() == from || (
                         from instanceof MemberDoc
                         && toMember.containingClass() == ((MemberDoc) from).containingClass()
-                    )
+                    ) || to.isEnumConstant()
                     ? ""
                     : toMember.containingClass().name() + '.'
                 );
 
-                if (to.isField()) {
+                if (to.isField() || to.isEnumConstant()) {
                     defaultLabelHtml += to.name();
-                } else
+            	} else
                 if (to.isConstructor()) {
                     ConstructorDoc toConstructorDoc = (ConstructorDoc) to;
                     defaultLabelHtml += (
