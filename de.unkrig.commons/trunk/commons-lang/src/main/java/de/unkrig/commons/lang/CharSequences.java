@@ -35,7 +35,7 @@ class CharSequences {
     /**
      * Creates and returns a sub-{@link CharSequence} of the given <var>delegate</var> {@link CharSequence}.
      */
-    public static final CharSequence
+    public static CharSequence
     subSequence(final CharSequence delegate, final int start, final int end) {
 
         if (start == 0 && end == delegate.length()) return delegate;
@@ -52,6 +52,50 @@ class CharSequences {
 
             @Override public char
             charAt(int index) { return delegate.charAt(start + index); }
+        };
+    }
+
+    /**
+     * Wraps a character array as a {@link CharSequence}.
+     */
+    public static CharSequence
+    from(final char[] buf) {
+
+        return new CharSequence() {
+
+            @Override public CharSequence
+            subSequence(int start, int end) { return CharSequences.subSequence(this, start, end); }
+
+            @Override public int
+            length() { return buf.length; }
+
+            @Override public char
+            charAt(int index) { return buf[index]; }
+        };
+    }
+
+    /**
+     * Wraps a character array as a {@link CharSequence}.
+     */
+    public static CharSequence
+    from(final char[] buf, final int off, final int len) {
+
+        // Fail fast:
+        if (off < 0)                throw new IndexOutOfBoundsException(off + "<0");
+        if (off > buf.length)       throw new IndexOutOfBoundsException(off + ">" + buf.length);
+        if (len < 0)                throw new IndexOutOfBoundsException(len + "<0");
+        if (off + len > buf.length) throw new IndexOutOfBoundsException((off + len) + ">" + buf.length);
+
+        return new CharSequence() {
+
+            @Override public CharSequence
+            subSequence(int start, int end) { return CharSequences.subSequence(this, off + start, off + end); }
+
+            @Override public int
+            length() { return len; }
+
+            @Override public char
+            charAt(int index) { return buf[off + index]; }
         };
     }
 }
