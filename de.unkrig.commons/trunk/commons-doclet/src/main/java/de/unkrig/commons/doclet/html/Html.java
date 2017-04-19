@@ -200,7 +200,7 @@ class Html {
                     toMember.containingClass() == from || (
                         from instanceof MemberDoc
                         && toMember.containingClass() == ((MemberDoc) from).containingClass()
-                    ) || to.isEnumConstant()
+                    )
                     ? ""
                     : toMember.containingClass().name() + '.'
                 );
@@ -508,7 +508,10 @@ class Html {
                 return argument;
             }
 
-            Object cv = ((FieldDoc) doc).constantValue();
+            FieldDoc fd = (FieldDoc) doc;
+            if (fd.isEnumConstant()) return fd.name();
+
+			Object cv = fd.constantValue();
             if (cv == null) {
                 rootDoc.printError(
                     doc.position(),
