@@ -34,6 +34,7 @@ import java.util.Random;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import de.unkrig.commons.nullanalysis.Nullable;
@@ -994,6 +995,22 @@ class ProducerUtil {
 
                 return p.produce();
             }
+        };
+    }
+
+    public interface BooleanProducer {
+        boolean produce();
+    }
+
+    /**
+     * @return Produces {@code true} once, and then always {@code false}
+     */
+    public static BooleanProducer
+    once() {
+
+        return new BooleanProducer() {
+            final AtomicBoolean b = new AtomicBoolean(true);
+            @Override public boolean produce() { return this.b.getAndSet(false); }
         };
     }
 }
