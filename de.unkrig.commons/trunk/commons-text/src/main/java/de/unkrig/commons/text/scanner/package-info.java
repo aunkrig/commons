@@ -26,7 +26,7 @@
 
 /**
  * A framework for convenient implementation of high-performance stateless or stateful scanners. For an application
- * sample, see {@link de.unkrig.commons.net.http.servlett.Servlett}.
+ * sample, see the {@code de.unkrig.commons.net.http.servlett.Servlett}.
  */
 @NotNullByDefault
 package de.unkrig.commons.text.scanner;
