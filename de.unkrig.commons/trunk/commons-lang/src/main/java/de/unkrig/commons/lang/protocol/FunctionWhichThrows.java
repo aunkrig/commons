@@ -29,7 +29,8 @@ package de.unkrig.commons.lang.protocol;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
- * An entity that transforms an "input value" into "a output value".
+ * An entity that transforms an "input value" (which may be {@code null}) into an "output value" (which may also be
+ * {@code null}).
  *
  * <h3>IMPORTANT NOTICE:</h3>
  * <p>
@@ -52,10 +53,12 @@ import de.unkrig.commons.nullanalysis.Nullable;
  *   .
  * </p>
  *
- * @param <I>  The type of the parameter of {@link #call(Object)}
- * @param <O>  The return type of {@link #call(Object)}
- * @param <EX> The exception type that {@link #call(Object)} is allowed to throw
- * @see        #call(Object)
+ * @param <I>                  The type of the parameter of {@link #call(Object)}
+ * @param <O>                  The return type of {@link #call(Object)}
+ * @param <EX>                 The exception type that {@link #call(Object)} is allowed to throw
+ * @see                        #call(Object)
+ * @see TransformerWhichThrows {@code TransformerWhichThrows} -- similar to this interface, but transforms only
+ *                             <em>non-null</em> values into <em>non-null</em> values
  */
 public
 interface FunctionWhichThrows<I, O, EX extends Throwable> {
