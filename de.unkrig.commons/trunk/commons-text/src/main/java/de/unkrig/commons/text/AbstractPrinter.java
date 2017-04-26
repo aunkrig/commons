@@ -35,7 +35,6 @@ import java.util.EnumSet;
 import javax.swing.text.AbstractWriter;
 
 import de.unkrig.commons.lang.AssertionUtil;
-import de.unkrig.commons.lang.protocol.Consumer;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
 import de.unkrig.commons.lang.protocol.RunnableUtil;
 import de.unkrig.commons.lang.protocol.RunnableWhichThrows;
@@ -56,7 +55,7 @@ class AbstractPrinter implements Printer {
 
     /**
      * Returns the context printer for this thread. The initial context printer for the "main thread" is the {@link
-     * #DEFAULT_PRINTER}.
+     * Printers#DEFAULT_PRINTER}.
      * <p>
      *   Notice that it is (intentionally) not possible to explicitly <em>set</em> the current thread's context
      *   printer; instead you would use {@link #run(Runnable)}.
@@ -229,15 +228,15 @@ class AbstractPrinter implements Printer {
 
     // ========================== Redirection to Consumer<String> ==========================
 
-    /** @see #redirect(Level, Consumer) */
+    /** @see #redirect(Level, ConsumerWhichThrows) */
     public final AbstractPrinter redirectError(@Nullable ConsumerWhichThrows<? super String, ? extends RuntimeException> errorConsumer)     { return this.redirect(Level.ERROR, errorConsumer);     }
-    /** @see #redirect(Level, Consumer) */
+    /** @see #redirect(Level, ConsumerWhichThrows) */
     public final AbstractPrinter redirectWarn(@Nullable ConsumerWhichThrows<? super String, ? extends RuntimeException> warnConsumer)       { return this.redirect(Level.WARN, warnConsumer);       }
-    /** @see #redirect(Level, Consumer) */
+    /** @see #redirect(Level, ConsumerWhichThrows) */
     public final AbstractPrinter redirectInfo(@Nullable ConsumerWhichThrows<? super String, ? extends RuntimeException> infoConsumer)       { return this.redirect(Level.INFO, infoConsumer);       }
-    /** @see #redirect(Level, Consumer) */
+    /** @see #redirect(Level, ConsumerWhichThrows) */
     public final AbstractPrinter redirectVerbose(@Nullable ConsumerWhichThrows<? super String, ? extends RuntimeException> verboseConsumer) { return this.redirect(Level.VERBOSE, verboseConsumer); }
-    /** @see #redirect(Level, Consumer) */
+    /** @see #redirect(Level, ConsumerWhichThrows) */
     public final AbstractPrinter redirectDebug(@Nullable ConsumerWhichThrows<? super String, ? extends RuntimeException> debugConsumer)     { return this.redirect(Level.DEBUG, debugConsumer);     }
 
     /**
