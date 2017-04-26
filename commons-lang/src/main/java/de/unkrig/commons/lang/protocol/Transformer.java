@@ -44,11 +44,5 @@ package de.unkrig.commons.lang.protocol;
  * @see       #transform(Object)
  */
 public
-interface Transformer<I, O> {
-
-    /**
-     * Transforms a (non-null) object of type {@code I} into a (non-null) object of type {@code O}.
-     */
-    O
-    transform(I in);
+interface Transformer<I, O> extends TransformerWhichThrows<I, O, RuntimeException> {
 }
