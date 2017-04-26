@@ -27,7 +27,7 @@
 package de.unkrig.commons.lang.protocol;
 
 /**
- * An entity that transforms an "input value" into "a output value".
+ * An entity that transforms a (non-{@code null}) "input value" into a (non-{@code null}) "output value".
  *
  * <h3>IMPORTANT NOTICE:</h3>
  * <p>
@@ -42,9 +42,11 @@ package de.unkrig.commons.lang.protocol;
  *   .
  * </p>
  *
- * @param <I> The type of the parameter of {@link #call(Object)}
- * @param <O> The return type of {@link #call(Object)}
- * @see       #call(Object)
+ * @param <I>       The type of the parameter of {@link #call(Object)}
+ * @param <O>       The return type of {@link #call(Object)}
+ * @see             #call(Object)
+ * @see Transformer {@code Transformer} -- similar to this interface, but transforms only <em>non-null</em> values into
+ *                  <em>non-null</em> values
  */
 public
 interface Function<I, O> extends FunctionWhichThrows<I, O, RuntimeException> {
