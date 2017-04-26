@@ -38,6 +38,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -493,7 +494,7 @@ class ConsumerUtil {
             produce() { return this.store; }
         };
     }
-    
+
     /**
      * Equivalent with {@link #cumulate(Consumer, long) cumulate(delegate)}.
      */
@@ -517,7 +518,7 @@ class ConsumerUtil {
             consume(Number n) { delegate.consume((this.count += n.longValue())); }
         };
     }
-    
+
     /**
      * Equivalent with {@link #cumulate(long) cumulate(0L)}.
      */
@@ -632,7 +633,7 @@ class ConsumerUtil {
      * Wraps the <var>delegate</var> such that its declared exception is caught and ignored.
      */
     public static <T, EX extends Throwable> Consumer<T>
-    ignoreExceptions(final Class<EX> exceptionClass, final ConsumerWhichThrows<T, EX> delegate) {
+    ignoreExceptions(final Class<EX> exceptionClass, final ConsumerWhichThrows<T, ? extends EX> delegate) {
 
         return new Consumer<T>() {
 
@@ -654,5 +655,93 @@ class ConsumerUtil {
                 }
             }
         };
+    }
+
+    /**
+     * Passes the first <var>n</var> elements of the <var>subject</var> to <var>delegate1</var>, and all remaining
+     * elements (if any) to <var>delegate2</var>.
+     * <p>
+     *   This method resembles UNIX's {@code head} command.
+     * </p>
+     */
+    public static <T, EX extends Throwable> void
+    head(
+        Iterable<? extends T>                        subject,
+        int                                          n,
+        ConsumerWhichThrows<? super T, ? extends EX> delegate1,
+        ConsumerWhichThrows<? super T, ? extends EX> delegate2
+    ) throws EX { ConsumerUtil.head(subject.iterator(), n, delegate1, delegate2); }
+
+    /**
+     * Passes the first <var>n</var> products of the <var>subject</var> to <var>delegate1</var>, and all remaining
+     * products (if any) to <var>delegate2</var>.
+     * <p>
+     *   This method resembles UNIX's {@code head} command.
+     * </p>
+     */
+    public static <T, EX extends Throwable> void
+    head(
+        Iterator<? extends T>                        subject,
+        int                                          n,
+        ConsumerWhichThrows<? super T, ? extends EX> delegate1,
+        ConsumerWhichThrows<? super T, ? extends EX> delegate2
+    ) throws EX {
+
+        for (int i = 0; i <= n && subject.hasNext(); i++) {
+            delegate1.consume(subject.next());
+        }
+
+        while (subject.hasNext()) {
+            delegate2.consume(subject.next());
+        }
+    }
+
+    /**
+     * Passes the first <var>x - n</var> products of the <var>subject</var> to <var>delegate1</var>, and all
+     * remaining products (if any) to <var>delegate2</var>, where <var>x</var> is the number of products of the
+     * <var>subject</var>.
+     * <p>
+     *   This method resembles UNIX's {@code tail} command.
+     * </p>
+     */
+    public static <T, EX extends Throwable> void
+    tail(
+        Iterator<? extends T>                        subject,
+        int                                          n,
+        ConsumerWhichThrows<? super T, ? extends EX> delegate1,
+        ConsumerWhichThrows<? super T, ? extends EX> delegate2
+    ) throws EX {
+
+        List<T> tmp = new ArrayList<T>();
+        while (subject.hasNext()) tmp.add(subject.next());
+
+        ConsumerUtil.tail(tmp, n, delegate1, delegate2);
+    }
+
+    /**
+     * Passes the first <var>subject</var>{@code .length()} - <var>n</var> elements of the <var>subject</var>
+     * collection to <var>delegate1</var>, and all remaining elements (if any) to <var>delegate2</var>.
+     * <p>
+     *   This method resembles UNIX's {@code tail} command.
+     * </p>
+     */
+    public static <T, EX extends Throwable> void
+    tail(
+        Collection<? extends T>                      subject,
+        int                                          n,
+        ConsumerWhichThrows<? super T, ? extends EX> delegate1,
+        ConsumerWhichThrows<? super T, ? extends EX> delegate2
+    ) throws EX {
+
+        int size = subject.size();
+
+        Iterator<? extends T> it = subject.iterator();
+
+        for (int i = 0; i < size - n && it.hasNext(); i++) {
+            delegate1.consume(it.next());
+        }
+        while (it.hasNext()) {
+            delegate2.consume(it.next());
+        }
     }
 }
