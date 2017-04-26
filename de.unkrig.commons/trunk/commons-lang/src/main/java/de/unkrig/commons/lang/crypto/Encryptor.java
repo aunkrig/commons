@@ -36,7 +36,7 @@ import javax.security.auth.Destroyable;
  *   Decryptor}.
  * </p>
  *
- * @see Encryptors#encrypt(Encryptor, CharSequence) For encrypting <em>strings</em> rather than byte arrays
+ * @see Encryptors#encrypt(Encryptor, char[]) For encrypting <em>strings</em> rather than byte arrays
  */
 public
 interface Encryptor extends Destroyable {
