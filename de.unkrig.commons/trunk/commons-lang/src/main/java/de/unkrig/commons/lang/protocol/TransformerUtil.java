@@ -199,7 +199,7 @@ class TransformerUtil {
      * A transformer which lets a <var>delegate</var> transform the inputs, but at most once for each non-equal
      * input.
      * <p>
-     *   This method is not thread-safe. To get a thread-safe cache, use {@link #cache(Transformer, Map)}.
+     *   This method is not thread-safe. To get a thread-safe cache, use {@link #cache(TransformerWhichThrows, Map)}.
      * </p>
      */
     public static <I, O, EX extends Throwable> TransformerWhichThrows<I, O, EX>
