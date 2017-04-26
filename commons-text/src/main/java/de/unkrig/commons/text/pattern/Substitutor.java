@@ -36,7 +36,7 @@ import de.unkrig.commons.lang.protocol.Transformer;
 public
 class Substitutor implements Transformer<CharSequence, CharSequence> {
 
-    static final int DEFAULT_LOOKBEHIND_LIMIT = 10;
+    public static final int DEFAULT_LOOKBEHIND_LIMIT = 10;
 
     // CONFIGURATION
 
