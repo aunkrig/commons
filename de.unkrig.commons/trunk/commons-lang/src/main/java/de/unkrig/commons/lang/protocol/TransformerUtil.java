@@ -33,7 +33,6 @@ import java.util.TreeMap;
 import java.util.WeakHashMap;
 
 import de.unkrig.commons.lang.AssertionUtil;
-import de.unkrig.commons.nullanalysis.NotNull;
 
 /**
  * Various {@link Transformer}-related utility methods.
@@ -50,31 +49,26 @@ class TransformerUtil {
      * @return A {@link Transformer} that transforms any object reference to itself.
      */
     @SuppressWarnings("unchecked") public static <O, I extends O> Transformer<I, O>
-    identity() {
-        return TransformerUtil.IDENTITY;
-    }
+    identity() { return TransformerUtil.IDENTITY; }
 
-    @SuppressWarnings("rawtypes") private static final Transformer IDENTITY = new Transformer() {
-
-        @Override public Object
-        transform(Object in) { return in; }
-    };
+    @SuppressWarnings("rawtypes") private static final Transformer
+    IDENTITY = new Transformer() { @Override public Object transform(Object in) { return in; } };
 
     /**
      * @return A transformer that feeds subjects through a chain of delegate transformers
      */
-    public static <T> Transformer<T, T>
-    chain(final Transformer<T, T>... transformers) {
+    public static <T, EX extends Throwable> TransformerWhichThrows<? super T, ? extends T, ? extends EX>
+    chain(final TransformerWhichThrows<? super T, ? extends T, ? extends EX>... transformers) {
 
-        if (transformers.length == 0) return TransformerUtil.identity();
+        if (transformers.length == 0) return TransformerUtil.asTransformerWhichThrows(TransformerUtil.<T, T>identity());
 
         if (transformers.length == 1) return transformers[0];
 
-        return new Transformer<T, T>() {
+        return new TransformerWhichThrows<T, T, EX>() {
 
             @Override public T
-            transform(T in) {
-                for (Transformer<T, T> transformer : transformers) {
+            transform(T in) throws EX {
+                for (TransformerWhichThrows<? super T, ? extends T, ? extends EX> transformer : transformers) {
                     in = transformer.transform(in);
                 }
                 return in;
@@ -83,7 +77,8 @@ class TransformerUtil {
     }
 
     /**
-     * Converts a {@link Transformer} into a {@link TransformerWhichThrows}.
+     * Converts a {@link TransformerWhichThrows}{@code <I, O, ? extends RuntimeException>} into a {@link
+     * TransformerWhichThrows}{@code <I, O, EX>}.
      * <p>
      *   That is possible iff:
      * </p>
@@ -97,11 +92,12 @@ class TransformerUtil {
      * @param <EX> The target transformer's exception
      */
     public static <I, O, EX extends Throwable> TransformerWhichThrows<I, O, EX>
-    asTransformerWhichThrows(final Transformer<? super I, ? extends O> source) {
+    asTransformerWhichThrows(final TransformerWhichThrows<? super I, ? extends O, ? extends RuntimeException> source) {
 
-        return new TransformerWhichThrows<I, O, EX>() {
-            @Override @NotNull public O transform(I in) { return source.transform(in); }
-        };
+        @SuppressWarnings("unchecked") TransformerWhichThrows<I, O, EX>
+        result = (TransformerWhichThrows<I, O, EX>) source;
+
+        return result;
     }
 
     /**
@@ -123,23 +119,7 @@ class TransformerUtil {
     asTransformer(final TransformerWhichThrows<? super I, ? extends O, EX> source) {
 
         return new Transformer<I, O>() {
-            @Override @NotNull public O transform(I in) { return source.transform(in); }
-        };
-    }
-
-    /**
-     * @return A {@link Transformer} which calls the <var>delegate</var>, except when the <var>subject</var> equals the
-     *         <var>extraInput</var>, when it returns <var>extraOutput</var>
-     */
-    public static <I, O> Transformer<I, O>
-    combine(final I extraInput, final O extraOutput, final Transformer<? super I, O> delegate) {
-        return new Transformer<I, O>() {
-
-            @Override @NotNull public O
-            transform(I in) {
-                if (in.equals(extraInput)) return extraOutput;
-                return delegate.transform(in);
-            }
+            @Override public O transform(I in) { return source.transform(in); }
         };
     }
 
@@ -148,10 +128,14 @@ class TransformerUtil {
      *         equals the <var>extraInput</var>, when it returns <var>extraOutput</var>
      */
     public static <I, O, EX extends Throwable> TransformerWhichThrows<I, O, EX>
-    combine(final I extraInput, final O extraOutput, final TransformerWhichThrows<? super I, O, EX> delegate) {
+    combine(
+        final I                                                  extraInput,
+        final O                                                  extraOutput,
+        final TransformerWhichThrows<? super I, ? extends O, EX> delegate
+    ) {
         return new TransformerWhichThrows<I, O, EX>() {
 
-            @Override @NotNull public O
+            @Override public O
             transform(I in) throws EX {
                 if (in.equals(extraInput)) return extraOutput;
                 return delegate.transform(in);
@@ -160,10 +144,14 @@ class TransformerUtil {
     }
 
     /**
-     * @return A {@link Transformer} in which the given keys and values override the mappings of the delegate.
+     * @return A {@link TransformerWhichThrows} in which the given keys and values override the mappings of the
+     *         <var>delegate</var>
      */
-    @SuppressWarnings("unchecked") public static <I, O> Transformer<I, O>
-    addMappings(final Transformer<? super I, O> transformer, Object... keysAndValues) {
+    @SuppressWarnings("unchecked") public static <I, O, EX extends Throwable> TransformerWhichThrows<I, O, EX>
+    addMappings(
+        final TransformerWhichThrows<? super I, ? extends O, ? extends EX> delegate,
+        Object...                                                          keysAndValues
+    ) {
 
         final Map<I, O> m = new HashMap<I, O>();
 
@@ -177,13 +165,13 @@ class TransformerUtil {
             m.put(key, value);
         }
 
-        return new Transformer<I, O>() {
+        return new TransformerWhichThrows<I, O, EX>() {
 
-            @Override @NotNull public O
-            transform(I in) {
+            @Override public O
+            transform(I in) throws EX {
                 O out = m.get(in);
                 if (out != null) return out;
-                return transformer.transform(in);
+                return delegate.transform(in);
             }
         };
     }
@@ -202,7 +190,7 @@ class TransformerUtil {
 
         return new Transformer<I, O>() {
 
-            @Override @NotNull public O
+            @Override public O
             transform(I in) { return m.get(in); }
         };
     }
@@ -214,8 +202,8 @@ class TransformerUtil {
      *   This method is not thread-safe. To get a thread-safe cache, use {@link #cache(Transformer, Map)}.
      * </p>
      */
-    public static <I, O> Transformer<I, O>
-    cache(final Transformer<? super I, O> delegate) {
+    public static <I, O, EX extends Throwable> TransformerWhichThrows<I, O, EX>
+    cache(final TransformerWhichThrows<? super I, ? extends O, ? extends EX> delegate) {
 
         return TransformerUtil.cache(delegate, new WeakHashMap<I, O>());
     }
@@ -231,13 +219,13 @@ class TransformerUtil {
      * @param cache Typically a {@link HashMap}, or a {@link TreeMap#TreeMap(java.util.Comparator)}, or a
      *              {@link WeakHashMap}, or a {@link Collections#synchronizedMap(Map)} (for thread-safety)
      */
-    public static <I, O> Transformer<I, O>
-    cache(final Transformer<? super I, O> delegate, final Map<I, O> cache) {
+    public static <I, O, EX extends Throwable> TransformerWhichThrows<I, O, EX>
+    cache(final TransformerWhichThrows<? super I, ? extends O, ? extends EX> delegate, final Map<I, O> cache) {
 
-        return new Transformer<I, O>() {
+        return new TransformerWhichThrows<I, O, EX>() {
 
-            @Override @NotNull public O
-            transform(I in) {
+            @Override public O
+            transform(I in) throws EX {
 
                 O out = cache.get(in);
                 if (out != null) return out;
