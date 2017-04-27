@@ -230,19 +230,40 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
                 this.previousTokenOffset = this.offset;
                 this.offset              = matcher.end();
 
-                return new Token<TT>(rule.tokenType, matcher.group());
+                String[] captured;
+                {
+                    int gc = matcher.groupCount();
+                    if (gc == 0) {
+                        captured = null;
+                    } else {
+                        captured = new String[gc];
+                        for (int i = 0; i < gc; i++) captured[i] = matcher.group(i + 1);
+                    }
+                }
+
+                return new Token<TT>(rule.tokenType, matcher.group(), captured);
             }
         }
 
-        throw new ScanException(
-            "Unexpected character '"
+        String message = (
+            "Unexpected character \""
             + this.cs.charAt(this.offset)
-            + "' at offset "
+            + "\" at offset "
             + this.offset
-            + " of '"
+            + " of input string \""
             + this.cs
-            + "'"
+            + "\""
         );
+        if (this.currentStateRules.size() == 1) {
+            message += "; expected " + this.currentStateRules.get(0).tokenType;
+        } else
+        if (this.currentStateRules.size() > 1) {
+            message += "; expected one of " + this.currentStateRules.get(0).tokenType;
+            for (int i = 1; i < this.currentStateRules.size(); i++) {
+                message += ", " + this.currentStateRules.get(i).tokenType;
+            }
+        }
+        throw new ScanException(message);
     }
 
     // IMPLEMENTATION
