@@ -37,6 +37,9 @@ class XmlScanner {
     // PUBLIC INTERFACE
 
     public
+    enum State { TAG }
+
+    public
     enum TokenType {
 
         /**
@@ -50,10 +53,15 @@ class XmlScanner {
          */
         XML_DECLARATION,
 
-        /** {@code Comment ::= '<!--' ((Char - '-') | ('-' (Char - '-')))* '-->' */
+        /** {@code Comment ::= '<!--' ((Char - '-') | ('-' (Char - '-')))* '-->'} */
         COMMENT,
 
         /**
+         * Example:
+         * <p>
+         *   {@code <?xml-stylesheet href="mystyle.css" type="text/css"?>}
+         * </p>
+         *
          * {@code PI       ::= '<?' PITarget (S (Char* - (Char* '?>' Char*)))? '?>' }<br />
          * {@code PITarget ::= Name - (('X' | 'x') ('M' | 'm') ('L' | 'l'))}
          */
@@ -77,15 +85,47 @@ class XmlScanner {
          */
         DOCUMENT_TYPE_DECLARATION,
 
-        /** {@code EmptyElemTag ::= '<' Name (S Attribute)* S? '/>'} */
-        EMPTY_ELEMENT_TAG,
+        /**
+         * The beginning of an empty element tag or a start tag (but <em>not</em> the beginning of an <em>end
+         * tag</em>!).
+         * <p>
+         *   {@code StartTag        ::= BeginTag Attribute* EndStartTag}<br />
+         *   {@code EmptyElementTag ::= BeginTag Attribute* EndEmptyElementTag}<br />
+         *   {@code BeginTag        ::= '<' Name}<br />
+         *   {@code Attribute       ::= S AttributeName Eq AttributeValue}
+         * </p>
+         */
+        BEGIN_TAG,
 
         /**
-         * {@code STag      ::= '<' Name (S Attribute)* S? '>'}<br />
-         * {@code Attribute ::= Name Eq AttValue}<br />
-         * {@code AttValue  ::= '"' ([^<&"] | Reference)* '"' | "'" ([^<&'] | Reference)* "'"}
+         * {@code AttributeName ::= S Name}
+         *
+         * @see #BEGIN_TAG
          */
-        START_TAG,
+        ATTRIBUTE_NAME,
+
+        /**
+         * {@code AttributeValue  ::= '"' ([^<&"] | Reference)* '"' | "'" ([^<&'] | Reference)* "'"}
+         *
+         * @see #BEGIN_TAG
+         */
+        ATTRIBUTE_VALUE,
+
+        /**
+         * The end of a start tag.
+         * <p>{@code EndOfStartTag ::= S? '>'}</p>
+         *
+         * @see #BEGIN_TAG
+         */
+        END_START_TAG,
+
+        /**
+         * The end of an empty element tag.
+         * <p>{@code EndOfEmptyElementTag ::= S? '/>'}</p>
+         *
+         * @see #BEGIN_TAG
+         */
+        END_EMPTY_ELEMENT_TAG,
 
         /** {@code ETag ::= '</' Name S? '>'} */
         END_TAG,
@@ -110,7 +150,7 @@ class XmlScanner {
 
     public static StringScanner<TokenType>
     stringScanner() {
-        StatelessScanner<TokenType> scanner = new StatelessScanner<TokenType>();
+        StatefulScanner<TokenType, State> scanner = new StatefulScanner<TokenType, State>(State.class);
 
         String s                  = "(?:[ \\t\\r\\n]+)";
         String eq                 = "(?:" + s + "?=" + s + "?)";
@@ -121,48 +161,41 @@ class XmlScanner {
         String characterReference = "(?:&#[0-9]+|&#x[0-9a-zA-Z]+;)";
         String reference          = "(?:" + entityReference + "|" + characterReference + ")";
         String attributeValue     = "(?:'(?:[^<&\"]|" + reference + ")*'|\"(?:[^<&\"]|" + reference + ")*\")";
-        String attribute          = "(?:" + name + eq + attributeValue + ")";
 
-        scanner.addRule("<!--.*?-->", TokenType.COMMENT);
+        scanner.addRule("<!--(.*?)-->", TokenType.COMMENT);
 
         // The "<?xml ..." rule must appear BEFORE the "<?name ..." rule.
         scanner.addRule((
             ""
             + "<\\?xml"
-            + "(?:@S@version@Eq@"    + XmlScanner.quoted("1\\.[0-9]+")                + ")"
-            + "(?:@S@encoding@Eq@"   + XmlScanner.quoted("[A-Za-z][A-Za-z0-9._\\-]*") + ")?"
-            + "(?:@S@standalone@Eq@" + XmlScanner.quoted("yes|no")                    + ")?"
+            + "(?:@S@version@Eq@("    + XmlScanner.quoted("1\\.[0-9]+")                + "))"
+            + "(?:@S@encoding@Eq@("   + XmlScanner.quoted("[A-Za-z][A-Za-z0-9._\\-]*") + "))?"
+            + "(?:@S@standalone@Eq@(" + XmlScanner.quoted("yes|no")                    + "))?"
             + "\\?>"
         ).replace("@S@", s).replace("@Eq@", eq), TokenType.XML_DECLARATION);
         scanner.addRule((
             ""
-            + "<\\?@Name@"
-            + "(?:@S@.*?)?"
+            + "<\\?(@Name@)"
+            + "(@S@.*?)?"
             + "\\?>"
         ).replace("@Name@", name).replace("@S@", s), TokenType.PROCESSING_INSTRUCTION);
 
         scanner.addRule("<!DOCTYPE.*?>", TokenType.DOCUMENT_TYPE_DECLARATION);
 
-        scanner.addRule((
-            ""
-            + "<@Name@"
-            + "(?:@S@@Attribute@)*"
-            + "@S@?"
-            + "/>"
-        ).replace("@Name@", name).replace("@S@", s).replace("@Attribute@", attribute), TokenType.EMPTY_ELEMENT_TAG);
+        scanner.addRule("<(@Name@)".replace("@Name@", name), TokenType.BEGIN_TAG, State.TAG);
 
-        scanner.addRule((
-            ""
-            + "<@Name@"
-            + "(?:@S@@Attribute@)*"
-            + "@S@?"
-            + ">"
-        ).replace("@Name@", name).replace("@S@", s).replace("@Attribute@", attribute), TokenType.START_TAG);
+        scanner.addRule(State.TAG, s + "(" + name + ")", TokenType.ATTRIBUTE_NAME, State.TAG);
+
+        scanner.addRule(State.TAG, eq + "(" + attributeValue + ")", TokenType.ATTRIBUTE_VALUE, State.TAG);
+
+        scanner.addRule(State.TAG, "@S@?>".replace("@S@", s), TokenType.END_START_TAG);
+
+        scanner.addRule(State.TAG, "@S@?/>".replace("@S@", s), TokenType.END_EMPTY_ELEMENT_TAG);
 
         scanner.addRule((
             ""
             + "</"
-            + "@Name@"
+            + "(@Name@)"
             + "@S@?"
             + ">"
         ).replace("@Name@", name).replace("@S@", s), TokenType.END_TAG);
@@ -173,7 +206,7 @@ class XmlScanner {
 
         scanner.addRule(characterReference, TokenType.CHARACTER_REFERENCE);
 
-        scanner.addRule("(?:<!\\[CDATA\\[.*?]]>)", TokenType.CDATA_SECTION);
+        scanner.addRule("(?:<!\\[CDATA\\[(.*?)]]>)", TokenType.CDATA_SECTION);
 
         return scanner;
     }

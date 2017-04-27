@@ -29,6 +29,7 @@ package test.scanner;
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.unkrig.commons.lang.ObjectUtil;
 import de.unkrig.commons.text.scanner.AbstractScanner.Token;
 import de.unkrig.commons.text.scanner.ScanException;
 import de.unkrig.commons.text.scanner.StringScanner;
@@ -47,23 +48,42 @@ class XmlScannerTest {
             (
                 ""
                 + "<?xml version=\"1.0\"?>\n"
+                + "<!DOCTYPE html>\n"
+                + "<?xml-stylesheet href=\"mystyle.css\" type=\"text/css\"?>\n"
+                + "<!-- For testing only! -->\n"
                 + "<outer a='a' b=\"b\">\n"
                 + "  <inner1 />\n"
                 + "  <inner2>bla</inner2>\n"
+                + "  <![CDATA[FOO]]BAR]]>]]>\n"
                 + "</outer>\n"
             ),
-            TokenType.XML_DECLARATION,   "<?xml version=\"1.0\"?>",
-            TokenType.CHAR_DATA,         "\n",
-            TokenType.START_TAG,         "<outer a='a' b=\"b\">",
-            TokenType.CHAR_DATA,         "\n  ",
-            TokenType.EMPTY_ELEMENT_TAG, "<inner1 />",
-            TokenType.CHAR_DATA,         "\n  ",
-            TokenType.START_TAG,         "<inner2>",
-            TokenType.CHAR_DATA,         "bla",
-            TokenType.END_TAG,           "</inner2>",
-            TokenType.CHAR_DATA,         "\n",
-            TokenType.END_TAG,           "</outer>",
-            TokenType.CHAR_DATA,         "\n"
+            TokenType.XML_DECLARATION,           "<?xml version=\"1.0\"?>", "\"1.0\"", null, null,
+            TokenType.CHAR_DATA,                 "\n",
+            TokenType.DOCUMENT_TYPE_DECLARATION, "<!DOCTYPE html>",
+            TokenType.CHAR_DATA,                 "\n",
+            TokenType.PROCESSING_INSTRUCTION,    "<?xml-stylesheet href=\"mystyle.css\" type=\"text/css\"?>", "xml-stylesheet", " href=\"mystyle.css\" type=\"text/css\"",
+            TokenType.CHAR_DATA,                 "\n",
+            TokenType.COMMENT,                   "<!-- For testing only! -->", " For testing only! ",
+            TokenType.CHAR_DATA,                 "\n",
+            TokenType.BEGIN_TAG,                 "<outer", "outer",
+            TokenType.ATTRIBUTE_NAME,            " a", "a",
+            TokenType.ATTRIBUTE_VALUE,           "='a'", "'a'",
+            TokenType.ATTRIBUTE_NAME,            " b", "b",
+            TokenType.ATTRIBUTE_VALUE,           "=\"b\"", "\"b\"",
+            TokenType.END_START_TAG,             ">",
+            TokenType.CHAR_DATA,                 "\n  ",
+            TokenType.BEGIN_TAG,                 "<inner1", "inner1",
+            TokenType.END_EMPTY_ELEMENT_TAG,     " />",
+            TokenType.CHAR_DATA,                 "\n  ",
+            TokenType.BEGIN_TAG,                 "<inner2", "inner2",
+            TokenType.END_START_TAG,             ">",
+            TokenType.CHAR_DATA,                 "bla",
+            TokenType.END_TAG,                   "</inner2>", "inner2",
+            TokenType.CHAR_DATA,                 "\n  ",
+            TokenType.CDATA_SECTION,             "<![CDATA[FOO]]BAR]]>", "FOO]]BAR",
+            TokenType.CHAR_DATA,                 "]]>\n",
+            TokenType.END_TAG,                   "</outer>", "outer",
+            TokenType.CHAR_DATA,                 "\n"
         );
     }
 
@@ -81,7 +101,7 @@ class XmlScannerTest {
             }
 
             TokenType type = (TokenType) tokenTypesAndTokenTexts[i++];
-            String    text = (String) tokenTypesAndTokenTexts[i++];
+            String    text = (String)    tokenTypesAndTokenTexts[i++];
 
             Token<TokenType> t = ss.produce();
             if (t == null) {
@@ -89,6 +109,37 @@ class XmlScannerTest {
                 return; // SNO
             }
 
+            String[] cgs = t.captured;
+            if (cgs != null) {
+
+                for (int j = 0; j < cgs.length; j++) {
+
+                    if (i >= tokenTypesAndTokenTexts.length || tokenTypesAndTokenTexts[i] instanceof TokenType ) {
+                        Assert.fail((
+                            "Capturing group count mismatch at index "
+                            + i
+                            + "; expected "
+                            + cgs.length
+                            + ", actually "
+                            + j
+                        ));
+                    }
+
+                    String actual   = cgs[j];
+                    String expected = (String) tokenTypesAndTokenTexts[i++];
+
+                    if (!ObjectUtil.equals(expected, actual)) {
+                        Assert.fail((
+                            "Capturing group mismatch: Expected \""
+                            + expected
+                            + "\", actually \""
+                            + actual
+                            + "\""
+                        ));
+                    }
+                }
+                cgs = new String[0];
+            }
             if (t.type != type) Assert.fail("Expected " + type + " instead of " + t.type);
             if (!t.text.equals(text)) Assert.fail("Expected \"" + text + "\" instead of \"" + t.text + "\"");
         }
