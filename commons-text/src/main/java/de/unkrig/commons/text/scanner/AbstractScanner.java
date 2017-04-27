@@ -32,6 +32,7 @@ import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.protocol.Predicate;
 import de.unkrig.commons.lang.protocol.ProducerUtil;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
+import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * A scanner that produces {@link Token}s.
@@ -62,13 +63,39 @@ class AbstractScanner<TT extends Enum<TT>> implements StringScanner<TT> {
          */
         public final String text;
 
+        /**
+         * The input subsequences captured by the rule's pattern match. The length equals the number of capturing
+         * groups, and the first capturing group is stored at position zero.
+         * <p>
+         *   Notice that multiple rules may generate the same token type, while the rules' patterns have different
+         *   capturing groups.
+         * </p>
+         * <p>
+         *   {@code null} and an array of length zero both mean that the matched pattern has no capturing groups.
+         * </p>
+         * 
+         * @see Pattern
+         */
+        @Nullable public final String[] captured;
+
         public
         Token(TT type, String text) {
             assert type != null;
             assert text != null;
 
-            this.type = type;
-            this.text = text;
+            this.type     = type;
+            this.text     = text;
+            this.captured = null;
+        }
+
+        public
+        Token(TT type, String text, @Nullable String[] captured) {
+            assert type != null;
+            assert text != null;
+
+            this.type     = type;
+            this.text     = text;
+            this.captured = captured;
         }
 
         @Override public String
