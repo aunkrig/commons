@@ -159,7 +159,7 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
     public void
     addRule(@Nullable EnumSet<S> states, String regex, TT tokenType, @Nullable S nextState) {
 
-        if (nextState != null) {
+        if (nextState != this.REMAIN) {
             Rule<TT, S> rule = new Rule<TT, S>(regex, tokenType, this.nonDefaultStateRules.get(nextState));
 
             if (states == null) {
