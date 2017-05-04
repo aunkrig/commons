@@ -27,7 +27,7 @@
 package de.unkrig.commons.text.expression;
 
 /**
- * Indicates a problem that has occurred while an expressin was evaluated.
+ * Indicates a problem that has occurred while an expression was evaluated.
  */
 public
 class EvaluationException extends Exception {
