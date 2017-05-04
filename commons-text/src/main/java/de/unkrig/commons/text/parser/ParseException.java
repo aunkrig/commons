@@ -27,7 +27,7 @@
 package de.unkrig.commons.text.parser;
 
 /**
- * Indicates a problem that has occurred which a document was parsed.
+ * Indicates a problem that has occurred when a document was parsed.
  */
 public
 class ParseException extends Exception {
