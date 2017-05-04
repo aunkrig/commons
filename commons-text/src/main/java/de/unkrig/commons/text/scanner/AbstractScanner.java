@@ -27,6 +27,7 @@
 package de.unkrig.commons.text.scanner;
 
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.protocol.Predicate;
@@ -73,7 +74,7 @@ class AbstractScanner<TT extends Enum<TT>> implements StringScanner<TT> {
          * <p>
          *   {@code null} and an array of length zero both mean that the matched pattern has no capturing groups.
          * </p>
-         * 
+         *
          * @see Pattern
          */
         @Nullable public final String[] captured;
