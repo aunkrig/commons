@@ -278,15 +278,15 @@ class ExpressionEvaluatorTest {
             "Cannot retrieve nonstatic attribute 'isEmpty' in static context",
             "String.isEmpty"
         );
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                         "java.lang.String",      NEW_CLASS_WITHOUT_KEYWORD, NEW_CLASS_WITHOUT_PARENTHESES); // SUPPRESS CHECKSTYLE LineLength
-        ExpressionEvaluatorTest.assertExpressionParsingFails("Unknown variable 'javaa'", "javaa.lang.String");
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                         "String()",              NEW_CLASS_WITHOUT_KEYWORD);
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("foo",                      "String(\"foo\")",       NEW_CLASS_WITHOUT_KEYWORD);
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                         "new String",            NEW_CLASS_WITHOUT_PARENTHESES);
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                         "new java.lang.String",  NEW_CLASS_WITHOUT_PARENTHESES);
-        ExpressionEvaluatorTest.assertExpressionParsingFails("Unexpected end of input", "new javaa.lang.String");
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                         "new String()");
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("foo",                      "new String(\"foo\")");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                                   "java.lang.String",      NEW_CLASS_WITHOUT_KEYWORD, NEW_CLASS_WITHOUT_PARENTHESES); // SUPPRESS CHECKSTYLE LineLength
+        ExpressionEvaluatorTest.assertExpressionParsingFails("Unknown variable 'javaa'",          "javaa.lang.String");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                                   "String()",              NEW_CLASS_WITHOUT_KEYWORD);
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("foo",                                "String(\"foo\")",       NEW_CLASS_WITHOUT_KEYWORD);
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                                   "new String",            NEW_CLASS_WITHOUT_PARENTHESES);
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                                   "new java.lang.String",  NEW_CLASS_WITHOUT_PARENTHESES);
+        ExpressionEvaluatorTest.assertExpressionParsingFails("Cannot load \"javaa.lang.String\"", "new javaa.lang.String");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                                   "new String()");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("foo",                                "new String(\"foo\")");
 
         ExpressionEvaluatorTest.assertExpressionEvaluationFails(
             "Cannot invoke non-static method 'java.lang.String.toString()' in static context",
