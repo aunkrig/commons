@@ -358,7 +358,8 @@ class Printers {
     }
 
     /**
-     * @deprecated Use {@link Printers#redirectToFile(Level, File, Charset, RunnableWhichThrows)}
+     * @deprecated Use {@link Printers#redirectToFile(de.unkrig.commons.text.AbstractPrinter.Level, File, Charset,
+     *             RunnableWhichThrows)}
      */
     @Deprecated public static <EX extends Throwable> void
     redirectInfoToFile(@Nullable File file, @Nullable Charset charset, RunnableWhichThrows<EX> runnable)
