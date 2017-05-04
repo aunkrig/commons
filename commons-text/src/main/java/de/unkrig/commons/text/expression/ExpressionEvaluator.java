@@ -453,8 +453,6 @@ class ExpressionEvaluator {
                     toString() { return lhs.toString() + '[' + rhs.toString() + ']'; }
                 };
             }
-
-
         }.setImports(this.imports);
     }
 
@@ -750,9 +748,9 @@ class ExpressionEvaluator {
         throw new EvaluationException(
             "'"
             + target.getName()
-            + "' has no field '"
+            + "' has no static field '"
             + attributeName
-            + "' nor a method '"
+            + "' nor a static method '"
             + attributeName
             + "()' or 'get"
             + ExpressionEvaluator.capitalizeFirstCharacter(attributeName)
