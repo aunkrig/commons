@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import de.unkrig.commons.lang.ExceptionUtil;
-import de.unkrig.commons.lang.StringUtil;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.nullanalysis.NotNull;
 import de.unkrig.commons.nullanalysis.Nullable;
@@ -873,9 +872,19 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
             }
         }
 
-        // A static field reference?
-        Class<?> type = target.toType();
-        if (type != null) return Parser.value(this.staticFieldReference(type, identifier));
+        // A nested type or a static field reference?
+        {
+            Class<?> type = target.toType();
+            if (type != null) {
+
+                {
+                    Class<?> nestedType = this.loadClass(type.getName() + '$' + identifier);
+                    if (nestedType != null) return this.type(nestedType);
+                }
+
+                return Parser.value(this.staticFieldReference(type, identifier));
+            }
+        }
 
         // Must be a package or a nonstatic field reference.
         return new Atom<T, E>() {
@@ -1069,25 +1078,28 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      * <pre>
      * class-or-interface-type := identifier { '.' identifier }
      * </pre>
+     * <p>
+     *   This method returns once it is able to load the class, i.e. it loads top-level types, but cannot be used to
+     *   find nested types.
+     * </p>
      */
-
     private Class<?>
     parseClassOrInterfaceType() throws ParseException {
+
         final String identifier = this.read(IDENTIFIER);
 
         // Imported class.
-        Class<?> clasS = this.loadImportedClass(identifier);
-        if (clasS != null) return clasS;
+        {
+            Class<?> importedClass = this.loadImportedClass(identifier);
+            if (importedClass != null) return importedClass;
+        }
 
-        // Qualified class name.
-        final List<String> identifiers = new ArrayList<String>();
-        identifiers.add(identifier);
-        for (;;) {
-            clasS = this.loadClass(StringUtil.join(identifiers, "."));
+        for (String qualifiedClassName = identifier;; qualifiedClassName += '.' + this.read(TokenType.IDENTIFIER)) {
+
+            Class<?> clasS = this.loadClass(qualifiedClassName);
             if (clasS != null) return clasS;
 
-            this.read(".");
-            identifiers.add(this.read(TokenType.IDENTIFIER));
+            if (!this.peekRead(".")) throw new ParseException("Cannot load \"" + qualifiedClassName + "\"");
         }
     }
 
