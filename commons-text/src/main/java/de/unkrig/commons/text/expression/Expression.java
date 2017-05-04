@@ -58,14 +58,14 @@ interface Expression {
     /**
      * @see AbstractExpression#evaluateTo(Mapping, Class)
      */
-    @Nullable Object
-    evaluateTo(Mapping<String, ?> variables, Class<?> targetType) throws EvaluationException;
+    @Nullable <T> T
+    evaluateTo(Mapping<String, ?> variables, Class<T> targetType) throws EvaluationException;
 
     /**
      * @see AbstractExpression#evaluateToPrimitive(Mapping, Class)
      */
-    Object
-    evaluateToPrimitive(Mapping<String, ?> variables, Class<?> targetType) throws EvaluationException;
+    <T> T
+    evaluateToPrimitive(Mapping<String, ?> variables, Class<T> targetType) throws EvaluationException;
 
     /**
      * @see AbstractExpression#evaluateToBoolean(Mapping)

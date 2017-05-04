@@ -38,16 +38,16 @@ class AbstractExpression implements Expression {
     /**
      * @see ExpressionEvaluator#to(Object, Class)
      */
-    @Override @Nullable public final Object
-    evaluateTo(Mapping<String, ?> variables, Class<?> targetType) throws EvaluationException {
+    @Override @Nullable public final <T> T
+    evaluateTo(Mapping<String, ?> variables, Class<T> targetType) throws EvaluationException {
         return ExpressionEvaluator.to(this.evaluate(variables), targetType);
     }
 
     /**
      * @see ExpressionEvaluator#toPrimitive(Object, Class)
      */
-    @Override public final Object
-    evaluateToPrimitive(Mapping<String, ?> variables, Class<?> targetType) throws EvaluationException {
+    @Override public final <T> T
+    evaluateToPrimitive(Mapping<String, ?> variables, Class<T> targetType) throws EvaluationException {
         return ExpressionEvaluator.toPrimitive(this.evaluate(variables), targetType);
     }
 
