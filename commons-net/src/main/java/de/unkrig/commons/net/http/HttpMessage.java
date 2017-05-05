@@ -368,7 +368,7 @@ class HttpMessage {
     }
 
     /**
-     * Changes the value of the first header with the given <var>name</var>.
+     * Changes the value of the first header with the given <var>name</var>, or adds a new header.
      */
     public void
     setHeader(String name, String value) {
