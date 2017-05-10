@@ -61,7 +61,7 @@ class HttpClient implements Closeable {
     HttpClient(InetAddress address, int port) throws IOException {
         this.tcpClient = new TcpClient(address, port);
     }
-
+    
     /**
      * Sends the given <var>httpRequest</var> to the server, waits for the response from the server.
      *
@@ -69,13 +69,30 @@ class HttpClient implements Closeable {
      */
     public HttpResponse
     call(HttpRequest httpRequest) throws IOException {
+        return this.call(httpRequest, "<<< ", ">>> ");
+    }
 
-        httpRequest.write(this.tcpClient.getOutputStream());
+    /**
+     * Sends the given <var>httpRequest</var> to the server, waits for the response from the server.
+     *
+     * @param writeRequestLoggingPrefix E.g. {@code "<<< "}
+     * @param readResponseLoggingPrefix E.g. {@code ">>> "}
+     * @return                          The parsed response from the server
+     */
+    public HttpResponse
+    call(
+        HttpRequest httpRequest,
+        String      writeRequestLoggingPrefix,
+        String      readResponseLoggingPrefix
+    ) throws IOException {
+
+        httpRequest.write(this.tcpClient.getOutputStream(), writeRequestLoggingPrefix);
 
         return HttpResponse.read(
-            this.tcpClient.getInputStream(),       // in
-            httpRequest.getHttpVersion(),          // httpVersion
-            httpRequest.getMethod() == Method.HEAD // isResponseToHEAD
+            this.tcpClient.getInputStream(),        // in
+            httpRequest.getHttpVersion(),           // httpVersion
+            httpRequest.getMethod() == Method.HEAD, // isResponseToHEAD
+            readResponseLoggingPrefix               // loggingPrefix
         );
     }
 
