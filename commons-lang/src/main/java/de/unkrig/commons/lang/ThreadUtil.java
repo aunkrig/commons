@@ -56,7 +56,7 @@ class ThreadUtil {
     /**
      * Execute the given <var>runnable</var> in a background thread
      *
-     * @return The beckground runnable can be interrupted through this object
+     * @return The background runnable can be interrupted through this object
      */
     public static Stoppable
     runInBackground(Runnable runnable, @Nullable String threadName) {
