@@ -156,6 +156,7 @@ class IoUtil {
         while (n > 0) {
             try {
                 IoUtil.LOGGER.log(Level.FINEST, "About to ''read(byte[{0}])''", buffer.length);
+                if (inputStream.available() == 0) outputStream.flush();
                 int m = inputStream.read(buffer, 0, (int) Math.min(n, buffer.length));
                 IoUtil.LOGGER.log(Level.FINEST, "''read()'' returned {0}", m);
                 if (m == -1) break;
