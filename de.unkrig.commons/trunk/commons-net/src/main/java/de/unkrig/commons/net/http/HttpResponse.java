@@ -194,13 +194,15 @@ class HttpResponse extends HttpMessage {
         this.reasonPhrase = status.getReasonPhrase();
         this.setBody(body);
     }
-
+    
     /**
      * Constructor for incoming responses.
      * <p>
      *   Notice that <var>in</var> will be read and closed when the body of this message is processed or disposed
      *   (see {@link Body}).
      * </p>
+     *
+     * @param loggingPrefix E.g. {@code ">>> "}
      */
     private
     HttpResponse(
@@ -208,14 +210,20 @@ class HttpResponse extends HttpMessage {
         Status      status,
         String      reasonPhrase,
         InputStream in,
-        boolean     isResponseToHEAD // SUPPRESS CHECKSTYLE Abbreviation
+        boolean     isResponseToHEAD, // SUPPRESS CHECKSTYLE Abbreviation
+        String      loggingPrefix
     ) throws IOException {
-        super(in, !"0.9".equals(httpVersion), !isResponseToHEAD && status.hasBody());
+        super(
+            in,                                    // in
+            !"0.9".equals(httpVersion),            // hasHeaders
+            !isResponseToHEAD && status.hasBody(), // hasBody
+            loggingPrefix
+        );
         this.httpVersion  = httpVersion;
         this.status       = status;
         this.reasonPhrase = reasonPhrase;
     }
-
+    
     /**
      * Constructor for incoming responses.
      * <p>
@@ -228,6 +236,23 @@ class HttpResponse extends HttpMessage {
         InputStream in,
         String      httpVersion,
         boolean     isResponseToHEAD // SUPPRESS CHECKSTYLE Abbreviation
+    ) throws IOException { return HttpResponse.read(in, httpVersion, isResponseToHEAD, ">>> "); }
+
+    /**
+     * Constructor for incoming responses.
+     * <p>
+     *   Notice that <var>in</var> will be read and closed when the body of this message is processed or disposed
+     *   (see {@link HttpMessage.Body}).
+     * </p>
+     *
+     * @param loggingPrefix E.g. {@code ">>> "}
+     */
+    public static HttpResponse
+    read(
+        InputStream in,
+        String      httpVersion,
+        boolean     isResponseToHEAD, // SUPPRESS CHECKSTYLE Abbreviation
+        String      loggingPrefix
     ) throws IOException {
 
         Status status;
@@ -240,7 +265,7 @@ class HttpResponse extends HttpMessage {
             // Read and parse status line.
             {
                 String statusLine = HttpMessage.readLine(in);
-                if (HttpMessage.LOGGER.isLoggable(Level.FINE)) HttpMessage.LOGGER.fine(">>> " + statusLine);
+                if (HttpMessage.LOGGER.isLoggable(Level.FINE)) HttpMessage.LOGGER.fine(loggingPrefix + statusLine);
 
                 Matcher m = HttpResponse.STATUS_LINE_PATTERN.matcher(statusLine);
                 if (!m.matches()) throw new InvalidHttpMessageException("Invalid status line");
@@ -258,22 +283,30 @@ class HttpResponse extends HttpMessage {
             }
         }
 
-        return new HttpResponse(httpVersion, status, reasonPhrase, in, isResponseToHEAD);
+        return new HttpResponse(httpVersion, status, reasonPhrase, in, isResponseToHEAD, loggingPrefix);
     }
-
+    
     /**
      * Writes this HTTP response to the given {@link OutputStream}.
      */
     public void
-    write(OutputStream out) throws IOException {
+    write(OutputStream out) throws IOException { this.write(out, "<<< "); }
+
+    /**
+     * Writes this HTTP response to the given {@link OutputStream}.
+     *
+     * @param loggingPrefix E.g. {@code "<<< "}
+     */
+    public void
+    write(OutputStream out, String loggingPrefix) throws IOException {
 
         String statusLine = "HTTP/" + this.httpVersion + ' ' + this.status.getCode() + ' ' + this.reasonPhrase;
 
+        HttpMessage.LOGGER.fine(loggingPrefix + statusLine);
+
         out.write((statusLine + "\r\n").getBytes("ASCII"));
 
-        this.writeHeadersAndBody("<<< ", out);
-
-        HttpMessage.LOGGER.fine("<<< " + statusLine);
+        this.writeHeadersAndBody(loggingPrefix, out);
     }
 
     /**
