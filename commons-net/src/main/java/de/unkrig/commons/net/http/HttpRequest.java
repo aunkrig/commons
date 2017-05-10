@@ -80,13 +80,29 @@ class HttpRequest extends HttpMessage {
     /**
      * Representation of the various HTTP methods.
      */
-    public enum Method { GET, POST, HEAD, PUT }
+    public enum Method {
+        GET(false), POST(true), HEAD(false), PUT(true), CONNECT(true);
 
+        private boolean hasBody;
+
+        private Method(boolean hasBody) { this.hasBody = hasBody; }
+
+        public boolean hasBody() { return this.hasBody; }
+    }
+    
     /**
      * Parses and returns one HTTP request from the given {@link InputStream}.
      */
     public static HttpRequest
-    read(InputStream in) throws IOException, InvalidHttpMessageException {
+    read(InputStream in) throws IOException, InvalidHttpMessageException { return HttpRequest.read(in, ">>> "); }
+
+    /**
+     * Parses and returns one HTTP request from the given {@link InputStream}.
+     *
+     * @param loggingPrefix E.g. {@code ">>> "}
+     */
+    public static HttpRequest
+    read(InputStream in, String loggingPrefix) throws IOException, InvalidHttpMessageException {
 
         // Read and parse first request line.
         Method method;
@@ -94,7 +110,7 @@ class HttpRequest extends HttpMessage {
         URI    uri;
         {
             String requestLine = HttpMessage.readLine(in);
-            LOGGER.fine(">>> " + requestLine);
+            LOGGER.fine(loggingPrefix + requestLine);
 
             Matcher matcher = REQUEST_LINE_PATTERN.matcher(requestLine);
             if (!matcher.matches()) {
@@ -114,29 +130,41 @@ class HttpRequest extends HttpMessage {
             if (httpVersion == null) httpVersion = "0.9";
         }
 
-        return new HttpRequest(method, uri, httpVersion, in);
+        return new HttpRequest(method, uri, httpVersion, in, loggingPrefix);
     }
-
+    
     public
     HttpRequest(Method method, URI uri, String httpVersion, InputStream in) throws IOException {
-        super(in, true, method == Method.POST || method == Method.PUT);
+        this(method, uri, httpVersion, in, ">>> ");
+    }
+    
+    /**
+     * @param loggingPrefix E.g. {@code ">>> "}
+     */
+    public
+    HttpRequest(Method method, URI uri, String httpVersion, InputStream in, String loggingPrefix) throws IOException {
+        super(in, true, method.hasBody(), loggingPrefix);
         this.method        = method;
         this.httpVersion   = httpVersion;
         this.uri           = uri;
         this.uriQueryValid = true;
         this.parameterList = null;
         this.parameterMap  = null;
+
+        if (method == Method.CONNECT) this.setAttemptUnstreaming(false);
     }
 
     public
     HttpRequest(Method method, URI uri, String httpVersion) {
-        super(method == Method.POST || method == Method.PUT);
+        super(method.hasBody());
         this.method        = method;
         this.httpVersion   = httpVersion;
         this.uri           = uri;
         this.uriQueryValid = true;
         this.parameterList = null;
         this.parameterMap  = null;
+
+        if (method == Method.CONNECT) this.setAttemptUnstreaming(false);
     }
 
     /**
@@ -479,24 +507,34 @@ class HttpRequest extends HttpMessage {
     /** Changes the HTTP version of this request. */
     public void
     setHttpVersion(String httpVersion) { this.httpVersion = httpVersion; }
-
-    /** Writes this HTTP request to the given {@link OutputStream}. */
+    
+    /**
+     * Writes this HTTP request to the given {@link OutputStream}.
+     */
     public void
-    write(OutputStream out) throws IOException {
+    write(OutputStream out) throws IOException { this.writeHeadersAndBody("<<< ", out); }
+
+    /**
+     * Writes this HTTP request to the given {@link OutputStream}.
+     *
+     * @param loggingPrefix E.g. {@code "<<< "}
+     */
+    public void
+    write(OutputStream out, String loggingPrefix) throws IOException {
 
         {
             String requestLine = this.method + " " + this.uri;
             if (!"0.9".equals(this.httpVersion)) requestLine += " HTTP/" + this.httpVersion;
-            LOGGER.fine("<<< " + requestLine);
+            LOGGER.fine(loggingPrefix + requestLine);
 
             Writer w = new OutputStreamWriter(out, Charset.forName("ASCII"));
             w.write(requestLine + "\r\n");
             w.flush();
         }
 
-        this.writeHeadersAndBody("<<< ", out);
+        this.writeHeadersAndBody(loggingPrefix, out);
     }
-
+    
     /**
      * Reads one HTTP request from <var>in</var> through the <var>multiplexer</var> and passes it to the
      * <var>requestConsumer</var>.
@@ -506,6 +544,20 @@ class HttpRequest extends HttpMessage {
         final ReadableByteChannel                           in,
         final Multiplexer                                   multiplexer,
         final ConsumerWhichThrows<HttpRequest, IOException> requestConsumer
+    ) throws IOException { HttpRequest.read(in, multiplexer, requestConsumer, ">>> "); }
+
+    /**
+     * Reads one HTTP request from <var>in</var> through the <var>multiplexer</var> and passes it to the
+     * <var>requestConsumer</var>.
+     *
+     * @param loggingPrefix E.g. {@code ">>> "}
+     */
+    public static void
+    read(
+        final ReadableByteChannel                           in,
+        final Multiplexer                                   multiplexer,
+        final ConsumerWhichThrows<HttpRequest, IOException> requestConsumer,
+        final String                                        loggingPrefix
     ) throws IOException {
 
         ConsumerWhichThrows<String, IOException> requestLineConsumer = new ConsumerWhichThrows<String, IOException>() {
@@ -546,12 +598,12 @@ class HttpRequest extends HttpMessage {
                                 run() throws IOException {
                                     requestConsumer.consume(httpRequest);
                                 }
-                            });
+                            }, loggingPrefix);
                         } else {
                             requestConsumer.consume(httpRequest);
                         }
                     }
-                });
+                }, loggingPrefix);
             }
         };
 

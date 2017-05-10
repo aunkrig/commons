@@ -73,6 +73,11 @@ class AbstractServlett implements Servlett {
             response = this.put(request, sendProvisionalResponse);
             break;
 
+        case CONNECT:
+            response = this.connect(request, sendProvisionalResponse);
+            if (response.getStatus().getCode() <= 299) response.setAttemptUnstreaming(false);
+            break;
+
         default:
             throw new IllegalStateException(request.toString());
         }
@@ -133,6 +138,18 @@ class AbstractServlett implements Servlett {
     protected HttpResponse
     put(HttpRequest httpRequest, ConsumerWhichThrows<HttpResponse, IOException> sendProvisionalResponse)
     throws IOException {
+        return HttpResponse.response(Status.BAD_REQUEST, "Method '" + httpRequest.getMethod() + "' not implemented");
+    }
+
+    /**
+     * Handles one HTTP CONNECT request. The default implementation returns a BAD_REQUEST response.
+     *
+     * @throws IOException
+     * @see #handleRequest(HttpRequest, ConsumerWhichThrows)
+     * @see Servlett#handleRequest(HttpRequest, ConsumerWhichThrows)
+     */
+    protected HttpResponse
+    connect(HttpRequest httpRequest, ConsumerWhichThrows<HttpResponse, IOException> sendProvisionalResponse) {
         return HttpResponse.response(Status.BAD_REQUEST, "Method '" + httpRequest.getMethod() + "' not implemented");
     }
 

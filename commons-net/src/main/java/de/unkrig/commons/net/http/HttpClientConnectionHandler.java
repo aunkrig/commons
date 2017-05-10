@@ -67,19 +67,56 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
     private Iterable<Servlett>          servletts;
     private final Collection<Stoppable> stoppables = Collections.synchronizedCollection(new HashSet<Stoppable>());
 
+    /** E.g. {@code ">>> "}. */
+    private final String readRequestLogginPrefix;
+
+    /** E.g. {@code "<<< "}. */
+    private final String writeResponseLoggingPrefix;
+    
     public
-    HttpClientConnectionHandler() {
-        this.servletts = Collections.emptyList();
+    HttpClientConnectionHandler() { this(">>> ", "<<< "); }
+
+    /**
+     * @param readRequestLogginPrefix    E.g. {@code ">>> "}
+     * @param writeResponseLoggingPrefix E.g. {@code "<<< "}
+     */
+    public
+    HttpClientConnectionHandler(String readRequestLogginPrefix, String writeResponseLoggingPrefix) {
+        this.servletts                  = Collections.emptyList();
+        this.readRequestLogginPrefix    = readRequestLogginPrefix;
+        this.writeResponseLoggingPrefix = writeResponseLoggingPrefix;
+    }
+    
+    public
+    HttpClientConnectionHandler(Servlett servlett) { this(servlett, ">>> ", "<<< "); }
+
+    /**
+     * @param readRequestLogginPrefix    E.g. {@code ">>> "}
+     * @param writeResponseLoggingPrefix E.g. {@code "<<< "}
+     */
+    public
+    HttpClientConnectionHandler(Servlett servlett, String readRequestLogginPrefix, String writeResponseLoggingPrefix) {
+        this.servletts                  = Collections.singletonList(servlett);
+        this.readRequestLogginPrefix    = readRequestLogginPrefix;
+        this.writeResponseLoggingPrefix = writeResponseLoggingPrefix;
     }
 
     public
-    HttpClientConnectionHandler(Servlett servlett) {
-        this.servletts = Collections.singletonList(servlett);
-    }
+    HttpClientConnectionHandler(Iterable<Servlett> servletts) { this(servletts, ">>> ", "<<< "); }
 
+    /**
+     * @param readRequestLogginPrefix    E.g. {@code ">>> "}
+     * @param writeResponseLoggingPrefix E.g. {@code "<<< "}
+     */
     public
-    HttpClientConnectionHandler(Iterable<Servlett> servletts) {
-        this.servletts = servletts;
+    HttpClientConnectionHandler(
+        Iterable<Servlett> servletts,
+        String             readRequestLogginPrefix,
+        String             writeResponseLoggingPrefix
+    ) {
+        this.servletts                  = servletts;
+        this.readRequestLogginPrefix    = readRequestLogginPrefix;
+        this.writeResponseLoggingPrefix = writeResponseLoggingPrefix;
     }
 
     /**
@@ -166,9 +203,9 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
             }
 
             this.stoppables.add(stoppable);
-            LOGGER.fine("Reading request from client");
+            LOGGER.fine(this.readRequestLogginPrefix + "Reading request from client");
             long t1 = System.currentTimeMillis();
-            HttpRequest request = HttpRequest.read(in);
+            HttpRequest request = HttpRequest.read(in, this.readRequestLogginPrefix);
             long t2 = System.currentTimeMillis();
 
             HttpResponse httpResponse;
@@ -186,7 +223,10 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
                             @Override public void
                             consume(HttpResponse provisionalResponse) throws IOException {
                                 assert provisionalResponse.isProvisional();
-                                provisionalResponse.write(finalOut);
+                                provisionalResponse.write(
+                                    finalOut,
+                                    HttpClientConnectionHandler.this.writeResponseLoggingPrefix
+                                );
                                 hadProvisionalResponses[0] = true;
                             }
                         }
@@ -207,9 +247,9 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
 
             assert httpResponse != null; // Redundant.
 
-            LOGGER.fine("Sending response to client");
+            LOGGER.fine(this.writeResponseLoggingPrefix + "Sending response to client");
             long t3 = System.currentTimeMillis();
-            httpResponse.write(out);
+            httpResponse.write(out, this.writeResponseLoggingPrefix);
             long t4 = System.currentTimeMillis();
 
             request.removeBody().dispose();
@@ -273,7 +313,10 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
                                     @Override public void
                                     consume(HttpResponse provisionalResponse) throws IOException {
                                         assert provisionalResponse.isProvisional();
-                                        provisionalResponse.write(Channels.newOutputStream(fbc));
+                                        provisionalResponse.write(
+                                            Channels.newOutputStream(fbc),
+                                            HttpClientConnectionHandler.this.writeResponseLoggingPrefix
+                                        );
                                         hadProvisionalResponses[0] = true;
                                     }
                                 }
@@ -293,14 +336,19 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
 
                     request.removeBody().dispose();
 
-                    LOGGER.fine("Sending response to client");
+                    LOGGER.fine(
+                        HttpClientConnectionHandler.this.writeResponseLoggingPrefix + "Sending response to client"
+                    );
                     assert response != null;
-                    response.write(Channels.newOutputStream(fbc));
+                    response.write(
+                        Channels.newOutputStream(fbc),
+                        HttpClientConnectionHandler.this.writeResponseLoggingPrefix
+                    );
                 }
             }
         );
 
-        HttpRequest.read(in, multiplexer, requestConsumer);
+        HttpRequest.read(in, multiplexer, requestConsumer, this.readRequestLogginPrefix);
     }
 
     @Override public void

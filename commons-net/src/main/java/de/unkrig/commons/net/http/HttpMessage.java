@@ -188,6 +188,9 @@ class HttpMessage {
 
         @Override public void
         dispose() {}
+
+        @Override public String
+        toString() { return "(none)"; }
     };
 
     /**
@@ -211,16 +214,18 @@ class HttpMessage {
     /**
      * {@code null} iff this message does not have a body.
      */
-    private Body body = NO_BODY;
+    private Body    body = NO_BODY;
+    private boolean attemptUnstreaming;
 
     /**
      * Constructor for outgoing messages.
      */
     protected
-    HttpMessage(boolean hasBody) {
-        this.body = hasBody ? EMPTY_BODY : NO_BODY;
-    }
+    HttpMessage(boolean hasBody) { this.body = hasBody ? EMPTY_BODY : NO_BODY; }
 
+    public void
+    setAttemptUnstreaming(boolean attemptUnstreaming) { this.attemptUnstreaming = attemptUnstreaming; }
+    
     /**
      * Constructor for incoming messages.
      * <p>
@@ -230,6 +235,20 @@ class HttpMessage {
      */
     protected
     HttpMessage(InputStream in, boolean hasHeaders, boolean hasBody) throws IOException {
+        this(in, hasHeaders, hasBody, ">>> ");
+    }
+
+    /**
+     * Constructor for incoming messages.
+     * <p>
+     *   Notice that <var>in</var> will be read and closed when the body of this message is processed or disposed
+     *   (see {@link Body}).
+     * </p>
+     *
+     * @param loggingPrefix E.g. {@code ">>> "}
+     */
+    protected
+    HttpMessage(InputStream in, boolean hasHeaders, boolean hasBody, final String loggingPrefix) throws IOException {
 
         // Read the headers.
         if (hasHeaders) {
@@ -241,7 +260,7 @@ class HttpMessage {
                     if (line.length() == 0 || " \t".indexOf(line.charAt(0)) == -1) break;
                     headerLine += "\r\n" + line;
                 }
-                LOGGER.fine(">>> " + headerLine);
+                LOGGER.fine(loggingPrefix + headerLine);
                 Matcher matcher = HEADER_PATTERN.matcher(headerLine);
                 if (!matcher.matches()) throw new IOException("Invalid HTTP header line '" + headerLine + "'");
                 this.headers.add(new MessageHeader(matcher.group(1), matcher.group(2)));
@@ -251,8 +270,8 @@ class HttpMessage {
         // Read the body.
         if (hasBody) {
 
-            final Produmer<Long, Long> rawByteCount     = ConsumerUtil.store();
-            final Produmer<Long, Long> decodedByteCount = ConsumerUtil.store();
+            final Produmer<Long, Long> rawByteCount     = ConsumerUtil.store(0L);
+            final Produmer<Long, Long> decodedByteCount = ConsumerUtil.store(0L);
 
             // Determine the raw message body size.
             if (LOGGER.isLoggable(FINE)) {
@@ -262,8 +281,8 @@ class HttpMessage {
             // Insert a logging Wye-Reader if logging is enabled.
             if (LOGGER.isLoggable(FINE)) {
 
-                LOGGER.fine("Reading message body");
-                Writer lw = LogUtil.logWriter(LOGGER, FINE, ">>> ");
+                LOGGER.fine(loggingPrefix + "Reading message body");
+                Writer lw = LogUtil.logWriter(LOGGER, FINE, loggingPrefix);
                 in = InputStreams.wye(in, (
                     this.contentTypeIsXmlish()
                     ? new WriterOutputStream(new XMLFormatterWriter(lw))
@@ -282,11 +301,11 @@ class HttpMessage {
                         if (!"chunked".equalsIgnoreCase(tes)) {
                             throw new IOException("Message with unsupported transfer encoding '" + tes + "' received");
                         }
-                        LOGGER.fine("Reading message with chunked contents");
+                        LOGGER.fine(loggingPrefix + "Reading message with chunked contents");
                         in = new ChunkedInputStream(in);
                     } else
                     {
-                        LOGGER.fine("Reading message with streaming contents");
+                        LOGGER.fine(loggingPrefix + "Reading message with streaming contents");
                         ;
                     }
                 }
@@ -309,7 +328,8 @@ class HttpMessage {
                     @Override public void
                     run() {
                         LOGGER.fine(
-                            "Message body size was "
+                            loggingPrefix
+                            + "Message body size was "
                             + NumberFormat.getInstance(Locale.US).format(rawByteCount.produce())
                             + " (raw) "
                             + NumberFormat.getInstance(Locale.US).format(decodedByteCount.produce())
@@ -767,17 +787,27 @@ class HttpMessage {
         return DEFAULT_CHARSET;
     }
     private static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
-
+    
     /**
      * Writes this message's headers and body to the given {@link OutputStream}. Also closes the {@link OutputStream}
      * iff there is neither a "Content-Length:" header, nor a "Transfer-Encoding: chunked" header, nor the message
      * is very small.
      */
     protected void
-    writeHeadersAndBody(final String prefix, final OutputStream out) throws IOException {
+    writeHeadersAndBody(final OutputStream out) throws IOException { this.writeHeadersAndBody("<<< ", out); }
+
+    /**
+     * Writes this message's headers and body to the given {@link OutputStream}. Also closes the {@link OutputStream}
+     * iff there is neither a "Content-Length:" header, nor a "Transfer-Encoding: chunked" header, nor the message
+     * is very small.
+     *
+     * @param loggingPrefix E.g. {@code "<<< "}
+     */
+    protected void
+    writeHeadersAndBody(final String loggingPrefix, final OutputStream out) throws IOException {
 
         if (this.body == NO_BODY) {
-            this.writeHeaders(prefix, out);
+            this.writeHeaders(loggingPrefix, out);
             return;
         }
 
@@ -788,12 +818,12 @@ class HttpMessage {
                 if (!"chunked".equalsIgnoreCase(tes)) {
                     throw new IOException("Message with unsupported transfer encoding '" + tes + "' received");
                 }
-                LOGGER.fine("Writing message with chunked contents");
+                LOGGER.fine(loggingPrefix + "Writing message with chunked contents");
 
                 // Chunked transfer encoding.
-                this.writeHeaders(prefix, out);
+                this.writeHeaders(loggingPrefix, out);
                 OutputStream cos = new ChunkedOutputStream(OutputStreams.unclosable(out));
-                this.writeBody(prefix, cos);
+                this.writeBody(loggingPrefix, cos);
                 cos.close();
                 return;
             }
@@ -805,15 +835,22 @@ class HttpMessage {
             if (contentLength >= 0L) {
 
                 // Content length known.
-                this.writeHeaders(prefix, out);
+                this.writeHeaders(loggingPrefix, out);
                 FixedLengthOutputStream flos = new FixedLengthOutputStream(
                     OutputStreams.unclosable(out),
                     contentLength
                 );
-                this.writeBody(prefix, flos);
+                this.writeBody(loggingPrefix, flos);
                 flos.close();
                 return;
             }
+        }
+
+        if (!this.attemptUnstreaming) {
+            this.writeHeaders(loggingPrefix, out);
+            this.writeBody(loggingPrefix, out);
+            this.writeBody(loggingPrefix, out);
+            return;
         }
 
         // The message has neither a header "Transfer-Encoding: chunked" nor a "Content-Length" header, so the length
@@ -821,7 +858,7 @@ class HttpMessage {
         // made to measure the length of the body if it is small.
         final byte[] buffer = new byte[4000];
         final int[]  count  = new int[1];
-        this.writeBody(prefix, new OutputStream() {
+        this.writeBody(loggingPrefix, new OutputStream() {
 
             @Override public void
             write(int b) throws IOException {
@@ -834,7 +871,7 @@ class HttpMessage {
                     out.write(b, off, len);
                 } else
                 if (count[0] + len > buffer.length) {
-                    HttpMessage.this.writeHeaders(prefix, out);
+                    HttpMessage.this.writeHeaders(loggingPrefix, out);
                     out.write(buffer, 0, count[0]);
                     count[0] = -1;
                     out.write(b, off, len);
@@ -853,26 +890,28 @@ class HttpMessage {
         }
 
         this.setHeader("Content-Length", count[0]);
-        this.writeHeaders(prefix, out);
+        this.writeHeaders(loggingPrefix, out);
         out.write(buffer, 0, count[0]);
     }
-
+    
     /**
      * Writes the body of this message <em>synchronously</em> to the given {@link OutputStream}.
+     *
+     * @param loggingPrefix E.g. {@code "<<< "}
      */
     private void
-    writeBody(String prefix, OutputStream out) throws IOException {
+    writeBody(String loggingPrefix, OutputStream out) throws IOException {
 
         // Check "Content-Encoding: gzip"
         GZIPOutputStream finishable = null;
         if ("gzip".equalsIgnoreCase(this.getHeader("Content-Encoding"))) {
-            LOGGER.fine(prefix + "GZIP-encoded contents");
+            LOGGER.fine(loggingPrefix + "GZIP-encoded contents");
             out = (finishable = new GZIPOutputStream(out));
         }
 
         if (LOGGER.isLoggable(FINE)) {
-            LOGGER.fine(prefix + "Writing message body:");
-            Writer lw = LogUtil.logWriter(LOGGER, FINE, prefix);
+            LOGGER.fine(loggingPrefix + "Writing message body:");
+            Writer lw = LogUtil.logWriter(LOGGER, FINE, loggingPrefix);
             out = OutputStreams.tee(out, (
                 this.contentTypeIsXmlish()
                 ? new WriterOutputStream(new XMLFormatterWriter(lw))
@@ -886,18 +925,24 @@ class HttpMessage {
         out.flush();
     }
 
+    /**
+     * @param loggingPrefix E.g. {@code ">>> "}
+     */
     private void
-    writeHeaders(String prefix, OutputStream out) throws IOException {
+    writeHeaders(String loggingPrefix, OutputStream out) throws IOException {
+
+        Writer w = new OutputStreamWriter(out, Charset.forName("ASCII"));
+
         // Headers and blank line.
-        {
-            Writer w = new OutputStreamWriter(out, Charset.forName("ASCII"));
-            for (MessageHeader header : this.getHeaders()) {
-                LOGGER.fine(prefix + header.getName() + ": " + header.getValue());
-                w.write(header.getName() + ": " + header.getValue() + "\r\n");
-            }
-            w.write("\r\n");
-            w.flush();
+        for (MessageHeader header : this.getHeaders()) {
+            LOGGER.fine(loggingPrefix + header.getName() + ": " + header.getValue());
+            w.write(header.getName() + ": " + header.getValue() + "\r\n");
         }
+
+        // Headers and blank line.
+        w.write("\r\n");
+
+        w.flush();
     }
 
     /**
@@ -967,7 +1012,7 @@ class HttpMessage {
 
         multiplexer.register((SelectableChannel) in, SelectionKey.OP_READ, lineParser);
     }
-
+    
     /**
      * Reads HTTP headers up to and including the terminating empty line.
      */
@@ -976,6 +1021,19 @@ class HttpMessage {
         final ReadableByteChannel                                   in,
         final Multiplexer                                           multiplexer,
         final ConsumerWhichThrows<List<MessageHeader>, IOException> consumer
+    ) throws IOException { HttpMessage.readHeaders(in, multiplexer, consumer, ">>> "); }
+
+    /**
+     * Reads HTTP headers up to and including the terminating empty line.
+     *
+     * @param loggingPrefix E.g. {@code ">>> "}
+     */
+    public static void
+    readHeaders(
+        final ReadableByteChannel                                   in,
+        final Multiplexer                                           multiplexer,
+        final ConsumerWhichThrows<List<MessageHeader>, IOException> consumer,
+        final String                                                loggingPrefix
     ) throws IOException {
         HttpMessage.readLine(in, multiplexer, new ConsumerWhichThrows<String, IOException>() {
 
@@ -993,7 +1051,7 @@ class HttpMessage {
                     return;
                 }
 
-                LOGGER.fine(">>> " + this.headerLine);
+                LOGGER.fine(loggingPrefix + this.headerLine);
                 Matcher matcher = HEADER_PATTERN.matcher(this.headerLine);
                 if (!matcher.matches()) {
                     throw new InvalidHttpMessageException("Invalid HTTP header line '" + this.headerLine + "'");
@@ -1014,12 +1072,15 @@ class HttpMessage {
     /**
      * Reads the body contents of this message into a buffer (depending on the 'Content-Length' and 'Transfer-Encoding'
      * headers).
+     *
+     * @param loggingPrefix E.g. {@code ">>> "}
      */
     protected void
     readBody(
         ReadableByteChannel                    in,
         Multiplexer                            multiplexer,
-        final RunnableWhichThrows<IOException> finished
+        final RunnableWhichThrows<IOException> finished,
+        final String                           loggingPrefix
     ) throws IOException {
 
         final ByteArrayOutputStream            buffer   = new ByteArrayOutputStream();
@@ -1031,14 +1092,14 @@ class HttpMessage {
 
                 // Process "Content-Encoding" header.
                 if ("gzip".equalsIgnoreCase(HttpMessage.this.getHeader("Content-Encoding"))) {
-                    LOGGER.fine("GZIP-encoded content");
+                    LOGGER.fine(loggingPrefix + "GZIP-encoded content");
                     in = new GZIPInputStream(in);
                 }
 
                 if (LOGGER.isLoggable(FINE)) {
 
-                    LOGGER.fine("Reading message body");
-                    Writer lw = LogUtil.logWriter(LOGGER, FINE, ">>> ");
+                    LOGGER.fine(loggingPrefix + "Reading message body");
+                    Writer lw = LogUtil.logWriter(LOGGER, FINE, loggingPrefix);
                     in = InputStreams.wye(in, (
                         HttpMessage.this.contentTypeIsXmlish()
                         ? new WriterOutputStream(new XMLFormatterWriter(lw))
@@ -1061,11 +1122,11 @@ class HttpMessage {
                     if (!"chunked".equalsIgnoreCase(tes)) {
                         throw new IOException("Message with unsupported transfer encoding '" + tes + "' received");
                     }
-                    LOGGER.fine("Reading chunked contents");
+                    LOGGER.fine(loggingPrefix + "Reading chunked contents");
                     HttpMessage.readChunked(in, multiplexer, buffer, runnable);
                 } else
                 {
-                    LOGGER.fine("Reading streaming contents");
+                    LOGGER.fine(loggingPrefix + "Reading streaming contents");
                     HttpMessage.read(in, multiplexer, buffer, runnable);
                 }
             }
