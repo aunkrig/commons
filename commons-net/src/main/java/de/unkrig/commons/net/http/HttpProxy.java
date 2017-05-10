@@ -117,7 +117,7 @@ class HttpProxy implements RunnableWhichThrows<IOException>, Stoppable {
         final TransformerWhichThrows<? super HttpRequest, HttpRequest, IOException>   requestTransformer,
         final TransformerWhichThrows<? super HttpResponse, HttpResponse, IOException> responseTransformer
     ) throws IOException {
-        this.tcpServer = new TcpServer(endpoint, 0, new HttpClientConnectionHandler() {
+        this.tcpServer = new TcpServer(endpoint, 0, new HttpClientConnectionHandler(">>> ", "<<< ") {
 
             @Override public void
             handleConnection(
@@ -145,7 +145,11 @@ class HttpProxy implements RunnableWhichThrows<IOException>, Stoppable {
 
                         // Forward the request.
                         HttpProxy.LOGGER.fine("Forwarding request #" + requestNumber + ":");
-                        HttpResponse httpResponse = httpClient.call(requestTransformer.transform(request));
+                        HttpResponse httpResponse = httpClient.call(
+                            requestTransformer.transform(request),
+                            "<<< ",
+                            ">>> "
+                        );
 
                         // Forward the response.
                         HttpProxy.LOGGER.fine("Forwarding response #" + requestNumber + ":");
