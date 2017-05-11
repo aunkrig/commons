@@ -72,7 +72,7 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
 
     /** E.g. {@code "<<< "}. */
     private final String writeResponseLoggingPrefix;
-    
+
     public
     HttpClientConnectionHandler() { this(">>> ", "<<< "); }
 
@@ -82,11 +82,9 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
      */
     public
     HttpClientConnectionHandler(String readRequestLogginPrefix, String writeResponseLoggingPrefix) {
-        this.servletts                  = Collections.emptyList();
-        this.readRequestLogginPrefix    = readRequestLogginPrefix;
-        this.writeResponseLoggingPrefix = writeResponseLoggingPrefix;
+        this(Collections.<Servlett>emptyList(), readRequestLogginPrefix, writeResponseLoggingPrefix);
     }
-    
+
     public
     HttpClientConnectionHandler(Servlett servlett) { this(servlett, ">>> ", "<<< "); }
 
@@ -96,13 +94,13 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
      */
     public
     HttpClientConnectionHandler(Servlett servlett, String readRequestLogginPrefix, String writeResponseLoggingPrefix) {
-        this.servletts                  = Collections.singletonList(servlett);
-        this.readRequestLogginPrefix    = readRequestLogginPrefix;
-        this.writeResponseLoggingPrefix = writeResponseLoggingPrefix;
+        this(Collections.singletonList(servlett), readRequestLogginPrefix, writeResponseLoggingPrefix);
     }
 
     public
-    HttpClientConnectionHandler(Iterable<Servlett> servletts) { this(servletts, ">>> ", "<<< "); }
+    HttpClientConnectionHandler(Iterable<Servlett> servletts) {
+        this(servletts, ">>> ", "<<< ");
+    }
 
     /**
      * @param readRequestLogginPrefix    E.g. {@code ">>> "}
