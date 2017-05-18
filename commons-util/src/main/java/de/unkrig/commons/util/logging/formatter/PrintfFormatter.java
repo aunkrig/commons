@@ -457,16 +457,7 @@ class PrintfFormatter extends Formatter {
 
                 pw.println(":");
 
-                pw.print(thrown.getClass().getName());
-                pw.print(':');
-                String message = thrown.getLocalizedMessage();
-                if (message != null) {
-                    pw.print(' ');
-                    pw.print(message);
-                }
-                pw.println();
-
-                thrown.printStackTrace(pw);
+                thrown.printStackTrace(pw); // <exc-class>:[ <message>]\n  at...\n  at...
 
                 thrownText = sw.toString();
                 thrownText = StringUtil.lessTrailingLineSeparators(thrownText);
