@@ -225,7 +225,7 @@ class HttpMessage {
 
     public void
     setAttemptUnstreaming(boolean attemptUnstreaming) { this.attemptUnstreaming = attemptUnstreaming; }
-    
+
     /**
      * Constructor for incoming messages.
      * <p>
@@ -539,14 +539,18 @@ class HttpMessage {
             @Override public String
             string(Charset charset) {
                 String result = this.text2;
-                if (result == null) throw new IllegalStateException();
+                if (result == null) {
+                    throw new IllegalStateException("Body has been read before");
+                }
                 this.text2 = null;
                 return result;
             }
 
             @Override public InputStream
             inputStream() throws IOException {
-                if (this.text2 == null) throw new IllegalStateException();
+                if (this.text2 == null) {
+                    throw new IllegalStateException("Body has been read before");
+                }
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 new OutputStreamWriter(baos, charset).write(this.text2);
                 this.text2 = null;
@@ -555,7 +559,9 @@ class HttpMessage {
 
             @Override public void
             write(OutputStream stream) throws IOException {
-                if (this.text2 == null) throw new IllegalStateException();
+                if (this.text2 == null) {
+                    throw new IllegalStateException("Body has been read before");
+                }
 
                 {
                     OutputStreamWriter w = new OutputStreamWriter(stream, charset);
@@ -593,7 +599,9 @@ class HttpMessage {
             @Override public String
             string(Charset charset) throws IOException {
                 InputStream in3 = this.in2;
-                if (in3 == null) throw new IllegalStateException();
+                if (in3 == null) {
+                    throw new IllegalStateException("Body has been read before");
+                }
                 final String result = Readers.readAll(new InputStreamReader(in3, charset));
                 try { in3.close(); } catch (Exception e) {}
                 this.in2 = null;
@@ -603,7 +611,9 @@ class HttpMessage {
             @Override public InputStream
             inputStream() {
                 InputStream in3 = this.in2;
-                if (in3 == null) throw new IllegalStateException();
+                if (in3 == null) {
+                    throw new IllegalStateException("Body has been read before");
+                }
                 this.in2 = null;
                 return in3;
             }
@@ -611,7 +621,9 @@ class HttpMessage {
             @Override public void
             write(OutputStream stream) throws IOException {
                 InputStream in3 = this.in2;
-                if (in3 == null) throw new IllegalStateException();
+                if (in3 == null) {
+                    throw new IllegalStateException("Body has been read before");
+                }
                 IoUtil.copy(in3, stream);
                 try { in3.close(); } catch (Exception e) {}
                 this.in2 = null;
@@ -652,7 +664,9 @@ class HttpMessage {
             string(Charset charset) throws IOException {
 
                 ProducerWhichThrows<InputStream, IOException> in3 = this.in2;
-                if (in3 == null) throw new IllegalStateException();
+                if (in3 == null) {
+                    throw new IllegalStateException("Body has been read before");
+                }
 
                 InputStream is = (this.is = in3.produce());
                 assert is != null;
@@ -667,7 +681,9 @@ class HttpMessage {
             inputStream() throws IOException {
 
                 ProducerWhichThrows<InputStream, IOException> in3 = this.in2;
-                if (in3 == null) throw new IllegalStateException();
+                if (in3 == null) {
+                    throw new IllegalStateException("Body has been read before");
+                }
 
                 InputStream is = (this.is = in3.produce());
                 assert is != null;
@@ -680,7 +696,9 @@ class HttpMessage {
             write(OutputStream stream) throws IOException {
 
                 ProducerWhichThrows<InputStream, IOException> in3 = this.in2;
-                if (in3 == null) throw new IllegalStateException();
+                if (in3 == null) {
+                    throw new IllegalStateException("Body has been read before");
+                }
 
                 InputStream is = (this.is = in3.produce());
                 assert is != null;
@@ -723,7 +741,9 @@ class HttpMessage {
             @Override public String
             string(Charset charset) throws IOException {
                 ConsumerWhichThrows<OutputStream, IOException> w3 = this.writer2;
-                if (w3 == null) throw new IllegalStateException();
+                if (w3 == null) {
+                    throw new IllegalStateException("Body has been read before");
+                }
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 w3.consume(baos);
                 this.writer2 = null;
@@ -733,7 +753,9 @@ class HttpMessage {
             @Override public InputStream
             inputStream() throws IOException {
                 ConsumerWhichThrows<OutputStream, IOException> w3 = this.writer2;
-                if (w3 == null) throw new IllegalStateException();
+                if (w3 == null) {
+                    throw new IllegalStateException("Body has been read before");
+                }
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 w3.consume(baos);
                 this.writer2 = null;
@@ -743,7 +765,9 @@ class HttpMessage {
             @Override public void
             write(OutputStream stream) throws IOException {
                 ConsumerWhichThrows<OutputStream, IOException> w3 = this.writer2;
-                if (w3 == null) throw new IllegalStateException();
+                if (w3 == null) {
+                    throw new IllegalStateException("Body has been read before");
+                }
                 w3.consume(stream);
                 this.writer2 = null;
             }
@@ -787,7 +811,7 @@ class HttpMessage {
         return DEFAULT_CHARSET;
     }
     private static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
-    
+
     /**
      * Writes this message's headers and body to the given {@link OutputStream}. Also closes the {@link OutputStream}
      * iff there is neither a "Content-Length:" header, nor a "Transfer-Encoding: chunked" header, nor the message
@@ -849,7 +873,6 @@ class HttpMessage {
         if (!this.attemptUnstreaming) {
             this.writeHeaders(loggingPrefix, out);
             this.writeBody(loggingPrefix, out);
-            this.writeBody(loggingPrefix, out);
             return;
         }
 
@@ -893,7 +916,7 @@ class HttpMessage {
         this.writeHeaders(loggingPrefix, out);
         out.write(buffer, 0, count[0]);
     }
-    
+
     /**
      * Writes the body of this message <em>synchronously</em> to the given {@link OutputStream}.
      *
@@ -1012,7 +1035,7 @@ class HttpMessage {
 
         multiplexer.register((SelectableChannel) in, SelectionKey.OP_READ, lineParser);
     }
-    
+
     /**
      * Reads HTTP headers up to and including the terminating empty line.
      */
