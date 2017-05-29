@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -849,6 +850,7 @@ class CommandLineOptions {
      * @param resourceCharset        The charset to use for decoding the contents of the resource; {@code null} for the
      *                               JVM default charset
      * @throws FileNotFoundException The resource could not be found
+     * @see Class#getResource(String)
      */
     public static void
     printResource(
@@ -862,17 +864,78 @@ class CommandLineOptions {
 
         InputStream is = baseClass.getResourceAsStream(resourceName);
         if (is == null) throw new FileNotFoundException(resourceName);
-        try {
 
-            Writer w = new OutputStreamWriter(outputStream);
+        CommandLineOptions.replaceSystemProperties(
+            is,              // inputStream
+            resourceCharset, // inputCharset
+            true,            // closeInputStream
+            outputStream,    // outputStream
+            null,            // outputCharset
+            false            // closeOutputStream
+        );
+    }
 
-            InputStreamReader
-            r = resourceCharset == null ? new InputStreamReader(is) : new InputStreamReader(is, resourceCharset);
+    /**
+     * Reads (and decodes) the contents of a resource, replaces all occurrences of
+     * "<code>${</code><var>system-property-name</var><code>}</code>" with the value of the designated system property,
+     * and writes the result to the <var>outputStream</var> (typically {@code System.out}).
+     * <p>
+     *   The resource is found through the <var>classLoader</var> and (absolute) <var>resourceName</var>.
+     * </p>
+     * <p>
+     *   To ensure that the resource is decoded with the same charset as it was encoded, you should not use the JVM
+     *   charset (which could be different in the build environment and the runtime environment).
+     * </p>
+     *
+     * @param resourceCharset        The charset to use for decoding the contents of the resource; {@code null} for the
+     *                               JVM default charset
+     * @throws FileNotFoundException The resource could not be found
+     * @see ClassLoader#getResource(String)
+     */
+    public static void
+    printResource(
+        ClassLoader       classLoader,
+        String            resourceName,
+        @Nullable Charset resourceCharset,
+        OutputStream      outputStream
+    ) throws IOException {
 
-            PatternUtil.replaceSystemProperties(r, w);
-            w.flush();
+        InputStream is = classLoader.getResourceAsStream(resourceName);
+        if (is == null) throw new FileNotFoundException(resourceName);
+
+        CommandLineOptions.replaceSystemProperties(
+            is,              // inputStream
+            resourceCharset, // inputCharset
+            true,            // closeInputStream
+            outputStream,    // outputStream
+            null,            // outputCharset
+            false            // closeOutputStream
+        );
+    }
+
+    private static void
+    replaceSystemProperties(
+        InputStream       inputStream,
+        @Nullable Charset inputCharset,
+        boolean           closeInputStream,
+        OutputStream      outputStream,
+        @Nullable Charset outputCharset,
+        boolean           closeOutputStream
+    ) throws IOException {
+
+    try {
+
+        if (outputCharset == null) outputCharset = Charset.defaultCharset();
+        Writer w = new OutputStreamWriter(outputStream, outputCharset);
+
+        if (inputCharset == null) inputCharset = Charset.defaultCharset();
+        Reader r = new InputStreamReader(inputStream, inputCharset);
+
+        PatternUtil.replaceSystemProperties(r, w);
+        w.flush();
         } finally {
-            is.close();
+            if (closeInputStream)  try { inputStream.close();  } catch (Exception e) {}
+            if (closeOutputStream) try { outputStream.close(); } catch (Exception e) {}
         }
     }
 }
