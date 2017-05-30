@@ -33,13 +33,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import de.unkrig.commons.lang.protocol.Predicate;
 import de.unkrig.commons.lang.protocol.Transformer;
-import de.unkrig.commons.nullanalysis.NotNull;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -114,28 +112,14 @@ class IterableUtil {
     }
 
     /**
-     * @return An {@link Iterable} that traverses the elements of the given {@link List} in reverse order.
+     * @return An {@link Iterable} that traverses the elements of the given {@link List} in reverse order, starting
+     *         with the last element of the list
      */
     public static <E> Iterable<E>
-    reverseList(final List<? extends E> list) {
+    reverseList(final List<E> list) {
 
         return new Iterable<E>() {
-
-            @Override public Iterator<E>
-            iterator() {
-                final ListIterator<? extends E> li = list.listIterator(list.size());
-                return new Iterator<E>() {
-
-                    @Override public boolean
-                    hasNext() { return li.hasPrevious(); }
-
-                    @Override public E
-                    next() { return li.previous(); }
-
-                    @Override public void
-                    remove() { li.remove(); }
-                };
-            }
+            @Override public Iterator<E> iterator() { return IteratorUtil.reverse(list.listIterator(list.size())); }
         };
     }
 
@@ -265,10 +249,9 @@ class IterableUtil {
      */
     public static <I, O> Iterable<O>
     transform(final Iterable<? extends I> delegate, final Transformer<? super I, ? extends O> transform) {
-        return new Iterable<O>() {
 
-            @Override public Iterator<O>
-            iterator() { return IteratorUtil.transform(delegate.iterator(), transform); }
+        return new Iterable<O>() {
+            @Override public Iterator<O> iterator() { return IteratorUtil.transform(delegate.iterator(), transform); }
         };
     }
 
@@ -304,103 +287,66 @@ class IterableUtil {
         };
     }
 
-    /**
-     * A helper interface which extends the "iterator" pattern with the possibility to access not only the "current"
-     * element, but also the previous and next element.
-     * @param <T>
-     */
-    public
-    interface ElementWithContext<T> {
-
-        /**
-         * @return The element before the current element, or {@code null} iffthe current element is the first element
-         */
-        @Nullable T previous();
-
-        /**
-         * @return The current element (always non-{@code null}
-         */
-        T current();
-
-        /**
-         * @return The element after the current element, or {@code null} iff the current element is the last element
-         */
-        @Nullable T next();
-    }
+    /** @deprecated Use {@link de.unkrig.commons.util.collections.ElementWithContext} instead */
+    @Deprecated public interface ElementWithContext<T> {}
 
     /**
-     * @return An iterable which wraps the given <var>delegate</var>
+     * Wraps the <var>delegate</var> iterable in an {@code Iterable<ElementWithContext>}.
+     *
+     * @see ElementWithContext
+     * @see IteratorUtil#iteratorWithContext(Iterable)
      */
-    public static <T> Iterable<ElementWithContext<T>>
+    public static <T> Iterable<de.unkrig.commons.util.collections.ElementWithContext<T>>
     iterableWithContext(final Iterable<? extends T> delegate) {
 
-        return new Iterable<IterableUtil.ElementWithContext<T>>() {
+        return new Iterable<de.unkrig.commons.util.collections.ElementWithContext<T>>() {
 
-            @Override public Iterator<ElementWithContext<T>>
-            iterator() { return IterableUtil.iteratorWithContext(delegate); }
+            @Override public Iterator<de.unkrig.commons.util.collections.ElementWithContext<T>>
+            iterator() { return IteratorUtil.iteratorWithContext(delegate.iterator()); }
         };
     }
 
+    /** @deprecated Use {@link IteratorUtil#iteratorWithContext(Iterator)} instead */
+    @Deprecated public static <T> Iterator<de.unkrig.commons.util.collections.ElementWithContext<T>>
+    iteratorWithContext(final Iterator<? extends T> delegate) {
+        return IteratorUtil.iteratorWithContext(delegate);
+    }
+
     /**
-     * @param iterable Must produce non-{@code null} values
-     * @return         An iterator that produces {@link ElementWithContext}s for the elements of the given
-     *                 <var>iterable</var>
+     * Equivalent with {@link #foR(int, int, int) foR}{@code (}<var>start</var>{@code ,} <var>end</var>{@code ,1)}.
+     *
+     * @see #foR(int, int, int)
      */
-    public static <T> Iterator<ElementWithContext<T>>
-    iteratorWithContext(final Iterable<? extends T> iterable) {
+    public static Iterable<Integer>
+    foR(final int start, final int end) { return IterableUtil.foR(start, end, 1); }
 
-        class ElementWithContextIterator implements Iterator<IterableUtil.ElementWithContext<T>> {
+    /**
+     * Returns a sequence of integers which reach from <var>start</var> (inclusively) to <var>end</var> (exclusively),
+     * with a <var>step</var> increment.
+     * <p>
+     *   More precise: Iff <var>step</var> is greater than zero, then the sequence is <var>start</var>,
+     *   <var>start</var> {@code +} <var>step</var>, and so forth, and ends with the last value which is less than
+     *   <var>end</var>.
+     * <p>
+     * <p>
+     *   Otherwise, iff <var>step</var> is less than zero, then the sequence is <var>start</var>,
+     *   <var>start</var> {@code +} <var>step</var>, and so forth, and ends with the last value which is greater than
+     *   <var>end</var>.
+     * <p>
+     * <p>
+     *   Otherwise, <var>step</var> is zero, and the returned sequence is either an
+     *   infinite sequence of values <var>start</var>, or, iff <var>start</var> {@code == } <var>end</var>, an empty
+     *   sequence.
+     * </p>
+     *
+     * @throws IllegalArgumentException <var>step</var> {@code > 0 &&} <var>end</var> {@code <} <var>start</var>
+     * @throws IllegalArgumentException <var>step</var> {@code < 0 &&} <var>end</var> {@code >} <var>start</var>
+     */
+    public static Iterable<Integer>
+    foR(final int start, final int end, final int step) {
 
-            @Nullable private T                 current, next;
-            private final Iterator<? extends T> it = iterable.iterator();
-
-            @Override public boolean
-            hasNext() {
-                return this.next != null || this.it.hasNext();
-            }
-
-            @Override public ElementWithContext<T>
-            next() {
-
-                final T previous = this.current;
-                if (this.next == null) {
-                    T e = this.it.next();
-                    assert e != null : "Delegate must produce non-null values";
-                    this.current = e;
-                } else {
-                    this.current = this.next;
-                    this.next    = null;
-                }
-
-                return new ElementWithContext<T>() {
-
-                    @Override @Nullable public T
-                    previous() { return previous; }
-
-                    @Override @NotNull public T
-                    current() {
-                        T result = ElementWithContextIterator.this.current;
-                        assert result != null;
-                        return result;
-                    }
-
-                    @Override @Nullable public T
-                    next() {
-                        if (ElementWithContextIterator.this.next != null) return ElementWithContextIterator.this.next;
-
-                        if (!ElementWithContextIterator.this.it.hasNext()) return null;
-                        T e = ElementWithContextIterator.this.it.next();
-                        assert e != null : "Delegate must produce non-null values";
-                        ElementWithContextIterator.this.next = e;
-                        return ElementWithContextIterator.this.next;
-                    }
-                };
-            }
-
-            @Override public void
-            remove() { throw new UnsupportedOperationException("remove"); }
-        }
-
-        return new ElementWithContextIterator();
+        return new Iterable<Integer>() {
+            @Override public Iterator<Integer> iterator() { return IteratorUtil.foR(start, end, step); }
+        };
     }
 }
