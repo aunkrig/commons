@@ -109,45 +109,49 @@ class CustomAuthenticator extends Authenticator {
         isDestroyed() { return this.destroyed; }
 
         /**
-         * Hostname of the site or proxy. {@code null} (the default) means "any host".
+         * The pattern to match against the hostname of the site or proxy. {@code null} (the default) means "any host".
          */
         public void
         setRequestingHost(@Nullable Pattern regex) { this.requestingHost = regex; }
 
         /**
-         * {@link InetAddress} of the site. {@code null} (the default) means "any site".
+         * The pattern to match against the {@link InetAddress} of the site. {@code null} (the default) means "any
+         * site".
          */
         public void
         setRequestingSite(@Nullable Pattern regex) { this.requestingSite = regex; }
 
         /**
-         * The pattern to match against the "port number for the requested connection". {@code null} (the default)
+         * The pattern to match against "the port number for the requested connection". {@code null} (the default)
          * means "any port".
          */
         public void
         setRequestingPort(@Nullable Pattern regex) { this.requestingPort = regex; }
 
         /**
-         * The protocol that's requesting the connection. {@code null} (the default) means "any protocol".
+         * The pattern to match against "the protocol that's requesting the connection". {@code null} (the default)
+         * means "any protocol".
          */
         public void
         setRequestingProtocol(@Nullable Pattern regex) { this.requestingProtocol = regex; }
 
         /**
-         * The prompt string given by the requestor (the "realm" for <a href="http://www.ietf.org/rfc/rfc2617.txt">HTTP
-         * authentication</a>). {@code null} (the default) means "any prompt string".
+         * The pattern to match against "the prompt string given by the requestor (the "realm" for <a
+         * href="http://www.ietf.org/rfc/rfc2617.txt">HTTP authentication</a>)". {@code null} (the default) means
+         * "any prompt string".
          */
         public void
         setRequestingPrompt(@Nullable Pattern regex) { this.requestingPrompt = regex; }
 
         /**
-         * The scheme of the requestor. {@code null} (the default) means "any scheme".
+         * The pattern to match against "the scheme of the requestor". {@code null} (the default) means "any scheme".
          */
         public void
         setRequestingScheme(@Nullable Pattern regex) { this.requestingScheme = regex; }
 
         /**
-         * The URL that resulted in this request for authentication. {@code null} (the default) means "any URL".
+         * The pattern to match against "the URL that resulted in this request for authentication". {@code null} (the
+         * default) means "any URL".
          */
         public void
         setRequestingUrl(@Nullable Pattern regex) { this.requestingUrl = regex; }
@@ -169,7 +173,7 @@ class CustomAuthenticator extends Authenticator {
 
         /**
          * If set to {@code true}, then {@link #setUserName(String)} and {@link #setPassword(char[])} are
-         * ignored, and authentication is <em>denied</em> for this spec.
+         * ignored, and authentication is <em>denied</em> for this spec. The default is "false".
          */
         public void
         setDeny(boolean value) { this.deny = value; }
@@ -178,7 +182,7 @@ class CustomAuthenticator extends Authenticator {
          * The user name to use iff this {@code <credentials>} element matches.
          */
         public void
-        setUserName(String userName) { this.userName = userName; }
+        setUserName(@Nullable String userName) { this.userName = userName; }
 
         /**
          * The password to use iff this {@code <credentials>} element matches.
@@ -311,28 +315,28 @@ class CustomAuthenticator extends Authenticator {
      *     /}<var>requesting-port</var>{@code /}<var>requesting-scheme</var>{@code /}</br>
      *     Example value: {@code "PROXY/http/proxy.company.com/8080/Negotiate"}
      *   </dd>
-     *   
+     *
      *   <dt>{1}, {2}<sup>*</sup></dt>
      *   <dd>The requesting host; see {@link #getRequestingHost()}</dd>
-     *   
+     *
      *   <dt>{3}, {4}<sup>*</sup></dt>
      *   <dd>The requesting site; see {@link #getRequestingSite()}</dd>
-     *   
+     *
      *   <dt>{5}, {6}<sup>*</sup></dt>
      *   <dd>The requesting port; see {@link #getRequestingPort()}</dd>
-     *   
+     *
      *   <dt>{7}, {8}<sup>*</sup></dt>
      *   <dd>The requesting protocol; see {@link #getRequestingProtocol()}</dd>
-     *   
+     *
      *   <dt>{9}, {10}<sup>*</sup></dt>
      *   <dd>The requesting prompt; see {@link #getRequestingPrompt()}</dd>
-     *   
+     *
      *   <dt>{11}, {12}<sup>*</sup></dt>
      *   <dd>The requesting scheme; see {@link #getRequestingScheme()}</dd>
-     *   
+     *
      *   <dt>{13}, {14}<sup>*</sup></dt>
      *   <dd>The requesting URL; see {@link #getRequestingURL()}</dd>
-     *   
+     *
      *   <dt>{15}, {16}<sup>*</sup></dt>
      *   <dd>The requestor type; see {@link #getRequestorType()}</dd>
      * </dl>
@@ -352,12 +356,23 @@ class CustomAuthenticator extends Authenticator {
      *   The default value is
      * </p>
      * <pre>
-     * {@value #DEFAULT_DIALOG_LABEL}
+     * &lt;html>
+     *   &lt;table>
+     *     {1,  choice, 0#|1#'&lt;tr>&lt;td>Host:    &lt;/td>&lt;td>'{2}'&lt;/td>&lt;/tr>'}
+     *     {3,  choice, 0#|1#'&lt;tr>&lt;td>Site:    &lt;/td>&lt;td>'{4}'&lt;/td>&lt;/tr>'}
+     *     {5,  choice, 0#|1#'&lt;tr>&lt;td>Port:    &lt;/td>&lt;td>'{6}'&lt;/td>&lt;/tr>'}
+     *     {7,  choice, 0#|1#'&lt;tr>&lt;td>Protocol:&lt;/td>&lt;td>'{8}'&lt;/td>&lt;/tr>'}
+     *     {9,  choice, 0#|1#'&lt;tr>&lt;td>Prompt:  &lt;/td>&lt;td>'{10}'&lt;/td>&lt;/tr>'}
+     *     {11, choice, 0#|1#'&lt;tr>&lt;td>Scheme:  &lt;/td>&lt;td>'{12}'&lt;/td>&lt;/tr>'}
+     *     {13, choice, 0#|1#'&lt;tr>&lt;td>URL:     &lt;/td>&lt;td>'{14}'&lt;/td>&lt;/tr>'}
+     *     {15, choice, 0#|1#'&lt;tr>&lt;td>Type:    &lt;/td>&lt;td>'{16}'&lt;/td>&lt;/tr>'}
+     *   &lt;/table>
+     * &lt;/html>
      * </pre>
      */
     public void
     setDialogLabel(String message) { this.dialogLabelMf = new MessageFormat(message); }
-    
+
     /**
      * Adds a set of {@link CredentialsSpec}s to this {@link CustomAuthenticator}. Earlier specs take precedence over
      * later specs.
@@ -369,7 +384,7 @@ class CustomAuthenticator extends Authenticator {
      *   password, and optionally cache the entered data (transiently and/or persistently, depending on the
      *   configured cache mode and store mode).
      * </p>
-     * 
+     *
      * @see #CustomAuthenticator(CacheMode, StoreMode)
      */
     public void
@@ -392,9 +407,9 @@ class CustomAuthenticator extends Authenticator {
         for (CredentialsSpec cs : this.credentials) {
 
             if (this.matches(cs)) {
-                
+
                 if (cs.deny) return null;
-                
+
                 userName = cs.userName;
                 if (userName != null) {
                     char[] password = cs.password;
@@ -437,7 +452,7 @@ class CustomAuthenticator extends Authenticator {
             CustomAuthenticator.add2(this.getRequestingScheme(),   args); // {11}: is... {12} scheme
             CustomAuthenticator.add2(this.getRequestingURL(),      args); // {13}: is... {14} URL
             CustomAuthenticator.add2(this.getRequestorType(),      args); // {15}: is... {16} type
-            
+
             message = this.dialogLabelMf.format(args.toArray());
         }
 
@@ -456,18 +471,18 @@ class CustomAuthenticator extends Authenticator {
         {
             char[] password = null;
             try {
-                
+
                 switch (this.cacheMode) {
-        
+
                 case NONE:
                     ;
                     break;
-        
+
                 case USER_NAMES:
                     // Prefer the CACHED user name over the CONFIGURED user name.
                     userName = this.userNameCache.get(key);
                     break;
-        
+
                 case USER_NAMES_AND_PASSWORDS:
                     // Prefer the CACHED user name and password over the CONFIGURED user name and password.
                     userName = this.userNameCache.get(key);
@@ -475,18 +490,18 @@ class CustomAuthenticator extends Authenticator {
                     if (tmp != null) password = tmp.clone();
                     break;
                 }
-        
+
                 // Check the authentication store.
                 switch (this.storeMode) {
-        
+
                 case NONE:
                     ;
                     break;
-        
+
                 case USER_NAMES:
                     if (userName == null) userName = this.getPasswordStore().getUserName(key);
                     break;
-        
+
                 case USER_NAMES_AND_PASSWORDS:
                     if (userName == null) {
                         userName = this.getPasswordStore().getUserName(key);
@@ -500,14 +515,14 @@ class CustomAuthenticator extends Authenticator {
                     }
                     break;
                 }
-    
+
                 // Now prompt the user for user name and passwords, and present the values found so far as proposals.
                 userNameField = new JTextField();
                 if (userName != null) userNameField.setText(userName);
-    
+
                 passwordField = new JPasswordField();
                 if (password != null) JPasswordFields.setPassword(passwordField, password);
-                
+
                 hasPassword = password != null;
             } finally {
                 if (password != null) Arrays.fill(password, '\0');
@@ -538,38 +553,38 @@ class CustomAuthenticator extends Authenticator {
 
         char[] password = passwordField.getPassword();
         try {
-    
+
             // Both "userName" and "password" are non-null at this point.
-    
+
             switch (this.cacheMode) {
-    
+
             case NONE:
                 ;
                 break;
-    
+
             case USER_NAMES:
                 this.userNameCache.put(key, userName);
                 break;
-    
+
             case USER_NAMES_AND_PASSWORDS:
                 this.userNameCache.put(key, userName);
                 char[] prev = this.passwordCache.put(key, password.clone());
                 if (prev != null) Arrays.fill(prev, '\0');
                 break;
             }
-    
+
             try {
-    
+
                 switch (this.storeMode) {
-    
+
                 case NONE:
                     this.getPasswordStore().remove(key);
                     break;
-    
+
                 case USER_NAMES:
                     this.getPasswordStore().put(key, userName);
                     break;
-    
+
                 case USER_NAMES_AND_PASSWORDS:
                     this.getPasswordStore().put(key, userName, password.clone()); // <= "put()" clears the char[]
                     break;
@@ -577,7 +592,7 @@ class CustomAuthenticator extends Authenticator {
             } catch (IOException ioe) {
                 throw ExceptionUtil.wrap("Saving password store", ioe, IllegalStateException.class);
             }
-    
+
             return new PasswordAuthentication(userName, password); // <= Constructor clones the password char[]
         } finally {
             Arrays.fill(password, '\0');
@@ -590,7 +605,7 @@ class CustomAuthenticator extends Authenticator {
      */
     private boolean
     matches(CredentialsSpec credentialsSpec) {
-        
+
         return (
             true // SUPPRESS CHECKSTYLE SimplifyBooleanExpression
             && CustomAuthenticator.matches(credentialsSpec.requestingHost,     this.getRequestingHost())
@@ -611,7 +626,7 @@ class CustomAuthenticator extends Authenticator {
      */
     private static void
     add2(@Nullable Object arg, List<Object> args) {
-        
+
         if (
             arg != null
             && !Integer.valueOf(-1).equals(arg)
