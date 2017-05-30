@@ -157,7 +157,7 @@ class ArchivingFileHandler extends AbstractStreamHandler {
      * {@link #DEFAULT_SIZE_LIMIT}{@code ,}
      * {@link #DEFAULT_TIME_TABLE}{@code ,}
      * {@value #DEFAULT_APPEND}{@code ,}
-     * {@value AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
+     * {@value de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
@@ -183,7 +183,7 @@ class ArchivingFileHandler extends AbstractStreamHandler {
      * {@value #DEFAULT_SIZE_LIMIT}{@code ,}
      * {@link #DEFAULT_TIME_TABLE}{@code ,}
      * <var>append</var>{@code ,}
-     * {@value AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
+     * {@value de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
@@ -192,10 +192,10 @@ class ArchivingFileHandler extends AbstractStreamHandler {
     public
     ArchivingFileHandler(String pattern, boolean append) throws IOException {
         this(
-            pattern,            // pattern
-            ArchivingFileHandler.DEFAULT_SIZE_LIMIT, // sizeLimit
-            ArchivingFileHandler.DEFAULT_TIME_TABLE, // timeTable
-            append,             // append
+            pattern,                                  // pattern
+            ArchivingFileHandler.DEFAULT_SIZE_LIMIT,  // sizeLimit
+            ArchivingFileHandler.DEFAULT_TIME_TABLE,  // timeTable
+            append,                                   // append
             AbstractStreamHandler.DEFAULT_AUTO_FLUSH, // autoFlush
             AbstractStreamHandler.DEFAULT_LEVEL,      // level
             AbstractStreamHandler.DEFAULT_FILTER,     // filter
@@ -209,7 +209,7 @@ class ArchivingFileHandler extends AbstractStreamHandler {
      * <var>sizeLimit</var>{@code ,}
      * {@link #DEFAULT_TIME_TABLE}{@code ,}
      * {@value de.unkrig.commons.util.logging.handler.ArchivingFileHandler#DEFAULT_APPEND}{@code ,}
-     * {@value AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
+     * {@value de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
@@ -235,7 +235,7 @@ class ArchivingFileHandler extends AbstractStreamHandler {
      * <var>sizeLimit</var>{@code ,}
      * {@link #DEFAULT_TIME_TABLE}{@code ,}
      * <var>append</var>{@code ,}
-     * {@value AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
+     * {@value de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
@@ -261,7 +261,7 @@ class ArchivingFileHandler extends AbstractStreamHandler {
      * {@value #DEFAULT_SIZE_LIMIT}{@code ,}
      * <var>timeTable</var>{@code ,}
      * {@value #DEFAULT_APPEND}{@code ,}
-     * {@value AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
+     * {@value de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
@@ -287,7 +287,7 @@ class ArchivingFileHandler extends AbstractStreamHandler {
      * {@value #DEFAULT_SIZE_LIMIT}{@code ,}
      * <var>timeTable</var>{@code ,}
      * <var>append</var>{@code ,}
-     * {@value AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
+     * {@value de.unkrig.commons.util.logging.handler.AbstractStreamHandler#DEFAULT_AUTO_FLUSH}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_LEVEL}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_FILTER}{@code ,}
      * {@link AbstractStreamHandler#DEFAULT_FORMATTER}{@code ,}
