@@ -26,7 +26,6 @@
 
 package de.unkrig.commons.net.http;
 
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,9 +40,8 @@ import de.unkrig.commons.text.scanner.ScanException;
 import de.unkrig.commons.text.scanner.StatefulScanner;
 
 /**
- * Implementation of an HTTP client.
- *
- * @see #HttpClient(InetAddress, int)
+ * @see <a href="https://tools.ietf.org/html/rfc7235">RFC 7235</a>
+ * @see #parse(String)
  */
 public final
 class AuthenticateHeaderParser {
@@ -52,6 +50,9 @@ class AuthenticateHeaderParser {
 
     private AuthenticateHeaderParser() {}
 
+    /**
+     * @see <a href="https://tools.ietf.org/html/rfc7235#section-2.1">Section 2.1 of RFC 7235</a>
+     */
     public static
     class Challenge {
         public final String authScheme;
@@ -60,6 +61,9 @@ class AuthenticateHeaderParser {
         }
     }
 
+    /**
+     * @see <a href="https://tools.ietf.org/html/rfc7235#section-2.1">Section 2.1 of RFC 7235</a>
+     */
     public static
     class Token68Challenge extends Challenge {
         public final String token68;
@@ -69,6 +73,9 @@ class AuthenticateHeaderParser {
         }
     }
 
+    /**
+     * @see <a href="https://tools.ietf.org/html/rfc7235#section-2.1">Section 2.1 of RFC 7235</a>
+     */
     public static
     class ChallengeWithAuthParams extends Challenge {
         public final List<AuthParam> authParams;
@@ -78,12 +85,18 @@ class AuthenticateHeaderParser {
         }
     }
 
+    /**
+     * @see <a href="https://tools.ietf.org/html/rfc7235#section-2.1">Section 2.1 of RFC 7235</a>
+     */
     public static
     class AuthParam {
         public final String name, value;
         private AuthParam(String name, String value) { this.name = name; this.value = value; }
     }
 
+    /**
+     * Parses the content of an {@code Authenticate} or {@code Proxy-Authenticate} HTTP Header.
+     */
     public static List<Challenge>
     parse(String input) throws ParseException {
 
