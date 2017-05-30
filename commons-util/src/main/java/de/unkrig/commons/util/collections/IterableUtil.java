@@ -294,7 +294,7 @@ class IterableUtil {
      * Wraps the <var>delegate</var> iterable in an {@code Iterable<ElementWithContext>}.
      *
      * @see ElementWithContext
-     * @see IteratorUtil#iteratorWithContext(Iterable)
+     * @see IteratorUtil#iteratorWithContext(Iterator)
      */
     public static <T> Iterable<de.unkrig.commons.util.collections.ElementWithContext<T>>
     iterableWithContext(final Iterable<? extends T> delegate) {
