@@ -26,8 +26,6 @@
 
 package de.unkrig.commons.util;
 
-import java.net.Authenticator;
-
 import javax.swing.JPasswordField;
 import javax.swing.text.GapContent;
 import javax.swing.text.PlainDocument;
@@ -38,10 +36,12 @@ import de.unkrig.commons.nullanalysis.NotNullByDefault;
 /**
  * Utility methods around {@link JPasswordField}s.
  */
-public
-class JPasswordFields extends Authenticator {
+public final
+class JPasswordFields {
 
     static { AssertionUtil.enableAssertionsForThisClass(); }
+
+    private JPasswordFields() {}
 
     /**
      * Works around {@link JPasswordField}'s painfully missing "{@code setPassword(char[])}" method.
