@@ -27,10 +27,13 @@
 package de.unkrig.commons.util.collections;
 
 import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
 import de.unkrig.commons.lang.protocol.PredicateWhichThrows;
 import de.unkrig.commons.lang.protocol.Transformer;
+import de.unkrig.commons.nullanalysis.NotNull;
+import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -132,6 +135,36 @@ class IteratorUtil {
     }
 
     /**
+     * Returns a list iterator that traverses the list elements in the reverse order of the given <var>delegate</var>.
+     * <p>
+     *   Notice that iff {@code !}<var>delegate</var>{@code .hasPrevious()}, then {@code
+     *   !reverse(}<var>delegate</var>{@code ).hasNext()}. In other words, you will often use
+     * </p>
+     * <pre>{@code IteratorUtil.reverse(list.listIterator(list.size()))}</pre>
+     * <p>
+     *   , and not simply
+     * </p>
+     * <pre>{@code IteratorUtil.reverse(list.listIterator())}</pre>
+     */
+    public static <E> ListIterator<E>
+    reverse(final ListIterator<E> delegate) {
+
+        return new ListIterator<E>() {
+
+            @Override public boolean                       hasNext()     { return delegate.hasPrevious(); }
+            @Override public E                             next()        { return delegate.previous();    }
+            @Override public boolean                       hasPrevious() { return delegate.hasNext();     }
+            @Override public E                             previous()    { return delegate.next();        }
+            @Override @NotNullByDefault(false) public void set(E e)      { delegate.set(e);               }
+            @Override @NotNullByDefault(false) public void add(E e)      { delegate.set(e);               }
+            @Override public void                          remove()      { delegate.remove();             }
+
+            @Override public int nextIndex()     { throw new UnsupportedOperationException("nextIndex"); }
+            @Override public int previousIndex() { throw new UnsupportedOperationException("previousIndex"); }
+        };
+    }
+
+    /**
      * @return An iterator that produces a sequence of <var>n</var> <var>value</var> elements
      */
     public static <T> Iterator<T>
@@ -206,5 +239,163 @@ class IteratorUtil {
         int n = 0;
         for (; iterator.hasNext(); iterator.next()) n++;
         return n;
+    }
+
+    /**
+     * Wraps the <var>delegate</var> iterator in an {@code Iterator<ElementWithContext>}.
+     *
+     * @param delegate Must produce non-{@code null} values
+     * @return         An iterator that produces {@link ElementWithContext}s from the sequence produced by the
+     *                 <var>delegate</var>
+     */
+    public static <T> Iterator<ElementWithContext<T>>
+    iteratorWithContext(final Iterator<? extends T> delegate) {
+
+        class ElementWithContextIterator implements Iterator<ElementWithContext<T>> {
+
+            @Nullable private T current, next;
+
+            @Override public boolean
+            hasNext() {
+                return this.next != null || delegate.hasNext();
+            }
+
+            @Override public ElementWithContext<T>
+            next() {
+
+                final T previous = this.current;
+
+                if (this.next == null) {
+                    T e = delegate.next();
+                    assert e != null : "Delegate must produce non-null values";
+                    this.current = e;
+                } else {
+                    this.current = this.next;
+                    this.next    = null;
+                }
+
+                return new ElementWithContext<T>() {
+
+                    @Override @Nullable public T
+                    previous() { return previous; }
+
+                    @Override @NotNull public T
+                    current() {
+                        T result = ElementWithContextIterator.this.current;
+                        assert result != null;
+                        return result;
+                    }
+
+                    @Override @Nullable public T
+                    next() {
+                        if (ElementWithContextIterator.this.next != null) return ElementWithContextIterator.this.next;
+
+                        if (!delegate.hasNext()) return null;
+                        T e = delegate.next();
+                        assert e != null : "Delegate must produce non-null values";
+                        ElementWithContextIterator.this.next = e;
+                        return ElementWithContextIterator.this.next;
+                    }
+                };
+            }
+
+            @Override public void
+            remove() { throw new UnsupportedOperationException("remove"); }
+        }
+
+        return new ElementWithContextIterator();
+    }
+
+    /**
+     * Equivalent with {@link #foR(int, int, int) foR}{@code (}<var>start</var>{@code ,} <var>end</var>{@code ,1)}.
+     *
+     * @see #foR(int, int, int)
+     */
+    public static Iterator<Integer>
+    foR(final int start, final int end) { return IteratorUtil.foR(start, end, 1); }
+
+    /**
+     * Creates and returns an {@link Iterator Iterator&lt;Integer>} that counts from <var>start</var> (inclusively) to
+     * <var>end</var> (exclusively), with a <var>step</var> increment.
+     * <p>
+     *   More precise: Iff <var>step</var> is greater than zero, then the returned iterator produces the values
+     *   <var>start</var>, <var>start</var> {@code +} <var>step</var>, and so forth, and ends with the last value which
+     *   is less than <var>end</var>.
+     * <p>
+     * <p>
+     *   Otherwise, iff <var>step</var> is less than zero, then the returned iterator produces the values <var>start</var>,
+     *   <var>start</var> {@code +} <var>step</var>, and so forth, and ends with the last value which is greater than
+     *   <var>end</var>.
+     * <p>
+     * <p>
+     *   Otherwise, <var>step</var> is zero, and the returned iterator produces either an
+     *   infinite sequence of values <var>start</var>, or, iff <var>start</var> {@code == } <var>end</var>, an empty
+     *   sequence.
+     * </p>
+     *
+     * @throws IllegalArgumentException <var>step</var> {@code > 0 &&} <var>end</var> {@code <} <var>start</var>
+     * @throws IllegalArgumentException <var>step</var> {@code < 0 &&} <var>end</var> {@code >} <var>start</var>
+     */
+    public static Iterator<Integer>
+    foR(final int start, final int end, final int step) {
+
+        if (step == 0) {
+
+            // Optimize for the "step == 0" case.
+            return start == end ? IteratorUtil.<Integer>atEnd() : IteratorUtil.repeat(start);
+        } else
+        if (step > 0) {
+            if (end < start) throw new IllegalArgumentException("step > 0 and end < start");
+
+            return new Iterator<Integer>() {
+
+                int nextValue = start;
+
+                @Override public boolean
+                hasNext() {
+                    return this.nextValue < end;
+                }
+
+                @Override public Integer
+                next() {
+                    if (this.nextValue >= end) throw new NoSuchElementException();
+                    int result = this.nextValue;
+                    this.nextValue += step;
+                    return result;
+                }
+
+                @Override public void
+                remove() {
+                    throw new UnsupportedOperationException("remove");
+                }
+            };
+        } else
+        {
+            if (end > start) throw new IllegalArgumentException("step < 0 and end > start");
+
+            return new Iterator<Integer>() {
+
+                int nextValue = start;
+
+                @Override public boolean
+                hasNext() {
+                    return this.nextValue > end;
+                }
+
+                @Override public Integer
+                next() {
+                    if (this.nextValue <= end) throw new NoSuchElementException();
+                    int result = this.nextValue;
+                    this.nextValue += step;
+                    return result;
+                }
+
+                @Override public void
+                remove() {
+                    throw new UnsupportedOperationException("remove");
+                }
+            };
+
+        }
     }
 }
