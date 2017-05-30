@@ -28,6 +28,8 @@ package de.unkrig.commons.lang;
 
 import java.io.IOException;
 
+import de.unkrig.commons.nullanalysis.NotNullByDefault;
+
 /**
  * An {@link Appendable} which appends to a delegate appendable. This is very much in analogy with the {@link
  * java.io.FilterWriter}.
@@ -44,13 +46,13 @@ class FilterAppendable implements Appendable {
     public
     FilterAppendable(Appendable delegate) { this.delegate = delegate; }
 
-    @Override public Appendable
+    @Override @NotNullByDefault(false) public Appendable
     append(CharSequence csq) throws IOException {
         this.delegate.append(csq);
         return this;
     }
 
-    @Override public Appendable
+    @Override @NotNullByDefault(false) public Appendable
     append(CharSequence csq, int start, int end) throws IOException {
         this.delegate.append(csq, start, end);
         return this;
