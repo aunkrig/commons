@@ -349,4 +349,14 @@ class IterableUtil {
             @Override public Iterator<Integer> iterator() { return IteratorUtil.foR(start, end, step); }
         };
     }
+
+    /**
+     * @return the sequence 1, 2, 3, ... {@link Integer#MAX_VALUE}
+     */
+    public static final Iterable<Integer> NATURALS = IterableUtil.foR(1, Integer.MAX_VALUE);
+
+    /**
+     * @return the sequence 0, 1, 2, ... {@link Integer#MAX_VALUE}
+     */
+    public static final Iterable<Integer> NATURALS0 = IterableUtil.foR(0, Integer.MAX_VALUE);
 }
