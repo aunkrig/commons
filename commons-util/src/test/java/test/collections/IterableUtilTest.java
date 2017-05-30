@@ -31,35 +31,39 @@ import java.util.Iterator;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.unkrig.commons.util.collections.IterableUtil;
+import de.unkrig.commons.util.collections.ElementWithContext;
+import de.unkrig.commons.util.collections.IteratorUtil;
 
 //CHECKSTYLE JavadocMethod:OFF
 //CHECKSTYLE JavadocType:OFF
 
 public
-class IteratorUtilTest {
+class IterableUtilTest {
 
     @Test public void
-    testNaturals() {
+    testIteratorWithContext() {
 
-        Iterator<Integer> it = IterableUtil.NATURALS.iterator();
+        Iterator<ElementWithContext<Integer>> it = IteratorUtil.iteratorWithContext(IteratorUtil.foR(0, 3));
+        ElementWithContext<Integer> ewc;
 
-        Assert.assertEquals((Integer) 1, it.next());
-        Assert.assertEquals((Integer) 2, it.next());
-        Assert.assertEquals((Integer) 3, it.next());
-        Assert.assertEquals((Integer) 4, it.next());
-        Assert.assertEquals((Integer) 5, it.next());
-    }
+        Assert.assertTrue(it.hasNext());
+        ewc = it.next();
+        Assert.assertNull(ewc.previous());
+        Assert.assertEquals((Integer) 0, ewc.current());
+        Assert.assertEquals((Integer) 1, ewc.next());
 
-    @Test public void
-    testNaturals0() {
+        Assert.assertTrue(it.hasNext());
+        ewc = it.next();
+        Assert.assertEquals((Integer) 0, ewc.previous());
+        Assert.assertEquals((Integer) 1, ewc.current());
+        Assert.assertEquals((Integer) 2, ewc.next());
 
-        Iterator<Integer> it = IterableUtil.NATURALS0.iterator();
+        Assert.assertTrue(it.hasNext());
+        ewc = it.next();
+        Assert.assertEquals((Integer) 1, ewc.previous());
+        Assert.assertEquals((Integer) 2, ewc.current());
+        Assert.assertNull(ewc.next());
 
-        Assert.assertEquals((Integer) 0, it.next());
-        Assert.assertEquals((Integer) 1, it.next());
-        Assert.assertEquals((Integer) 2, it.next());
-        Assert.assertEquals((Integer) 3, it.next());
-        Assert.assertEquals((Integer) 4, it.next());
+        Assert.assertFalse(it.hasNext());
     }
 }
