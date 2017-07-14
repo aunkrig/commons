@@ -147,8 +147,8 @@ class AbstractParser<TT extends Enum<TT>> {
     /**
      * Checks the next token and consumes it if it matches.
      *
-     * @return Whether the next token's text equals <var>text</var>, or the scanner is at end-of-input and <var>text</var>
-     *         is {@code null}
+     * @return Whether the next token's text equals <var>text</var>, or the scanner is at end-of-input and
+     *         <var>text</var> is {@code null}
      */
     public boolean
     peekRead(@Nullable String text) throws ParseException {
@@ -322,7 +322,12 @@ class AbstractParser<TT extends Enum<TT>> {
             throw new ParseException("One of [none] expected instead of '" + t + "'");
 
         case 1:
-            throw new ParseException(AbstractParser.tokenTypeOrTextToString(tokenTypeOrText[0]) + " expected instead of '" + t + "'");
+            throw new ParseException(
+                AbstractParser.tokenTypeOrTextToString(tokenTypeOrText[0])
+                + " expected instead of '"
+                + t
+                + "'"
+            );
 
         default:
             {

@@ -122,7 +122,9 @@ class AssertPrinters {
      * Asserts that <var>actual</var> contains all of <var>expected</var>.
      */
     public static void
-    assertContainsAll(Collection<?> expected, Collection<?> actual) { AssertPrinters.assertContainsAll(null, expected, actual); }
+    assertContainsAll(Collection<?> expected, Collection<?> actual) {
+        AssertPrinters.assertContainsAll(null, expected, actual);
+    }
 
     /**
      * Asserts that <var>actual</var> contains all of <var>expected</var>.

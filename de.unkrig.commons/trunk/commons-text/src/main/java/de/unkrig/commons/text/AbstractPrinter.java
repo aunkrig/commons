@@ -46,7 +46,10 @@ class AbstractPrinter implements Printer {
 
     static { AssertionUtil.enableAssertionsForThisClass(); }
 
-    public enum Level { ERROR, WARN, INFO, VERBOSE, DEBUG }
+    /**
+     * The "importance levels" that a {@link Printer} supports.
+     */
+    public enum Level { ERROR, WARN, INFO, VERBOSE, DEBUG } // SUPPRESS CHECKSTYLE JavadocField
 
     private static final ThreadLocal<AbstractPrinter>
     THREAD_LOCAL_PRINTER = new InheritableThreadLocal<AbstractPrinter>() {
@@ -194,6 +197,7 @@ class AbstractPrinter implements Printer {
         final PrintWriter pw = writer instanceof PrintWriter ? (PrintWriter) writer : new PrintWriter(writer);
 
         return new AbstractPrinter() {
+            // SUPPRESS CHECKSTYLE LineLength:5
             @Override public void error(@Nullable String message)   { if (level == Level.ERROR)   { pw.println(message); } else { AbstractPrinter.this.error(message);   } }
             @Override public void warn(@Nullable String message)    { if (level == Level.WARN)    { pw.println(message); } else { AbstractPrinter.this.warn(message);    } }
             @Override public void info(@Nullable String message)    { if (level == Level.INFO)    { pw.println(message); } else { AbstractPrinter.this.info(message);    } }
@@ -218,6 +222,7 @@ class AbstractPrinter implements Printer {
         final PrintWriter pw = writer instanceof PrintWriter ? (PrintWriter) writer : new PrintWriter(writer);
 
         return new AbstractPrinter() {
+            // SUPPRESS CHECKSTYLE LineLength:5
             @Override public void error(@Nullable String message)   { if (levels.contains(Level.ERROR))   { pw.println(message); } else { AbstractPrinter.this.error(message);   } }
             @Override public void warn(@Nullable String message)    { if (levels.contains(Level.WARN))    { pw.println(message); } else { AbstractPrinter.this.warn(message);    } }
             @Override public void info(@Nullable String message)    { if (levels.contains(Level.INFO))    { pw.println(message); } else { AbstractPrinter.this.info(message);    } }
@@ -228,6 +233,7 @@ class AbstractPrinter implements Printer {
 
     // ========================== Redirection to Consumer<String> ==========================
 
+    // SUPPRESS CHECKSTYLE LineLength:10
     /** @see #redirect(Level, ConsumerWhichThrows) */
     public final AbstractPrinter redirectError(@Nullable ConsumerWhichThrows<? super String, ? extends RuntimeException> errorConsumer)     { return this.redirect(Level.ERROR, errorConsumer);     }
     /** @see #redirect(Level, ConsumerWhichThrows) */
@@ -244,7 +250,8 @@ class AbstractPrinter implements Printer {
      * <var>level</var>to the given <var>messageConsumer</var>, and forwards all other messages to {@code this} {@link
      * AbstractWriter}.
      * <p>
-     *   Iff <var>level</var> {@code == null ||} <var>messageConsumer</var> {@code == null}, then {@code this} object is returned instead.
+     *   Iff <var>level</var> {@code == null ||} <var>messageConsumer</var> {@code == null}, then {@code this} object is
+     *   returned instead.
      * </p>
      */
     public final AbstractPrinter
@@ -256,6 +263,7 @@ class AbstractPrinter implements Printer {
         if (level == null || messageConsumer == null) return this;
 
         return new AbstractPrinter() {
+            // SUPPRESS CHECKSTYLE LineLength:5
             @Override public void error(@Nullable String message)   { if (level == Level.ERROR)   { if (message != null) messageConsumer.consume(message); } else { AbstractPrinter.this.error(message);   } }
             @Override public void warn(@Nullable String message)    { if (level == Level.WARN)    { if (message != null) messageConsumer.consume(message); } else { AbstractPrinter.this.warn(message);    } }
             @Override public void info(@Nullable String message)    { if (level == Level.INFO)    { if (message != null) messageConsumer.consume(message); } else { AbstractPrinter.this.info(message);    } }
@@ -282,6 +290,7 @@ class AbstractPrinter implements Printer {
         if (levels == null || levels.isEmpty() || messageConsumer == null) return this;
 
         return new AbstractPrinter() {
+            // SUPPRESS CHECKSTYLE LineLength:5
             @Override public void error(@Nullable String message)   { if (levels.contains(Level.ERROR))   { if (message != null) messageConsumer.consume(message); } else { AbstractPrinter.this.error(message);   } }
             @Override public void warn(@Nullable String message)    { if (levels.contains(Level.WARN))    { if (message != null) messageConsumer.consume(message); } else { AbstractPrinter.this.warn(message);    } }
             @Override public void info(@Nullable String message)    { if (levels.contains(Level.INFO))    { if (message != null) messageConsumer.consume(message); } else { AbstractPrinter.this.info(message);    } }
@@ -292,6 +301,7 @@ class AbstractPrinter implements Printer {
 
     // ========================== Discarding individual message levels ==========================
 
+    // SUPPRESS CHECKSTYLE LineLength:10
     /** @see #discard(Level) */
     public final AbstractPrinter discardError(@Nullable ConsumerWhichThrows<? super String, ? extends RuntimeException> errorConsumer)     { return this.discard(Level.ERROR);     }
     /** @see #discard(Level) */
@@ -316,6 +326,7 @@ class AbstractPrinter implements Printer {
         if (level == null) return this;
 
         return new AbstractPrinter() {
+            // SUPPRESS CHECKSTYLE LineLength:5
             @Override public void error(@Nullable String message)   { if (level != Level.ERROR)   AbstractPrinter.this.error(message);   }
             @Override public void warn(@Nullable String message)    { if (level != Level.WARN)    AbstractPrinter.this.warn(message);    }
             @Override public void info(@Nullable String message)    { if (level != Level.INFO)    AbstractPrinter.this.info(message);    }
@@ -328,7 +339,8 @@ class AbstractPrinter implements Printer {
      * Creates and returns an {@link AbstractPrinter} which discards all messages of the given <var>levels</var>, and
      * forwards all other messages to {@code this} {@link AbstractWriter}.
      * <p>
-     *   Iff <var>levels</var> {@code == null ||} <var>levels</var>{@code .isEmpty()}, then {@code this} object is returned instead.
+     *   Iff <var>levels</var> {@code == null ||} <var>levels</var>{@code .isEmpty()}, then {@code this} object is
+     *   returned instead.
      * </p>
      */
     public final AbstractPrinter
@@ -337,6 +349,7 @@ class AbstractPrinter implements Printer {
         if (levels == null || levels.isEmpty()) return this;
 
         return new AbstractPrinter() {
+            // SUPPRESS CHECKSTYLE LineLength:5
             @Override public void error(@Nullable String message)   { if (!levels.contains(Level.ERROR))   AbstractPrinter.this.error(message);   }
             @Override public void warn(@Nullable String message)    { if (!levels.contains(Level.WARN))    AbstractPrinter.this.warn(message);    }
             @Override public void info(@Nullable String message)    { if (!levels.contains(Level.INFO))    AbstractPrinter.this.info(message);    }

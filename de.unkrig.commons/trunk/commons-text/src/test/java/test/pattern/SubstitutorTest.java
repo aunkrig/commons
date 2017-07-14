@@ -37,7 +37,10 @@ import de.unkrig.commons.lang.StringUtil;
 import de.unkrig.commons.text.pattern.PatternUtil;
 import de.unkrig.commons.text.pattern.Substitutor;
 
-public class SubstitutorTest {
+// CHECKSTYLE Javadoc:OFF
+
+public
+class SubstitutorTest {
 
     @Test public void
     testSubstitutor() {

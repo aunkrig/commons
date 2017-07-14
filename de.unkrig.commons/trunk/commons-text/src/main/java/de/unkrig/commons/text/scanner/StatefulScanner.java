@@ -58,9 +58,15 @@ import de.unkrig.commons.nullanalysis.Nullable;
 public
 class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractScanner<TT> {
 
-    @Nullable public final EnumSet<S> ANY_STATE = null;
+    /**
+     * Special value for some method parameters.
+     */
+    @Nullable public final EnumSet<S> ANY_STATE = null; // SUPPRESS CHECKSTYLE MemberName
 
-    @Nullable public final S REMAIN = null;
+    /**
+     * Special value for some method parameters.
+     */
+    @Nullable public final S REMAIN = null; // SUPPRESS CHECKSTYLE MemberName
 
     public
     StatefulScanner(Class<S> states) {

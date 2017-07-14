@@ -49,6 +49,7 @@ class ProxyPrinter extends AbstractPrinter {
      */
     public ProxyPrinter(Printer delegate) { this.delegate = delegate; }
 
+    // SUPPRESS CHECKSTYLE LineLength:16
     @Override public void error(@Nullable String message)                                   { this.delegate.error(message);               }
     @Override public void error(@Nullable String message, @Nullable Throwable t)            { this.delegate.error(message, t);            }
     @Override public void error(String pattern, Object... arguments)                        { this.delegate.error(pattern, arguments);    }
