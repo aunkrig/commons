@@ -335,7 +335,7 @@ class CommandLineOptions {
                         : new String[] { "-" + name, "--" + name }
                     )) {
                         Method prev = this.allOptions.put(name2, m);
-                        assert prev == null : "Two methods map to option \"" + name2 + "\": \"" + prev + "\" and \"" + m + "\"";
+                        assert prev == null : "Two methods map to option \"" + name2 + "\": \"" + prev + "\" and \"" + m + "\""; // SUPPRESS CHECKSTYLE LineLength
                     }
                 }
 
