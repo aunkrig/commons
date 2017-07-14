@@ -34,7 +34,11 @@ import java.nio.CharBuffer;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
-public class Readers {
+/**
+ * Utility functionality related to {@link Reader}s.
+ */
+public final
+class Readers {
 
     private Readers() {}
 
@@ -62,20 +66,20 @@ public class Readers {
      */
     public static String
     readAll(Reader reader, boolean closeReader) throws IOException {
-    
+
         char[]        buf = new char[4096];
         StringBuilder sb  = new StringBuilder();
-    
+
         try {
-    
+
             for (;;) {
                 int n = reader.read(buf);
                 if (n == -1) break;
                 sb.append(buf, 0, n);
             }
-    
+
             if (closeReader) reader.close();
-    
+
             return sb.toString();
         } finally {
             if (closeReader) {
@@ -91,20 +95,20 @@ public class Readers {
     public static Reader
     asReader(final CharSequence cs) {
         return new Reader() {
-    
+
             int pos;
-    
+
             @Override public int
             read() { return this.pos >= cs.length() ? -1 : cs.charAt(this.pos++); }
-    
+
             @Override public int
             read(@Nullable char[] cbuf, int off, int len) {
                 assert cbuf != null;
-    
+
                 if (len <= 0) return 0;
-    
+
                 if (this.pos >= cs.length()) return -1;
-    
+
                 int end = cs.length();
                 if (this.pos + len > end) {
                     len = end - this.pos;
@@ -114,7 +118,7 @@ public class Readers {
                 for (int i = this.pos; i < end; cbuf[off++] = cs.charAt(i++));
                 return len;
             }
-    
+
             @Override public void
             close() {}
         };
@@ -125,22 +129,22 @@ public class Readers {
      */
     public static Reader
     singlingFilterReader(Reader delegate) {
-    
+
         return new FilterReader(delegate) {
-    
+
             @NotNullByDefault(false) @Override public int
             read(char[] cbuf, int off, int len) throws IOException {
                 return this.in.read(cbuf, off, len <= 0 ? 0 : 1);
             }
-    
+
             @NotNullByDefault(false) @Override public int
             read(CharBuffer target) throws IOException {
-    
+
                 if (target.remaining() == 0) return 0;
-    
+
                 int c = this.read();
                 if (c == -1) return -1;
-    
+
                 target.put((char) c);
                 return 1;
             }

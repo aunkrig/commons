@@ -33,7 +33,13 @@ import javax.swing.text.Segment;
 
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 
-public class Writers {
+/**
+ * Utility functionality related to {@link Writer}s.
+ */
+public final
+class Writers {
+
+    private Writers() {}
 
     /**
      * A writer that ignores any data written to it.
@@ -56,6 +62,7 @@ public class Writers {
         if (delegate instanceof Writer) return (Writer) delegate;
         return new Writer() {
 
+            // SUPPRESS CHECKSTYLE LineLength:8
             @Override public void   write(int c)                                 throws IOException { delegate.append((char) c);                          }
             @Override public void   write(char[] cbuf)                           throws IOException { delegate.append(new Segment(cbuf, 0, cbuf.length)); }
             @Override public void   write(char[] cbuf, int off, int len)         throws IOException { delegate.append(new Segment(cbuf, off, len));       }

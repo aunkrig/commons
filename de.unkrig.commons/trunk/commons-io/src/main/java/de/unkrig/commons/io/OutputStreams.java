@@ -43,7 +43,11 @@ import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
-public class OutputStreams {
+/**
+ * Utility functionality related to {@link OutputStream}s.
+ */
+public final
+class OutputStreams {
 
     private OutputStreams() {}
 
@@ -124,7 +128,12 @@ public class OutputStreams {
 
         Produmer<Long, Long> count = ConsumerUtil.store();
 
-        writeContents.consume(OutputStreams.tee(outputStream, OutputStreams.lengthWritten(ConsumerUtil.cumulate(count, 0L))));
+        writeContents.consume(
+            OutputStreams.tee(
+                outputStream,
+                OutputStreams.lengthWritten(ConsumerUtil.cumulate(count, 0L))
+            )
+        );
 
         Long result = count.produce();
         return result == null ? 0L : result;
