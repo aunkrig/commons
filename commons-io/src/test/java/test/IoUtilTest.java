@@ -170,7 +170,9 @@ class IoUtilTest {
      */
     @Test public void
     findOnPathTest2() throws IOException {
+
         final Pattern p = Pattern.compile("commons-lang-\\d+(\\.\\d+)*(-SNAPSHOT)?\\.jar");
+
         File[] jarFiles = new File("../commons-lang/target").listFiles(new FilenameFilter() {
 
             @NotNullByDefault(false) @Override public boolean

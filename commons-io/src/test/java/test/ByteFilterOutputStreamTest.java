@@ -66,6 +66,7 @@ class ByteFilterOutputStreamTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         final boolean[] wasClosed = new boolean[1];
+
         OutputStream fos = new FilterOutputStream(baos) {
             @Override public void close() throws IOException { wasClosed[0] = true; super.close(); }
         };

@@ -44,7 +44,11 @@ import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
-public class InputStreams {
+/**
+ * Utility functionality related to {@link InputStream}s.
+ */
+public final
+class InputStreams {
 
     private InputStreams() {}
 
