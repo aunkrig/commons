@@ -56,6 +56,7 @@ import junit.framework.TestCase;
 
 // CHECKSTYLE JavadocMethod:OFF
 // CHECKSTYLE JavadocType:OFF
+//CHECKSTYLE LineLength:OFF
 
 public
 class PatternUtilTest extends TestCase {
@@ -139,7 +140,7 @@ class PatternUtilTest extends TestCase {
     testReplacementWithCharFilterReader() throws IOException {
         Reader r = new CharFilterReader(
             new StringReader("line1\nline2 \t// COMMENT\nline3"),
-                new CharFilter<Void>() {
+            new CharFilter<Void>() {
 
                 @Override @Nullable public Void
                 run(Reader in, Writer out) throws IOException {
@@ -164,8 +165,8 @@ class PatternUtilTest extends TestCase {
             StringBuilder orig      = new StringBuilder();
             StringBuilder patched   = new StringBuilder();
             StringBuilder repatched = new StringBuilder();
-            Substitutor   patcher   = PatternUtil.substitutor(Pattern.compile("StringBuilder"), "STRING_"+"BUILDER");
-            Substitutor   repatcher = PatternUtil.substitutor(Pattern.compile("ST"+"RING_BUILDER"), "StringBuilder");
+            Substitutor   patcher   = PatternUtil.substitutor(Pattern.compile("StringBuilder"), "STRING_" + "BUILDER");
+            Substitutor   repatcher = PatternUtil.substitutor(Pattern.compile("ST" + "RING_BUILDER"), "StringBuilder");
             for (;;) {
                 int n = r.read(buffer);
                 if (n == -1) break;
@@ -278,7 +279,7 @@ class PatternUtilTest extends TestCase {
 
         // Then, test the "replaceAllFilterWriter()".
         StringWriter sw = new StringWriter();
-        Writer w = PatternUtil.replaceAllFilterWriter(pattern, PatternUtil.replacementStringMatchReplacer(replacementString), sw);
+        Writer       w  = PatternUtil.replaceAllFilterWriter(pattern, PatternUtil.replacementStringMatchReplacer(replacementString), sw);
         w.write(subject);
         w.close();
         Assert.assertEquals(expected, sw.toString());

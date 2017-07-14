@@ -484,8 +484,8 @@ class Glob implements Predicate<String> {
      * <p>
      * The {@link #replace(String)} method of the returned {@link Glob} returns checks whether the {@link
      * Glob#replace(String)} on the <var>pattern</var> returns nuon-{@code null} and the <var>predicate</var> evaluates
-     * to {@code true}; if so, it returns the result of the {@link Glob#replace(String)} call; otherwise it returns {@code
-     * null}.
+     * to {@code true}; if so, it returns the result of the {@link Glob#replace(String)} call; otherwise it returns
+     * {@code null}.
      */
     public static Glob
     and(final Glob pattern, final Predicate<? super String> predicate) {

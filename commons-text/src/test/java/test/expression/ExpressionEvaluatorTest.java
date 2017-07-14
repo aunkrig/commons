@@ -60,12 +60,13 @@ import de.unkrig.commons.text.parser.ParseException;
 
 //CHECKSTYLE JavadocMethod:OFF
 //CHECKSTYLE JavadocType:OFF
+//CHECKSTYLE LineLength:OFF
 
 public
 class ExpressionEvaluatorTest {
 
     private static final Map<String, Object> VARIABLES = ExpressionEvaluatorTest.map(
-        "bo", false,
+        "bo", false,                           // SUPPRESS CHECKSTYLE WrapMethod:11
         "by", (byte) 1,
         "sh", (short) 2,
         "in", 3,
@@ -92,7 +93,6 @@ class ExpressionEvaluatorTest {
     testIntegerLiterals() throws EvaluationException, ParseException {
 
         // INT
-
         ExpressionEvaluatorTest.assertExpressionEvaluatesTo(123,                                            "123");
         ExpressionEvaluatorTest.assertExpressionEvaluatesTo(Integer.MAX_VALUE,                              "2147483647");
         ExpressionEvaluatorTest.assertExpressionParsingFails("Integer literal '2147483648' out of range",   "2147483648");
@@ -271,14 +271,14 @@ class ExpressionEvaluatorTest {
 
     @Test public void
     testNewClass() throws EvaluationException, ParseException {
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                         "String",                NEW_CLASS_WITHOUT_KEYWORD, NEW_CLASS_WITHOUT_PARENTHESES); // SUPPRESS CHECKSTYLE LineLength
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                         "String + String",       NEW_CLASS_WITHOUT_KEYWORD, NEW_CLASS_WITHOUT_PARENTHESES); // SUPPRESS CHECKSTYLE LineLength
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                         "String",                NEW_CLASS_WITHOUT_KEYWORD, NEW_CLASS_WITHOUT_PARENTHESES);
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                         "String + String",       NEW_CLASS_WITHOUT_KEYWORD, NEW_CLASS_WITHOUT_PARENTHESES);
         ExpressionEvaluatorTest.assertExpressionEvaluatesTo(true,                       "String().isEmpty",      NEW_CLASS_WITHOUT_KEYWORD);
         ExpressionEvaluatorTest.assertExpressionEvaluationFails(
             "Cannot retrieve nonstatic attribute 'isEmpty' in static context",
             "String.isEmpty"
         );
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                                   "java.lang.String",      NEW_CLASS_WITHOUT_KEYWORD, NEW_CLASS_WITHOUT_PARENTHESES); // SUPPRESS CHECKSTYLE LineLength
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                                   "java.lang.String",      NEW_CLASS_WITHOUT_KEYWORD, NEW_CLASS_WITHOUT_PARENTHESES);
         ExpressionEvaluatorTest.assertExpressionParsingFails("Unknown variable 'javaa'",          "javaa.lang.String");
         ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                                   "String()",              NEW_CLASS_WITHOUT_KEYWORD);
         ExpressionEvaluatorTest.assertExpressionEvaluatesTo("foo",                                "String(\"foo\")",       NEW_CLASS_WITHOUT_KEYWORD);

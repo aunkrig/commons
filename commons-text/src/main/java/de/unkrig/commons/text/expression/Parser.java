@@ -669,8 +669,12 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
                 ));
             } else
             if ((operator = this.peekReadEnum(
-                BinaryOperator.EQUAL, BinaryOperator.NOT_EQUAL, BinaryOperator.LESS, BinaryOperator.LESS_EQUAL,
-                BinaryOperator.GREATER, BinaryOperator.GREATER_EQUAL
+                BinaryOperator.EQUAL,
+                BinaryOperator.NOT_EQUAL,
+                BinaryOperator.LESS,
+                BinaryOperator.LESS_EQUAL,
+                BinaryOperator.GREATER,
+                BinaryOperator.GREATER_EQUAL
             )) != null) {
                 lhs = Parser.value(this.binaryOperation(lhs.toValue(), operator, this.parseRelational().toValue()));
             } else
@@ -934,7 +938,7 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
             this.read(")");
 
             if (this.peek(
-                "~", "!", "(",
+                "~", "!", "(",                              // SUPPRESS CHECKSTYLE WrapMethod:3
                 IDENTIFIER,
                 "this", "new",
                 INTEGER_LITERAL, CHARACTER_LITERAL, STRING_LITERAL, FLOATING_POINT_LITERAL

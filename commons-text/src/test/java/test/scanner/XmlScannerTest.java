@@ -38,6 +38,8 @@ import de.unkrig.commons.text.scanner.XmlScanner.TokenType;
 
 //CHECKSTYLE JavadocMethod:OFF
 //CHECKSTYLE JavadocType:OFF
+//CHECKSTYLE WrapMethod:OFF
+//CHECKSTYLE LineLength:OFF
 
 public
 class XmlScannerTest {
@@ -114,7 +116,7 @@ class XmlScannerTest {
 
                 for (int j = 0; j < cgs.length; j++) {
 
-                    if (i >= tokenTypesAndTokenTexts.length || tokenTypesAndTokenTexts[i] instanceof TokenType ) {
+                    if (i >= tokenTypesAndTokenTexts.length || tokenTypesAndTokenTexts[i] instanceof TokenType) {
                         Assert.fail((
                             "Capturing group count mismatch at index "
                             + i

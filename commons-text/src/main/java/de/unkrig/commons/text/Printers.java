@@ -131,8 +131,8 @@ class Printers {
         @Override public void error(@Nullable String message)   { System.err.println(message); }
         @Override public void warn(@Nullable String message)    { System.err.println(message); }
         @Override public void info(@Nullable String message)    { System.out.println(message); }
-        @Override public void verbose(@Nullable String message) {                              }
-        @Override public void debug(@Nullable String message)   {                              }
+        @Override public void verbose(@Nullable String message) {}
+        @Override public void debug(@Nullable String message)   {}
     };
 
     /**
@@ -177,7 +177,9 @@ class Printers {
      * @see MessageFormat
      */
     public static void
-    error(String pattern, Throwable t, Object... arguments) { AbstractPrinter.getContextPrinter().error(pattern, t, arguments); }
+    error(String pattern, Throwable t, Object... arguments) {
+        AbstractPrinter.getContextPrinter().error(pattern, t, arguments);
+    }
 
     /**
      * Prints a warning condition on the context printer.
@@ -243,7 +245,12 @@ class Printers {
     @Deprecated public static synchronized void
     withPrinter(Printer printer, Runnable runnable) {
 
-        AbstractPrinter ap = printer instanceof AbstractPrinter ? (AbstractPrinter) printer : AbstractPrinter.fromPrinter(printer);
+        AbstractPrinter ap = (
+            printer instanceof AbstractPrinter
+            ? (AbstractPrinter) printer
+            : AbstractPrinter.fromPrinter(printer)
+        );
+
         ap.run(runnable);
     }
 
@@ -253,7 +260,12 @@ class Printers {
     @Deprecated public static synchronized <EX extends Throwable> void
     withPrinter(Printer printer, RunnableWhichThrows<EX> runnable) throws EX {
 
-        AbstractPrinter ap = printer instanceof AbstractPrinter ? (AbstractPrinter) printer : AbstractPrinter.fromPrinter(printer);
+        AbstractPrinter ap = (
+            printer instanceof AbstractPrinter
+            ? (AbstractPrinter) printer
+            : AbstractPrinter.fromPrinter(printer)
+        );
+
         ap.run(runnable);
     }
 
@@ -283,7 +295,7 @@ class Printers {
             return;
         }
 
-        FileOutputStream os = new FileOutputStream(file);
+        FileOutputStream  os = new FileOutputStream(file);
         final PrintWriter pw = new PrintWriter(
             charset == null
             ? new OutputStreamWriter(os)
@@ -293,6 +305,7 @@ class Printers {
 
             final Printer delegate = AbstractPrinter.getContextPrinter();
             new AbstractPrinter() {
+                // SUPPRESS CHECKSTYLE LineLength:5
                 @Override public void error(@Nullable String message)   { if (level == Level.ERROR)   { pw.println(message); } else { delegate.error(message);   } }
                 @Override public void warn(@Nullable String message)    { if (level == Level.WARN)    { pw.println(message); } else { delegate.warn(message);    } }
                 @Override public void info(@Nullable String message)    { if (level == Level.INFO)    { pw.println(message); } else { delegate.info(message);    } }
@@ -345,6 +358,7 @@ class Printers {
                 : new OutputStreamWriter(os, charset)
             );
             new AbstractPrinter() {
+                // SUPPRESS CHECKSTYLE LineLength:5
                 @Override public void error(@Nullable String message)   { if (levels.contains(Level.ERROR))   { pw.println(message); } else { delegate2.error(message);   } }
                 @Override public void warn(@Nullable String message)    { if (levels.contains(Level.WARN))    { pw.println(message); } else { delegate2.warn(message);    } }
                 @Override public void info(@Nullable String message)    { if (levels.contains(Level.INFO))    { pw.println(message); } else { delegate2.info(message);    } }

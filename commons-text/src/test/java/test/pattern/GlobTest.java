@@ -36,6 +36,7 @@ import de.unkrig.commons.text.pattern.Pattern2;
 
 //CHECKSTYLE JavadocMethod:OFF
 //CHECKSTYLE JavadocType:OFF
+//CHECKSTYLE LineLength:OFF
 
 public
 class GlobTest {
