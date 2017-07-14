@@ -261,10 +261,8 @@ class LinearMap<K, V> extends AbstractMap<K, V> {
                     return (V) result;
                 }
 
-                @Override
-                public String toString() {
-                    return LinearMap.this.keys[idx] + "=" + LinearMap.this.values[idx];
-                }
+                @Override public String
+                toString() { return LinearMap.this.keys[idx] + "=" + LinearMap.this.values[idx]; }
             };
         }
     }

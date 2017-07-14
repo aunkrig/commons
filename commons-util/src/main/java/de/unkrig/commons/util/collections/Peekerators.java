@@ -35,79 +35,80 @@ import de.unkrig.commons.nullanalysis.Nullable;
 /**
  * Utility functionality related to {@link Peekerator}s.
  */
-public class Peekerators  {
+public final
+class Peekerators  {
 
     static { AssertionUtil.enableAssertionsForThisClass(); }
 
-	private Peekerators() {}
+    private Peekerators() {}
 
-	/**
-	 * Wraps a given {@link Iterator} as a {@link Peekerator}. That peekerator implements the {@link Peekerator#peek()}
-	 * operation by reading ahead (at most) one element from the underlying iterator.
-	 */
-	public static <E> Peekerator<E>
-	from(final Iterator<E> delegate) {
+    /**
+     * Wraps a given {@link Iterator} as a {@link Peekerator}. That peekerator implements the {@link Peekerator#peek()}
+     * operation by reading ahead (at most) one element from the underlying iterator.
+     */
+    public static <E> Peekerator<E>
+    from(final Iterator<E> delegate) {
 
-		return new Peekerator<E>() {
+        return new Peekerator<E>() {
 
-			boolean     readAhead;
-			@Nullable E buffer;    // Valid iff readAhead==true
+            boolean     readAhead;
+            @Nullable E buffer;    // Valid iff readAhead==true
 
-			@Override public boolean
-			hasNext() { return this.readAhead || delegate.hasNext(); }
+            @Override public boolean
+            hasNext() { return this.readAhead || delegate.hasNext(); }
 
-			@Override @Nullable public E
-			next() {
-				if (this.readAhead) {
-					this.readAhead = false;
-					return this.buffer;
-				}
-				return delegate.next();
-			}
+            @Override @Nullable public E
+            next() {
+                if (this.readAhead) {
+                    this.readAhead = false;
+                    return this.buffer;
+                }
+                return delegate.next();
+            }
 
-			@Override public void
-			remove() { delegate.remove(); }
+            @Override public void
+            remove() { delegate.remove(); }
 
-			@Override @Nullable public E
-			peek() {
+            @Override @Nullable public E
+            peek() {
 
-				if (this.readAhead) return this.buffer;
+                if (this.readAhead) return this.buffer;
 
-				this.buffer    = delegate.next();
-				this.readAhead = true;
-				return this.buffer;
-			}
-		};
-	}
+                this.buffer    = delegate.next();
+                this.readAhead = true;
+                return this.buffer;
+            }
+        };
+    }
 
-	/**
-	 * Wraps a given {@link ListIterator} as a {@link Peekerator}. That peekerator implements the {@link
-	 * Peekerator#peek()} operation by calling {@link ListIterator#next()} and immediately {@link
-	 * ListIterator#previous()}.
-	 * <p>
-	 *   This implementation may perform slightly better than {@link #from(Iterator)}.
-	 * </p>
-	 */
-	public static <E> Peekerator<E>
-	from(final ListIterator<E> delegate) {
+    /**
+     * Wraps a given {@link ListIterator} as a {@link Peekerator}. That peekerator implements the {@link
+     * Peekerator#peek()} operation by calling {@link ListIterator#next()} and immediately {@link
+     * ListIterator#previous()}.
+     * <p>
+     *   This implementation may perform slightly better than {@link #from(Iterator)}.
+     * </p>
+     */
+    public static <E> Peekerator<E>
+    from(final ListIterator<E> delegate) {
 
-	    return new Peekerator<E>() {
+        return new Peekerator<E>() {
 
-	        @Override public boolean
-	        hasNext() { return delegate.hasNext(); }
+            @Override public boolean
+            hasNext() { return delegate.hasNext(); }
 
-	        @Override @Nullable public E
-	        next() { return delegate.next(); }
+            @Override @Nullable public E
+            next() { return delegate.next(); }
 
-	        @Override public void
-	        remove() { delegate.remove(); }
+            @Override public void
+            remove() { delegate.remove(); }
 
-	        @Override @Nullable public E
-	        peek() {
-	            E result = delegate.next();
-	            delegate.previous();
-	            return result;
-	        }
-	    };
-	}
+            @Override @Nullable public E
+            peek() {
+                E result = delegate.next();
+                delegate.previous();
+                return result;
+            }
+        };
+    }
 }

@@ -207,7 +207,7 @@ class Html {
 
                 if (to.isField() || to.isEnumConstant()) {
                     defaultLabelHtml += to.name();
-            	} else
+                } else
                 if (to.isConstructor()) {
                     ConstructorDoc toConstructorDoc = (ConstructorDoc) to;
                     defaultLabelHtml += (
@@ -511,7 +511,7 @@ class Html {
             FieldDoc fd = (FieldDoc) doc;
             if (fd.isEnumConstant()) return fd.name();
 
-			Object cv = fd.constantValue();
+            Object cv = fd.constantValue();
             if (cv == null) {
                 rootDoc.printError(
                     doc.position(),

@@ -367,7 +367,9 @@ class CommandLineOptions {
                     }
 
                     Set<Class<?>> optionGroups = this.optionToOptionGroups.get(m);
-                    if (optionGroups == null) this.optionToOptionGroups.put(m, (optionGroups = new HashSet<Class<?>>()));
+                    if (optionGroups == null) {
+                        this.optionToOptionGroups.put(m, (optionGroups = new HashSet<Class<?>>()));
+                    }
 
                     optionGroups.add(optionGroup);
 
@@ -598,7 +600,10 @@ class CommandLineOptions {
             Set<Class<?>> optionGroups = this.optionToOptionGroups.get(option);
             if (optionGroups != null) {
                 for (Class<?> optionGroup : optionGroups) {
-                    if (this.singularOptionGroups.contains(optionGroup) && this.actualOptionGroups.contains(optionGroup)) {
+                    if (
+                        this.singularOptionGroups.contains(optionGroup)
+                        && this.actualOptionGroups.contains(optionGroup)
+                    ) {
                         throw new ConflictingOptions(optionGroup, option, optionName);
                     }
                 }

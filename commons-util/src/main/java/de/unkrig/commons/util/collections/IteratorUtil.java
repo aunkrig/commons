@@ -323,9 +323,9 @@ class IteratorUtil {
      *   is less than <var>end</var>.
      * <p>
      * <p>
-     *   Otherwise, iff <var>step</var> is less than zero, then the returned iterator produces the values <var>start</var>,
-     *   <var>start</var> {@code +} <var>step</var>, and so forth, and ends with the last value which is greater than
-     *   <var>end</var>.
+     *   Otherwise, iff <var>step</var> is less than zero, then the returned iterator produces the values
+     *   <var>start</var>, <var>start</var> {@code +} <var>step</var>, and so forth, and ends with the last value which
+     *   is greater than <var>end</var>.
      * <p>
      * <p>
      *   Otherwise, <var>step</var> is zero, and the returned iterator produces either an
