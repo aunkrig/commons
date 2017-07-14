@@ -34,37 +34,38 @@ import de.unkrig.commons.nullanalysis.NotNullByDefault;
 /**
  * Extends the {@link Iterator} with the capability to "peek" an element.
  *
+ * @param <E>   Der ELement-Typ
  * @see #peek()
  */
-@NotNullByDefault(false)
-public interface Peekerator<E> extends Iterator<E> {
+@NotNullByDefault(false) public
+interface Peekerator<E> extends Iterator<E> {
 
-	/**
-	 * Consumes and returns the next element in this iteration.
-	 *
-	 * @return                        The next element in this iteration
-	 * @throws NoSuchElementException This iteration has no more elements
-	 */
-	@Override E next();
+    /**
+     * Consumes and returns the next element in this iteration.
+     *
+     * @return                        The next element in this iteration
+     * @throws NoSuchElementException This iteration has no more elements
+     */
+    @Override E next();
 
-	/**
-	 * Just like {@link #next()}, but does <em>not</em> consume the next element.
-	 * I.e. the next invocation of {@link #peek()} of {@link #next()} will return the <em>same</em> element that this
-	 * invocation returns.
-	 *
-	 * @return                        The next element in this iteration
-	 * @throws NoSuchElementException This iteration has no more elements
-	 */
-	E peek();
+    /**
+     * Just like {@link #next()}, but does <em>not</em> consume the next element.
+     * I.e. the next invocation of {@link #peek()} of {@link #next()} will return the <em>same</em> element that this
+     * invocation returns.
+     *
+     * @return                        The next element in this iteration
+     * @throws NoSuchElementException This iteration has no more elements
+     */
+    E peek();
 
-	/**
-	 * Removes the last element returned by {@link #next()} or {@link #peek()} from the underlying collection.
-	 *
-	 * @throws UnsupportedOperationException This operation is not supported by this peekerator, probably because
-	 *                                       this peekerator is not backed by a collection
-	 * @throws IllegalStateException         The {@link #next()} or {@link #peek()} methods have not yet been called
-	 * @throws IllegalStateException         The {@link #remove()} method has already been called after the last call
-	 *                                       to {@link #next()} or {@link #peek()}
-	 */
-	@Override void remove();
+    /**
+     * Removes the last element returned by {@link #next()} or {@link #peek()} from the underlying collection.
+     *
+     * @throws UnsupportedOperationException This operation is not supported by this peekerator, probably because
+     *                                       this peekerator is not backed by a collection
+     * @throws IllegalStateException         The {@link #next()} or {@link #peek()} methods have not yet been called
+     * @throws IllegalStateException         The {@link #remove()} method has already been called after the last call
+     *                                       to {@link #next()} or {@link #peek()}
+     */
+    @Override void remove();
 }

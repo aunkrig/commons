@@ -178,7 +178,7 @@ class LogUtil {
     @Nullable public static <T> T
     getLoggingProperty(String propertyName, Class<T> type) throws ParseException, EvaluationException {
 
-        String propertyValue = LogUtil.getLoggingProperty(propertyName);
+        String propertyValue = LogUtil.LOG_MANAGER.getProperty(propertyName);
         if (propertyValue == null) return null;
 
         Map<String, Object> variables = MapUtil.map("propertyName", propertyName, "type", type);
@@ -201,7 +201,6 @@ class LogUtil {
     throws ParseException, EvaluationException {
 
         String spec = LogUtil.LOG_MANAGER.getProperty(propertyName);
-
         if (spec == null) return defaulT;
 
         Map<String, Object> variables = MapUtil.map("propertyName", propertyName, "type", type);

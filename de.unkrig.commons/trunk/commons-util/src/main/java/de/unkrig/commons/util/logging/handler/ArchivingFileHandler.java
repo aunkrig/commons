@@ -131,7 +131,8 @@ class ArchivingFileHandler extends AbstractStreamHandler {
 
             // Remember size limit and time table.
             this.sizeLimit = LogUtil.getLoggingProperty(
-                propertyNamePrefix + ".sizeLimit", ArchivingFileHandler.DEFAULT_SIZE_LIMIT
+                propertyNamePrefix + ".sizeLimit",
+                ArchivingFileHandler.DEFAULT_SIZE_LIMIT
             );
             this.timeTable = LogUtil.getLoggingProperty(
                 propertyNamePrefix + ".timeTable",

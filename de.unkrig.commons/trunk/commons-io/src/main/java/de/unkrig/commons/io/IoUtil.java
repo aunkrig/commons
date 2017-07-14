@@ -1194,18 +1194,15 @@ class IoUtil {
                                 delegate.consume(os);
 
                             } catch (RuntimeException re) {
-
                                 try { os.close(); } catch (Exception e2) {}
                                 throw re;
-                            } catch (Error e) { // SUPPRESS CHECKSTYLE IllegalCatch
-
+                            } catch (Error e) {     // SUPPRESS CHECKSTYLE IllegalCatch
                                 try { os.close(); } catch (Exception e2) {}
                                 throw e;
                             } catch (Throwable t) { // SUPPRESS CHECKSTYLE IllegalCatch
-
                                 try { os.close(); } catch (Exception e2) {}
-
-                                // "t" must be a checked exception.
+                            	
+                                // At this point, "t" MUST be a checked exception.
                                 @SuppressWarnings("unchecked") EX tmp = (EX) t;
                                 throw tmp;
                             }
@@ -1257,15 +1254,14 @@ class IoUtil {
             }
         } catch (RuntimeException re) {
             newFile.delete();
-
             throw re;
-        } catch (Error e) { // SUPPRESS CHECKSTYLE IllegalCatch
+        } catch (Error e) {     // SUPPRESS CHECKSTYLE IllegalCatch
             newFile.delete();
-
             throw e;
         } catch (Throwable t) { // SUPPRESS CHECKSTYLE IllegalCatch
             newFile.delete();
 
+            // At this point, "t" MUST be the checked exception.
             @SuppressWarnings("unchecked") EX tmp = (EX) t;
             throw tmp;
         }

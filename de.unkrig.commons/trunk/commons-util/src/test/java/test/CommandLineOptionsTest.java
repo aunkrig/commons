@@ -387,7 +387,7 @@ class CommandLineOptionsTest {
         CommandLineOptions.parse(new String[] { "--clo1", "--clo01" }, new Foo10());
         CommandLineOptions.parse(new String[] { "--combo" },           new Foo10());
         for (Object[] os : new Object[][] {
-            { RequiredOptionGroupMissing.class, new String[] {                                } },
+            { RequiredOptionGroupMissing.class, new String[] {}                                 },
             { RequiredOptionGroupMissing.class, new String[] { "--clo01"                      } },
             { ConflictingOptions.class,         new String[] { "--clo1", "--combo"            } },
             { ConflictingOptions.class,         new String[] { "--clo1", "--clo01", "--combo" } },

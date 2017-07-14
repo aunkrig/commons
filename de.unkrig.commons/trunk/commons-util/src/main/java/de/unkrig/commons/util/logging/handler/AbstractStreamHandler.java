@@ -71,8 +71,9 @@ class AbstractStreamHandler extends java.util.logging.StreamHandler {
         // trace to STDERR before we rethrow the exception.
         // (The JRE default log manager prints a stack trace, too, so we'll see two.)
         try {
+            // SUPPRESS CHECKSTYLE LineLength:6
             this.init(
-                LogUtil.getLoggingProperty(propertyNamePrefix + ".autoFlush",                  AbstractStreamHandler.DEFAULT_AUTO_FLUSH), // SUPPRESS CHECKSTYLE LineLength:4
+                LogUtil.getLoggingProperty(propertyNamePrefix + ".autoFlush",                  AbstractStreamHandler.DEFAULT_AUTO_FLUSH),
                 LogUtil.getLoggingProperty(propertyNamePrefix + ".level",                      AbstractStreamHandler.DEFAULT_LEVEL),
                 LogUtil.getLoggingProperty(propertyNamePrefix + ".filter",    Filter.class),   // DEFAULT_FILTER == null
                 LogUtil.getLoggingProperty(propertyNamePrefix + ".formatter", Formatter.class, AbstractStreamHandler.DEFAULT_FORMATTER),

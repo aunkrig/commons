@@ -44,7 +44,7 @@ class IterableUtilTest {
     testIteratorWithContext() {
 
         Iterator<ElementWithContext<Integer>> it = IteratorUtil.iteratorWithContext(IteratorUtil.foR(0, 3));
-        ElementWithContext<Integer> ewc;
+        ElementWithContext<Integer>           ewc;
 
         Assert.assertTrue(it.hasNext());
         ewc = it.next();
