@@ -316,7 +316,7 @@ class Characters {
                 || type == Character.MODIFIER_LETTER
                 || type == Character.OTHER_LETTER
                 || type == Character.LETTER_NUMBER
-                );
+            );
         }
     };
 
@@ -459,7 +459,10 @@ class Characters {
         @Override public boolean
         evaluate(Integer subject) {
 
-            if (Characters.IS_UNICODE_ALPHA.evaluate(subject) || Characters.IS_UNICODE_JOIN_CONTROL.evaluate(subject)) return true;
+            if (
+                Characters.IS_UNICODE_ALPHA.evaluate(subject)
+                || Characters.IS_UNICODE_JOIN_CONTROL.evaluate(subject)
+            ) return true;
 
             int type = Character.getType(subject);
             return (
@@ -522,18 +525,18 @@ class Characters {
     static {
         Map<String /*name*/, Predicate<Integer>> m = new HashMap<String, Predicate<Integer>>();
 
-        m.put("ALPHA", Characters.IS_UNICODE_ALPHA);
-        m.put("LOWER", Characters.IS_UNICODE_LOWER);
-        m.put("UPPER", Characters.IS_UNICODE_UPPER);
-        m.put("SPACE", Characters.IS_UNICODE_WHITE_SPACE);
-        m.put("PUNCT", Characters.IS_UNICODE_PUNCT);
-        m.put("XDIGIT",Characters.IS_UNICODE_HEX_DIGIT);
-        m.put("ALNUM", Characters.IS_UNICODE_ALNUM);
-        m.put("CNTRL", Characters.IS_UNICODE_CNTRL);
-        m.put("DIGIT", Characters.IS_UNICODE_DIGIT);
-        m.put("BLANK", Characters.IS_UNICODE_BLANK);
-        m.put("GRAPH", Characters.IS_UNICODE_GRAPH);
-        m.put("PRINT", Characters.IS_UNICODE_PRINT);
+        m.put("ALPHA",  Characters.IS_UNICODE_ALPHA);
+        m.put("LOWER",  Characters.IS_UNICODE_LOWER);
+        m.put("UPPER",  Characters.IS_UNICODE_UPPER);
+        m.put("SPACE",  Characters.IS_UNICODE_WHITE_SPACE);
+        m.put("PUNCT",  Characters.IS_UNICODE_PUNCT);
+        m.put("XDIGIT", Characters.IS_UNICODE_HEX_DIGIT);
+        m.put("ALNUM",  Characters.IS_UNICODE_ALNUM);
+        m.put("CNTRL",  Characters.IS_UNICODE_CNTRL);
+        m.put("DIGIT",  Characters.IS_UNICODE_DIGIT);
+        m.put("BLANK",  Characters.IS_UNICODE_BLANK);
+        m.put("GRAPH",  Characters.IS_UNICODE_GRAPH);
+        m.put("PRINT",  Characters.IS_UNICODE_PRINT);
 
         UNICODE_PROPERTIES2 = Collections.unmodifiableMap(m);
     }

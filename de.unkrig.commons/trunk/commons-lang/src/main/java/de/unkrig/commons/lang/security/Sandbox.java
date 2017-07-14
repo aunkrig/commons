@@ -77,7 +77,8 @@ import de.unkrig.commons.nullanalysis.Nullable;
  *  unprivileged.run();
  * </pre>
  *
- * @see <a href="https://docs.oracle.com/javase/tutorial/essential/environment/security.html">ORACLE: Java Essentials: The Security Manager</a>
+ * @see <a href="https://docs.oracle.com/javase/tutorial/essential/environment/security.html">ORACLE: Java Essentials:
+ *      The Security Manager</a>
  */
 public final
 class Sandbox {

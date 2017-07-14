@@ -45,7 +45,8 @@ import de.unkrig.commons.lang.crypto.Encryptors;
 import de.unkrig.commons.lang.crypto.SaltException;
 import de.unkrig.commons.lang.crypto.WrongKeyException;
 
-public class CryptorTest {
+public
+class CryptorTest {
 
     private static final SecretKey SECRET_KEY;
     static {
@@ -109,7 +110,7 @@ public class CryptorTest {
 
         Encryptor e = Encryptors.fromKey(CryptorTest.SECRET_KEY);
 
-        byte[] original = { 3, 99, 3, -23, 5, 99, 99 };
+        byte[] original  = { 3, 99, 3, -23, 5, 99, 99 };
         byte[] encrypted = e.encrypt(Arrays.copyOf(original, original.length));
 
         Decryptor d = Decryptors.fromKey(CryptorTest.SECRET_KEY);
@@ -139,7 +140,7 @@ public class CryptorTest {
         Cryptor c = Cryptors.fromSecretKey(CryptorTest.SECRET_KEY);
 
         String original = "The quick brown fox jumps over the lazy dog";
-        byte[] salt = { 1, 2, 3, 4 };
+        byte[] salt     = { 1, 2, 3, 4 };
 
         String encrypted = Encryptors.encrypt(c, salt, original.toCharArray());
         Assert.assertNotEquals(original, encrypted);
@@ -154,7 +155,7 @@ public class CryptorTest {
         Cryptor c = Cryptors.fromSecretKey(CryptorTest.SECRET_KEY);
 
         String original = "The quick brown fox jumps over the lazy dog";
-        byte[] salt = { 1, 2, 3, 4 };
+        byte[] salt     = { 1, 2, 3, 4 };
 
         String encrypted = Encryptors.encrypt(c, salt, original.toCharArray());
         Assert.assertNotEquals(original, encrypted);

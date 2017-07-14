@@ -59,13 +59,15 @@ class AssertionUtilTest {
     test4() {
         MemberClassWithAssertionsNotEnabled.meth();
     }
-    static class MemberClassWithAssertionsEnabled {
+    static
+    class MemberClassWithAssertionsEnabled {
         static { AssertionUtil.enableAssertionsForThisClass(); }
         public static void meth() { assert false; }
-    };
-    static class MemberClassWithAssertionsNotEnabled {
+    }
+    static
+    class MemberClassWithAssertionsNotEnabled {
         public static void meth() { assert false; }
-    };
+    }
 
     /**
      * Verifies that assertions are enabled fot <em>this</em> object.
