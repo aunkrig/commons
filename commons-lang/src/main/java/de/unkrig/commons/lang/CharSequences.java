@@ -29,8 +29,10 @@ package de.unkrig.commons.lang;
 /**
  * Utility methods related to {@link CharSequence}s.
  */
-public
+public final
 class CharSequences {
+
+    private CharSequences() {}
 
     /**
      * Creates and returns a sub-{@link CharSequence} of the given <var>delegate</var> {@link CharSequence}.

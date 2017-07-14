@@ -90,13 +90,13 @@ class SecretKeys {
 
             // Load existing keystore file.
             SecretKeys.loadKeyStoreFromFile(keyStoreFile, keyStorePassword, ks);
-            secretKey = (SecretKey) ks.getKey(keyAlias, keyProtectionPassword);
+            secretKey     = (SecretKey) ks.getKey(keyAlias, keyProtectionPassword);
             keystoreDirty = false;
         } else {
 
             // The keystore file does not yet exist; create an empty keystore.
             ks.load(null, keyStorePassword);
-            secretKey = null;
+            secretKey     = null;
             keystoreDirty = true;
         }
 
@@ -203,7 +203,7 @@ class SecretKeys {
 
             // The keystore file does not yet exist; create an empty keystore.
             ks.load(null, keyStorePassword);
-            secretKey = null;
+            secretKey     = null;
             keystoreDirty = true;
         }
 

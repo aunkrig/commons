@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import de.unkrig.commons.lang.protocol.Predicate;
+import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * Various {@code java.lang.String}-related utility methods.
@@ -255,9 +256,17 @@ class StringUtil {
      */
     public static boolean
     containsAny(String subject, String characters) {
-    	for (int i = characters.length() - 1; i >= 0; i--) {
-    		if (subject.indexOf(Character.codePointAt(characters, i)) != -1) return true;
-    	}
-    	return false;
+        for (int i = characters.length() - 1; i >= 0; i--) {
+            if (subject.indexOf(Character.codePointAt(characters, i)) != -1) return true;
+        }
+        return false;
+    }
+
+    /**
+     * @see ObjectUtil#equals(Object, Object)
+     */
+    public static boolean
+    equalsIgnoreCase(@Nullable String s1, @Nullable String s2) {
+        return s1 == null ? s2 == null : s1.equalsIgnoreCase(s2);
     }
 }

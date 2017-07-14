@@ -65,7 +65,7 @@ class ClassLoadersTest {
         Map<String, URL> m = ClassLoaders.getSubresources(null, "test/", true);
 
         String resourceName = this.getClass().getName().replace('.', '/') + ".class";
-        URL url = m.get(resourceName);
+        URL    url          = m.get(resourceName);
         Assert.assertNotNull(m + ": " + resourceName, url);
         ClassLoadersTest.assertContentsBeginsWith(url, ClassLoadersTest.CLASS_FILE_MAGIC_BYTES);
     }

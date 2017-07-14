@@ -26,7 +26,10 @@
 
 package de.unkrig.commons.lang.protocol;
 
-public
+/**
+ * Utility functionality related to {@link Transformer Transformer&lt;String>}s.
+ */
+public final
 class StringTransformers {
 
     private StringTransformers() {}
@@ -54,7 +57,7 @@ class StringTransformers {
     /**
      * @see String#replace(char, char)
      */
-    public static final Transformer<CharSequence, String>
+    public static Transformer<CharSequence, String>
     replaceChar(final char oldChar, final char newChar) {
 
         return new Transformer<CharSequence, String>() {

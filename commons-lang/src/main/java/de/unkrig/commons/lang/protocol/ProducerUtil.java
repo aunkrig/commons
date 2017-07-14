@@ -984,7 +984,7 @@ class ProducerUtil {
 
         return new ProducerWhichThrows<T, EX>() {
 
-            int nextIndex = 0;
+            int nextIndex;
 
             @Override @Nullable public T
             produce() throws EX {
@@ -998,7 +998,8 @@ class ProducerUtil {
         };
     }
 
-    public interface BooleanProducer {
+    public
+    interface BooleanProducer {
         boolean produce();
     }
 

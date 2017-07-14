@@ -94,7 +94,7 @@ class ProducerUtilTest {
     @Test public void
     testProducerUtilCache2() {
 
-    	ProducerWhichThrows<Integer, RuntimeException>
+        ProducerWhichThrows<Integer, RuntimeException>
         p = ProducerUtil.cache(99, ProducerUtil.increasing(1), new Toggle());
 
         for (int expected : new int[] { 99, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, }) {
@@ -307,7 +307,7 @@ class ProducerUtilTest {
 
         try {
             runnableWhichThrows.run();
-        } catch (Throwable t) {
+        } catch (Throwable t) { // SUPPRESS CHECKSTYLE IllegalCatch
             if (expected.isAssignableFrom(t.getClass())) return;
 
             throw new AssertionError(t);

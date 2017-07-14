@@ -113,7 +113,7 @@ class Encryptors {
                 byte[] md5 = MD5.of(unencrypted);
                 assert md5.length == 16;
 
-                byte[] tmp = unencrypted;
+                final byte[] tmp = unencrypted;
                 unencrypted = Arrays.copyOf(unencrypted, unencrypted.length + 16);
                 System.arraycopy(md5, 0, unencrypted, unencrypted.length - 16, 16);
                 Arrays.fill(tmp, (byte) 0);

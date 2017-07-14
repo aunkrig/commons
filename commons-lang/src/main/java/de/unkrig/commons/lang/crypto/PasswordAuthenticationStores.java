@@ -55,8 +55,8 @@ class PasswordAuthenticationStores {
     private PasswordAuthenticationStores() {}
 
     /**
-     * Creates and returns a {@link PasswordAuthenticationStore} which uses a given {@link DestroyableProperties} object for
-     * persistent storage.
+     * Creates and returns a {@link PasswordAuthenticationStore} which uses a given {@link DestroyableProperties} object
+     * for persistent storage.
      */
     public static PasswordAuthenticationStore
     propertiesPasswordAuthenticationStore(final DestroyableProperties delegate) {
@@ -123,9 +123,9 @@ class PasswordAuthenticationStores {
     }
 
     /**
-     * Creates and returns a {@link PasswordAuthenticationStore} that forwards all operations to the <var>delegate</var>,
-     * except that it encrypts and decrypts passwords on-the-fly. Uses the user name as the "salt" for encryption/
-     * decryption.
+     * Creates and returns a {@link PasswordAuthenticationStore} that forwards all operations to the
+     * <var>delegate</var>, except that it encrypts and decrypts passwords on-the-fly. Uses the user name as the "salt"
+     * for encryption/decryption.
      */
     public static PasswordAuthenticationStore
     encryptPasswords(SecretKey secretKey, final PasswordAuthenticationStore delegate) {
