@@ -106,13 +106,28 @@ class InputStreams {
     }
 
     /**
-     * @return All bytes that the given {@link InputStream} produces
+     * Equivalent with {@code readAll(is, false)}.
      */
     public static byte[]
-    readAll(InputStream is) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        IoUtil.copy(is, baos);
-        return baos.toByteArray();
+    readAll(InputStream is) throws IOException { return InputStreams.readAll(is, false); }
+
+    /**
+     * @param closeInputStream Whether to close the inputStream (also if an {@link IOException} is thrown)
+     * @return                 All bytes that the given {@link InputStream} produces
+     */
+    public static byte[]
+	readAll(InputStream is, boolean closeInputStream) throws IOException {
+
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+    	IoUtil.copy(
+			is,               // inputStream
+			closeInputStream, // closeInputStream
+			baos,             // outputStream
+			false             // closeOutputStream
+		);
+
+    	return baos.toByteArray();
     }
 
     /**
