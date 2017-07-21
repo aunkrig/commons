@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.zip.UnsupportedZipFeatureException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormat;
@@ -308,10 +309,19 @@ class CompressUtil {
 
             is.close();
             return result;
+        } catch (UnsupportedZipFeatureException uzfe) {
+
+        	// Cannot use "ExceptionUtil.wrap(prefix, cause)" here, because this exception has none of the "usual"
+        	// constructors.
+        	throw new IOException(file + ": " + uzfe.getMessage(), uzfe);
         } catch (ArchiveException ae) {
             throw ExceptionUtil.wrap(file.toString(), ae, IOException.class);
         } catch (IOException ioe) {
             throw ExceptionUtil.wrap(file.toString(), ioe);
+        } catch (RuntimeException re) {
+        	throw ExceptionUtil.wrap(file.toString(), re);
+        } catch (Error e) {
+        	throw ExceptionUtil.wrap(file.toString(), e);
         } finally {
             try { is.close(); } catch (Exception e) {}
         }
