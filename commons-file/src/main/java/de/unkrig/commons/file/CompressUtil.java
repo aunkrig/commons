@@ -314,7 +314,7 @@ class CompressUtil {
         	// Cannot use "ExceptionUtil.wrap(prefix, cause)" here, because this exception has none of the "usual"
         	// constructors.
         	throw new IOException(
-    			file + "!" + uzfe.getEntry().getName() + ": Unsupported feature \"" + uzfe.getFeature() +  "\"",
+    			file + "!" + uzfe.getEntry().getName() + ": Unsupported ZIP feature \"" + uzfe.getFeature() +  "\"",
     			uzfe
 			);
         } catch (ArchiveException ae) {
