@@ -64,7 +64,10 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
     @Nullable public final EnumSet<S> ANY_STATE = null; // SUPPRESS CHECKSTYLE MemberName
 
     /**
-     * Special value for some method parameters.
+     * Special value for some method parameters; indicates that the current state should <em>remain</em> when the
+     * rule applies.
+     *
+     * @see #addRule(EnumSet, String, Enum, Enum)
      */
     @Nullable public final S REMAIN = null; // SUPPRESS CHECKSTYLE MemberName
 
@@ -86,7 +89,9 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
     StatefulScanner(StatefulScanner<TT, S> that) {
         this.defaultStateRules    = that.defaultStateRules;
         this.nonDefaultStateRules = that.nonDefaultStateRules;
-        this.currentStateRules    = this.defaultStateRules;
+
+        // We start in the default state.
+        this.currentStateRules = this.defaultStateRules;
     }
 
     /**
@@ -135,7 +140,7 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
 
         Rule<TT, S> rule = new Rule<TT, S>(regex, tokenType, this.defaultStateRules);
 
-        if (states == null) {
+        if (states == /*this.ANY_STATE*/ null) {
             for (List<Rule<TT, S>> rules : this.nonDefaultStateRules.values()) rules.add(rule);
             this.defaultStateRules.add(rule);
         } else {
@@ -168,7 +173,7 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
         if (nextState != this.REMAIN) {
             Rule<TT, S> rule = new Rule<TT, S>(regex, tokenType, this.nonDefaultStateRules.get(nextState));
 
-            if (states == null) {
+            if (states == /*this.ANY_STATE*/ null) {
                 for (List<Rule<TT, S>> rules : this.nonDefaultStateRules.values()) {
                     rules.add(rule);
                 }
@@ -178,7 +183,7 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
             }
         } else {
 
-            if (states == null) {
+            if (states == /*this.ANY_STATE*/ null) {
                 for (List<Rule<TT, S>> rules : this.nonDefaultStateRules.values()) {
                     rules.add(new Rule<TT, S>(regex, tokenType, rules));
                 }
