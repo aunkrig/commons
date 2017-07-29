@@ -107,6 +107,10 @@ class ClassLoaders {
      *   If multiple resources have the <var>name</var>, then the resources are retrieved from the <var>first</var>
      *   occurrence.
      * </p>
+     * <p>
+     *   Directories on the BOOTCLASSPATH do <em>not</em> work, e.g. "java/lang/"; directories on the CLASSPATH
+     *   <em>do</em> work (e.g. "de/unkrig/commons/lang/");.
+     * </p>
      *
      * @param classLoader The class loader to use; {@code null} means use the system class loader
      * @param name        No leading slash
