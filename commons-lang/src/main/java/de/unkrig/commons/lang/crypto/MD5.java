@@ -26,6 +26,8 @@
 
 package de.unkrig.commons.lang.crypto;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -65,6 +67,32 @@ class MD5 {
         }
 
         md.update(subject, offset, length);
+
+        byte[] result = md.digest();
+        assert result.length == 16;
+
+        return result;
+    }
+
+    /**
+     * @return The MD5 digest (exactly 16 bytes) of all bytes produced by the <var>inputStream</var>
+     */
+    public static byte[]
+    of(InputStream inputStream) throws IOException {
+
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException nsae) {
+            throw new AssertionError(nsae);
+        }
+
+        byte[] ba = new byte[4096];
+        for (;;) {
+            int n = inputStream.read(ba);
+            if (n == -1) break;
+            md.update(ba, 0, n);
+        }
 
         byte[] result = md.digest();
         assert result.length == 16;
