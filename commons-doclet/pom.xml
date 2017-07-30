@@ -43,4 +43,5 @@
 		<version>1.2.11-SNAPSHOT</version>
 		<relativePath>../commons-parent</relativePath>
 	</parent>
+	<url>http://commons.unkrig.de/commons-doclet</url>
 </project>

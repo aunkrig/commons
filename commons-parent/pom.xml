@@ -110,20 +110,6 @@
           <additionalparam>-Xdoclint:none</additionalparam>
           <encoding>UTF-8</encoding>
           <quiet>true</quiet>
-          <offlineLinks>
-            <offlineLink><url>../commons-asm/</url>         <location>${basedir}/../commons-asm/target/apidocs/</location>         </offlineLink>
-            <offlineLink><url>../commons-doclet/</url>      <location>${basedir}/../commons-doclet/target/apidocs/</location>      </offlineLink>
-            <offlineLink><url>../commons-file/</url>        <location>${basedir}/../commons-file/target/apidocs/</location>        </offlineLink>
-            <offlineLink><url>../commons-io/</url>          <location>${basedir}/../commons-io/target/apidocs/</location>          </offlineLink>
-            <offlineLink><url>../commons-junit4/</url>      <location>${basedir}/../commons-junit4/target/apidocs/</location>      </offlineLink>
-            <offlineLink><url>../commons-lang/</url>        <location>${basedir}/../commons-lang/target/apidocs/</location>        </offlineLink>
-            <offlineLink><url>../commons-math/</url>        <location>${basedir}/../commons-math/target/apidocs/</location>        </offlineLink>
-            <offlineLink><url>../commons-net/</url>         <location>${basedir}/../commons-net/target/apidocs/</location>         </offlineLink>
-            <offlineLink><url>../commons-nullanalysis/</url><location>${basedir}/../commons-nullanalysis/target/apidocs/</location></offlineLink>
-            <offlineLink><url>../commons-reflect/</url>     <location>${basedir}/../commons-reflect/target/apidocs/</location>     </offlineLink>
-            <offlineLink><url>../commons-text/</url>        <location>${basedir}/../commons-text/target/apidocs/</location>        </offlineLink>
-            <offlineLink><url>../commons-util/</url>        <location>${basedir}/../commons-util/target/apidocs/</location>        </offlineLink>
-          </offlineLinks>
         </configuration>
       </plugin>
     </plugins>
