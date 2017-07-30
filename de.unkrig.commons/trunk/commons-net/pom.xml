@@ -6,7 +6,6 @@
 	<packaging>jar</packaging>
 
 	<name>commons-net</name>
-	<url>http://commons.unkrig.de/</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -49,4 +48,5 @@
 		<version>1.2.11-SNAPSHOT</version>
 		<relativePath>../commons-parent</relativePath>
 	</parent>
+	<url>http://commons.unkrig.de/commons-net</url>
 </project>
