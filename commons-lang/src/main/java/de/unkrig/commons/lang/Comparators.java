@@ -64,7 +64,7 @@ class Comparators {
      * @return {@code 0} if both arguments are {@code null},
      *         or {@code -1} if only <var>o1</var> is {@code null},
      *         or {@code 1} if only <var>o2</var> is {@code null},
-     *         and otherwise <var>o1</var>{@code .compareTo(<var>o2</var>{@code )}
+     *         and otherwise <var>o1</var>{@code .compareTo(}<var>o2</var>{@code )}
      */
     public static <T extends Comparable<T>> int
     compareNullSafe(@Nullable T c1, @Nullable T c2) {
