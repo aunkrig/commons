@@ -29,7 +29,9 @@ package de.unkrig.commons.lang;
 import java.io.BufferedReader;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import de.unkrig.commons.lang.protocol.Predicate;
@@ -268,5 +270,157 @@ class StringUtil {
     public static boolean
     equalsIgnoreCase(@Nullable String s1, @Nullable String s2) {
         return s1 == null ? s2 == null : s1.equalsIgnoreCase(s2);
+    }
+
+    /**
+     * @see #indexOf(CharSequence, int, int)
+     */
+    public
+    interface IndexOf {
+
+        /**
+         * {@link #indexOf(CharSequence, int, int)} is (probably) significantly faster that {@link String#indexOf(int)}
+         * if the search string's is at least that long.
+         */
+        int MIN_KEY_LENGTH = 16;
+
+        /**
+         * The equivalent of {@link String#indexOf(String)}.
+         * <p>
+         *   For the return value, the following condition holds true:
+         * </p>
+         * <pre>
+         *   StringUtil.newIndexOf(infix).indexOf(subject, from, to) = subject.substring(0, to).indexOf(infix, from)
+         * </pre>
+         */
+        int indexOf(CharSequence subject, int from, int to);
+    }
+
+    /**
+     * {@link #indexOf(CharSequence, int, int)} is (probably) significantly faster that {@link String#indexOf(int)}
+     * if the search string's is at least that long.
+     */
+    public static final int MIN_KEY_LENGTH = 16;
+
+    /**
+     * Implementation of the Knuth–Morris–Pratt algorithm (see <a
+     * href="https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm">Wikipedia</a>) for efficient
+     * string infix search.
+     * <p>
+     *   This algorithm is (probably) significantly faster that {@link String#indexOf(int)} if the search string's is
+     *   at least {@link #MIN_KEY_LENGTH} long.
+     * </p>
+     *
+     * @see IndexOf#indexOf(CharSequence, int, int)
+     */
+    public static IndexOf
+    newIndexOf(final String infix) {
+
+        return new IndexOf() {
+
+            final CharToIntMapping deltas = StringUtil.computeDeltas(infix);
+            final int              len    = infix.length();
+
+            @Override public int
+            indexOf(CharSequence subject, int from, int to) {
+
+                for (from += this.len - 1; from < to;) {
+
+                    int delta = this.deltas.get(subject.charAt(from));
+                    if (delta == -1) {
+                        from += this.len;
+                        continue;
+                    }
+
+                    from -= delta;
+
+                    for (int i = 0; subject.charAt(from + i) == infix.charAt(i);) {
+                        if (++i == this.len) return from;
+                    }
+
+                    from += this.len;
+                }
+
+                return -1;
+            }
+        };
+    }
+
+    /**
+     * Optimized version of a {@code Map<Character, Integer>}.
+     */
+    private
+    interface CharToIntMapping {
+
+        /**
+         * @return The value that the <var>key</var> maps to, or {@code -1}
+         */
+        int get(char key);
+
+        /**
+         * Maps the given <var>key</var> to the given <var>value</var>, replacing any previously mapped value.
+         */
+        void put(char key, int value);
+    }
+
+    private static CharToIntMapping
+    arrayBasedCharToIntMapping(final char maxKey) {
+
+        return new CharToIntMapping() {
+
+            final int[] deltas = new int[maxKey + 1];
+            { Arrays.fill(this.deltas, -1); }
+
+            @Override public int
+            get(char c) {
+                return c < this.deltas.length ? this.deltas[c] : -1;
+            }
+
+            @Override public void
+            put(char key, int value) { this.deltas[key] = value; }
+        };
+    }
+
+    private static CharToIntMapping
+    hashMapCharToIntMapping() {
+
+        return new CharToIntMapping() {
+
+            final Map<Character, Integer> deltas = new HashMap<Character, Integer>();
+
+            @Override public int
+            get(char c) {
+                Integer result = this.deltas.get(c);
+                return result != null ? result : -1;
+            }
+
+            @Override public void
+            put(char key, int value) { this.deltas.put(key, value); }
+        };
+    }
+
+    private static CharToIntMapping
+    computeDeltas(String keys) {
+        int len = keys.length();
+
+        char maxKey = 0;
+        for (int i = 0; i < len; i++) {
+            char c = keys.charAt(i);
+            if (c > maxKey) maxKey = c;
+        }
+
+        CharToIntMapping result;
+        if (maxKey < 256) {
+
+            // The key characters are relative small, so we can use a super-fast, array-based mapping.
+            result = StringUtil.arrayBasedCharToIntMapping(maxKey);
+        } else {
+
+            result = StringUtil.hashMapCharToIntMapping();
+        }
+
+        for (int i = 0; i < len; i++) result.put(keys.charAt(i), i);
+
+        return result;
     }
 }
