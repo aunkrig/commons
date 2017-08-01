@@ -297,18 +297,18 @@ class StringUtil {
     }
 
     /**
-     * {@link #indexOf(CharSequence, int, int)} is (probably) significantly faster that {@link String#indexOf(int)}
-     * if the search string's is at least that long.
+     * {@link IndexOf#indexOf(CharSequence, int, int)} is (probably) significantly faster that {@link
+     * String#indexOf(int)} if the search string's is at least that long.
      */
     public static final int MIN_KEY_LENGTH = 16;
 
     /**
      * Implementation of the Knuth–Morris–Pratt algorithm (see <a
-     * href="https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm">Wikipedia</a>) for efficient
-     * string infix search.
+     * href="https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm">Wikipedia</a>) for an
+     * efficient string infix search.
      * <p>
-     *   This algorithm is (probably) significantly faster that {@link String#indexOf(int)} if the search string's is
-     *   at least {@link #MIN_KEY_LENGTH} long.
+     *   This algorithm is (probably) significantly faster that {@link String#indexOf(int)} if the search string is at
+     *   least {@link #MIN_KEY_LENGTH} characters long.
      * </p>
      *
      * @see IndexOf#indexOf(CharSequence, int, int)
