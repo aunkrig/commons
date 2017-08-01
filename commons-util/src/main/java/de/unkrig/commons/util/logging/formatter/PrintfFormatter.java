@@ -402,7 +402,7 @@ class PrintfFormatter extends Formatter {
      *     </td>
      *     <td>
      *       <code>
-     *         <i>preceeding-text</i>:<br>
+     *         <i>preceding-text</i>:<br>
      *         pkg.MyException: Exception message<br>
      *         &nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;pkg.Class.method(File.java:123)<br>
      *         &nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;Main.main(Main.java:20)
@@ -419,7 +419,7 @@ class PrintfFormatter extends Formatter {
      *     <td>Colon, space, throwable converted to string (typically class name, colon, space, localized message)</td>
      *     <td>
      *       <code>
-     *         <i>preceeding-text</i>: pkg.MyEception
+     *         <i>preceding-text</i>: pkg.MyEception
      *       </code>
      *     </td>
      *   </tr>
