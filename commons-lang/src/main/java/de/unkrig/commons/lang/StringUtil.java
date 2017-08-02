@@ -279,69 +279,226 @@ class StringUtil {
     interface IndexOf {
 
         /**
-         * {@link #indexOf(CharSequence, int, int)} is (probably) significantly faster that {@link String#indexOf(int)}
-         * if the search string's is at least that long.
-         */
-        int MIN_KEY_LENGTH = 16;
-
-        /**
          * The equivalent of {@link String#indexOf(String)}.
          * <p>
          *   For the return value, the following condition holds true:
          * </p>
          * <pre>
-         *   StringUtil.newIndexOf(infix).indexOf(subject, from, to) = subject.substring(0, to).indexOf(infix, from)
+         *   StringUtil.newIndexOf(infix).indexOf(subject) = subject.indexOf(infix)
          * </pre>
+         *
+         * @return {@code 0} ... {@code subject.length() - infix.length()}, or {@code -1}
          */
-        int indexOf(CharSequence subject, int from, int to);
+        int indexOf(CharSequence subject);
+
+        /**
+         * The equivalent of {@link String#indexOf(String, int)}.
+         * <p>
+         *   For the return value, the following condition holds true:
+         * </p>
+         * <pre>
+         *   StringUtil.newIndexOf(infix).indexOf(subject, fromIndex) = subject.indexOf(infix, fromIndex)
+         * </pre>
+         *
+         * @return {@code max(0, fromIndex)} ... {@code subject.length() - infix.length()}, or {@code -1}
+         */
+        int indexOf(CharSequence subject, int fromIndex);
+
+        /**
+         * Like {@link #indexOf(CharSequence, int)}, but the match terminates at index <var>toIndex</var> (inclusive).
+         *
+         * @return {@code max(0, fromIndex)} ... {@code min(toIndex, subject.length() - infix.length())}, or {@code -1}
+         */
+        int indexOf(CharSequence subject, int fromIndex, int toIndex);
+
+        /**
+         * The equivalent of {@link String#lastIndexOf(String)}.
+         * <p>
+         *   For the return value, the following condition holds true:
+         * </p>
+         * <pre>
+         *   StringUtil.newIndexOf(infix).lastIndexOf(subject) = subject.lastIndexOf(infix)
+         * </pre>
+         *
+         * @return {@code 0} ... {@code subject.length() - infix.length()}, or {@code -1}
+         */
+        int lastIndexOf(CharSequence subject);
+
+        /**
+         * The equivalent of {@link String#lastIndexOf(String, int)}.
+         * <p>
+         *   For the return value, the following condition holds true:
+         * </p>
+         * <pre>
+         *   StringUtil.newIndexOf(infix).lastIndexOf(subject, fromIndex) = subject.lastIndexOf(infix, fromIndex)
+         * </pre>
+         *
+         * @return {@code max(0, fromIndex)} ... {@code subject.length() - infix.length()}, or {@code -1}
+         */
+        int lastIndexOf(CharSequence subject, int fromIndex);
+
+        /**
+         * Like {@link #lastIndexOf(CharSequence, int)}, but the match terminates at index <var>toIndex</var>
+         * (inclusive). (<var>toIndex</var> is usually smaller than <var>fromIndex</var>.)
+         *
+         * @return {@code max(0, fromIndex)} ... {@code min(toIndex, subject.length() - infix.length())}, or {@code -1}
+         */
+        int lastIndexOf(CharSequence subject, int fromIndex, int toIndex);
     }
 
     /**
-     * {@link IndexOf#indexOf(CharSequence, int, int)} is (probably) significantly faster that {@link
-     * String#indexOf(int)} if the search string's is at least that long.
-     */
-    public static final int MIN_KEY_LENGTH = 16;
-
-    /**
-     * Implementation of the Knuth–Morris–Pratt algorithm (see <a
-     * href="https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm">Wikipedia</a>) for an
-     * efficient string infix search.
+     * Runtime-optimized reimplementation of {@link String#indexOf(String)} and {@link String#lastIndexOf(String)}.
      * <p>
-     *   This algorithm is (probably) significantly faster that {@link String#indexOf(int)} if the search string is at
-     *   least {@link #MIN_KEY_LENGTH} characters long.
+     *   This method returns an implementation that performs at least as well as the {@link String} methodsby analyzing
+     *   the <var>infix</var> (the string to search for),
      * </p>
-     *
-     * @see IndexOf#indexOf(CharSequence, int, int)
      */
     public static IndexOf
     newIndexOf(final String infix) {
 
-        return new IndexOf() {
+        if (infix.length() < 16) {
+            return StringUtil.newNaiveIndexOf(infix);
+        } else {
+            return StringUtil.newKnuthMorrisPrattIndexOf(infix);
+        }
+    }
 
-            final CharToIntMapping deltas = StringUtil.computeDeltas(infix);
-            final int              len    = infix.length();
+    private static abstract
+    class AbstractIndexOf implements IndexOf {
+        @Override public int indexOf(CharSequence subject)                    { return this.indexOf(subject, 0, Integer.MAX_VALUE);             }
+        @Override public int indexOf(CharSequence subject, int fromIndex)     { return this.indexOf(subject, fromIndex, Integer.MAX_VALUE);     }
+        @Override public int lastIndexOf(CharSequence subject)                { return this.lastIndexOf(subject, 0, Integer.MAX_VALUE);         }
+        @Override public int lastIndexOf(CharSequence subject, int fromIndex) { return this.lastIndexOf(subject, fromIndex, Integer.MAX_VALUE); }
+    }
+
+    /**
+     * @return A wrapper for {@link String#indexOf(String)} and {@link String#lastIndexOf(String)}, which implements
+     *         a naive string search algorithm
+     */
+    public static IndexOf
+    newNaiveIndexOf(final String infix) {
+
+        return new AbstractIndexOf() {
+
+            final int infixLength = infix.length();
 
             @Override public int
-            indexOf(CharSequence subject, int from, int to) {
+            indexOf(CharSequence subject, int fromIndex, int toIndex) {
 
-                for (from += this.len - 1; from < to;) {
+                if (toIndex + this.infixLength >= subject.length()) {
+                    return subject.toString().indexOf(infix, fromIndex);
+                }
 
-                    int delta = this.deltas.get(subject.charAt(from));
+                return subject.toString().substring(0, toIndex + this.infixLength).indexOf(infix, fromIndex);
+            }
+
+            @Override public int
+            lastIndexOf(CharSequence subject, int fromIndex, int toIndex) {
+
+                if (toIndex <= 0) return subject.toString().lastIndexOf(infix, fromIndex);
+
+                subject = subject.subSequence(toIndex, subject.length() - toIndex);
+                fromIndex -= toIndex;
+
+                int result = subject.toString().indexOf(infix, fromIndex);
+                return result == -1 ? -1 : result + toIndex;
+            }
+        };
+    }
+
+    /**
+     * Implementation of the Knuth-Morris-Pratt string search algorithm.
+     *
+     * @see <a href="https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm">The Knuth–Morris–Pratt
+     *      algorithm</a>
+     */
+    public static IndexOf
+    newKnuthMorrisPrattIndexOf(final String infix) {
+
+        return new AbstractIndexOf() {
+
+            final CharToIntMapping deltas      = this.computeDeltas(infix);
+            final int              infixLength = infix.length();
+
+            @Override public int
+            indexOf(CharSequence subject, int fromIndex, int toIndex) {
+                int subjectLength = subject.length();
+
+                if (fromIndex < 0) fromIndex = 0;
+
+                if (toIndex + this.infixLength > subjectLength) toIndex = subjectLength - this.infixLength;
+
+                for (fromIndex += this.infixLength - 1; fromIndex < subjectLength;) {
+
+                    int delta = this.deltas.get(subject.charAt(fromIndex));
                     if (delta == -1) {
-                        from += this.len;
+                        fromIndex += this.infixLength;
                         continue;
                     }
 
-                    from -= delta;
+                    fromIndex -= delta;
 
-                    for (int i = 0; subject.charAt(from + i) == infix.charAt(i);) {
-                        if (++i == this.len) return from;
+                    for (int i = 0; subject.charAt(fromIndex + i) == infix.charAt(i);) {
+                        if (++i == this.infixLength) return fromIndex;
                     }
 
-                    from += this.len;
+                    fromIndex += this.infixLength;
                 }
 
                 return -1;
+            }
+
+            @Override public int
+            lastIndexOf(CharSequence subject, int fromIndex, int toIndex) {
+                int subjectLength = subject.length();
+
+                if (toIndex < 0) toIndex = 0;
+
+                if (fromIndex + this.infixLength > subjectLength) fromIndex = subjectLength - this.infixLength;
+
+                for (fromIndex += this.infixLength - 1; fromIndex >= toIndex;) {
+
+                    int delta = this.deltas.get(subject.charAt(fromIndex));
+                    if (delta == -1) {
+                        fromIndex -= this.infixLength;
+                        continue;
+                    }
+
+                    fromIndex -= delta;
+
+                    for (int i = 0; subject.charAt(fromIndex + i) == infix.charAt(i);) {
+                        if (++i == this.infixLength) return fromIndex;
+                    }
+
+                    fromIndex -= this.infixLength;
+                }
+
+                return -1;
+            }
+
+            private CharToIntMapping
+            computeDeltas(CharSequence keys) {
+                int len = keys.length();
+
+                char maxKey = 0;
+                for (int i = 0; i < len; i++) {
+                    char c = keys.charAt(i);
+                    if (c > maxKey) maxKey = c;
+                }
+
+                CharToIntMapping result;
+                if (maxKey < 256) {
+
+                    // The key characters are relative small, so we can use a super-fast, array-based mapping.
+                    result = StringUtil.arrayBasedCharToIntMapping(maxKey);
+                } else {
+
+                    result = StringUtil.hashMapCharToIntMapping();
+                }
+
+                for (int i = 0; i < len; i++) result.put(keys.charAt(i), i);
+
+                return result;
             }
         };
     }
@@ -397,30 +554,5 @@ class StringUtil {
             @Override public void
             put(char key, int value) { this.deltas.put(key, value); }
         };
-    }
-
-    private static CharToIntMapping
-    computeDeltas(String keys) {
-        int len = keys.length();
-
-        char maxKey = 0;
-        for (int i = 0; i < len; i++) {
-            char c = keys.charAt(i);
-            if (c > maxKey) maxKey = c;
-        }
-
-        CharToIntMapping result;
-        if (maxKey < 256) {
-
-            // The key characters are relative small, so we can use a super-fast, array-based mapping.
-            result = StringUtil.arrayBasedCharToIntMapping(maxKey);
-        } else {
-
-            result = StringUtil.hashMapCharToIntMapping();
-        }
-
-        for (int i = 0; i < len; i++) result.put(keys.charAt(i), i);
-
-        return result;
     }
 }
