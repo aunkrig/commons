@@ -42,6 +42,17 @@ class Characters {
 
     private Characters() {}
 
+    private abstract static
+    class IntegerPredicate implements Predicate<Integer> {
+
+        private final String toString;
+
+        IntegerPredicate(String toString) { this.toString = toString; }
+
+        @Override public String
+        toString() { return this.toString; }
+    }
+
     /**
      * Evaluates whether a given code point lies in the POSIX character class "lower" ({@code [a-z]}).
      *
@@ -49,13 +60,8 @@ class Characters {
      *      Group Base Specifications Issue 7, section 7.3.1: LC_CTYPE</a>
      */
     public static final Predicate<Integer>
-    IS_POSIX_LOWER = new Predicate<Integer>() {
-
-        @Override public boolean
-        evaluate(Integer subject) {
-            int c = subject;
-            return c >= 'a' && c <= 'z';
-        }
+    IS_POSIX_LOWER = new IntegerPredicate("posixLower") {
+        @Override public boolean evaluate(Integer subject) { int c = subject; return c >= 'a' && c <= 'z'; }
     };
 
     /**
@@ -65,20 +71,15 @@ class Characters {
      *      Group Base Specifications Issue 7, section 7.3.1: LC_CTYPE</a>
      */
     public static final Predicate<Integer>
-    IS_POSIX_UPPER = new Predicate<Integer>() {
-
-        @Override public boolean
-        evaluate(Integer subject) {
-            int c = subject;
-            return c >= 'A' && c <= 'Z';
-        }
+    IS_POSIX_UPPER = new IntegerPredicate("posixUpper") {
+        @Override public boolean evaluate(Integer subject) { int c = subject; return c >= 'A' && c <= 'Z'; }
     };
 
     /**
      * Evaluates whether a given code point is in the ASCII range (0-127).
      */
     public static final Predicate<Integer>
-    IS_POSIX_ASCII = new Predicate<Integer>() {
+    IS_POSIX_ASCII = new IntegerPredicate("posixAscii") {
         @Override public boolean evaluate(Integer subject) { return subject <= 0x7f; }
     };
 
@@ -89,7 +90,7 @@ class Characters {
      *      Group Base Specifications Issue 7, section 7.3.1: LC_CTYPE</a>
      */
     public static final Predicate<Integer>
-    IS_POSIX_ALPHA = new Predicate<Integer>() {
+    IS_POSIX_ALPHA = new IntegerPredicate("posixAlpha") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -105,7 +106,7 @@ class Characters {
      *      Group Base Specifications Issue 7, section 7.3.1: LC_CTYPE</a>
      */
     public static final Predicate<Integer>
-    IS_POSIX_DIGIT = new Predicate<Integer>() {
+    IS_POSIX_DIGIT = new IntegerPredicate("posixDigit") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -121,7 +122,7 @@ class Characters {
      *      Group Base Specifications Issue 7, section 7.3.1: LC_CTYPE</a>
      */
     public static final Predicate<Integer>
-    IS_POSIX_ALNUM = new Predicate<Integer>() {
+    IS_POSIX_ALNUM = new IntegerPredicate("posixAlnum") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -138,7 +139,7 @@ class Characters {
      *      Group Base Specifications Issue 7, section 7.3.1: LC_CTYPE</a>
      */
     public static final Predicate<Integer>
-    IS_POSIX_PUNCT = new Predicate<Integer>() {
+    IS_POSIX_PUNCT = new IntegerPredicate("posixPunct") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -160,7 +161,7 @@ class Characters {
      *      Group Base Specifications Issue 7, section 7.3.1: LC_CTYPE</a>
      */
     public static final Predicate<Integer>
-    IS_POSIX_GRAPH = new Predicate<Integer>() {
+    IS_POSIX_GRAPH = new IntegerPredicate("posixGraph") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -176,7 +177,7 @@ class Characters {
      *      Group Base Specifications Issue 7, section 7.3.1: LC_CTYPE</a>
      */
     public static final Predicate<Integer>
-    IS_POSIX_PRINT = new Predicate<Integer>() {
+    IS_POSIX_PRINT = new IntegerPredicate("posixPrint") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -196,7 +197,7 @@ class Characters {
      *      Group Base Specifications Issue 7, section 7.3.1: LC_CTYPE</a>
      */
     public static final Predicate<Integer>
-    IS_POSIX_BLANK = new Predicate<Integer>() {
+    IS_POSIX_BLANK = new IntegerPredicate("posixBlank") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -212,7 +213,7 @@ class Characters {
      *      Group Base Specifications Issue 7, section 7.3.1: LC_CTYPE</a>
      */
     public static final Predicate<Integer>
-    IS_POSIX_CNTRL = new Predicate<Integer>() {
+    IS_POSIX_CNTRL = new IntegerPredicate("posixCntrl") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -228,7 +229,7 @@ class Characters {
      *      Group Base Specifications Issue 7, section 7.3.1: LC_CTYPE</a>
      */
     public static final Predicate<Integer>
-    IS_POSIX_XDIGIT = new Predicate<Integer>() {
+    IS_POSIX_XDIGIT = new IntegerPredicate("posixXdigit") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -245,7 +246,7 @@ class Characters {
      *      Group Base Specifications Issue 7, section 7.3.1: LC_CTYPE</a>
      */
     public static final Predicate<Integer>
-    IS_POSIX_SPACE = new Predicate<Integer>() {
+    IS_POSIX_SPACE = new IntegerPredicate("posixSpace") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -259,50 +260,51 @@ class Characters {
 
     /** A predicate for {@link Character#isLowerCase(int)}. */
     public static final Predicate<Integer>
-    IS_LOWER_CASE = new Predicate<Integer>() {
+    IS_LOWER_CASE = new IntegerPredicate("lowerCase") {
         @Override public boolean evaluate(Integer subject) { return Character.isLowerCase(subject); }
     };
 
     /** A predicate for {@link Character#isUpperCase(int)}. */
     public static final Predicate<Integer>
-    IS_UPPER_CASE = new Predicate<Integer>() {
+    IS_UPPER_CASE = new IntegerPredicate("upperCase") {
         @Override public boolean evaluate(Integer subject) { return Character.isUpperCase(subject); }
     };
 
     /** A predicate for {@link Character#isWhitespace(int)}. */
     public static final Predicate<Integer>
-    IS_WHITESPACE = new Predicate<Integer>() {
+    IS_WHITESPACE = new IntegerPredicate("whitespace") {
         @Override public boolean evaluate(Integer subject) { return Character.isWhitespace(subject); }
     };
 
     /** A predicate for {@link Character#isMirrored(int)}. */
     public static final Predicate<Integer>
-    IS_MIRRORED = new Predicate<Integer>() {
+    IS_MIRRORED = new IntegerPredicate("mirrored") {
         @Override public boolean evaluate(Integer subject) { return Character.isMirrored(subject); }
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_LOWER = new Predicate<Integer>() {
+    IS_UNICODE_LOWER = new IntegerPredicate("unicodeLower") {
         @Override public boolean evaluate(Integer subject) { return Character.isLowerCase(subject); }
+        @Override public String  toString()                { return "unicodeLower";                 }
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_UPPER = new Predicate<Integer>() {
+    IS_UNICODE_UPPER = new IntegerPredicate("unicodeUpper") {
         @Override public boolean evaluate(Integer subject) { return Character.isUpperCase(subject); }
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_TITLE = new Predicate<Integer>() {
+    IS_UNICODE_TITLE = new IntegerPredicate("unicodeTitle") {
         @Override public boolean evaluate(Integer subject) { return Character.isTitleCase(subject); }
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_LETTER = new Predicate<Integer>() {
+    IS_UNICODE_LETTER = new IntegerPredicate("unicodeLetter") {
         @Override public boolean evaluate(Integer subject) { return Character.isLetter(subject); }
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_ALPHA = new Predicate<Integer>() {
+    IS_UNICODE_ALPHA = new IntegerPredicate("unicodeAlpha") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -321,12 +323,13 @@ class Characters {
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_DIGIT = new Predicate<Integer>() {
+    IS_UNICODE_DIGIT = new IntegerPredicate("unicodeDigit") {
         @Override public boolean evaluate(Integer subject) { return Character.isDigit(subject); }
+        @Override public String  toString()                { return "digit";                    }
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_ALNUM = new Predicate<Integer>() {
+    IS_UNICODE_ALNUM = new IntegerPredicate("unicodeAlnum") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -335,7 +338,7 @@ class Characters {
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_PUNCT = new Predicate<Integer>() {
+    IS_UNICODE_PUNCT = new IntegerPredicate("unicodePunct") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -355,7 +358,7 @@ class Characters {
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_GRAPH = new Predicate<Integer>() {
+    IS_UNICODE_GRAPH = new IntegerPredicate("unicodeGraph") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -374,7 +377,7 @@ class Characters {
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_PRINT = new Predicate<Integer>() {
+    IS_UNICODE_PRINT = new IntegerPredicate("unicodePrint") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -388,7 +391,7 @@ class Characters {
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_BLANK = new Predicate<Integer>() {
+    IS_UNICODE_BLANK = new IntegerPredicate("unicodeBlank") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -397,14 +400,14 @@ class Characters {
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_CNTRL = new Predicate<Integer>() {
+    IS_UNICODE_CNTRL = new IntegerPredicate("unicodeCntrl") {
 
         @Override public boolean
         evaluate(Integer subject) { return Character.getType(subject) == Character.CONTROL; }
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_HEX_DIGIT = new Predicate<Integer>() {
+    IS_UNICODE_HEX_DIGIT = new IntegerPredicate("unicodeHexDigit") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -423,21 +426,21 @@ class Characters {
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_ASSIGNED = new Predicate<Integer>() {
+    IS_UNICODE_ASSIGNED = new IntegerPredicate("unicodeAssigned") {
 
         @Override public boolean
         evaluate(Integer subject) { return Character.getType(subject) != Character.UNASSIGNED; }
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_NONCHARACTER = new Predicate<Integer>() {
+    IS_UNICODE_NONCHARACTER = new IntegerPredicate("unicodeNoncharacter") {
 
         @Override public boolean
         evaluate(Integer subject) { return (subject & 0xfffe) == 0xfffe || (subject >= 0xfdd0 && subject <= 0xfdef); }
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_WHITE_SPACE = new Predicate<Integer>() {
+    IS_UNICODE_WHITE_SPACE = new IntegerPredicate("unicodeWhiteSpace") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -451,10 +454,13 @@ class Characters {
                 || (subject == 0x85)
             );
         }
+
+        @Override public String
+        toString() { return "unicodeWhiteSpace"; }
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_WORD = new Predicate<Integer>() {
+    IS_UNICODE_WORD = new IntegerPredicate("unicodeWord") {
 
         @Override public boolean
         evaluate(Integer subject) {
@@ -476,7 +482,7 @@ class Characters {
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_JOIN_CONTROL = new Predicate<Integer>() {
+    IS_UNICODE_JOIN_CONTROL = new IntegerPredicate("unicodeJoinControl") {
         @Override public boolean evaluate(Integer subject) { return subject == 0x200C || subject == 0x200D; }
     };
 
