@@ -116,18 +116,18 @@ class InputStreams {
      * @return                 All bytes that the given {@link InputStream} produces
      */
     public static byte[]
-	readAll(InputStream is, boolean closeInputStream) throws IOException {
+    readAll(InputStream is, boolean closeInputStream) throws IOException {
 
-    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-    	IoUtil.copy(
-			is,               // inputStream
-			closeInputStream, // closeInputStream
-			baos,             // outputStream
-			false             // closeOutputStream
-		);
+        IoUtil.copy(
+            is,               // inputStream
+            closeInputStream, // closeInputStream
+            baos,             // outputStream
+            false             // closeOutputStream
+        );
 
-    	return baos.toByteArray();
+        return baos.toByteArray();
     }
 
     /**

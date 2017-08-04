@@ -1201,7 +1201,7 @@ class IoUtil {
                                 throw e;
                             } catch (Throwable t) { // SUPPRESS CHECKSTYLE IllegalCatch
                                 try { os.close(); } catch (Exception e2) {}
-                            	
+
                                 // At this point, "t" MUST be a checked exception.
                                 @SuppressWarnings("unchecked") EX tmp = (EX) t;
                                 throw tmp;
