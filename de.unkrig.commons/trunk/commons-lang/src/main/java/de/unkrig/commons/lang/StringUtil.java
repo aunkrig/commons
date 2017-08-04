@@ -344,6 +344,11 @@ class StringUtil {
          * @return {@code max(0, fromIndex)} ... {@code min(toIndex, subject.length() - infix.length())}, or {@code -1}
          */
         int lastIndexOf(CharSequence subject, int fromIndex, int toIndex);
+
+        /**
+         * @return A textual representation of the infix and the search algorithm
+         */
+        @Override String toString();
     }
 
     /**
@@ -363,12 +368,14 @@ class StringUtil {
         }
     }
 
-    private static abstract
+    private abstract static
     class AbstractIndexOf implements IndexOf {
-        @Override public int indexOf(CharSequence subject)                    { return this.indexOf(subject, 0, Integer.MAX_VALUE);             }
+        @Override public int indexOf(CharSequence subject)                    { return this.indexOf(subject, 0, Integer.MAX_VALUE);             } // SUPPRESS CHECKSTYLE LineLength:4
         @Override public int indexOf(CharSequence subject, int fromIndex)     { return this.indexOf(subject, fromIndex, Integer.MAX_VALUE);     }
         @Override public int lastIndexOf(CharSequence subject)                { return this.lastIndexOf(subject, 0, Integer.MAX_VALUE);         }
         @Override public int lastIndexOf(CharSequence subject, int fromIndex) { return this.lastIndexOf(subject, fromIndex, Integer.MAX_VALUE); }
+
+        @Override public abstract String toString();
     }
 
     /**
@@ -397,12 +404,15 @@ class StringUtil {
 
                 if (toIndex <= 0) return subject.toString().lastIndexOf(infix, fromIndex);
 
-                subject = subject.subSequence(toIndex, subject.length() - toIndex);
+                subject   = subject.subSequence(toIndex, subject.length() - toIndex);
                 fromIndex -= toIndex;
 
                 int result = subject.toString().indexOf(infix, fromIndex);
                 return result == -1 ? -1 : result + toIndex;
             }
+
+            @Override public String
+            toString() { return "naive(\"" + infix + "\")"; }
         };
     }
 
@@ -500,6 +510,9 @@ class StringUtil {
 
                 return result;
             }
+
+            @Override public String
+            toString() { return "knuthMorrisPratt(\"" + infix + "\")"; }
         };
     }
 
