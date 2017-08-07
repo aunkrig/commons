@@ -1,0 +1,8 @@
+
+test.EnhancedServiceLoaderTest$MyService1
+test.EnhancedServiceLoaderTest$MyService1.instanceField = INSTANCE
+
+test.EnhancedServiceLoaderTest$MyService2
+test.EnhancedServiceLoaderTest$MyService2.instanceMethod = getInstance
+
+test.EnhancedServiceLoaderTest$MyService3
