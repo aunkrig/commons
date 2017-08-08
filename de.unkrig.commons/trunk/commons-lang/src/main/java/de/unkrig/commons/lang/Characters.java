@@ -260,25 +260,37 @@ class Characters {
 
     /** A predicate for {@link Character#isLowerCase(int)}. */
     public static final Predicate<Integer>
-    IS_LOWER_CASE = new IntegerPredicate("lowerCase") {
+    IS_LOWER_CASE = new IntegerPredicate("javaLowerCase") {
         @Override public boolean evaluate(Integer subject) { return Character.isLowerCase(subject); }
     };
 
     /** A predicate for {@link Character#isUpperCase(int)}. */
     public static final Predicate<Integer>
-    IS_UPPER_CASE = new IntegerPredicate("upperCase") {
+    IS_UPPER_CASE = new IntegerPredicate("javaUpperCase") {
         @Override public boolean evaluate(Integer subject) { return Character.isUpperCase(subject); }
     };
 
     /** A predicate for {@link Character#isWhitespace(int)}. */
     public static final Predicate<Integer>
-    IS_WHITESPACE = new IntegerPredicate("whitespace") {
+    IS_WHITESPACE = new IntegerPredicate("javaWhitespace") {
         @Override public boolean evaluate(Integer subject) { return Character.isWhitespace(subject); }
     };
 
+    /** A predicate for {@link Characters#isHorizontalWhitespace(int)}. */
+    public static final Predicate<Integer>
+    IS_HORIZONTAL_WHITESPACE = new IntegerPredicate("horizontalWhitespace") {
+        @Override public boolean evaluate(Integer subject) { return Characters.isHorizontalWhitespace(subject); }
+    };
+
+    public static boolean
+    isHorizontalWhitespace(int codePoint) {
+        return "\t\u00A0\u1680\u180e\u202f\u205f\u3000".indexOf(codePoint) != -1
+        || (codePoint >= '\u2000' && codePoint <= '\u200a');
+    }
+
     /** A predicate for {@link Character#isMirrored(int)}. */
     public static final Predicate<Integer>
-    IS_MIRRORED = new IntegerPredicate("mirrored") {
+    IS_MIRRORED = new IntegerPredicate("javaMirrored") {
         @Override public boolean evaluate(Integer subject) { return Character.isMirrored(subject); }
     };
 
@@ -325,7 +337,11 @@ class Characters {
     public static final Predicate<Integer>
     IS_UNICODE_DIGIT = new IntegerPredicate("unicodeDigit") {
         @Override public boolean evaluate(Integer subject) { return Character.isDigit(subject); }
-        @Override public String  toString()                { return "digit";                    }
+    };
+
+    public static final Predicate<Integer>
+    IS_DIGIT = new IntegerPredicate("digit") {
+        @Override public boolean evaluate(Integer subject) { return subject >= '0' && subject <= '9'; }
     };
 
     public static final Predicate<Integer>
@@ -461,25 +477,43 @@ class Characters {
 
     public static final Predicate<Integer>
     IS_UNICODE_WORD = new IntegerPredicate("unicodeWord") {
-
-        @Override public boolean
-        evaluate(Integer subject) {
-
-            if (
-                Characters.IS_UNICODE_ALPHA.evaluate(subject)
-                || Characters.IS_UNICODE_JOIN_CONTROL.evaluate(subject)
-            ) return true;
-
-            int type = Character.getType(subject);
-            return (
-                type == Character.NON_SPACING_MARK
-                || type == Character.ENCLOSING_MARK
-                || type == Character.COMBINING_SPACING_MARK
-                || type == Character.DECIMAL_DIGIT_NUMBER
-                || type == Character.CONNECTOR_PUNCTUATION
-            );
-        }
+        @Override public boolean evaluate(Integer subject) { return Characters.isUnicodeWord(subject); }
     };
+
+    protected static boolean
+    isUnicodeWord(Integer subject) {
+
+        if (
+            Characters.IS_UNICODE_ALPHA.evaluate(subject)
+            || Characters.IS_UNICODE_JOIN_CONTROL.evaluate(subject)
+        ) return true;
+
+        int type = Character.getType(subject);
+        return (
+            type == Character.NON_SPACING_MARK
+            || type == Character.ENCLOSING_MARK
+            || type == Character.COMBINING_SPACING_MARK
+            || type == Character.DECIMAL_DIGIT_NUMBER
+            || type == Character.CONNECTOR_PUNCTUATION
+        );
+    }
+
+    /**  A word character: [a-zA-Z_0-9] */
+    public static final Predicate<Integer>
+    IS_WORD = new IntegerPredicate("word") {
+        @Override public boolean evaluate(Integer subject) { return Characters.isWordCharacter(subject); }
+    };
+
+    /**  A word character: [a-zA-Z_0-9] */
+    public static boolean
+    isWordCharacter(int codePoint) {
+        return (
+            (codePoint >= 'a' && codePoint <= 'z')
+            || (codePoint >= 'A' && codePoint <= 'Z')
+            || (codePoint >= '0' && codePoint <= '9')
+            || codePoint == '_'
+        );
+    }
 
     public static final Predicate<Integer>
     IS_UNICODE_JOIN_CONTROL = new IntegerPredicate("unicodeJoinControl") {
