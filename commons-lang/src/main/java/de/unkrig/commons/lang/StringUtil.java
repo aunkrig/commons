@@ -354,8 +354,8 @@ class StringUtil {
     /**
      * Runtime-optimized reimplementation of {@link String#indexOf(String)} and {@link String#lastIndexOf(String)}.
      * <p>
-     *   This method returns an implementation that performs at least as well as the {@link String} methodsby analyzing
-     *   the <var>infix</var> (the string to search for),
+     *   This method returns an implementation that performs at least as well as the {@link String} methods by analyzing
+     *   the <var>infix</var> (the string to search for).
      * </p>
      */
     public static IndexOf
