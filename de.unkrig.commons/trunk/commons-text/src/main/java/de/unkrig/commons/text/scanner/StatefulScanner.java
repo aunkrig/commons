@@ -265,6 +265,21 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
             + this.cs
             + "\""
         );
+
+        if (this.currentStateRules == this.defaultStateRules) {
+            message += " in default state";
+        } else {
+            for (Entry<S, List<Rule<TT, S>>> e : this.nonDefaultStateRules.entrySet()) {
+                S                 state = e.getKey();
+                List<Rule<TT, S>> rules = e.getValue();
+
+                if (this.currentStateRules == rules) {
+                    message += " in state " + state;
+                    break;
+                }
+            }
+        }
+
         if (this.currentStateRules.size() == 1) {
             message += "; expected " + this.currentStateRules.get(0).tokenType;
         } else
