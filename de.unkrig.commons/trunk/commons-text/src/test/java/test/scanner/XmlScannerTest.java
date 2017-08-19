@@ -111,37 +111,33 @@ class XmlScannerTest {
                 return; // SNO
             }
 
-            String[] cgs = t.captured;
-            if (cgs != null) {
+            for (int j = 0; j < t.captured.length; j++) {
 
-                for (int j = 0; j < cgs.length; j++) {
-
-                    if (i >= tokenTypesAndTokenTexts.length || tokenTypesAndTokenTexts[i] instanceof TokenType) {
-                        Assert.fail((
-                            "Capturing group count mismatch at index "
-                            + i
-                            + "; expected "
-                            + cgs.length
-                            + ", actually "
-                            + j
-                        ));
-                    }
-
-                    String actual   = cgs[j];
-                    String expected = (String) tokenTypesAndTokenTexts[i++];
-
-                    if (!ObjectUtil.equals(expected, actual)) {
-                        Assert.fail((
-                            "Capturing group mismatch: Expected \""
-                            + expected
-                            + "\", actually \""
-                            + actual
-                            + "\""
-                        ));
-                    }
+                if (i >= tokenTypesAndTokenTexts.length || tokenTypesAndTokenTexts[i] instanceof TokenType) {
+                    Assert.fail((
+                        "Capturing group count mismatch at index "
+                        + i
+                        + "; expected "
+                        + t.captured.length
+                        + ", actually "
+                        + j
+                    ));
                 }
-                cgs = new String[0];
+
+                String actual   = t.captured[j];
+                String expected = (String) tokenTypesAndTokenTexts[i++];
+
+                if (!ObjectUtil.equals(expected, actual)) {
+                    Assert.fail((
+                        "Capturing group mismatch: Expected \""
+                        + expected
+                        + "\", actually \""
+                        + actual
+                        + "\""
+                    ));
+                }
             }
+
             if (t.type != type) Assert.fail("Expected " + type + " instead of " + t.type);
             if (!t.text.equals(text)) Assert.fail("Expected \"" + text + "\" instead of \"" + t.text + "\"");
         }
