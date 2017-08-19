@@ -100,7 +100,9 @@ class AuthenticateHeaderParser {
     public static List<Challenge>
     parse(String input) throws ParseException {
 
-        StatefulScanner<TokenType, State> ss = new StatefulScanner<TokenType, State>(CHALLENGE_SCANNER);
+        StatefulScanner<TokenType, State>
+        ss = new StatefulScanner<TokenType, State>(AuthenticateHeaderParser.CHALLENGE_SCANNER);
+        
         ss.setInput(input);
 
         AbstractParser<TokenType>
@@ -140,18 +142,15 @@ class AuthenticateHeaderParser {
 
                     if (t.type != TokenType.AUTH_PARAM) throw new ParseException(TokenType.AUTH_PARAM + " expected instead of " + t.type);
 
-                    String[] captured = t.captured;
-                    assert captured != null;
-
-                    String name = captured[0], value;
-                    if (captured[1] != null && captured[2] == null) {
-                        value = captured[1];
+                    String name = t.captured[0], value;
+                    if (t.captured[1] != null && t.captured[2] == null) {
+                        value = t.captured[1];
                     } else
-                    if (captured[1] == null && captured[2] != null) {
-                        value = captured[2].replaceAll("\\\\(.)", "$1");
+                    if (t.captured[1] == null && t.captured[2] != null) {
+                        value = t.captured[2].replaceAll("\\\\(.)", "$1");
                     } else
                     {
-                        throw new AssertionError(Arrays.toString(captured));
+                        throw new AssertionError(Arrays.toString(t.captured));
                     }
                     aps.add(new AuthParam(name, value));
 
@@ -172,21 +171,43 @@ class AuthenticateHeaderParser {
     enum State { Challenge1, Challenge2 }
     private static final StatefulScanner<TokenType, State> CHALLENGE_SCANNER = new StatefulScanner<TokenType, State>(State.class);
     static {
-        CHALLENGE_SCANNER.addRule(CHALLENGE_SCANNER.ANY_STATE, "\\s+", TokenType.SPACE, CHALLENGE_SCANNER.REMAIN);
+        
+        AuthenticateHeaderParser.CHALLENGE_SCANNER.addRule(
+            AuthenticateHeaderParser.CHALLENGE_SCANNER.ANY_STATE,
+            "\\s+",
+            TokenType.SPACE,
+            AuthenticateHeaderParser.CHALLENGE_SCANNER.REMAIN
+        );
 
         String token = "[A-Za-z0-9!#$%&'*+\\-.^_`|~]+";
-
+        
         // token
-        CHALLENGE_SCANNER.addRule(token, TokenType.TOKEN, State.Challenge1);
+        AuthenticateHeaderParser.CHALLENGE_SCANNER.addRule(
+            token,
+            TokenType.TOKEN,
+            State.Challenge1
+        );
 
         // token68  Use negative lookahead to handle the similarity with "token '=' ( token | quoted-string )".
-        CHALLENGE_SCANNER.addRule(State.Challenge1, "[A-Za-z0-9\\-._~+/]+=*+(?!\\s*[A-Za-z0-9!#$%&'*+\\-.^_`|~\"])", TokenType.TOKEN68);
+        AuthenticateHeaderParser.CHALLENGE_SCANNER.addRule(
+            State.Challenge1,
+            "[A-Za-z0-9\\-._~+/]+=*+(?!\\s*[A-Za-z0-9!#$%&'*+\\-.^_`|~\"])",
+            TokenType.TOKEN68
+        );
 
         // auth-param
-        CHALLENGE_SCANNER.addRule(CHALLENGE_SCANNER.ANY_STATE, "(" + token + ")\\s*+=\\s*+(?:(" + token + ")|\"((?:[^\"\\\\]|\\\\.)*)\")", TokenType.AUTH_PARAM);
+        AuthenticateHeaderParser.CHALLENGE_SCANNER.addRule(
+            AuthenticateHeaderParser.CHALLENGE_SCANNER.ANY_STATE,
+            "(" + token + ")\\s*+=\\s*+(?:(" + token + ")|\"((?:[^\"\\\\]|\\\\.)*)\")",
+            TokenType.AUTH_PARAM
+        );
 
         // comma
-        CHALLENGE_SCANNER.addRule(CHALLENGE_SCANNER.ANY_STATE, ",", TokenType.COMMA);
+        AuthenticateHeaderParser.CHALLENGE_SCANNER.addRule(
+            AuthenticateHeaderParser.CHALLENGE_SCANNER.ANY_STATE,
+            ",",
+            TokenType.COMMA
+        );
     }
 }
 
