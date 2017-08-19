@@ -412,7 +412,7 @@ class StringUtil {
             }
 
             @Override public String
-            toString() { return "naive(\"" + infix + "\")"; }
+            toString() { return "naive(" + PrettyPrinter.toString(infix) + ")"; }
         };
     }
 
