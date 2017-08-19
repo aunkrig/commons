@@ -33,7 +33,6 @@ import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.protocol.Predicate;
 import de.unkrig.commons.lang.protocol.ProducerUtil;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
-import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * A scanner that produces {@link Token}s.
@@ -72,12 +71,14 @@ class AbstractScanner<TT extends Enum<TT>> implements StringScanner<TT> {
          *   capturing groups.
          * </p>
          * <p>
-         *   {@code null} and an array of length zero both mean that the matched pattern has no capturing groups.
+         *   An array of length zero means that the matched pattern has no capturing groups.
          * </p>
          *
          * @see Pattern
          */
-        @Nullable public final String[] captured;
+        public final String[] captured;
+
+        private static final String[] DEFAULT_CAPTURED = new String[0];
 
         public
         Token(TT type, String text) {
@@ -86,11 +87,11 @@ class AbstractScanner<TT extends Enum<TT>> implements StringScanner<TT> {
 
             this.type     = type;
             this.text     = text;
-            this.captured = null;
+            this.captured = Token.DEFAULT_CAPTURED;
         }
 
         public
-        Token(TT type, String text, @Nullable String[] captured) {
+        Token(TT type, String text, String[] captured) {
             assert type != null;
             assert text != null;
 
