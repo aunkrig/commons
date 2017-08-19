@@ -111,6 +111,18 @@ class PrettyPrinter {
         return PrettyPrinter.append(o, sb).toString();
     }
 
+    /**
+     * Converts a code point into a JAVA character literal (e.g. {@code "'\n'"}, {@code "'A'"}), or, iff <var>cp</var>
+     * {@code > Character.MAX_VALUE}, into a JAVA hexadecimal integer literal (e.g. {@code "0x10000"}).
+     */
+    @Nullable public static String
+    codePointToString(int cp) {
+
+        if (cp <= Character.MAX_VALUE) return PrettyPrinter.append((char) cp, new StringBuilder()).toString();
+
+        return new Formatter().format("0x%x", cp).toString();
+    }
+
     private static StringBuilder
     append(@Nullable Object o, StringBuilder sb) {
 
