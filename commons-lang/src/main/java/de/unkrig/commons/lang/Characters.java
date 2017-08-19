@@ -26,6 +26,7 @@
 
 package de.unkrig.commons.lang;
 
+import java.lang.Character.UnicodeBlock;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
@@ -258,16 +259,81 @@ class Characters {
         }
     };
 
-    /** A predicate for {@link Character#isLowerCase(int)}. */
+    @Nullable public static Predicate<Integer>
+    javaCharacterClassFromName(String name) {
+        return (
+            "javaLetter".equals(name)                 ? Characters.IS_UNICODE_LETTER           :
+            "javaLowerCase".equals(name)              ? Characters.IS_UNICODE_LOWER            :
+            "javaUpperCase".equals(name)              ? Characters.IS_UNICODE_UPPER            :
+            "javaTitleCase".equals(name)              ? Characters.IS_UNICODE_TITLE            :
+            "javaWhitespace".equals(name)             ? Characters.IS_WHITESPACE               :
+            "javaMirrored".equals(name)               ? Characters.IS_MIRRORED                 :
+            "javaDigit".equals(name)                  ? Characters.IS_UNICODE_DIGIT            :
+            "javaLetterOrDigit".equals(name)          ? Characters.IS_LETTER_OR_DIGIT          :
+            "javaDefined".equals(name)                ? Characters.IS_DEFINED                  :
+            "javaJavaIdentifierStart".equals(name)    ? Characters.IS_JAVA_IDENTIFIER_START    :
+            "javaJavaIdentifierPart".equals(name)     ? Characters.IS_JAVA_IDENTIFIER_PART     :
+            "javaIdentifierIgnorable".equals(name)    ? Characters.IS_IDENTIFIER_IGNORABLE     :
+            "javaUnicodeIdentifierStart".equals(name) ? Characters.IS_UNICODE_IDENTIFIER_START :
+            "javaUnicodeIdentifierPart".equals(name)  ? Characters.IS_UNICODE_IDENTIFIER_PART  :
+            "javaSpaceChar".equals(name)              ? Characters.IS_SPACE_CHAR               :
+            "javaISOControl".equals(name)             ? Characters.IS_ISO_CONTROL              :
+            null
+        );
+    }
+
+    /** A predicate for {@link Character#isISOControl(int)}. */
     public static final Predicate<Integer>
-    IS_LOWER_CASE = new IntegerPredicate("javaLowerCase") {
-        @Override public boolean evaluate(Integer subject) { return Character.isLowerCase(subject); }
+    IS_ISO_CONTROL = new IntegerPredicate("javaISOControl") {
+        @Override public boolean evaluate(Integer subject) { return Character.isISOControl(subject); }
     };
 
-    /** A predicate for {@link Character#isUpperCase(int)}. */
+    /** A predicate for {@link Character#isSpaceChar(int)}. */
     public static final Predicate<Integer>
-    IS_UPPER_CASE = new IntegerPredicate("javaUpperCase") {
-        @Override public boolean evaluate(Integer subject) { return Character.isUpperCase(subject); }
+    IS_SPACE_CHAR = new IntegerPredicate("javaSpaceChar") {
+        @Override public boolean evaluate(Integer subject) { return Character.isSpaceChar(subject); }
+    };
+
+    /** A predicate for {@link Character#isDefined(int)}. */
+    public static final Predicate<Integer>
+    IS_DEFINED = new IntegerPredicate("javaDefined") {
+        @Override public boolean evaluate(Integer subject) { return Character.isDefined(subject); }
+    };
+
+    /** A predicate for {@link Character#isJavaIdentifierStart(int)}. */
+    public static final Predicate<Integer>
+    IS_JAVA_IDENTIFIER_START = new IntegerPredicate("isJavaIdentifierStart") {
+        @Override public boolean evaluate(Integer subject) { return Character.isJavaIdentifierStart(subject); }
+    };
+
+    /** A predicate for {@link Character#isJavaIdentifierPart(int)}. */
+    public static final Predicate<Integer>
+    IS_JAVA_IDENTIFIER_PART = new IntegerPredicate("isJavaIdentifierPart") {
+        @Override public boolean evaluate(Integer subject) { return Character.isJavaIdentifierPart(subject); }
+    };
+
+    /** A predicate for {@link Character#isIdentifierIgnorable(int)}. */
+    public static final Predicate<Integer>
+    IS_IDENTIFIER_IGNORABLE = new IntegerPredicate("isIdentifierIgnorable") {
+        @Override public boolean evaluate(Integer subject) { return Character.isIdentifierIgnorable(subject); }
+    };
+
+    /** A predicate for {@link Character#isUnicodeIdentifierStart(int)}. */
+    public static final Predicate<Integer>
+    IS_UNICODE_IDENTIFIER_START = new IntegerPredicate("isUnicodeIdentifierStart") {
+        @Override public boolean evaluate(Integer subject) { return Character.isUnicodeIdentifierStart(subject); }
+    };
+
+    /** A predicate for {@link Character#isUnicodeIdentifierPart(int)}. */
+    public static final Predicate<Integer>
+    IS_UNICODE_IDENTIFIER_PART = new IntegerPredicate("isUnicodeIdentifierPart") {
+        @Override public boolean evaluate(Integer subject) { return Character.isUnicodeIdentifierPart(subject); }
+    };
+
+    /** A predicate for {@link Character#isLetterOrDigit(int)}. */
+    public static final Predicate<Integer>
+    IS_LETTER_OR_DIGIT = new IntegerPredicate("javaDefined") {
+        @Override public boolean evaluate(Integer subject) { return Character.isLetterOrDigit(subject); }
     };
 
     /** A predicate for {@link Character#isWhitespace(int)}. */
@@ -290,30 +356,65 @@ class Characters {
 
     /** A predicate for {@link Character#isMirrored(int)}. */
     public static final Predicate<Integer>
-    IS_MIRRORED = new IntegerPredicate("javaMirrored") {
+    IS_MIRRORED = new IntegerPredicate("mirrored") {
         @Override public boolean evaluate(Integer subject) { return Character.isMirrored(subject); }
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_LOWER = new IntegerPredicate("unicodeLower") {
-        @Override public boolean evaluate(Integer subject) { return Character.isLowerCase(subject); }
-        @Override public String  toString()                { return "unicodeLower";                 }
+    IS_DIGIT = new IntegerPredicate("digit") {
+        @Override public boolean evaluate(Integer subject) { return subject >= '0' && subject <= '9'; }
     };
 
+    /**  A word character: [a-zA-Z_0-9] */
     public static final Predicate<Integer>
-    IS_UNICODE_UPPER = new IntegerPredicate("unicodeUpper") {
-        @Override public boolean evaluate(Integer subject) { return Character.isUpperCase(subject); }
+    IS_WORD = new IntegerPredicate("word") {
+        @Override public boolean evaluate(Integer subject) { return Characters.isWordCharacter(subject); }
     };
 
-    public static final Predicate<Integer>
-    IS_UNICODE_TITLE = new IntegerPredicate("unicodeTitle") {
-        @Override public boolean evaluate(Integer subject) { return Character.isTitleCase(subject); }
-    };
+    /**  A word character: [a-zA-Z_0-9] */
+    public static boolean
+    isWordCharacter(int codePoint) {
+        return (
+            (codePoint >= 'a' && codePoint <= 'z')
+            || (codePoint >= 'A' && codePoint <= 'Z')
+            || (codePoint >= '0' && codePoint <= '9')
+            || codePoint == '_'
+        );
+    }
 
-    public static final Predicate<Integer>
-    IS_UNICODE_LETTER = new IntegerPredicate("unicodeLetter") {
-        @Override public boolean evaluate(Integer subject) { return Character.isLetter(subject); }
-    };
+    // =============================== UNICODE CATEGORIES ===============================
+
+    public static final Predicate<Integer> IS_UNICODE_UNASSIGNED                = Characters.unicodeGeneralCategoryPredicate(Character.UNASSIGNED,                "unicodeUnassigned");
+    public static final Predicate<Integer> IS_UNICODE_LETTER                    = new IntegerPredicate("unicodeTitle") { @Override public boolean evaluate(Integer subject) { return Character.isLetter(subject);    } };
+    public static final Predicate<Integer> IS_UNICODE_UPPER                     = new IntegerPredicate("unicodeUpper") { @Override public boolean evaluate(Integer subject) { return Character.isUpperCase(subject); } };
+    public static final Predicate<Integer> IS_UNICODE_LOWER                     = new IntegerPredicate("unicodeLower") { @Override public boolean evaluate(Integer subject) { return Character.isLowerCase(subject); } };
+    public static final Predicate<Integer> IS_UNICODE_TITLE                     = new IntegerPredicate("unicodeTitle") { @Override public boolean evaluate(Integer subject) { return Character.isTitleCase(subject); } };
+    public static final Predicate<Integer> IS_UNICODE_MODIFIER_LETTER           = Characters.unicodeGeneralCategoryPredicate(Character.MODIFIER_LETTER,           "unicodeModifier");
+    public static final Predicate<Integer> IS_UNICODE_OTHER_LETTER              = Characters.unicodeGeneralCategoryPredicate(Character.OTHER_LETTER,              "unicodeOther");
+    public static final Predicate<Integer> IS_UNICODE_NON_SPACING_MARK          = Characters.unicodeGeneralCategoryPredicate(Character.NON_SPACING_MARK,          "unicodeNonSpacingNark");
+    public static final Predicate<Integer> IS_UNICODE_ENCLOSING_MARK            = Characters.unicodeGeneralCategoryPredicate(Character.ENCLOSING_MARK,            "unicodeEnclosingMark");
+    public static final Predicate<Integer> IS_UNICODE_COMBINING_SPACING_MARK    = Characters.unicodeGeneralCategoryPredicate(Character.COMBINING_SPACING_MARK,    "unicodeCombiningSpacingMark");
+    public static final Predicate<Integer> IS_UNICODE_DECIMAL_DIGIT_NUMBER      = Characters.unicodeGeneralCategoryPredicate(Character.DECIMAL_DIGIT_NUMBER,      "unicodeDecimalDigitNumber");
+    public static final Predicate<Integer> IS_UNICODE_LETTER_NUMBER             = Characters.unicodeGeneralCategoryPredicate(Character.LETTER_NUMBER,             "unicodeLetterNumber");
+    public static final Predicate<Integer> IS_UNICODE_OTHER_NUMBER              = Characters.unicodeGeneralCategoryPredicate(Character.OTHER_NUMBER,              "unicodeOtherNumber");
+    public static final Predicate<Integer> IS_UNICODE_SPACE_SEPARATOR           = Characters.unicodeGeneralCategoryPredicate(Character.SPACE_SEPARATOR,           "unicodeSpaceSeparator");
+    public static final Predicate<Integer> IS_UNICODE_LINE_SEPARATOR            = Characters.unicodeGeneralCategoryPredicate(Character.LINE_SEPARATOR,            "unicodeLineSeparator");
+    public static final Predicate<Integer> IS_UNICODE_PARAGRAPH_SEPARATOR       = Characters.unicodeGeneralCategoryPredicate(Character.PARAGRAPH_SEPARATOR,       "unicodeParagraphSeparator");
+    public static final Predicate<Integer> IS_UNICODE_CONTROL                   = Characters.unicodeGeneralCategoryPredicate(Character.CONTROL,                   "unicodeControl");
+    public static final Predicate<Integer> IS_UNICODE_FORMAT                    = Characters.unicodeGeneralCategoryPredicate(Character.FORMAT,                    "unicodeFormat");
+    public static final Predicate<Integer> IS_UNICODE_PRIVATE_USE               = Characters.unicodeGeneralCategoryPredicate(Character.PRIVATE_USE,               "unicodePrivateUse");
+    public static final Predicate<Integer> IS_UNICODE_SURROGATE                 = Characters.unicodeGeneralCategoryPredicate(Character.SURROGATE,                 "unicodeSurrogate");
+    public static final Predicate<Integer> IS_UNICODE_DASH_PUNCTUATION          = Characters.unicodeGeneralCategoryPredicate(Character.DASH_PUNCTUATION,          "unicodeDashPunctuation");
+    public static final Predicate<Integer> IS_UNICODE_START_PUNCTUATION         = Characters.unicodeGeneralCategoryPredicate(Character.START_PUNCTUATION,         "unicodeStartPunctuation");
+    public static final Predicate<Integer> IS_UNICODE_END_PUNCTUATION           = Characters.unicodeGeneralCategoryPredicate(Character.END_PUNCTUATION,           "unicodeEndPunctuation");
+    public static final Predicate<Integer> IS_UNICODE_CONNECTOR_PUNCTUATION     = Characters.unicodeGeneralCategoryPredicate(Character.CONNECTOR_PUNCTUATION,     "unicodeConnectorPunctuation");
+    public static final Predicate<Integer> IS_UNICODE_OTHER_PUNCTUATION         = Characters.unicodeGeneralCategoryPredicate(Character.OTHER_PUNCTUATION,         "unicodeOtherPunctuation");
+    public static final Predicate<Integer> IS_UNICODE_MATH_SYMBOL               = Characters.unicodeGeneralCategoryPredicate(Character.MATH_SYMBOL,               "unicodeMATH_Symbol");
+    public static final Predicate<Integer> IS_UNICODE_CURRENCY_SYMBOL           = Characters.unicodeGeneralCategoryPredicate(Character.CURRENCY_SYMBOL,           "unicodeCurrencySymbol");
+    public static final Predicate<Integer> IS_UNICODE_MODIFIER_SYMBOL           = Characters.unicodeGeneralCategoryPredicate(Character.MODIFIER_SYMBOL,           "unicodeModifierSymbol");
+    public static final Predicate<Integer> IS_UNICODE_OTHER_SYMBOL              = Characters.unicodeGeneralCategoryPredicate(Character.OTHER_SYMBOL,              "unicodeOtherSymbol");
+    public static final Predicate<Integer> IS_UNICODE_INITIAL_QUOTE_PUNCTUATION = Characters.unicodeGeneralCategoryPredicate(Character.INITIAL_QUOTE_PUNCTUATION, "unicodeInitialQuotePunctuation");
+    public static final Predicate<Integer> IS_UNICODE_FINAL_QUOTE_PUNCTUATION   = Characters.unicodeGeneralCategoryPredicate(Character.FINAL_QUOTE_PUNCTUATION,   "unicodeFinalQuotePunctuation");
 
     public static final Predicate<Integer>
     IS_UNICODE_ALPHA = new IntegerPredicate("unicodeAlpha") {
@@ -335,23 +436,27 @@ class Characters {
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_DIGIT = new IntegerPredicate("unicodeDigit") {
-        @Override public boolean evaluate(Integer subject) { return Character.isDigit(subject); }
-    };
-
-    public static final Predicate<Integer>
-    IS_DIGIT = new IntegerPredicate("digit") {
-        @Override public boolean evaluate(Integer subject) { return subject >= '0' && subject <= '9'; }
-    };
-
-    public static final Predicate<Integer>
-    IS_UNICODE_ALNUM = new IntegerPredicate("unicodeAlnum") {
+    IS_UNICODE_WHITE_SPACE = new IntegerPredicate("unicodeWhiteSpace") {
 
         @Override public boolean
         evaluate(Integer subject) {
-            return Characters.IS_UNICODE_ALPHA.evaluate(subject) || Characters.IS_UNICODE_DIGIT.evaluate(subject);
+
+            int type = Character.getType(subject);
+            return (
+                type == Character.SPACE_SEPARATOR
+                || type == Character.LINE_SEPARATOR
+                || type == Character.PARAGRAPH_SEPARATOR
+                || (subject >= 0x9 && subject <= 0xd)
+                || (subject == 0x85)
+            );
         }
+
+        @Override public String
+        toString() { return "unicodeWhiteSpace"; }
     };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_CNTRL = Characters.unicodeGeneralCategoryPredicate(Character.CONTROL, "unicodeCntrl");
 
     public static final Predicate<Integer>
     IS_UNICODE_PUNCT = new IntegerPredicate("unicodePunct") {
@@ -370,6 +475,62 @@ class Characters {
                 || type == Character.INITIAL_QUOTE_PUNCTUATION
                 || type == Character.FINAL_QUOTE_PUNCTUATION
             );
+        }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_HEX_DIGIT = new IntegerPredicate("unicodeHexDigit") {
+
+        @Override public boolean
+        evaluate(Integer subject) {
+
+            // See "UnicodeProp.HEX_DIGIT"
+            return (
+                Character.isDigit(subject)
+                || (subject >= '0'    && subject <= '9')
+                || (subject >= 'A'    && subject <= 'F')
+                || (subject >= 'a'    && subject <= 'f')
+                || (subject >= 0xFF10 && subject <= 0xFF19)
+                || (subject >= 0xFF21 && subject <= 0xFF26)
+                || (subject >= 0xFF41 && subject <= 0xFF46)
+            );
+        }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_ASSIGNED = new IntegerPredicate("unicodeAssigned") {
+
+        @Override public boolean
+        evaluate(Integer subject) { return Character.getType(subject) != Character.UNASSIGNED; }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_NONCHARACTER = new IntegerPredicate("unicodeNoncharacter") {
+
+        @Override public boolean
+        evaluate(Integer subject) { return (subject & 0xfffe) == 0xfffe || (subject >= 0xfdd0 && subject <= 0xfdef); }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_DIGIT = new IntegerPredicate("unicodeDigit") {
+        @Override public boolean evaluate(Integer subject) { return Character.isDigit(subject); }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_ALNUM = new IntegerPredicate("unicodeAlnum") {
+
+        @Override public boolean
+        evaluate(Integer subject) {
+            return Characters.IS_UNICODE_ALPHA.evaluate(subject) || Characters.IS_UNICODE_DIGIT.evaluate(subject);
+        }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_BLANK = new IntegerPredicate("unicodeBlank") {
+
+        @Override public boolean
+        evaluate(Integer subject) {
+            return Character.getType(subject) == Character.SPACE_SEPARATOR || subject == 0x9;
         }
     };
 
@@ -407,77 +568,13 @@ class Characters {
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_BLANK = new IntegerPredicate("unicodeBlank") {
-
-        @Override public boolean
-        evaluate(Integer subject) {
-            return Character.getType(subject) == Character.SPACE_SEPARATOR || subject == 0x9;
-        }
-    };
-
-    public static final Predicate<Integer>
-    IS_UNICODE_CNTRL = new IntegerPredicate("unicodeCntrl") {
-
-        @Override public boolean
-        evaluate(Integer subject) { return Character.getType(subject) == Character.CONTROL; }
-    };
-
-    public static final Predicate<Integer>
-    IS_UNICODE_HEX_DIGIT = new IntegerPredicate("unicodeHexDigit") {
-
-        @Override public boolean
-        evaluate(Integer subject) {
-
-            // See "UnicodeProp.HEX_DIGIT"
-            return (
-                Character.isDigit(subject)
-                || (subject >= '0'    && subject <= '9')
-                || (subject >= 'A'    && subject <= 'F')
-                || (subject >= 'a'    && subject <= 'f')
-                || (subject >= 0xFF10 && subject <= 0xFF19)
-                || (subject >= 0xFF21 && subject <= 0xFF26)
-                || (subject >= 0xFF41 && subject <= 0xFF46)
-            );
-        }
-    };
-
-    public static final Predicate<Integer>
-    IS_UNICODE_ASSIGNED = new IntegerPredicate("unicodeAssigned") {
-
-        @Override public boolean
-        evaluate(Integer subject) { return Character.getType(subject) != Character.UNASSIGNED; }
-    };
-
-    public static final Predicate<Integer>
-    IS_UNICODE_NONCHARACTER = new IntegerPredicate("unicodeNoncharacter") {
-
-        @Override public boolean
-        evaluate(Integer subject) { return (subject & 0xfffe) == 0xfffe || (subject >= 0xfdd0 && subject <= 0xfdef); }
-    };
-
-    public static final Predicate<Integer>
-    IS_UNICODE_WHITE_SPACE = new IntegerPredicate("unicodeWhiteSpace") {
-
-        @Override public boolean
-        evaluate(Integer subject) {
-
-            int type = Character.getType(subject);
-            return (
-                type == Character.SPACE_SEPARATOR
-                || type == Character.LINE_SEPARATOR
-                || type == Character.PARAGRAPH_SEPARATOR
-                || (subject >= 0x9 && subject <= 0xd)
-                || (subject == 0x85)
-            );
-        }
-
-        @Override public String
-        toString() { return "unicodeWhiteSpace"; }
-    };
-
-    public static final Predicate<Integer>
     IS_UNICODE_WORD = new IntegerPredicate("unicodeWord") {
         @Override public boolean evaluate(Integer subject) { return Characters.isUnicodeWord(subject); }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_JOIN_CONTROL = new IntegerPredicate("unicodeJoinControl") {
+        @Override public boolean evaluate(Integer subject) { return subject == 0x200C || subject == 0x200D; }
     };
 
     protected static boolean
@@ -498,35 +595,45 @@ class Characters {
         );
     }
 
-    /**  A word character: [a-zA-Z_0-9] */
-    public static final Predicate<Integer>
-    IS_WORD = new IntegerPredicate("word") {
-        @Override public boolean evaluate(Integer subject) { return Characters.isWordCharacter(subject); }
-    };
-
-    /**  A word character: [a-zA-Z_0-9] */
-    public static boolean
-    isWordCharacter(int codePoint) {
-        return (
-            (codePoint >= 'a' && codePoint <= 'z')
-            || (codePoint >= 'A' && codePoint <= 'Z')
-            || (codePoint >= '0' && codePoint <= '9')
-            || codePoint == '_'
-        );
-    }
-
-    public static final Predicate<Integer>
-    IS_UNICODE_JOIN_CONTROL = new IntegerPredicate("unicodeJoinControl") {
-        @Override public boolean evaluate(Integer subject) { return subject == 0x200C || subject == 0x200D; }
-    };
-
     @Nullable public static Predicate<Integer>
-    unicodePropertyFromName(String name) {
-        return Characters.UNICODE_PROPERTIES.get(name.toUpperCase(Locale.US));
+    unicodeCategoryFromName(String name) {
+        return Characters.UNICODE_CATEGORIES.get(name.toUpperCase(Locale.US));
     }
-    private static final Map<String /*name*/, Predicate<Integer>> UNICODE_PROPERTIES;
+    private static final Map<String /*name*/, Predicate<Integer>> UNICODE_CATEGORIES;
     static {
         Map<String /*name*/, Predicate<Integer>> m = new HashMap<String, Predicate<Integer>>();
+
+        m.put("CN", Characters.IS_UNICODE_UNASSIGNED);
+        m.put("L",  Characters.IS_UNICODE_LETTER);
+        m.put("LU", Characters.IS_UNICODE_UPPER);
+        m.put("LL", Characters.IS_UNICODE_LOWER);
+        m.put("LT", Characters.IS_UNICODE_TITLE);
+        m.put("LM", Characters.IS_UNICODE_MODIFIER_LETTER);
+        m.put("LO", Characters.IS_UNICODE_OTHER_LETTER);
+        m.put("MN", Characters.IS_UNICODE_NON_SPACING_MARK);
+        m.put("ME", Characters.IS_UNICODE_ENCLOSING_MARK);
+        m.put("MC", Characters.IS_UNICODE_COMBINING_SPACING_MARK);
+        m.put("ND", Characters.IS_UNICODE_DECIMAL_DIGIT_NUMBER);
+        m.put("NL", Characters.IS_UNICODE_LETTER_NUMBER);
+        m.put("NO", Characters.IS_UNICODE_OTHER_NUMBER);
+        m.put("ZS", Characters.IS_UNICODE_SPACE_SEPARATOR);
+        m.put("ZL", Characters.IS_UNICODE_LINE_SEPARATOR);
+        m.put("ZP", Characters.IS_UNICODE_PARAGRAPH_SEPARATOR);
+        m.put("CC", Characters.IS_UNICODE_CONTROL);
+        m.put("CF", Characters.IS_UNICODE_FORMAT);
+        m.put("CO", Characters.IS_UNICODE_PRIVATE_USE);
+        m.put("CS", Characters.IS_UNICODE_SURROGATE);
+        m.put("PD", Characters.IS_UNICODE_DASH_PUNCTUATION);
+        m.put("PS", Characters.IS_UNICODE_START_PUNCTUATION);
+        m.put("PE", Characters.IS_UNICODE_END_PUNCTUATION);
+        m.put("PC", Characters.IS_UNICODE_CONNECTOR_PUNCTUATION);
+        m.put("PO", Characters.IS_UNICODE_OTHER_PUNCTUATION);
+        m.put("SM", Characters.IS_UNICODE_MATH_SYMBOL);
+        m.put("SC", Characters.IS_UNICODE_CURRENCY_SYMBOL);
+        m.put("SK", Characters.IS_UNICODE_MODIFIER_SYMBOL);
+        m.put("SO", Characters.IS_UNICODE_OTHER_SYMBOL);
+        m.put("PI", Characters.IS_UNICODE_INITIAL_QUOTE_PUNCTUATION);
+        m.put("PF", Characters.IS_UNICODE_FINAL_QUOTE_PUNCTUATION);
 
         m.put("ALPHABETIC",              Characters.IS_UNICODE_ALPHA);
         m.put("LETTER",                  Characters.IS_UNICODE_LETTER);
@@ -554,30 +661,187 @@ class Characters {
         m.put("NONCHARACTERCODEPOINT", m.get("NONCHARACTER_CODE_POINT"));
         m.put("JOINCONTROL",           m.get("JOIN_CONTROL"));
 
-        UNICODE_PROPERTIES = Collections.unmodifiableMap(m);
+        UNICODE_CATEGORIES = Collections.unmodifiableMap(m);
     }
 
     @Nullable public static Predicate<Integer>
-    unicodePropertyFromPosixName(String name) {
-        return Characters.UNICODE_PROPERTIES2.get(name.toUpperCase(Locale.US));
+    unicodeBinaryPropertyFromName(String name) {
+        return Characters.UNICODE_PROPERTIES.get(name.toUpperCase(Locale.US));
     }
-    private static final Map<String /*name*/, Predicate<Integer>> UNICODE_PROPERTIES2;
+    private static final Map<String /*name*/, Predicate<Integer>> UNICODE_PROPERTIES;
     static {
         Map<String /*name*/, Predicate<Integer>> m = new HashMap<String, Predicate<Integer>>();
 
-        m.put("ALPHA",  Characters.IS_UNICODE_ALPHA);
+        m.put("ALPHABETIC",              Characters.IS_UNICODE_ALPHA);
+//        m.put("IDEOGRAPHIC",             Characters.IS_UNICODE_IDEOGRAPHIC);
+        m.put("LETTER",                  Characters.IS_UNICODE_LETTER);
+        m.put("LOWERCASE",               Characters.IS_UNICODE_LOWER);
+        m.put("UPPERCASE",               Characters.IS_UNICODE_UPPER);
+        m.put("TITLECASE",               Characters.IS_UNICODE_TITLE);
+        m.put("PUNCTUATION",             Characters.IS_UNICODE_PUNCT);
+        m.put("CONTROL",                 Characters.IS_UNICODE_CNTRL);
+        m.put("WHITE_SPACE",             Characters.IS_UNICODE_WHITE_SPACE);
+        m.put("DIGIT",                   Characters.IS_UNICODE_DIGIT);
+        m.put("HEX_DIGIT",               Characters.IS_UNICODE_HEX_DIGIT);
+        m.put("JOIN_CONTROL",            Characters.IS_UNICODE_JOIN_CONTROL);
+        m.put("NONCHARACTER_CODE_POINT", Characters.IS_UNICODE_NONCHARACTER);
+        m.put("ASSIGNED",                Characters.IS_UNICODE_ASSIGNED);
+
+        UNICODE_PROPERTIES = Collections.unmodifiableMap(m);
+    }
+
+//    @Nullable public static Predicate<Integer>
+//    unicodePredefinedCharacterClassFromName(String name) {
+//        return Characters.UNICODE_PREDEFINIED_CHARACTER_CLASSES.get(name.toUpperCase(Locale.US));
+//    }
+//    private static final Map<String /*name*/, Predicate<Integer>> UNICODE_PREDEFINIED_CHARACTER_CLASSES;
+//    static {
+//        Map<String /*name*/, Predicate<Integer>> m = new HashMap<String, Predicate<Integer>>();
+//
+//        m.put("ALNUM",                   Characters.IS_UNICODE_ALNUM);
+//        m.put("BLANK",                   Characters.IS_UNICODE_BLANK);
+//        m.put("GRAPH",                   Characters.IS_UNICODE_GRAPH);
+//        m.put("PRINT",                   Characters.IS_UNICODE_PRINT);
+//        m.put("WORD",                    Characters.IS_UNICODE_WORD);
+//
+//        // Aliases.
+//        m.put("WHITESPACE",            m.get("WHITE_SPACE"));
+//        m.put("HEXDIGIT",              m.get("HEX_DIGIT"));
+//        m.put("NONCHARACTERCODEPOINT", m.get("NONCHARACTER_CODE_POINT"));
+//        m.put("JOINCONTROL",           m.get("JOIN_CONTROL"));
+//
+//        UNICODE_PREDEFINIED_CHARACTER_CLASSES = Collections.unmodifiableMap(m);
+//    }
+
+    private static IntegerPredicate
+    unicodeGeneralCategoryPredicate(final byte generalCategory, String toString) {
+
+        return new IntegerPredicate(toString) {
+            @Override public boolean evaluate(Integer subject) { return Character.getType(subject) == generalCategory; }
+        };
+    }
+
+    @Nullable public static Predicate<Integer>
+    unicodePredefinedCharacterClassFromName(String name) {
+        return Characters.UNICODE_PREDEFINED_CHARACTER_CLASSES.get(name.toUpperCase(Locale.US));
+    }
+    private static final Map<String /*name*/, Predicate<Integer>> UNICODE_PREDEFINED_CHARACTER_CLASSES;
+    static {
+        Map<String /*name*/, Predicate<Integer>> m = new HashMap<String, Predicate<Integer>>();
+
         m.put("LOWER",  Characters.IS_UNICODE_LOWER);
         m.put("UPPER",  Characters.IS_UNICODE_UPPER);
-        m.put("SPACE",  Characters.IS_UNICODE_WHITE_SPACE);
-        m.put("PUNCT",  Characters.IS_UNICODE_PUNCT);
-        m.put("XDIGIT", Characters.IS_UNICODE_HEX_DIGIT);
-        m.put("ALNUM",  Characters.IS_UNICODE_ALNUM);
-        m.put("CNTRL",  Characters.IS_UNICODE_CNTRL);
+        m.put("ASCII",  Characters.IS_POSIX_ASCII);
+        m.put("ALPHA",  Characters.IS_UNICODE_ALPHA);
         m.put("DIGIT",  Characters.IS_UNICODE_DIGIT);
-        m.put("BLANK",  Characters.IS_UNICODE_BLANK);
+        m.put("ALNUM",  Characters.IS_UNICODE_ALNUM);
+        m.put("PUNCT",  Characters.IS_UNICODE_PUNCT);
         m.put("GRAPH",  Characters.IS_UNICODE_GRAPH);
         m.put("PRINT",  Characters.IS_UNICODE_PRINT);
+        m.put("BLANK",  Characters.IS_UNICODE_BLANK);
+        m.put("CNTRL",  Characters.IS_UNICODE_CNTRL);
+        m.put("XDIGIT", Characters.IS_UNICODE_HEX_DIGIT);
+        m.put("SPACE",  Characters.IS_UNICODE_WHITE_SPACE);
 
-        UNICODE_PROPERTIES2 = Collections.unmodifiableMap(m);
+        UNICODE_PREDEFINED_CHARACTER_CLASSES = Collections.unmodifiableMap(m);
+    }
+
+    @Nullable public static Predicate<Integer>
+    posixCharacterClassFromName(String name) {
+        return Characters.POSIX_CHARACTer_CLASSES.get(name.toUpperCase(Locale.US));
+    }
+    private static final Map<String /*name*/, Predicate<Integer>> POSIX_CHARACTer_CLASSES;
+    static {
+        Map<String /*name*/, Predicate<Integer>> m = new HashMap<String, Predicate<Integer>>();
+
+        m.put("LOWER",  Characters.IS_POSIX_LOWER);
+        m.put("UPPER",  Characters.IS_POSIX_UPPER);
+        m.put("ASCII",  Characters.IS_POSIX_ASCII);
+        m.put("ALPHA",  Characters.IS_POSIX_ALPHA);
+        m.put("DIGIT",  Characters.IS_POSIX_DIGIT);
+        m.put("ALNUM",  Characters.IS_POSIX_ALNUM);
+        m.put("PUNCT",  Characters.IS_POSIX_PUNCT);
+        m.put("GRAPH",  Characters.IS_POSIX_GRAPH);
+        m.put("PRINT",  Characters.IS_POSIX_PRINT);
+        m.put("BLANK",  Characters.IS_POSIX_BLANK);
+        m.put("CNTRL",  Characters.IS_POSIX_CNTRL);
+        m.put("XDIGIT", Characters.IS_POSIX_XDIGIT);
+        m.put("SPACE",  Characters.IS_POSIX_SPACE);
+
+        POSIX_CHARACTer_CLASSES = Collections.unmodifiableMap(m);
+    }
+
+    @Nullable public static Predicate<Integer>
+    unicodeBlockFromName(String name) {
+
+        final UnicodeBlock block;
+        try {
+            block = Character.UnicodeBlock.forName(name);
+        } catch (IllegalArgumentException iae) {
+            return null;
+        }
+
+        return new Predicate<Integer>() {
+            @Override public boolean evaluate(Integer subject) { return Character.UnicodeBlock.of(subject) == block; }
+            @Override public String  toString()                { return "inUnicodeBlock(" + block + ")";             }
+        };
+    }
+
+    /**
+     * @return The set of codepoints that are regarded as case-insensitively "equal", including the <var>cp</var>, e.g.
+     *         <code>{ 'a', 'A' }</code>, or {@code null} iff no other codepoints are case-insensitively equal with
+     *         <var>cp</var>
+     */
+    @Nullable public static String
+    caseInsensitivelyEqualCharacters(int cp) {
+
+        {
+            String s = Characters.SPECIAL_CASES.get(cp);
+            if (s != null) return s;
+        }
+
+        int lc = Character.toLowerCase(cp);
+        int uc = Character.toUpperCase(cp);
+        int tc = Character.toTitleCase(cp);
+
+        if (lc == uc) {
+            if (uc == tc) return null;                          // xxx
+            return new String(new int[] { lc, tc }, 0, 2);      // xxy
+        } else
+        if (lc == tc) {
+            return new String(new int[] { lc, uc }, 0, 2);      // xyx
+        } else
+        if (uc == tc) {
+            return new String(new int[] { lc, uc }, 0, 2);      // xyy
+        } else
+        {
+            return new String(new int[] { lc, uc, tc }, 0, 3);  // xyz
+
+        }
+    }
+    private static final Map<Integer, String> SPECIAL_CASES;
+    static {
+        Map<Integer, String> m = new HashMap<Integer, String>();
+        for (String s : new String[] {
+            "I"      + "i"      + "\u0130" + "\u0131",
+            "K"      + "k"      + "\u212a",
+            "S"      + "s"      + "\u017f",
+            "µ"      + "\u039c" + "\u03bc",
+            "Å"      + "å"      + "\u212b",
+            "\u0345" + "\u0399" + "\u03b9" + "\u1fbe",
+            "\u0392" + "\u03b2" + "\u03d0",
+            "\u0395" + "\u03b5" + "\u03f5",
+            "\u0398" + "\u03b8" + "\u03d1" + "\u03f4",
+            "\u039a" + "\u03ba" + "\u03f0",
+            "\u03a0" + "\u03c0" + "\u03d6",
+            "\u03a1" + "\u03c1" + "\u03f1",
+            "\u03a3" + "\u03c2" + "\u03c3",
+            "\u03a6" + "\u03c6" + "\u03d5",
+            "\u03a9" + "\u03c9" + "\u2126",
+            "\u1e60" + "\u1e61" + "\u1e9b",
+        }) {
+            for (int c : s.toCharArray()) m.put(c, s);
+        }
+        SPECIAL_CASES = m;
     }
 }
