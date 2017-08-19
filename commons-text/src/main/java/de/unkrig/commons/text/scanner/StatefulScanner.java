@@ -241,16 +241,9 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
                 this.previousTokenOffset = this.offset;
                 this.offset              = matcher.end();
 
-                String[] captured;
-                {
-                    int gc = matcher.groupCount();
-                    if (gc == 0) {
-                        captured = null;
-                    } else {
-                        captured = new String[gc];
-                        for (int i = 0; i < gc; i++) captured[i] = matcher.group(i + 1);
-                    }
-                }
+                int gc = matcher.groupCount();
+                String[] captured = new String[gc];
+                for (int i = 0; i < gc; i++) captured[i] = matcher.group(i + 1);
 
                 return new Token<TT>(rule.tokenType, matcher.group(), captured);
             }
