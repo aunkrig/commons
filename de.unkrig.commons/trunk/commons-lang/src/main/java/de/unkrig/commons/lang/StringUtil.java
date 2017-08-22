@@ -448,8 +448,12 @@ class StringUtil {
 
                     fromIndex -= delta;
 
-                    for (int i = 0; subject.charAt(fromIndex + i) == infix.charAt(i);) {
-                        if (++i == this.infixLength) return fromIndex;
+                    for (int infixIndex = 0, subjectIndex = fromIndex;; subjectIndex++, infixIndex++) {
+
+                        if (infixIndex   >= this.infixLength) return fromIndex;
+                        if (subjectIndex >= subjectLength)    return -1;
+
+                        if (subject.charAt(subjectIndex) != infix.charAt(infixIndex)) break;
                     }
 
                     fromIndex += this.infixLength;
@@ -476,8 +480,12 @@ class StringUtil {
 
                     fromIndex -= delta;
 
-                    for (int i = 0; subject.charAt(fromIndex + i) == infix.charAt(i);) {
-                        if (++i == this.infixLength) return fromIndex;
+                    for (int infixIndex = 0, subjectIndex = fromIndex;; subjectIndex++, infixIndex++) {
+
+                        if (infixIndex >= this.infixLength) return fromIndex;
+                        if (subjectIndex >= subjectLength)    return -1;
+
+                        if (subject.charAt(subjectIndex) != infix.charAt(infixIndex)) break;
                     }
 
                     fromIndex -= this.infixLength;
