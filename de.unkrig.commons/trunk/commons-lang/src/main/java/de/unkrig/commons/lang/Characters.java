@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import de.unkrig.commons.lang.OptionalMethods.MethodWrapper1;
 import de.unkrig.commons.lang.protocol.Predicate;
 import de.unkrig.commons.nullanalysis.Nullable;
 
@@ -61,9 +62,7 @@ class Characters {
      *      Group Base Specifications Issue 7, section 7.3.1: LC_CTYPE</a>
      */
     public static final Predicate<Integer>
-    IS_POSIX_LOWER = new IntegerPredicate("posixLower") {
-        @Override public boolean evaluate(Integer subject) { int c = subject; return c >= 'a' && c <= 'z'; }
-    };
+    IS_POSIX_LOWER = Characters.rangePredicate("posixLower", 'a', 'z');
 
     /**
      * Evaluates whether a given code point lies in the POSIX character class "upper" ({@code [A-Z]}).
@@ -72,17 +71,13 @@ class Characters {
      *      Group Base Specifications Issue 7, section 7.3.1: LC_CTYPE</a>
      */
     public static final Predicate<Integer>
-    IS_POSIX_UPPER = new IntegerPredicate("posixUpper") {
-        @Override public boolean evaluate(Integer subject) { int c = subject; return c >= 'A' && c <= 'Z'; }
-    };
+    IS_POSIX_UPPER = Characters.rangePredicate("posixUpper", 'A', 'Z');
 
     /**
      * Evaluates whether a given code point is in the ASCII range (0-127).
      */
     public static final Predicate<Integer>
-    IS_POSIX_ASCII = new IntegerPredicate("posixAscii") {
-        @Override public boolean evaluate(Integer subject) { return subject <= 0x7f; }
-    };
+    IS_POSIX_ASCII = Characters.rangePredicate("posixAscii", 0, 0x7f);
 
     /**
      * Evaluates whether a given code point lies in the POSIX character class "alpha" ({@code [A-Za-z]}).
@@ -95,8 +90,8 @@ class Characters {
 
         @Override public boolean
         evaluate(Integer subject) {
-            int c = subject;
-            return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+            int cp = subject;
+            return (cp >= 'a' && cp <= 'z') || (cp >= 'A' && cp <= 'Z');
         }
     };
 
@@ -107,14 +102,7 @@ class Characters {
      *      Group Base Specifications Issue 7, section 7.3.1: LC_CTYPE</a>
      */
     public static final Predicate<Integer>
-    IS_POSIX_DIGIT = new IntegerPredicate("posixDigit") {
-
-        @Override public boolean
-        evaluate(Integer subject) {
-            int c = subject;
-            return c >= '0' && c <= '9';
-        }
-    };
+    IS_POSIX_DIGIT = Characters.rangePredicate("posixDigit", '0', '9');
 
     /**
      * Evaluates whether a given code point lies in the POSIX character class "alnum" ({@code [A-Za-z0-9]}).
@@ -127,8 +115,8 @@ class Characters {
 
         @Override public boolean
         evaluate(Integer subject) {
-            int c = subject;
-            return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
+            int cp = subject;
+            return (cp >= 'a' && cp <= 'z') || (cp >= 'A' && cp <= 'Z') || (cp >= '0' && cp <= '9');
         }
     };
 
@@ -144,12 +132,12 @@ class Characters {
 
         @Override public boolean
         evaluate(Integer subject) {
-            int c = subject;
+            int cp = subject;
             return (
-                (c >= '!' && c <= '/')    // !"#$%&'()*+,-./ (33...47)
-                || (c >= ':' && c <= '@') // :;<=>?@         (58...64)
-                || (c >= '[' && c <= '`') // [\]^_`          (91...96)
-                || (c >= '{' && c <= '~') // {|}~            (123...126)
+                (cp >= '!' && cp <= '/')    // !"#$%&'()*+,-./ (33...47)
+                || (cp >= ':' && cp <= '@') // :;<=>?@         (58...64)
+                || (cp >= '[' && cp <= '`') // [\]^_`          (91...96)
+                || (cp >= '{' && cp <= '~') // {|}~            (123...126)
             );
         }
     };
@@ -202,8 +190,8 @@ class Characters {
 
         @Override public boolean
         evaluate(Integer subject) {
-            int c = subject;
-            return c == ' ' || c == '\t';
+            int cp = subject;
+            return cp == ' ' || cp == '\t';
         }
     };
 
@@ -218,8 +206,8 @@ class Characters {
 
         @Override public boolean
         evaluate(Integer subject) {
-            int c = subject;
-            return c <= 0x1f || c == 0x7f;
+            int cp = subject;
+            return cp <= 0x1f || cp == 0x7f;
         }
     };
 
@@ -234,8 +222,8 @@ class Characters {
 
         @Override public boolean
         evaluate(Integer subject) {
-            int c = subject;
-            return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+            int cp = subject;
+            return (cp >= '0' && cp <= '9') || (cp >= 'a' && cp <= 'f') || (cp >= 'A' && cp <= 'F');
         }
     };
 
@@ -251,10 +239,10 @@ class Characters {
 
         @Override public boolean
         evaluate(Integer subject) {
-            int c = subject;
+            int cp = subject;
             return (
-                (c >= 9 && c <= 13) // 0x09=tab, 0x0a=newline, 0x0b=vertical-tab, 0x0c=form-feed, 0x0d=carriage-return
-                || c == ' '         // 0x20=space
+                (cp >= 9 && cp <= 13) // 0x09=tab, 0x0a=newline, 0x0b=vertical-tab, 0x0c=form-feed, 0x0d=carriage-return
+                || cp == ' '         // 0x20=space
             );
         }
     };
@@ -262,6 +250,8 @@ class Characters {
     @Nullable public static Predicate<Integer>
     javaCharacterClassFromName(String name) {
         return (
+            "javaAlphabetic".equals(name)             ? Characters.IS_UNICODE_ALPHA            :
+            "javaIdeographic".equals(name)            ? Characters.IS_UNICODE_IDEOGRAPHIC      :
             "javaLetter".equals(name)                 ? Characters.IS_UNICODE_LETTER           :
             "javaLowerCase".equals(name)              ? Characters.IS_UNICODE_LOWER            :
             "javaUpperCase".equals(name)              ? Characters.IS_UNICODE_UPPER            :
@@ -350,19 +340,16 @@ class Characters {
 
     public static boolean
     isHorizontalWhitespace(int codePoint) {
-        return "\t\u00A0\u1680\u180e\u202f\u205f\u3000".indexOf(codePoint) != -1
-        || (codePoint >= '\u2000' && codePoint <= '\u200a');
+        return (
+            " \t\u00A0\u1680\u180e\u202f\u205f\u3000".indexOf(codePoint) != -1
+            || (codePoint >= '\u2000' && codePoint <= '\u200a')
+        );
     }
 
     /** A predicate for {@link Character#isMirrored(int)}. */
     public static final Predicate<Integer>
     IS_MIRRORED = new IntegerPredicate("mirrored") {
         @Override public boolean evaluate(Integer subject) { return Character.isMirrored(subject); }
-    };
-
-    public static final Predicate<Integer>
-    IS_DIGIT = new IntegerPredicate("digit") {
-        @Override public boolean evaluate(Integer subject) { return subject >= '0' && subject <= '9'; }
     };
 
     /**  A word character: [a-zA-Z_0-9] */
@@ -384,55 +371,66 @@ class Characters {
 
     // =============================== UNICODE CATEGORIES ===============================
 
-    public static final Predicate<Integer> IS_UNICODE_UNASSIGNED                = Characters.unicodeGeneralCategoryPredicate(Character.UNASSIGNED,                "unicodeUnassigned");
-    public static final Predicate<Integer> IS_UNICODE_LETTER                    = new IntegerPredicate("unicodeTitle") { @Override public boolean evaluate(Integer subject) { return Character.isLetter(subject);    } };
-    public static final Predicate<Integer> IS_UNICODE_UPPER                     = new IntegerPredicate("unicodeUpper") { @Override public boolean evaluate(Integer subject) { return Character.isUpperCase(subject); } };
-    public static final Predicate<Integer> IS_UNICODE_LOWER                     = new IntegerPredicate("unicodeLower") { @Override public boolean evaluate(Integer subject) { return Character.isLowerCase(subject); } };
-    public static final Predicate<Integer> IS_UNICODE_TITLE                     = new IntegerPredicate("unicodeTitle") { @Override public boolean evaluate(Integer subject) { return Character.isTitleCase(subject); } };
-    public static final Predicate<Integer> IS_UNICODE_MODIFIER_LETTER           = Characters.unicodeGeneralCategoryPredicate(Character.MODIFIER_LETTER,           "unicodeModifier");
-    public static final Predicate<Integer> IS_UNICODE_OTHER_LETTER              = Characters.unicodeGeneralCategoryPredicate(Character.OTHER_LETTER,              "unicodeOther");
-    public static final Predicate<Integer> IS_UNICODE_NON_SPACING_MARK          = Characters.unicodeGeneralCategoryPredicate(Character.NON_SPACING_MARK,          "unicodeNonSpacingNark");
-    public static final Predicate<Integer> IS_UNICODE_ENCLOSING_MARK            = Characters.unicodeGeneralCategoryPredicate(Character.ENCLOSING_MARK,            "unicodeEnclosingMark");
-    public static final Predicate<Integer> IS_UNICODE_COMBINING_SPACING_MARK    = Characters.unicodeGeneralCategoryPredicate(Character.COMBINING_SPACING_MARK,    "unicodeCombiningSpacingMark");
-    public static final Predicate<Integer> IS_UNICODE_DECIMAL_DIGIT_NUMBER      = Characters.unicodeGeneralCategoryPredicate(Character.DECIMAL_DIGIT_NUMBER,      "unicodeDecimalDigitNumber");
-    public static final Predicate<Integer> IS_UNICODE_LETTER_NUMBER             = Characters.unicodeGeneralCategoryPredicate(Character.LETTER_NUMBER,             "unicodeLetterNumber");
-    public static final Predicate<Integer> IS_UNICODE_OTHER_NUMBER              = Characters.unicodeGeneralCategoryPredicate(Character.OTHER_NUMBER,              "unicodeOtherNumber");
-    public static final Predicate<Integer> IS_UNICODE_SPACE_SEPARATOR           = Characters.unicodeGeneralCategoryPredicate(Character.SPACE_SEPARATOR,           "unicodeSpaceSeparator");
-    public static final Predicate<Integer> IS_UNICODE_LINE_SEPARATOR            = Characters.unicodeGeneralCategoryPredicate(Character.LINE_SEPARATOR,            "unicodeLineSeparator");
-    public static final Predicate<Integer> IS_UNICODE_PARAGRAPH_SEPARATOR       = Characters.unicodeGeneralCategoryPredicate(Character.PARAGRAPH_SEPARATOR,       "unicodeParagraphSeparator");
-    public static final Predicate<Integer> IS_UNICODE_CONTROL                   = Characters.unicodeGeneralCategoryPredicate(Character.CONTROL,                   "unicodeControl");
-    public static final Predicate<Integer> IS_UNICODE_FORMAT                    = Characters.unicodeGeneralCategoryPredicate(Character.FORMAT,                    "unicodeFormat");
-    public static final Predicate<Integer> IS_UNICODE_PRIVATE_USE               = Characters.unicodeGeneralCategoryPredicate(Character.PRIVATE_USE,               "unicodePrivateUse");
-    public static final Predicate<Integer> IS_UNICODE_SURROGATE                 = Characters.unicodeGeneralCategoryPredicate(Character.SURROGATE,                 "unicodeSurrogate");
-    public static final Predicate<Integer> IS_UNICODE_DASH_PUNCTUATION          = Characters.unicodeGeneralCategoryPredicate(Character.DASH_PUNCTUATION,          "unicodeDashPunctuation");
-    public static final Predicate<Integer> IS_UNICODE_START_PUNCTUATION         = Characters.unicodeGeneralCategoryPredicate(Character.START_PUNCTUATION,         "unicodeStartPunctuation");
-    public static final Predicate<Integer> IS_UNICODE_END_PUNCTUATION           = Characters.unicodeGeneralCategoryPredicate(Character.END_PUNCTUATION,           "unicodeEndPunctuation");
-    public static final Predicate<Integer> IS_UNICODE_CONNECTOR_PUNCTUATION     = Characters.unicodeGeneralCategoryPredicate(Character.CONNECTOR_PUNCTUATION,     "unicodeConnectorPunctuation");
-    public static final Predicate<Integer> IS_UNICODE_OTHER_PUNCTUATION         = Characters.unicodeGeneralCategoryPredicate(Character.OTHER_PUNCTUATION,         "unicodeOtherPunctuation");
-    public static final Predicate<Integer> IS_UNICODE_MATH_SYMBOL               = Characters.unicodeGeneralCategoryPredicate(Character.MATH_SYMBOL,               "unicodeMATH_Symbol");
-    public static final Predicate<Integer> IS_UNICODE_CURRENCY_SYMBOL           = Characters.unicodeGeneralCategoryPredicate(Character.CURRENCY_SYMBOL,           "unicodeCurrencySymbol");
-    public static final Predicate<Integer> IS_UNICODE_MODIFIER_SYMBOL           = Characters.unicodeGeneralCategoryPredicate(Character.MODIFIER_SYMBOL,           "unicodeModifierSymbol");
-    public static final Predicate<Integer> IS_UNICODE_OTHER_SYMBOL              = Characters.unicodeGeneralCategoryPredicate(Character.OTHER_SYMBOL,              "unicodeOtherSymbol");
-    public static final Predicate<Integer> IS_UNICODE_INITIAL_QUOTE_PUNCTUATION = Characters.unicodeGeneralCategoryPredicate(Character.INITIAL_QUOTE_PUNCTUATION, "unicodeInitialQuotePunctuation");
-    public static final Predicate<Integer> IS_UNICODE_FINAL_QUOTE_PUNCTUATION   = Characters.unicodeGeneralCategoryPredicate(Character.FINAL_QUOTE_PUNCTUATION,   "unicodeFinalQuotePunctuation");
+    public static final Predicate<Integer> IS_UNICODE_UNASSIGNED                = Characters.unicodeGeneralCategoryPredicate("unicodeUnassigned",              Character.UNASSIGNED);
+    public static final Predicate<Integer> IS_UNICODE_LETTER                    = new IntegerPredicate("unicodeLetter") { @Override public boolean evaluate(Integer subject) { return Character.isLetter(subject);    } };
+    public static final Predicate<Integer> IS_UNICODE_UPPER                     = new IntegerPredicate("unicodeUpper")  { @Override public boolean evaluate(Integer subject) { return Character.isUpperCase(subject); } };
+    public static final Predicate<Integer> IS_UNICODE_LOWER                     = new IntegerPredicate("unicodeLower")  { @Override public boolean evaluate(Integer subject) { return Character.isLowerCase(subject); } };
+    public static final Predicate<Integer> IS_UNICODE_TITLE                     = new IntegerPredicate("unicodeTitle")  { @Override public boolean evaluate(Integer subject) { return Character.isTitleCase(subject); } };
+    public static final Predicate<Integer> IS_UNICODE_MODIFIER_LETTER           = Characters.unicodeGeneralCategoryPredicate("unicodeModifier",                Character.MODIFIER_LETTER);
+    public static final Predicate<Integer> IS_UNICODE_OTHER_LETTER              = Characters.unicodeGeneralCategoryPredicate("unicodeOther",                   Character.OTHER_LETTER);
+    public static final Predicate<Integer> IS_UNICODE_NON_SPACING_MARK          = Characters.unicodeGeneralCategoryPredicate("unicodeNonSpacingNark",          Character.NON_SPACING_MARK);
+    public static final Predicate<Integer> IS_UNICODE_ENCLOSING_MARK            = Characters.unicodeGeneralCategoryPredicate("unicodeEnclosingMark",           Character.ENCLOSING_MARK);
+    public static final Predicate<Integer> IS_UNICODE_COMBINING_SPACING_MARK    = Characters.unicodeGeneralCategoryPredicate("unicodeCombiningSpacingMark",    Character.COMBINING_SPACING_MARK);
+    public static final Predicate<Integer> IS_UNICODE_DECIMAL_DIGIT_NUMBER      = Characters.unicodeGeneralCategoryPredicate("unicodeDecimalDigitNumber",      Character.DECIMAL_DIGIT_NUMBER);
+    public static final Predicate<Integer> IS_UNICODE_LETTER_NUMBER             = Characters.unicodeGeneralCategoryPredicate("unicodeLetterNumber",            Character.LETTER_NUMBER);
+    public static final Predicate<Integer> IS_UNICODE_OTHER_NUMBER              = Characters.unicodeGeneralCategoryPredicate("unicodeOtherNumber",             Character.OTHER_NUMBER);
+    public static final Predicate<Integer> IS_UNICODE_SPACE_SEPARATOR           = Characters.unicodeGeneralCategoryPredicate("unicodeSpaceSeparator",          Character.SPACE_SEPARATOR);
+    public static final Predicate<Integer> IS_UNICODE_LINE_SEPARATOR            = Characters.unicodeGeneralCategoryPredicate("unicodeLineSeparator",           Character.LINE_SEPARATOR);
+    public static final Predicate<Integer> IS_UNICODE_PARAGRAPH_SEPARATOR       = Characters.unicodeGeneralCategoryPredicate("unicodeParagraphSeparator",      Character.PARAGRAPH_SEPARATOR);
+    public static final Predicate<Integer> IS_UNICODE_CONTROL                   = Characters.unicodeGeneralCategoryPredicate("unicodeControl",                 Character.CONTROL);
+    public static final Predicate<Integer> IS_UNICODE_FORMAT                    = Characters.unicodeGeneralCategoryPredicate("unicodeFormat",                  Character.FORMAT);
+    public static final Predicate<Integer> IS_UNICODE_PRIVATE_USE               = Characters.unicodeGeneralCategoryPredicate("unicodePrivateUse",              Character.PRIVATE_USE);
+    public static final Predicate<Integer> IS_UNICODE_SURROGATE                 = Characters.unicodeGeneralCategoryPredicate("unicodeSurrogate",               Character.SURROGATE);
+    public static final Predicate<Integer> IS_UNICODE_DASH_PUNCTUATION          = Characters.unicodeGeneralCategoryPredicate("unicodeDashPunctuation",         Character.DASH_PUNCTUATION);
+    public static final Predicate<Integer> IS_UNICODE_START_PUNCTUATION         = Characters.unicodeGeneralCategoryPredicate("unicodeStartPunctuation",        Character.START_PUNCTUATION);
+    public static final Predicate<Integer> IS_UNICODE_END_PUNCTUATION           = Characters.unicodeGeneralCategoryPredicate("unicodeEndPunctuation",          Character.END_PUNCTUATION);
+    public static final Predicate<Integer> IS_UNICODE_CONNECTOR_PUNCTUATION     = Characters.unicodeGeneralCategoryPredicate("unicodeConnectorPunctuation",    Character.CONNECTOR_PUNCTUATION);
+    public static final Predicate<Integer> IS_UNICODE_OTHER_PUNCTUATION         = Characters.unicodeGeneralCategoryPredicate("unicodeOtherPunctuation",        Character.OTHER_PUNCTUATION);
+    public static final Predicate<Integer> IS_UNICODE_MATH_SYMBOL               = Characters.unicodeGeneralCategoryPredicate("unicodeMATH_Symbol",             Character.MATH_SYMBOL);
+    public static final Predicate<Integer> IS_UNICODE_CURRENCY_SYMBOL           = Characters.unicodeGeneralCategoryPredicate("unicodeCurrencySymbol",          Character.CURRENCY_SYMBOL);
+    public static final Predicate<Integer> IS_UNICODE_MODIFIER_SYMBOL           = Characters.unicodeGeneralCategoryPredicate("unicodeModifierSymbol",          Character.MODIFIER_SYMBOL);
+    public static final Predicate<Integer> IS_UNICODE_OTHER_SYMBOL              = Characters.unicodeGeneralCategoryPredicate("unicodeOtherSymbol",             Character.OTHER_SYMBOL);
+    public static final Predicate<Integer> IS_UNICODE_INITIAL_QUOTE_PUNCTUATION = Characters.unicodeGeneralCategoryPredicate("unicodeInitialQuotePunctuation", Character.INITIAL_QUOTE_PUNCTUATION);
+    public static final Predicate<Integer> IS_UNICODE_FINAL_QUOTE_PUNCTUATION   = Characters.unicodeGeneralCategoryPredicate("unicodeFinalQuotePunctuation",   Character.FINAL_QUOTE_PUNCTUATION);
 
     public static final Predicate<Integer>
     IS_UNICODE_ALPHA = new IntegerPredicate("unicodeAlpha") {
 
-        @Override public boolean
-        evaluate(Integer subject) {
+        final MethodWrapper1<Character, Boolean, Integer, RuntimeException>
+        CHARACTER__IS_ALPHABETIC = OptionalMethods.get1(
+            Character.class,       // declaringClass
+            "isAlphabetic",        // methodName
+            int.class,             // parameterType
+            RuntimeException.class // checkedException
+        );
 
-            // "Character.isAlphabetic()" is only available since Java 1.7.
-            int type = Character.getType(subject);
-            return (
-                type == Character.UPPERCASE_LETTER
-                || type == Character.LOWERCASE_LETTER
-                || type == Character.TITLECASE_LETTER
-                || type == Character.MODIFIER_LETTER
-                || type == Character.OTHER_LETTER
-                || type == Character.LETTER_NUMBER
-            );
-        }
+        @SuppressWarnings("null") @Override public boolean
+        evaluate(Integer subject) { return this.CHARACTER__IS_ALPHABETIC.invoke(null, subject); }
+    };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_IDEOGRAPHIC = new IntegerPredicate("unicodeIdeographic") {
+
+        final MethodWrapper1<Character, Boolean, Integer, RuntimeException>
+        CHARACTER__IS_IDEOGRAPHIC = OptionalMethods.get1(
+            Character.class,       // declaringClass
+            "isIdeographic",       // methodName
+            int.class,             // parameterType
+            RuntimeException.class // checkedException
+        );
+
+        @SuppressWarnings("null") @Override public boolean
+        evaluate(Integer subject) { return this.CHARACTER__IS_IDEOGRAPHIC.invoke(null, subject); }
     };
 
     public static final Predicate<Integer>
@@ -440,14 +438,15 @@ class Characters {
 
         @Override public boolean
         evaluate(Integer subject) {
+            int cp = subject;
 
-            int type = Character.getType(subject);
+            int type = Character.getType(cp);
             return (
                 type == Character.SPACE_SEPARATOR
                 || type == Character.LINE_SEPARATOR
                 || type == Character.PARAGRAPH_SEPARATOR
-                || (subject >= 0x9 && subject <= 0xd)
-                || (subject == 0x85)
+                || (cp >= 0x9 && cp <= 0xd)
+                || (cp == 0x85)
             );
         }
 
@@ -456,16 +455,17 @@ class Characters {
     };
 
     public static final Predicate<Integer>
-    IS_UNICODE_CNTRL = Characters.unicodeGeneralCategoryPredicate(Character.CONTROL, "unicodeCntrl");
+    IS_UNICODE_CNTRL = Characters.unicodeGeneralCategoryPredicate("unicodeCntrl", Character.CONTROL);
 
     public static final Predicate<Integer>
     IS_UNICODE_PUNCT = new IntegerPredicate("unicodePunct") {
 
         @Override public boolean
         evaluate(Integer subject) {
+            int cp = subject;
 
             // See "UnicodeProp.PUNCTUATION"
-            int type = Character.getType(subject);
+            int type = Character.getType(cp);
             return (
                 type == Character.CONNECTOR_PUNCTUATION
                 || type == Character.DASH_PUNCTUATION
@@ -483,16 +483,17 @@ class Characters {
 
         @Override public boolean
         evaluate(Integer subject) {
+            int cp = subject;
 
             // See "UnicodeProp.HEX_DIGIT"
             return (
-                Character.isDigit(subject)
-                || (subject >= '0'    && subject <= '9')
-                || (subject >= 'A'    && subject <= 'F')
-                || (subject >= 'a'    && subject <= 'f')
-                || (subject >= 0xFF10 && subject <= 0xFF19)
-                || (subject >= 0xFF21 && subject <= 0xFF26)
-                || (subject >= 0xFF41 && subject <= 0xFF46)
+                Character.isDigit(cp)
+                || (cp >= '0'    && cp <= '9')
+                || (cp >= 'A'    && cp <= 'F')
+                || (cp >= 'a'    && cp <= 'f')
+                || (cp >= 0xFF10 && cp <= 0xFF19)
+                || (cp >= 0xFF21 && cp <= 0xFF26)
+                || (cp >= 0xFF41 && cp <= 0xFF46)
             );
         }
     };
@@ -508,7 +509,10 @@ class Characters {
     IS_UNICODE_NONCHARACTER = new IntegerPredicate("unicodeNoncharacter") {
 
         @Override public boolean
-        evaluate(Integer subject) { return (subject & 0xfffe) == 0xfffe || (subject >= 0xfdd0 && subject <= 0xfdef); }
+        evaluate(Integer subject) {
+            int cp = subject;
+            return (cp & 0xfffe) == 0xfffe || (cp >= 0xfdd0 && cp <= 0xfdef);
+        }
     };
 
     public static final Predicate<Integer>
@@ -521,7 +525,8 @@ class Characters {
 
         @Override public boolean
         evaluate(Integer subject) {
-            return Characters.IS_UNICODE_ALPHA.evaluate(subject) || Characters.IS_UNICODE_DIGIT.evaluate(subject);
+            int cp = subject;
+            return Characters.IS_UNICODE_ALPHA.evaluate(cp) || Characters.IS_UNICODE_DIGIT.evaluate(cp);
         }
     };
 
@@ -530,7 +535,8 @@ class Characters {
 
         @Override public boolean
         evaluate(Integer subject) {
-            return Character.getType(subject) == Character.SPACE_SEPARATOR || subject == 0x9;
+            int cp = subject;
+            return Character.getType(cp) == Character.SPACE_SEPARATOR || cp == 0x9;
         }
     };
 
@@ -539,16 +545,17 @@ class Characters {
 
         @Override public boolean
         evaluate(Integer subject) {
+            int cp = subject;
 
             // See "UnicodeProp.GRAPH"
-            int type = Character.getType(subject);
+            int type = Character.getType(cp);
             return (
-                type == Character.SPACE_SEPARATOR
-                || type == Character.LINE_SEPARATOR
-                || type == Character.PARAGRAPH_SEPARATOR
-                || type == Character.CONTROL
-                || type == Character.SURROGATE
-                || type == Character.UNASSIGNED
+                type != Character.SPACE_SEPARATOR
+                && type != Character.LINE_SEPARATOR
+                && type != Character.PARAGRAPH_SEPARATOR
+                && type != Character.CONTROL
+                && type != Character.SURROGATE
+                && type != Character.UNASSIGNED
             );
         }
     };
@@ -558,11 +565,12 @@ class Characters {
 
         @Override public boolean
         evaluate(Integer subject) {
+            int cp = subject;
 
             // See "UnicodeProp.PRINT"
             return (
-                (Characters.IS_UNICODE_GRAPH.evaluate(subject) || Characters.IS_UNICODE_BLANK.evaluate(subject))
-                && !Characters.IS_UNICODE_CNTRL.evaluate(subject)
+                (Characters.IS_UNICODE_GRAPH.evaluate(cp) || Characters.IS_UNICODE_BLANK.evaluate(cp))
+                && !Characters.IS_UNICODE_CNTRL.evaluate(cp)
             );
         }
     };
@@ -574,8 +582,77 @@ class Characters {
 
     public static final Predicate<Integer>
     IS_UNICODE_JOIN_CONTROL = new IntegerPredicate("unicodeJoinControl") {
-        @Override public boolean evaluate(Integer subject) { return subject == 0x200C || subject == 0x200D; }
+
+        @Override public boolean
+        evaluate(Integer subject) {
+            int cp = subject;
+            return cp == 0x200C || cp == 0x200D;
+        }
     };
+
+    public static final Predicate<Integer>
+    IS_UNICODE_MARK = Characters.unicodeGeneralCategoryPredicate(
+        "unicodeMark",
+        Character.NON_SPACING_MARK,
+        Character.ENCLOSING_MARK,
+        Character.COMBINING_SPACING_MARK
+    );
+
+    public static final Predicate<Integer>
+    IS_UNICODE_NUMBER = Characters.unicodeGeneralCategoryPredicate(
+        "unicodeNumber",
+        Character.DECIMAL_DIGIT_NUMBER,
+        Character.LETTER_NUMBER,
+        Character.OTHER_NUMBER
+    );
+
+    public static final Predicate<Integer>
+    IS_UNICODE_SEPARATOR = Characters.unicodeGeneralCategoryPredicate(
+        "unicodeSeparator",
+        Character.SPACE_SEPARATOR,
+        Character.LINE_SEPARATOR,
+        Character.PARAGRAPH_SEPARATOR
+    );
+
+    public static final Predicate<Integer>
+    IS_UNICODE_SPECIAL = Characters.unicodeGeneralCategoryPredicate(
+        "unicodeSpecial",
+        Character.CONTROL,
+        Character.FORMAT,
+        Character.PRIVATE_USE,
+        Character.SURROGATE
+    );
+
+    public static final Predicate<Integer>
+    IS_UNICODE_SYMBOL = Characters.unicodeGeneralCategoryPredicate(
+        "unicodeSymbol",
+        Character.MATH_SYMBOL,
+        Character.CURRENCY_SYMBOL,
+        Character.MODIFIER_SYMBOL,
+        Character.OTHER_SYMBOL
+    );
+
+    public static final Predicate<Integer>
+    IS_UNICODE_UPPER_LOWER_TITLE = Characters.unicodeGeneralCategoryPredicate(
+        "unicodeUpperLowerTitle",
+        Character.UPPERCASE_LETTER,
+        Character.LOWERCASE_LETTER,
+        Character.TITLECASE_LETTER
+    );
+
+    public static final Predicate<Integer>
+    IS_UNICODE_ALPHA2 = Characters.unicodeGeneralCategoryPredicate(
+        "unicodeAlpha2",
+        Character.UPPERCASE_LETTER,
+        Character.LOWERCASE_LETTER,
+        Character.TITLECASE_LETTER,
+        Character.MODIFIER_LETTER,
+        Character.OTHER_LETTER,
+        Character.DECIMAL_DIGIT_NUMBER
+    );
+
+    public static final Predicate<Integer>
+    IS_UNICODE_LATIN1 = Characters.rangePredicate("unicodeAlpha2", 0, 0xff);
 
     protected static boolean
     isUnicodeWord(Integer subject) {
@@ -595,6 +672,9 @@ class Characters {
         );
     }
 
+    /**
+     * @return {@code null} iff the named category is unknown
+     */
     @Nullable public static Predicate<Integer>
     unicodeCategoryFromName(String name) {
         return Characters.UNICODE_CATEGORIES.get(name.toUpperCase(Locale.US));
@@ -604,7 +684,6 @@ class Characters {
         Map<String /*name*/, Predicate<Integer>> m = new HashMap<String, Predicate<Integer>>();
 
         m.put("CN", Characters.IS_UNICODE_UNASSIGNED);
-        m.put("L",  Characters.IS_UNICODE_LETTER);
         m.put("LU", Characters.IS_UNICODE_UPPER);
         m.put("LL", Characters.IS_UNICODE_LOWER);
         m.put("LT", Characters.IS_UNICODE_TITLE);
@@ -634,10 +713,20 @@ class Characters {
         m.put("SO", Characters.IS_UNICODE_OTHER_SYMBOL);
         m.put("PI", Characters.IS_UNICODE_INITIAL_QUOTE_PUNCTUATION);
         m.put("PF", Characters.IS_UNICODE_FINAL_QUOTE_PUNCTUATION);
+        m.put("L",  Characters.IS_UNICODE_LETTER);
+        m.put("M",  Characters.IS_UNICODE_MARK);
+        m.put("N",  Characters.IS_UNICODE_NUMBER);
+        m.put("Z",  Characters.IS_UNICODE_SEPARATOR);
+        m.put("C",  Characters.IS_UNICODE_SPECIAL);
+        m.put("P",  Characters.IS_UNICODE_PUNCT);
+        m.put("S",  Characters.IS_UNICODE_SYMBOL);
+        m.put("LC", Characters.IS_UNICODE_UPPER_LOWER_TITLE);
+        m.put("LD", Characters.IS_UNICODE_ALPHA2);
+        m.put("L1", Characters.IS_UNICODE_LATIN1);
 
         m.put("ALPHABETIC",              Characters.IS_UNICODE_ALPHA);
         m.put("LETTER",                  Characters.IS_UNICODE_LETTER);
-//        m.put("IDEOGRAPHIC",             Characters.IS_UNICODE_IDEOGRAPHIC);
+        m.put("IDEOGRAPHIC",             Characters.IS_UNICODE_IDEOGRAPHIC);
         m.put("LOWERCASE",               Characters.IS_UNICODE_LOWER);
         m.put("UPPERCASE",               Characters.IS_UNICODE_UPPER);
         m.put("TITLECASE",               Characters.IS_UNICODE_TITLE);
@@ -673,7 +762,7 @@ class Characters {
         Map<String /*name*/, Predicate<Integer>> m = new HashMap<String, Predicate<Integer>>();
 
         m.put("ALPHABETIC",              Characters.IS_UNICODE_ALPHA);
-//        m.put("IDEOGRAPHIC",             Characters.IS_UNICODE_IDEOGRAPHIC);
+        m.put("IDEOGRAPHIC",             Characters.IS_UNICODE_IDEOGRAPHIC);
         m.put("LETTER",                  Characters.IS_UNICODE_LETTER);
         m.put("LOWERCASE",               Characters.IS_UNICODE_LOWER);
         m.put("UPPERCASE",               Characters.IS_UNICODE_UPPER);
@@ -713,11 +802,42 @@ class Characters {
 //        UNICODE_PREDEFINIED_CHARACTER_CLASSES = Collections.unmodifiableMap(m);
 //    }
 
+    /**
+     * @return A wrapper predicate around {@link Character#getType(int)}
+     */
     private static IntegerPredicate
-    unicodeGeneralCategoryPredicate(final byte generalCategory, String toString) {
+    unicodeGeneralCategoryPredicate(String toString, final byte generalCategory) {
 
         return new IntegerPredicate(toString) {
             @Override public boolean evaluate(Integer subject) { return Character.getType(subject) == generalCategory; }
+        };
+    }
+
+    /**
+     * @return A wrapper predicate around {@link Character#getType(int)}
+     */
+    private static IntegerPredicate
+    unicodeGeneralCategoryPredicate(String toString, final byte gc1, final byte gc2, final byte... gc3) {
+
+        int mask = 1 << gc1 | 1 << gc2;
+        for (byte gc : gc3) mask |= 1 << gc;
+
+        final int finalMask = mask;
+        return new IntegerPredicate(toString) {
+
+            @Override public boolean
+            evaluate(Integer subject) { return (finalMask & 1 << Character.getType(subject)) != 0; }
+        };
+    }
+
+    private static IntegerPredicate
+    rangePredicate(String toString, final int minCp, final int maxCp) {
+
+        return new IntegerPredicate(toString) {
+            @Override public boolean evaluate(Integer subject) {
+                int cp = subject;
+                return cp >= minCp && cp <= maxCp;
+            }
         };
     }
 
@@ -784,6 +904,62 @@ class Characters {
         return new Predicate<Integer>() {
             @Override public boolean evaluate(Integer subject) { return Character.UnicodeBlock.of(subject) == block; }
             @Override public String  toString()                { return "inUnicodeBlock(" + block + ")";             }
+        };
+    }
+
+    static final MethodWrapper1<?, Object, String, RuntimeException>
+    UNICODE_SCRIPT__FOR_NAME = OptionalMethods.get1(
+        null,                                // classLoader
+        "java.lang.Character$UnicodeScript", // declaringClassName
+        "forName",                           // methodName
+        String.class,                        // parameterType
+        null                                 // checkedException
+    );
+    static final MethodWrapper1<?, Object, Integer, RuntimeException>
+    UNICODE_SCRIPT__OF = OptionalMethods.get1(
+        null,                                // classLoader
+        "java.lang.Character$UnicodeScript", // declaringClassName
+        "of",                                // methodName
+        int.class,                           // parameterType
+        null                                 // checkedException
+    );
+    static final boolean
+    UNICODE_SCRIPT_AVAILABLE = Characters.UNICODE_SCRIPT__FOR_NAME.isAvailable() && Characters.UNICODE_SCRIPT__OF.isAvailable();
+
+    /**
+     * @return Whether this JRE supports unicode scripts (because it is 1.7 or later)
+     */
+    public static boolean
+    unicodeScriptAvailable() { return Characters.UNICODE_SCRIPT_AVAILABLE; }
+
+    /**
+     * @return                               A predicate that tests if a given code point is in the named script;
+     *                                       {@code null} iff a UNICODE script with the <var>name</name> is unknown
+     * @throws UnsupportedOperationException This JRE does not support unicode scripts (because it is pre-1.7)
+     * @see                                  #unicodeScriptAvailable()
+     */
+    @Nullable public static Predicate<Integer>
+    unicodeScriptPredicate(String name) {
+
+        final Object unicodeScript1;
+        try {
+            unicodeScript1 = Characters.UNICODE_SCRIPT__FOR_NAME.invoke(null, name);
+        } catch (IllegalArgumentException iae) {
+
+            // Script name is unknown.
+            return null;
+        }
+
+        return new Predicate<Integer>() {
+
+            @Override public boolean
+            evaluate(Integer subject) {
+                Object unicodeScript2 = Characters.UNICODE_SCRIPT__OF.invoke(null, subject);
+                return unicodeScript1 == unicodeScript2;
+            }
+
+            @Override public String
+            toString() { return "unicodeScript(" + unicodeScript1 + ")"; }
         };
     }
 
