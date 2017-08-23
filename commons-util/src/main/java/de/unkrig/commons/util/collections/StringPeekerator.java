@@ -48,10 +48,8 @@ import de.unkrig.commons.nullanalysis.Nullable;
  *   defined manner.
  * </p>
  *
- * @see de.unkrig.commons.text.StringStream {@code StringStream}: A similar functionality, which leans on a {@code
- *      ProducerWhichThrows<String, EX>} (which supports checked exceptions).
- * @see de.unkrig.commons.text.parser.AbstractParser {@code AbstractParser}: A similar functionality, which leans on a
- *      {@code ProducerWhichThrows<String, ScanException>}.
+ * @see de.unkrig.commons.text.StringStream
+ * @see de.unkrig.commons.text.parser.AbstractParser
  */
 public
 class StringPeekerator implements Peekerator<String> {
