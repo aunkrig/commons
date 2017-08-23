@@ -107,8 +107,7 @@ class OptionalMethods {
      * <var>methodName</var>. If that method does not exist, a wrapper is returned that will throw an {@link
      * UnsupportedOperationException} when invoked.
      *
-     * @param <DC> The class that declares the method
-     * @param <R>  The return type of the method
+     * @param <R> The return type of the method
      */
     public static <R> MethodWrapper0<?, R, RuntimeException>
     get0(
@@ -129,7 +128,6 @@ class OptionalMethods {
      * <var>methodName</var>. If that method does not exist, a wrapper is returned that will throw an {@link
      * UnsupportedOperationException} when invoked.
      *
-     * @param <DC> The class that declares the method
      * @param <R>  The return type of the method
      * @param <EX> The (single) checked exception declared for the method
      */
@@ -264,9 +262,8 @@ class OptionalMethods {
      * <var>methodName</var> and <var>parameterType</var>. If that method does not exist, a wrapper is returned that
      * will throw an {@link UnsupportedOperationException} when invoked.
      *
-     * @param <DC> The class that declares the wrapped method
-     * @param <R>  The return type of the wrapped method
-     * @param <P>  The type of the single parameter of the wrapped method
+     * @param <R> The return type of the wrapped method
+     * @param <P> The type of the single parameter of the wrapped method
      */
     public static <R, P> MethodWrapper1<?, R, P, RuntimeException>
     get1(
@@ -289,7 +286,6 @@ class OptionalMethods {
      * <var>methodName</var> and <var>parameterType</var>. If that method does not exist, a wrapper is returned that
      * will throw an {@link UnsupportedOperationException} when invoked.
      *
-     * @param <DC> The class that declares the wrapped method
      * @param <R>  The return type of the wrapped method
      * @param <P>  The type of the single parameter of the wrapped method
      * @param <EX> The (single) checked exception declared for the method
@@ -432,7 +428,6 @@ class OptionalMethods {
      * <var>methodName</var>, <var>parameterType1</var> and <var>parameterType2</var>. If that method does not exist,
      * a wrapper is returned that will throw an {@link UnsupportedOperationException} when invoked.
      *
-     * @param <DC> The class that declares the wrapped method
      * @param <R>  The return type of the wrapped method
      * @param <P1> The type of the first parameter of the wrapped method
      * @param <P2> The type of the second parameter of the wrapped method
@@ -460,10 +455,9 @@ class OptionalMethods {
      * <var>methodName</var>, <var>parameterType1</var> and <var>parameterType2</var>. If that method does not exist,
      * a wrapper is returned that will throw an {@link UnsupportedOperationException} when invoked.
      *
-     * @param <DC> The class that declares the wrapped method
      * @param <R>  The return type of the wrapped method
      * @param <P1> The type of the first parameter of the wrapped method
-     * @param <P1> The type of the second parameter of the wrapped method
+     * @param <P2> The type of the second parameter of the wrapped method
      * @param <EX> The (single) checked exception declared for the method
      */
     public static <R, P1, P2, EX extends Throwable> MethodWrapper2<?, R, P1, P2, EX>
