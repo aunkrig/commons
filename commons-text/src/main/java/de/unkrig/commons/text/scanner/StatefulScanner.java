@@ -71,14 +71,16 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
      */
     @Nullable public final S REMAIN = null; // SUPPRESS CHECKSTYLE MemberName
 
+    private final List<List<Rule>> stateStack = new ArrayList<List<Rule>>();
+
     public
     StatefulScanner(Class<S> states) {
-        this.defaultStateRules    = new ArrayList<Rule<TT, S>>();
-        this.nonDefaultStateRules = new HashMap<S, List<Rule<TT, S>>>();
+        this.defaultStateRules    = new ArrayList<Rule>();
+        this.nonDefaultStateRules = new HashMap<S, List<Rule>>();
         this.currentStateRules    = this.defaultStateRules;
 
         for (S state : states.getEnumConstants()) {
-            this.nonDefaultStateRules.put(state, new ArrayList<StatefulScanner.Rule<TT, S>>());
+            this.nonDefaultStateRules.put(state, new ArrayList<Rule>());
         }
     }
 
@@ -100,20 +102,11 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
      *
      * @see Pattern
      */
-    public void
+    public Rule
     addRule(String regex, TT tokenType) {
-        this.addRule(regex, tokenType, this.defaultStateRules);
-    }
-
-    /**
-     * Adds a rule that applies iff the scanner is in the "default state".
-     *
-     * @param nextState The new current state after the rule has matched
-     * @see Pattern
-     */
-    public void
-    addRule(String regex, TT tokenType, S nextState) {
-        this.addRule(regex, tokenType, this.nonDefaultStateRules.get(nextState));
+        Rule rule = new Rule(regex, tokenType, this.defaultStateRules);
+        this.defaultStateRules.add(rule);
+        return rule;
     }
 
     /**
@@ -123,9 +116,11 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
      * @param state {@code null} means "any state"
      * @see Pattern
      */
-    public void
+    public Rule
     addRule(S state, String regex, TT tokenType) {
-        this.addRule(EnumSet.of(state), regex, tokenType);
+        Rule rule = new Rule(regex, tokenType, this.defaultStateRules);
+        this.nonDefaultStateRules.get(state).add(rule);
+        return rule;
     }
 
     /**
@@ -135,66 +130,19 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
      *
      * @see Pattern
      */
-    public void
+    public Rule
     addRule(@Nullable EnumSet<S> states, String regex, TT tokenType) {
 
-        Rule<TT, S> rule = new Rule<TT, S>(regex, tokenType, this.defaultStateRules);
+        Rule rule = new Rule(regex, tokenType, this.defaultStateRules);
 
         if (states == /*this.ANY_STATE*/ null) {
-            for (List<Rule<TT, S>> rules : this.nonDefaultStateRules.values()) rules.add(rule);
+            for (List<Rule> rules : this.nonDefaultStateRules.values()) rules.add(rule);
             this.defaultStateRules.add(rule);
         } else {
             for (S s : states) this.nonDefaultStateRules.get(s).add(rule);
         }
-    }
 
-    /**
-     * Adds a rule that applies iff the scanner is in the given non-default <var>state</var>.
-     *
-     * @param nextState The new state after the rule has matched, or {@link #REMAIN}
-     * @see Pattern
-     */
-    public void
-    addRule(S state, String regex, TT tokenType, @Nullable S nextState) {
-        this.addRule(EnumSet.of(state), regex, tokenType, nextState);
-    }
-
-    /**
-     * Adds a rule that applies iff <var>states</var>{@code ==} {@link #ANY_STATE}, or if the scanner is in one of the
-     * the given non-default <var>states</var>, or the <var>states</var> contain {@code null} and the scanner is in the
-     * default state.
-     *
-     * @param nextState The new current state after the rule has matched, or {@link #REMAIN}
-     * @see Pattern
-     */
-    public void
-    addRule(@Nullable EnumSet<S> states, String regex, TT tokenType, @Nullable S nextState) {
-
-        if (nextState != this.REMAIN) {
-            Rule<TT, S> rule = new Rule<TT, S>(regex, tokenType, this.nonDefaultStateRules.get(nextState));
-
-            if (states == /*this.ANY_STATE*/ null) {
-                for (List<Rule<TT, S>> rules : this.nonDefaultStateRules.values()) {
-                    rules.add(rule);
-                }
-                this.defaultStateRules.add(rule);
-            } else {
-                for (S s : states) this.nonDefaultStateRules.get(s).add(rule);
-            }
-        } else {
-
-            if (states == /*this.ANY_STATE*/ null) {
-                for (List<Rule<TT, S>> rules : this.nonDefaultStateRules.values()) {
-                    rules.add(new Rule<TT, S>(regex, tokenType, rules));
-                }
-                this.defaultStateRules.add(new Rule<TT, S>(regex, tokenType, this.defaultStateRules));
-            } else {
-                for (S s : states) {
-                    List<Rule<TT, S>> rules = this.nonDefaultStateRules.get(s);
-                    rules.add(new Rule<TT, S>(regex, tokenType, rules));
-                }
-            }
-        }
+        return rule;
     }
 
     /**
@@ -205,9 +153,9 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
 
         if (this.currentStateRules == this.defaultStateRules) return null;
 
-        for (Entry<S, List<Rule<TT, S>>> e : this.nonDefaultStateRules.entrySet()) {
+        for (Entry<S, List<Rule>> e : this.nonDefaultStateRules.entrySet()) {
             S                 state = e.getKey();
-            List<Rule<TT, S>> rules = e.getValue();
+            List<Rule> rules = e.getValue();
 
             if (rules == this.currentStateRules) return state;
         }
@@ -233,11 +181,17 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
         int length = this.cs.length();
         if (this.offset == length) return null;
 
-        for (Rule<TT, S> rule : this.currentStateRules) {
+        for (Rule rule : this.currentStateRules) {
             Matcher matcher = rule.regex.matcher(this.cs);
             matcher.region(this.offset, length);
             if (matcher.lookingAt()) {
-                this.currentStateRules   = rule.nextStateRules;
+                if (rule.popState) {
+                    this.currentStateRules = this.stateStack.remove(this.stateStack.size() - 1);
+                } else {
+                    if (rule.pushState) this.stateStack.add(this.currentStateRules);
+                    if (rule.nextStateRules != null/*this.REMAIN*/) this.currentStateRules = rule.nextStateRules;
+                }
+
                 this.previousTokenOffset = this.offset;
                 this.offset              = matcher.end();
 
@@ -262,9 +216,9 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
         if (this.currentStateRules == this.defaultStateRules) {
             message += " in default state";
         } else {
-            for (Entry<S, List<Rule<TT, S>>> e : this.nonDefaultStateRules.entrySet()) {
+            for (Entry<S, List<Rule>> e : this.nonDefaultStateRules.entrySet()) {
                 S                 state = e.getKey();
-                List<Rule<TT, S>> rules = e.getValue();
+                List<Rule> rules = e.getValue();
 
                 if (this.currentStateRules == rules) {
                     message += " in state " + state;
@@ -285,26 +239,78 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
         throw new ScanException(message);
     }
 
-    // IMPLEMENTATION
-
-    private void
-    addRule(String regex, TT tokenType, List<Rule<TT, S>> nextRules) {
-
-        Rule<TT, S> rule = new Rule<TT, S>(regex, tokenType, nextRules);
-
-        this.defaultStateRules.add(rule);
+    /**
+     * @deprecated Use {@code ss.addRule(regex, tokenType).goTo(nextState)} instead.
+     */
+    @Deprecated public Rule
+    addRule(String regex, TT tokenType, S nextState) {
+        return this.addRule(regex, tokenType).goTo(nextState);
     }
 
-    private static
-    class Rule<TT extends Enum<TT>, S extends Enum<S>> {
-        final TT                tokenType;
-        final Pattern           regex;
-        final List<Rule<TT, S>> nextStateRules;
+    /**
+     * @deprecated Use {@code addRule(state, regex, tokenType).goTo(nextState)}
+     */
+    @Deprecated public Rule
+    addRule(S state, String regex, TT tokenType, @Nullable S nextState) {
+        return this.addRule(state, regex, tokenType).goTo(nextState);
+    }
 
-        Rule(String regex, TT tokenType, List<Rule<TT, S>> nextStateRules) {
+    /**
+     * @deprecated Use {@code ss.addRule(states, regex, tokenType).goTo(nextState)} instead
+     */
+    @Deprecated public Rule
+    addRule(@Nullable EnumSet<S> states, String regex, TT tokenType, @Nullable S nextState) {
+        return this.addRule(states, regex, tokenType).goTo(nextState);
+    }
+
+    // IMPLEMENTATION
+
+    public
+    class Rule {
+        final TT             tokenType;
+        final Pattern        regex;
+        @Nullable List<Rule> nextStateRules;
+        private boolean      pushState, popState;
+
+        /**
+         * @param nextStateRules {@code null} means remain in current state
+         */
+        Rule(String regex, TT tokenType, @Nullable List<Rule> nextStateRules) {
             this.regex          = Pattern.compile(regex);
             this.tokenType      = tokenType;
             this.nextStateRules = nextStateRules;
+        }
+
+        /**
+         * @param nextState {@code ss.REMAIN} means remain in current state
+         */
+        public Rule
+        goTo(@Nullable S nextState) {
+            this.nextStateRules = StatefulScanner.this.nonDefaultStateRules.get(nextState);
+            return this;
+        }
+
+        /**
+         * Saves the current state and changes to the <var>nextState</var>.
+         *
+         * @see #pop()
+         */
+        public Rule
+        push(S nextState) {
+            this.pushState = true;
+            this.nextStateRules = StatefulScanner.this.nonDefaultStateRules.get(nextState);
+            return this;
+        }
+
+        /**
+         * Restores a previously pushed state.
+         *
+         * @see #push(Enum)
+         */
+        public Rule
+        pop() {
+            this.popState = true;
+            return this;
         }
 
         @Override public String
@@ -313,10 +319,10 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
 
     // CONFIGURATION
 
-    private final List<Rule<TT, S>>         defaultStateRules;
-    private final Map<S, List<Rule<TT, S>>> nonDefaultStateRules;
+    private final List<Rule>         defaultStateRules;
+    private final Map<S, List<Rule>> nonDefaultStateRules;
 
     // STATE
 
-    private List<Rule<TT, S>> currentStateRules;
+    private List<Rule> currentStateRules;
 }
