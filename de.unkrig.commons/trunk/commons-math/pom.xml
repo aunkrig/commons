@@ -21,19 +21,19 @@
 		<dependency>
 			<groupId>de.unkrig.commons</groupId>
 			<artifactId>commons-nullanalysis</artifactId>
-			<version>1.2.11-SNAPSHOT</version>
+			<version>1.2.11</version>
 		</dependency>
 		<dependency>
 			<groupId>de.unkrig.commons</groupId>
 			<artifactId>commons-lang</artifactId>
-			<version>1.2.11-SNAPSHOT</version>
+			<version>1.2.11</version>
 		</dependency>
 	</dependencies>
 
 	<parent>
 		<groupId>de.unkrig.commons</groupId>
 		<artifactId>commons-parent</artifactId>
-		<version>1.2.11-SNAPSHOT</version>
+		<version>1.2.11</version>
 		<relativePath>../commons-parent</relativePath>
 	</parent>
 	<url>http://commons.unkrig.de/commons-math</url>
