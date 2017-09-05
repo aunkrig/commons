@@ -397,7 +397,7 @@ class OutputStreams {
         return result;
     }
 
-    static final long[] THRESHOLDS;
+    private static final long[] THRESHOLDS;
     static {
         THRESHOLDS = new long[126];
         long x = 2;
