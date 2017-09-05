@@ -55,8 +55,10 @@ class AuthenticateHeaderParser {
      */
     public static
     class Challenge {
+        
         public final String authScheme;
-        private Challenge(String authScheme) {
+        
+        Challenge(String authScheme) {
             this.authScheme = authScheme;
         }
     }
@@ -64,10 +66,13 @@ class AuthenticateHeaderParser {
     /**
      * @see <a href="https://tools.ietf.org/html/rfc7235#section-2.1">Section 2.1 of RFC 7235</a>
      */
-    public static
+    public static final
     class Token68Challenge extends Challenge {
+        
         public final String token68;
-        private Token68Challenge(String authScheme, String token68) {
+        
+        private
+        Token68Challenge(String authScheme, String token68) {
             super(authScheme);
             this.token68 = token68;
         }
@@ -76,10 +81,13 @@ class AuthenticateHeaderParser {
     /**
      * @see <a href="https://tools.ietf.org/html/rfc7235#section-2.1">Section 2.1 of RFC 7235</a>
      */
-    public static
+    public static final
     class ChallengeWithAuthParams extends Challenge {
+        
         public final List<AuthParam> authParams;
-        private ChallengeWithAuthParams(String authScheme, List<AuthParam> authParams) {
+        
+        private
+        ChallengeWithAuthParams(String authScheme, List<AuthParam> authParams) {
             super(authScheme);
             this.authParams = authParams;
         }
@@ -88,7 +96,7 @@ class AuthenticateHeaderParser {
     /**
      * @see <a href="https://tools.ietf.org/html/rfc7235#section-2.1">Section 2.1 of RFC 7235</a>
      */
-    public static
+    public static final
     class AuthParam {
         public final String name, value;
         private AuthParam(String name, String value) { this.name = name; this.value = value; }
@@ -136,11 +144,13 @@ class AuthenticateHeaderParser {
             } else
             {
 
-                List<AuthParam> aps = new ArrayList<AuthParam>();
+                final List<AuthParam> aps = new ArrayList<AuthParam>();
                 for (;;) {
                     Token<TokenType> t = p.read();
 
-                    if (t.type != TokenType.AUTH_PARAM) throw new ParseException(TokenType.AUTH_PARAM + " expected instead of " + t.type);
+                    if (t.type != TokenType.AUTH_PARAM) {
+                        throw new ParseException(TokenType.AUTH_PARAM + " expected instead of " + t.type);
+                    }
 
                     String name = t.captured[0], value;
                     if (t.captured[1] != null && t.captured[2] == null) {
@@ -168,29 +178,28 @@ class AuthenticateHeaderParser {
     }
 
     enum TokenType { TOKEN, TOKEN68, SPACE, AUTH_PARAM, COMMA }
-    enum State { Challenge1, Challenge2 }
-    private static final StatefulScanner<TokenType, State> CHALLENGE_SCANNER = new StatefulScanner<TokenType, State>(State.class);
+
+    enum State { CHALLENGE1, CHALLENGE2 }
+
+    private static final StatefulScanner<TokenType, State>
+    CHALLENGE_SCANNER = new StatefulScanner<TokenType, State>(State.class);
+    
     static {
+        String token = "[A-Za-z0-9!#$%&'*+\\-.^_`|~]+";
         
+        // space
         AuthenticateHeaderParser.CHALLENGE_SCANNER.addRule(
             AuthenticateHeaderParser.CHALLENGE_SCANNER.ANY_STATE,
             "\\s+",
-            TokenType.SPACE,
-            AuthenticateHeaderParser.CHALLENGE_SCANNER.REMAIN
-        );
+            TokenType.SPACE
+        ).goTo(AuthenticateHeaderParser.CHALLENGE_SCANNER.REMAIN);
 
-        String token = "[A-Za-z0-9!#$%&'*+\\-.^_`|~]+";
-        
         // token
-        AuthenticateHeaderParser.CHALLENGE_SCANNER.addRule(
-            token,
-            TokenType.TOKEN,
-            State.Challenge1
-        );
+        AuthenticateHeaderParser.CHALLENGE_SCANNER.addRule(token, TokenType.TOKEN).goTo(State.CHALLENGE1);
 
         // token68  Use negative lookahead to handle the similarity with "token '=' ( token | quoted-string )".
         AuthenticateHeaderParser.CHALLENGE_SCANNER.addRule(
-            State.Challenge1,
+            State.CHALLENGE1,
             "[A-Za-z0-9\\-._~+/]+=*+(?!\\s*[A-Za-z0-9!#$%&'*+\\-.^_`|~\"])",
             TokenType.TOKEN68
         );

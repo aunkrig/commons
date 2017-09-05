@@ -33,20 +33,21 @@ import java.net.URL;
 /**
  * Helper functionality in the context of {@link URL} and {@link URI}.
  */
-public class Urls {
+public final
+class Urls {
 
-	private Urls() {}
+    private Urls() {}
 
-	/**
-	 * @return The <em>path</em>, encoded such that an HTTP server which receives a URL with that path would decode it
-	 *         to equal the original <var>path</var>
-	 */
-	public static String
-	quoteUriPath(String path) {
-		try {
-			return new URI(null, null, path, null).toString();
-		} catch (URISyntaxException use) {
-			throw new IllegalArgumentException(path, use);
-		}
-	}
+    /**
+     * @return The <em>path</em>, encoded such that an HTTP server which receives a URL with that path would decode it
+     *         to equal the original <var>path</var>
+     */
+    public static String
+    quoteUriPath(String path) {
+        try {
+            return new URI(null, null, path, null).toString();
+        } catch (URISyntaxException use) {
+            throw new IllegalArgumentException(path, use);
+        }
+    }
 }

@@ -177,8 +177,8 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
      *   {@link InetAddress#anyLocalAddress() wildcard address}, it will default accepting connections on any/all local
      *   addresses.
      * <p>
-     *   The port of the <var>endpoint</var> must be between 0 and 65535, inclusive. If it is zero, then an ephemoral port
-     *   will be picked for the server socket.
+     *   The port of the <var>endpoint</var> must be between 0 and 65535, inclusive. If it is zero, then an ephemoral
+     *   port will be picked for the server socket.
      * </p>
      * <p>
      *   The <var>backlog</var> argument must be a positive value greater than 0. If the value passed if equal or less
