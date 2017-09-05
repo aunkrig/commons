@@ -26,14 +26,20 @@
 
 package de.unkrig.commons.util.collections;
 
+import java.io.Serializable;
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.SortedSet;
 
 import de.unkrig.commons.lang.AssertionUtil;
+import de.unkrig.commons.nullanalysis.NotNullByDefault;
 
 /**
  * Utility methods related to {@link Set}s.
@@ -82,5 +88,36 @@ class Sets {
         allSubsets.addAll(tmp);
 
         return allSubsets;
+    }
+
+    /**
+     * Desperately missing from {@code java.util.Collections}.
+     */
+    @SuppressWarnings("rawtypes") public static final SortedSet
+    EMPTY_SORTED_SET = new EmptySortedSet();
+
+    /**
+     * Desperately missing from {@code java.util.Collections}.
+     */
+    @SuppressWarnings("unchecked") public static <T> SortedSet<T>
+    emptySortedSet() { return CollectionUtil.EMPTY_SORTED_SET; }
+
+    @NotNullByDefault(false) @SuppressWarnings("rawtypes") private static
+    class EmptySortedSet extends AbstractSet implements SortedSet, Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        @Override public Iterator   iterator()                     { return IteratorUtil.AT_END; }
+        @Override public int        size()                         { return 0; }
+        @Override public boolean    isEmpty()                      { return true; }
+        @Override public boolean    contains(Object obj)           { return false; }
+        @Override public Comparator comparator()                   { return null; }
+        @Override public SortedSet  subSet(Object from, Object to) { return CollectionUtil.EMPTY_SORTED_SET; }
+        @Override public SortedSet  headSet(Object toElement)      { return CollectionUtil.EMPTY_SORTED_SET; }
+        @Override public SortedSet  tailSet(Object fromElement)    { return CollectionUtil.EMPTY_SORTED_SET; }
+        @Override public Object     first()                        { throw new NoSuchElementException(); }
+        @Override public Object     last()                         { throw new NoSuchElementException(); }
+        @Override public boolean    equals(Object o)               { return (o instanceof SortedSet) && ((SortedSet) o).size() == 0; } // SUPPRESS CHECKSTYLE LineLength
+        @Override public int        hashCode()                     { return 0; }
     }
 }

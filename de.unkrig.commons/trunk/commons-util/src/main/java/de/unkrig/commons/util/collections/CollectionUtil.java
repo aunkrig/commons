@@ -26,21 +26,16 @@
 
 package de.unkrig.commons.util.collections;
 
-import java.io.Serializable;
-import java.util.AbstractSet;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
 import de.unkrig.commons.lang.AssertionUtil;
-import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -119,35 +114,16 @@ class CollectionUtil {
     emptySortedMap() { return MapUtil.EMPTY_SORTED_MAP; }
 
     /**
-     * Desperately missing from {@code java.util.Collections}.
+     * @deprecated Has moved to {@link Sets#EMPTY_SORTED_SET}
      */
-    @SuppressWarnings("rawtypes") public static final SortedSet
-    EMPTY_SORTED_SET = new EmptySortedSet();
+    @Deprecated @SuppressWarnings("rawtypes") public static final SortedSet
+    EMPTY_SORTED_SET = Sets.EMPTY_SORTED_SET;
 
     /**
-     * Desperately missing from {@code java.util.Collections}.
+     * @deprecated Has moved to {@link Sets#emptySortedSet()}
      */
-    @SuppressWarnings("unchecked") public static <T> SortedSet<T>
-    emptySortedSet() { return CollectionUtil.EMPTY_SORTED_SET; }
-
-    @NotNullByDefault(false) @SuppressWarnings("rawtypes") private static
-    class EmptySortedSet extends AbstractSet implements SortedSet, Serializable {
-
-        private static final long serialVersionUID = 1L;
-
-        @Override public Iterator   iterator()                     { return IteratorUtil.AT_END; }
-        @Override public int        size()                         { return 0; }
-        @Override public boolean    isEmpty()                      { return true; }
-        @Override public boolean    contains(Object obj)           { return false; }
-        @Override public Comparator comparator()                   { return null; }
-        @Override public SortedSet  subSet(Object from, Object to) { return CollectionUtil.EMPTY_SORTED_SET; }
-        @Override public SortedSet  headSet(Object toElement)      { return CollectionUtil.EMPTY_SORTED_SET; }
-        @Override public SortedSet  tailSet(Object fromElement)    { return CollectionUtil.EMPTY_SORTED_SET; }
-        @Override public Object     first()                        { throw new NoSuchElementException(); }
-        @Override public Object     last()                         { throw new NoSuchElementException(); }
-        @Override public boolean    equals(Object o)               { return (o instanceof SortedSet) && ((SortedSet) o).size() == 0; } // SUPPRESS CHECKSTYLE LineLength
-        @Override public int        hashCode()                     { return 0; }
-    }
+    @Deprecated public static <T> SortedSet<T>
+    emptySortedSet() { return Sets.emptySortedSet(); }
 
     /**
      * @deprecated Moved to {@link IteratorUtil#AT_END}
