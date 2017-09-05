@@ -371,6 +371,7 @@ class Characters {
 
     // =============================== UNICODE CATEGORIES ===============================
 
+    // SUPPRESS CHECKSTYLE LineLength|JavadocVariable:31
     public static final Predicate<Integer> IS_UNICODE_UNASSIGNED                = Characters.unicodeGeneralCategoryPredicate("unicodeUnassigned",              Character.UNASSIGNED);
     public static final Predicate<Integer> IS_UNICODE_LETTER                    = new IntegerPredicate("unicodeLetter") { @Override public boolean evaluate(Integer subject) { return Character.isLetter(subject);    } };
     public static final Predicate<Integer> IS_UNICODE_UPPER                     = new IntegerPredicate("unicodeUpper")  { @Override public boolean evaluate(Integer subject) { return Character.isUpperCase(subject); } };
@@ -406,32 +407,32 @@ class Characters {
     public static final Predicate<Integer>
     IS_UNICODE_ALPHA = new IntegerPredicate("unicodeAlpha") {
 
-        final MethodWrapper1<Character, Boolean, Integer, RuntimeException>
-        CHARACTER__IS_ALPHABETIC = OptionalMethods.get1(
-            Character.class,       // declaringClass
-            "isAlphabetic",        // methodName
-            int.class,             // parameterType
-            RuntimeException.class // checkedException
-        );
-
         @SuppressWarnings("null") @Override public boolean
-        evaluate(Integer subject) { return this.CHARACTER__IS_ALPHABETIC.invoke(null, subject); }
+        evaluate(Integer subject) { return Characters.CHARACTER_IS_ALPHABETIC.invoke(null, subject); }
     };
+    private static final MethodWrapper1<Character, Boolean, Integer, RuntimeException>
+    CHARACTER_IS_ALPHABETIC = OptionalMethods.get1(
+        Character.class,       // declaringClass
+        "isAlphabetic",        // methodName
+        int.class,             // parameterType
+        RuntimeException.class // checkedException
+    );
+
 
     public static final Predicate<Integer>
     IS_UNICODE_IDEOGRAPHIC = new IntegerPredicate("unicodeIdeographic") {
 
-        final MethodWrapper1<Character, Boolean, Integer, RuntimeException>
-        CHARACTER__IS_IDEOGRAPHIC = OptionalMethods.get1(
-            Character.class,       // declaringClass
-            "isIdeographic",       // methodName
-            int.class,             // parameterType
-            RuntimeException.class // checkedException
-        );
 
         @SuppressWarnings("null") @Override public boolean
-        evaluate(Integer subject) { return this.CHARACTER__IS_IDEOGRAPHIC.invoke(null, subject); }
+        evaluate(Integer subject) { return Characters.CHARACTER_IS_IDEOGRAPHIC.invoke(null, subject); }
     };
+    private static final MethodWrapper1<Character, Boolean, Integer, RuntimeException>
+    CHARACTER_IS_IDEOGRAPHIC = OptionalMethods.get1(
+        Character.class,       // declaringClass
+        "isIdeographic",       // methodName
+        int.class,             // parameterType
+        RuntimeException.class // checkedException
+    );
 
     public static final Predicate<Integer>
     IS_UNICODE_WHITE_SPACE = new IntegerPredicate("unicodeWhiteSpace") {
@@ -834,7 +835,9 @@ class Characters {
     rangePredicate(String toString, final int minCp, final int maxCp) {
 
         return new IntegerPredicate(toString) {
-            @Override public boolean evaluate(Integer subject) {
+
+            @Override public boolean
+            evaluate(Integer subject) {
                 int cp = subject;
                 return cp >= minCp && cp <= maxCp;
             }
@@ -868,9 +871,9 @@ class Characters {
 
     @Nullable public static Predicate<Integer>
     posixCharacterClassFromName(String name) {
-        return Characters.POSIX_CHARACTer_CLASSES.get(name.toUpperCase(Locale.US));
+        return Characters.POSIX_CHARACTER_CLASSES.get(name.toUpperCase(Locale.US));
     }
-    private static final Map<String /*name*/, Predicate<Integer>> POSIX_CHARACTer_CLASSES;
+    private static final Map<String /*name*/, Predicate<Integer>> POSIX_CHARACTER_CLASSES;
     static {
         Map<String /*name*/, Predicate<Integer>> m = new HashMap<String, Predicate<Integer>>();
 
@@ -888,7 +891,7 @@ class Characters {
         m.put("XDIGIT", Characters.IS_POSIX_XDIGIT);
         m.put("SPACE",  Characters.IS_POSIX_SPACE);
 
-        POSIX_CHARACTer_CLASSES = Collections.unmodifiableMap(m);
+        POSIX_CHARACTER_CLASSES = Collections.unmodifiableMap(m);
     }
 
     @Nullable public static Predicate<Integer>
@@ -908,7 +911,7 @@ class Characters {
     }
 
     static final MethodWrapper1<?, Object, String, RuntimeException>
-    UNICODE_SCRIPT__FOR_NAME = OptionalMethods.get1(
+    UNICODE_SCRIPT_FOR_NAME = OptionalMethods.get1(
         null,                                // classLoader
         "java.lang.Character$UnicodeScript", // declaringClassName
         "forName",                           // methodName
@@ -916,7 +919,7 @@ class Characters {
         null                                 // checkedException
     );
     static final MethodWrapper1<?, Object, Integer, RuntimeException>
-    UNICODE_SCRIPT__OF = OptionalMethods.get1(
+    UNICODE_SCRIPT_OF = OptionalMethods.get1(
         null,                                // classLoader
         "java.lang.Character$UnicodeScript", // declaringClassName
         "of",                                // methodName
@@ -924,7 +927,10 @@ class Characters {
         null                                 // checkedException
     );
     static final boolean
-    UNICODE_SCRIPT_AVAILABLE = Characters.UNICODE_SCRIPT__FOR_NAME.isAvailable() && Characters.UNICODE_SCRIPT__OF.isAvailable();
+    UNICODE_SCRIPT_AVAILABLE = (
+        Characters.UNICODE_SCRIPT_FOR_NAME.isAvailable()
+        && Characters.UNICODE_SCRIPT_OF.isAvailable()
+    );
 
     /**
      * @return Whether this JRE supports unicode scripts (because it is 1.7 or later)
@@ -943,7 +949,7 @@ class Characters {
 
         final Object unicodeScript1;
         try {
-            unicodeScript1 = Characters.UNICODE_SCRIPT__FOR_NAME.invoke(null, name);
+            unicodeScript1 = Characters.UNICODE_SCRIPT_FOR_NAME.invoke(null, name);
         } catch (IllegalArgumentException iae) {
 
             // Script name is unknown.
@@ -954,7 +960,7 @@ class Characters {
 
             @Override public boolean
             evaluate(Integer subject) {
-                Object unicodeScript2 = Characters.UNICODE_SCRIPT__OF.invoke(null, subject);
+                Object unicodeScript2 = Characters.UNICODE_SCRIPT_OF.invoke(null, subject);
                 return unicodeScript1 == unicodeScript2;
             }
 
