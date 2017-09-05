@@ -311,20 +311,20 @@ class CompressUtil {
             return result;
         } catch (UnsupportedZipFeatureException uzfe) {
 
-        	// Cannot use "ExceptionUtil.wrap(prefix, cause)" here, because this exception has none of the "usual"
-        	// constructors.
-        	throw new IOException(
-    			file + "!" + uzfe.getEntry().getName() + ": Unsupported ZIP feature \"" + uzfe.getFeature() +  "\"",
-    			uzfe
-			);
+            // Cannot use "ExceptionUtil.wrap(prefix, cause)" here, because this exception has none of the "usual"
+            // constructors.
+            throw new IOException(
+                file + "!" + uzfe.getEntry().getName() + ": Unsupported ZIP feature \"" + uzfe.getFeature() +  "\"",
+                uzfe
+            );
         } catch (ArchiveException ae) {
             throw ExceptionUtil.wrap(file.toString(), ae, IOException.class);
         } catch (IOException ioe) {
             throw ExceptionUtil.wrap(file.toString(), ioe);
         } catch (RuntimeException re) {
-        	throw ExceptionUtil.wrap(file.toString(), re);
+            throw ExceptionUtil.wrap(file.toString(), re);
         } catch (Error e) {
-        	throw ExceptionUtil.wrap(file.toString(), e);
+            throw ExceptionUtil.wrap(file.toString(), e);
         } finally {
             try { is.close(); } catch (Exception e) {}
         }
