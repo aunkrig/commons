@@ -26,6 +26,7 @@
 
 package de.unkrig.commons.util.collections;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
@@ -397,5 +398,13 @@ class IteratorUtil {
             };
 
         }
+    }
+
+    /**
+     * Adds all remaining products of the <var>iterator</var> to the <var>target</var> collection.
+     */
+    public static <T> void
+    addAllElementsTo(Iterator<? extends T> iterator, Collection<? super T> target) {
+        while (iterator.hasNext()) target.add(iterator.next());
     }
 }

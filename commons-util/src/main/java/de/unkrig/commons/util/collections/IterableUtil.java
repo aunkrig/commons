@@ -359,4 +359,12 @@ class IterableUtil {
      * Produces the sequence 0, 1, 2, ... {@link Integer#MAX_VALUE}
      */
     public static final Iterable<Integer> NATURALS0 = IterableUtil.foR(0, Integer.MAX_VALUE);
+
+    /**
+     * Adds all elements of the <var>iterable</var> to the <var>target</var> collection.
+     */
+    public static <T> void
+    addAllElementsTo(Iterable<T> iterable, Collection<? super T> target) {
+        for (Iterator<T> it = iterable.iterator(); it.hasNext();) target.add(it.next());
+    }
 }
