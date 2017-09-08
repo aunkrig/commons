@@ -576,4 +576,28 @@ class StringUtil {
             put(char key, int value) { this.deltas.put(key, value); }
         };
     }
+
+    /**
+     * @return The input string, enclosed in double quotes, and special characters replaced with Java escapes
+     */
+    public static String
+    asJavaLiteral(String s) {
+
+        StringBuilder sb = new StringBuilder(s.length() + 2).append('"');
+
+        for (char c : s.toCharArray()) {
+            int idx;
+            if ((idx = "\r\n\b\t\\".indexOf(c)) != -1) {
+                sb.append('\\').append("rnbt\\".charAt(idx));
+            } else
+            if (c < 32 || c == 127 || c > 255) {
+                sb.append(String.format("\\u%04x", (int) c));
+            } else
+            {
+                sb.append(c);
+            }
+        }
+
+        return sb.append('"').toString();
+    }
 }
