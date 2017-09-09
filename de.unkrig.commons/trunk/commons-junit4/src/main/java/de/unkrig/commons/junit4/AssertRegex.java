@@ -47,7 +47,7 @@ class AssertRegex {
      */
     public static void
     assertMatches(String expectedRegex, String actual) {
-        assertMatches(null, expectedRegex, actual);
+        AssertRegex.assertMatches(null, expectedRegex, actual);
     }
 
     /**
@@ -59,7 +59,7 @@ class AssertRegex {
         Pattern pattern = Pattern.compile(expectedRegex);
         Matcher matcher = pattern.matcher(actual);
         if (!matcher.matches()) {
-            int mismatchOffset = mismatchOffset(pattern, actual);
+            int mismatchOffset = AssertRegex.mismatchOffset(pattern, actual);
 
             String s = actual.substring(mismatchOffset);
             if (s.length() > 10) s = s.substring(0, 8) + "...";
@@ -96,7 +96,7 @@ class AssertRegex {
      */
     public static void
     assertMatches(List<String> expectedRegexes, List<String> actuals) {
-        assertMatches(null, expectedRegexes, actuals);
+        AssertRegex.assertMatches(null, expectedRegexes, actuals);
     }
 
     /**
@@ -108,7 +108,11 @@ class AssertRegex {
             String expectedRegex = expectedRegexes.get(i);
             String actual        = actuals.get(i);
 
-            assertMatches((message == null ? "Element " : message + ": Element ") + i, expectedRegex, actual);
+            AssertRegex.assertMatches(
+                (message == null ? "Element " : message + ": Element ") + i,
+                expectedRegex,
+                actual
+            );
         }
         if (expectedRegexes.size() != actuals.size()) {
             Assert.fail(
@@ -116,6 +120,34 @@ class AssertRegex {
                 + expectedRegexes.size()
                 + " strings, but got "
                 + actuals.size()
+            );
+        }
+    }
+
+    /**
+     * Fails unless the <var>expectedRegex</var> can be found at least once in the <var>actual</var> string.
+     */
+    public static void
+    assertFind(String expectedRegex, String actual) {
+        AssertRegex.assertFind(null, expectedRegex, actual);
+    }
+
+    /**
+     * Fails with the given <var>message</var> unless the <var>expectedRegex</var> can be found at least once in the
+     * <var>actual</var> string.
+     */
+    public static void
+    assertFind(@Nullable String message, String expectedRegex, String actual) {
+        Pattern pattern = Pattern.compile(expectedRegex);
+        Matcher matcher = pattern.matcher(actual);
+        if (!matcher.find()) {
+
+            Assert.fail(
+                (message == null ? "regex [" : message + ": regex [")
+                + expectedRegex
+                + "] not found in ["
+                + actual
+                + "]"
             );
         }
     }
