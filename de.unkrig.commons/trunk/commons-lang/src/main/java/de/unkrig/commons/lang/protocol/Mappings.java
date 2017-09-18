@@ -109,14 +109,14 @@ class Mappings {
     /**
      * @return A {@link Mapping} with no mappings
      */
-    public static <K, V> Mapping<K, V>
-    none() {
-        return new Mapping<K, V>() {
-            @Override public boolean     containsKey(@Nullable Object key) { return false;    }
-            @Override @Nullable public V get(@Nullable Object key)         { return null;     }
-            @Override public String      toString()                        { return "(none)"; }
-        };
-    }
+    @SuppressWarnings("unchecked") public static <K, V> Mapping<K, V>
+    none() { return Mappings.NONE; }
+
+    @SuppressWarnings("rawtypes") private static final Mapping NONE = new Mapping() {
+        @Override public boolean          containsKey(@Nullable Object key) { return false;    }
+        @Override @Nullable public Object get(@Nullable Object key)         { return null;     }
+        @Override public String           toString()                        { return "(none)"; }
+    };
 
     /**
      * Returns a mapping of property names to property values for the given <var>subject</var> object.
@@ -300,13 +300,20 @@ class Mappings {
      *   For the returned {@link Mapping}, the following conditions apply:
      * </p>
      * <ul>
-     *   <li>A key is contained in the result iff it is contained in (at least) one of the operands.
-     *   <li>The value mapped to a key is the value mapped to the key in the <i>first</i> of the operands which
-     *       contains the key, or {@code null} iff neither of <var>op1</var> and <var>op2</var> contain the key.
+     *   <li>
+     *     A key is contained in the result iff it is contained in (at least) one of the operands.
+     *   </li>
+     *   <li>
+     *     The value mapped to a key is the value mapped to the key in the <i>first</i> of the operands which contains
+     *     the key, or {@code null} iff neither of <var>op1</var> and <var>op2</var> contain the key.
+     *   </li>
      * </ul>
      */
     public static <K, V> Mapping<K, V>
     union(final Mapping<K, V> op1, final Mapping<K, V> op2) {
+
+        if (op1 == Mappings.NONE) return op2;
+        if (op2 == Mappings.NONE) return op1;
 
         return new Mapping<K, V>() {
 
