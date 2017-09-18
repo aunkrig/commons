@@ -49,5 +49,5 @@ package de.unkrig.commons.lang.protocol;
  *                  <em>non-null</em> values
  */
 public
-interface Function<I, O> extends FunctionWhichThrows<I, O, RuntimeException> {
+interface Function<I, O> extends FunctionWhichThrows<I, O, NoException> {
 }

@@ -40,7 +40,8 @@ package de.unkrig.commons.lang.protocol;
  * <pre>ConsumerWhichThrows&lt;? super <i>consumed-type</i>, ? extends <i>thrown-exception</i>></pre>
  *
  * @param <T>  The type of the consumed subjects
- * @param <EX> The throwable type that {@link #consume(Object)} may throw
+ * @param <EX> The throwable type that {@link #consume(Object)} may throw; use {@link NoException} to indicate that
+ *             {@link #consume(Object)} does not declare any checked exceptions
  */
 public
 interface ConsumerWhichThrows<T, EX extends Throwable> {

@@ -43,7 +43,8 @@ package de.unkrig.commons.lang.protocol;
  * </p>
  *
  * @param <T>  The type of the evaluated subject
- * @param <EX> The throwable type that {@link #evaluate(Object)} may throw
+ * @param <EX> The throwable type that {@link #evaluate(Object)} may throw; use {@link NoException} to indicate that
+ *             {@link #evaluate(Object)} does not declare any checked exceptions
  */
 public
 interface PredicateWhichThrows<T, EX extends Throwable> {

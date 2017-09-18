@@ -55,7 +55,9 @@ import de.unkrig.commons.nullanalysis.Nullable;
  *
  * @param <I>                  The type of the parameter of {@link #call(Object)}
  * @param <O>                  The return type of {@link #call(Object)}
- * @param <EX>                 The exception type that {@link #call(Object)} is allowed to throw
+ * @param <EX>                 The exception type that {@link #call(Object)} is allowed to throw; use {@link
+ *                             NoException} to indicate that {@link #call(Object)} does not declare any checked
+ *                             exceptions
  * @see                        #call(Object)
  * @see TransformerWhichThrows {@code TransformerWhichThrows} -- similar to this interface, but transforms only
  *                             <em>non-null</em> values into <em>non-null</em> values

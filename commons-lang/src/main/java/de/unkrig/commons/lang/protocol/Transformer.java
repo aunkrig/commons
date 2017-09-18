@@ -44,5 +44,5 @@ package de.unkrig.commons.lang.protocol;
  * @see       #transform(Object)
  */
 public
-interface Transformer<I, O> extends TransformerWhichThrows<I, O, RuntimeException> {
+interface Transformer<I, O> extends TransformerWhichThrows<I, O, NoException> {
 }
