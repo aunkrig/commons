@@ -33,6 +33,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import de.unkrig.commons.lang.OptionalMethods.MethodWrapper1;
+import de.unkrig.commons.lang.protocol.NoException;
 import de.unkrig.commons.lang.protocol.Predicate;
 import de.unkrig.commons.nullanalysis.Nullable;
 
@@ -242,7 +243,7 @@ class Characters {
             int cp = subject;
             return (
                 (cp >= 9 && cp <= 13) // 0x09=tab, 0x0a=newline, 0x0b=vertical-tab, 0x0c=form-feed, 0x0d=carriage-return
-                || cp == ' '         // 0x20=space
+                || cp == ' '          // 0x20=space
             );
         }
     };
@@ -410,28 +411,28 @@ class Characters {
         @SuppressWarnings("null") @Override public boolean
         evaluate(Integer subject) { return Characters.CHARACTER_IS_ALPHABETIC.invoke(null, subject); }
     };
-    private static final MethodWrapper1<Character, Boolean, Integer, RuntimeException>
-    CHARACTER_IS_ALPHABETIC = OptionalMethods.get1(
-        Character.class,       // declaringClass
-        "isAlphabetic",        // methodName
-        int.class,             // parameterType
-        RuntimeException.class // checkedException
-    );
 
+    private static final MethodWrapper1<Character, Boolean, Integer, NoException>
+    CHARACTER_IS_ALPHABETIC = OptionalMethods.get1(
+        Character.class,  // declaringClass
+        "isAlphabetic",   // methodName
+        int.class,        // parameterType
+        NoException.class // checkedException
+    );
 
     public static final Predicate<Integer>
     IS_UNICODE_IDEOGRAPHIC = new IntegerPredicate("unicodeIdeographic") {
 
-
         @SuppressWarnings("null") @Override public boolean
         evaluate(Integer subject) { return Characters.CHARACTER_IS_IDEOGRAPHIC.invoke(null, subject); }
     };
-    private static final MethodWrapper1<Character, Boolean, Integer, RuntimeException>
+
+    private static final MethodWrapper1<Character, Boolean, Integer, NoException>
     CHARACTER_IS_IDEOGRAPHIC = OptionalMethods.get1(
-        Character.class,       // declaringClass
-        "isIdeographic",       // methodName
-        int.class,             // parameterType
-        RuntimeException.class // checkedException
+        Character.class,  // declaringClass
+        "isIdeographic",  // methodName
+        int.class,        // parameterType
+        NoException.class // checkedException
     );
 
     public static final Predicate<Integer>
@@ -910,7 +911,7 @@ class Characters {
         };
     }
 
-    static final MethodWrapper1<?, Object, String, RuntimeException>
+    static final MethodWrapper1<?, Object, String, NoException>
     UNICODE_SCRIPT_FOR_NAME = OptionalMethods.get1(
         null,                                // classLoader
         "java.lang.Character$UnicodeScript", // declaringClassName
@@ -918,7 +919,7 @@ class Characters {
         String.class,                        // parameterType
         null                                 // checkedException
     );
-    static final MethodWrapper1<?, Object, Integer, RuntimeException>
+    static final MethodWrapper1<?, Object, Integer, NoException>
     UNICODE_SCRIPT_OF = OptionalMethods.get1(
         null,                                // classLoader
         "java.lang.Character$UnicodeScript", // declaringClassName
