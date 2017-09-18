@@ -108,8 +108,8 @@ class ProducerUtil {
      *   This is always possible, because the <var>source</var> is only allowed to throw {@link RuntimeException}s.
      * </p>
      * <p>
-     *   Notice {@code Producer<T>} <em>extends</em> {@code ProducerWhichThrows<T, RuntimeException>}, thus you don't
-     *   need this method to convert to {@code ProducerWhichThrows<T, RuntimeException>}.
+     *   Notice {@code Producer<T>} <em>extends</em> {@code ProducerWhichThrows<T, NoException>}, thus you don't
+     *   need this method to convert to {@code ProducerWhichThrows<T, NoException>}.
      * </p>
      *
      * @param <T>  The product type
