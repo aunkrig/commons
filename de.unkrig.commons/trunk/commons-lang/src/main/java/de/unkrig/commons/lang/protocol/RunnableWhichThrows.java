@@ -39,7 +39,8 @@ package de.unkrig.commons.lang.protocol;
  * </p>
  * <pre>RunnableWhichThrows&lt;? extends <i>thrown-exception</i>></pre>
  *
- * @param <EX> The throwable type that {@link #run()} may throw
+ * @param <EX> The throwable type that {@link #run()} may throw; use {@link NoException} to indicate that {@link
+ *             #run()} does not declare any checked exceptions
  */
 public
 interface RunnableWhichThrows<EX extends Throwable> {

@@ -44,5 +44,5 @@ package de.unkrig.commons.lang.protocol;
  * @param <T> The type of the 'products'
  */
 public
-interface Producer<T> extends ProducerWhichThrows<T, RuntimeException> {
+interface Producer<T> extends ProducerWhichThrows<T, NoException> {
 }

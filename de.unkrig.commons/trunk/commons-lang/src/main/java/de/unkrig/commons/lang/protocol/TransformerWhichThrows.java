@@ -46,7 +46,8 @@ package de.unkrig.commons.lang.protocol;
  *
  * @param <I>  The type of the consumed subject
  * @param <O>  The type of the product
- * @param <EX> The throwable type that {@link #transform(Object)} may throw
+ * @param <EX> The throwable type that {@link #transform(Object)} may throw; use {@link NoException} to indicate that
+ *             {@link #transform(Object)} does not declare any checked exceptions
  * @see #transform(Object)
  */
 public

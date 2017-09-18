@@ -45,5 +45,5 @@ package de.unkrig.commons.lang.protocol;
  * @param <T> The subject type
  */
 public
-interface Consumer<T> extends ConsumerWhichThrows<T, RuntimeException> {
+interface Consumer<T> extends ConsumerWhichThrows<T, NoException> {
 }

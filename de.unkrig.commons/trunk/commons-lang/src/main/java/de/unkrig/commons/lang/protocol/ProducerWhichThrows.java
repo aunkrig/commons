@@ -43,7 +43,8 @@ import de.unkrig.commons.nullanalysis.Nullable;
  * <pre>ProducerWhichThrows&lt;? extends <i>product-type</i>, ? extends <i>thrown-exception</i>></pre>
  *
  * @param <T>  The type of the products
- * @param <EX> The throwable type that {@link #produce()} may throw
+ * @param <EX> The throwable type that {@link #produce()} may throw; use {@link NoException} to indicate that {@link
+ *             #produce()} does not declare any checked exceptions
  */
 @NotNullByDefault(false) public
 interface ProducerWhichThrows<T, EX extends Throwable> {

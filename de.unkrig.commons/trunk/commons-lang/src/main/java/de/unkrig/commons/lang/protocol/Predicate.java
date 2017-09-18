@@ -45,5 +45,5 @@ package de.unkrig.commons.lang.protocol;
  * @param <T> The type of the <var>subject</var> parameter of the {@link #evaluate(Object)} method
  */
 public
-interface Predicate<T> extends PredicateWhichThrows<T, RuntimeException> {
+interface Predicate<T> extends PredicateWhichThrows<T, NoException> {
 }
