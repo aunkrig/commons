@@ -64,7 +64,7 @@ import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
 import de.unkrig.commons.lang.protocol.Producer;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.lang.protocol.RunnableWhichThrows;
-import de.unkrig.commons.lang.protocol.Transformer;
+import de.unkrig.commons.lang.protocol.TransformerWhichThrows;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
@@ -343,13 +343,13 @@ class IoUtil {
      *
      * @param bufferCapacity The number of chars that are read per chunk
      */
-    public static void
+    public static <EX extends Throwable> void
     copyAndTransform(
-        Reader                                                    in,
-        Transformer<? super CharSequence, ? extends CharSequence> transformer,
-        Appendable                                                out,
-        int                                                       bufferCapacity
-    ) throws IOException {
+        Reader                                                                             in,
+        TransformerWhichThrows<? super CharSequence, ? extends CharSequence, ? extends EX> transformer,
+        Appendable                                                                         out,
+        int                                                                                bufferCapacity
+    ) throws IOException, EX {
 
         char[] buffer = new char[bufferCapacity];
         for (;;) {
