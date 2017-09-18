@@ -35,6 +35,7 @@ import javax.swing.text.Segment;
 import de.unkrig.commons.lang.protocol.StringTransformers;
 import de.unkrig.commons.lang.protocol.Transformer;
 import de.unkrig.commons.lang.protocol.TransformerUtil;
+import de.unkrig.commons.lang.protocol.TransformerWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -48,7 +49,8 @@ import de.unkrig.commons.nullanalysis.Nullable;
 public
 class TransformingFilterReader extends FilterReader {
 
-    private final Transformer<? super CharSequence, ? extends CharSequence> transformer;
+    private final TransformerWhichThrows<? super CharSequence, ? extends CharSequence, ? extends IOException>
+    transformer;
 
     /**
      * Sometimes we have "too many" characters than we can return, so we set them aside in this buffer.
@@ -62,11 +64,11 @@ class TransformingFilterReader extends FilterReader {
      */
     public static Reader
     create(
-        Reader                                                          delegate,
-        final Transformer<? super CharSequence, ? extends CharSequence> transformer
+        Reader                                                                                            delegate,
+        final TransformerWhichThrows<? super CharSequence, ? extends CharSequence, ? extends IOException> transformer
     ) {
 
-        if (transformer == TransformerUtil.<CharSequence, CharSequence>identity()) return delegate;
+        if (transformer == TransformerUtil.<CharSequence, CharSequence, IOException>identity()) return delegate;
 
         if (transformer == StringTransformers.TO_EMPTY) return Readers.EMPTY_READER;
 
@@ -75,8 +77,8 @@ class TransformingFilterReader extends FilterReader {
 
     public
     TransformingFilterReader(
-        Reader                                                          delegate,
-        final Transformer<? super CharSequence, ? extends CharSequence> transformer
+        Reader                                                                                            delegate,
+        final TransformerWhichThrows<? super CharSequence, ? extends CharSequence, ? extends IOException> transformer
     ) {
         super(delegate);
         this.transformer = transformer;

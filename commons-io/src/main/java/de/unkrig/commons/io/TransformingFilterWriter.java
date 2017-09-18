@@ -36,6 +36,7 @@ import javax.swing.text.Segment;
 import de.unkrig.commons.lang.protocol.StringTransformers;
 import de.unkrig.commons.lang.protocol.Transformer;
 import de.unkrig.commons.lang.protocol.TransformerUtil;
+import de.unkrig.commons.lang.protocol.TransformerWhichThrows;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 
 /**
@@ -48,16 +49,22 @@ import de.unkrig.commons.nullanalysis.NotNullByDefault;
 public
 class TransformingFilterWriter extends Writer {
 
-    private final Transformer<? super CharSequence, ? extends CharSequence> transformer;
-    private final Appendable                                                delegate;
+    private final TransformerWhichThrows<? super CharSequence, ? extends CharSequence, ? extends IOException>
+    transformer;
+
+    private final Appendable
+    delegate;
 
     /**
      * This method is sometimes more efficient than calling "{@code new TransformingFilterWriter()}".
      */
     public static Writer
-    create(Transformer<? super CharSequence, ? extends CharSequence> transformer, Appendable delegate) {
+    create(
+        TransformerWhichThrows<? super CharSequence, ? extends CharSequence, ? extends IOException> transformer,
+        Appendable                                                                                  delegate
+    ) {
 
-        if (transformer == TransformerUtil.<CharSequence, CharSequence>identity()) {
+        if (transformer == TransformerUtil.<CharSequence, CharSequence, IOException>identity()) {
             return Writers.fromAppendable(delegate);
         }
 
@@ -68,8 +75,8 @@ class TransformingFilterWriter extends Writer {
 
     public
     TransformingFilterWriter(
-        Transformer<? super CharSequence, ? extends CharSequence> transformer,
-        Appendable                                                delegate
+        TransformerWhichThrows<? super CharSequence, ? extends CharSequence, ? extends IOException> transformer,
+        Appendable                                                                                  delegate
     ) {
         this.transformer = transformer;
         this.delegate    = delegate;
