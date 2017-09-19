@@ -44,6 +44,7 @@ import de.unkrig.commons.lang.StringUtil;
 import de.unkrig.commons.lang.protocol.Mapping;
 import de.unkrig.commons.lang.protocol.Predicate;
 import de.unkrig.commons.lang.protocol.PredicateUtil;
+import de.unkrig.commons.lang.protocol.PredicateWhichThrows;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.reflect.ReflectUtil;
@@ -56,6 +57,7 @@ import de.unkrig.commons.text.pattern.Glob;
 import de.unkrig.commons.text.pattern.Pattern2;
 import de.unkrig.commons.text.scanner.AbstractScanner.Token;
 import de.unkrig.commons.text.scanner.ScanException;
+import de.unkrig.commons.text.scanner.StringScanner;
 
 /**
  * Supports two operation modes:
@@ -70,16 +72,18 @@ import de.unkrig.commons.text.scanner.ScanException;
 public
 class ExpressionEvaluator {
 
-    private String[]                        imports     = new String[] { "java.lang" };
-    private ClassLoader                     classLoader = this.getClass().getClassLoader();
-    private final Predicate<? super String> isValidVariableName;
+    private String[]    imports     = new String[] { "java.lang" };
+    private ClassLoader classLoader = this.getClass().getClassLoader();
+
+    private final PredicateWhichThrows<? super String, ? extends RuntimeException>
+    isValidVariableName;
 
     /**
      * @param isValidVariableName Evaluates whether a string is a valid variable name; if not, then the parser will
      *                            throw a {@link ParseException}
      */
     public
-    ExpressionEvaluator(Predicate<? super String> isValidVariableName) {
+    ExpressionEvaluator(PredicateWhichThrows<? super String, ? extends RuntimeException> isValidVariableName) {
         this.isValidVariableName = isValidVariableName;
     }
 
@@ -142,6 +146,29 @@ class ExpressionEvaluator {
     }
 
     /**
+     * Parses an expression from the <var>spec</var>, but only as far as it is possible without a parse error.
+     * E.g. {@code "a + b)"} is parsed up to and including "b". 
+     *
+     * @param spec            The text to be parsed
+     * @param offset          Returns the position of the first character within the <var>space</var> that could not be
+     *                        parsed
+     * @throws ParseException The expression cannot be parsed, e.g. {@code "a +)"} (the second operand of the "+"
+     *                        operator is missing)
+     * @see Parser            The expression syntax
+     */
+    public Expression
+    parsePart(CharSequence spec, int[] offset) throws ParseException {
+
+        StringScanner<TokenType> scanner = Scanner.stringScanner().setInput(spec);
+
+        Expression result = this.<RuntimeException>parser(scanner).parsePart();
+
+        offset[0] = scanner.getPreviousTokenOffset();
+
+        return result;
+    }
+
+    /**
      * Parses an expression from a <var>tokenProducer</var>.
      *
      * @see Parser The expression syntax
@@ -170,7 +197,7 @@ class ExpressionEvaluator {
      * @return              A {@link Parser} for expression parsing
      * @see Parser          The expression syntax
      */
-    @SuppressWarnings("null") public <EX extends Exception> Parser<Expression, EX>
+    @SuppressWarnings("null") public <EX extends Throwable> Parser<Expression, EX>
     parser(ProducerWhichThrows<? extends Token<TokenType>, ? extends ScanException> tokenProducer) {
 
         return new Parser<Expression, EX>(tokenProducer) {
