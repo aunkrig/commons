@@ -48,6 +48,7 @@ import de.unkrig.commons.io.CharFilterReader;
 import de.unkrig.commons.io.IoUtil;
 import de.unkrig.commons.lang.StringUtil;
 import de.unkrig.commons.lang.protocol.Function;
+import de.unkrig.commons.lang.protocol.NoException;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.pattern.PatternUtil;
 import de.unkrig.commons.text.pattern.Substitutor;
@@ -124,14 +125,14 @@ class PatternUtilTest extends TestCase {
             "Hxe1xllo world",
             PatternUtil.replaceSome(
                 Pattern.compile("e").matcher("Hello world"),
-                PatternUtil.replacementStringMatchReplacer("x$01x")
+                PatternUtil.<NoException>replacementStringMatchReplacer("x$01x")
             )
         );
         Assert.assertEquals(
             "Hxexllo world",
             PatternUtil.replaceSome(
                 Pattern.compile("(e)").matcher("Hello world"),
-                PatternUtil.replacementStringMatchReplacer("x$01x")
+                PatternUtil.<NoException>replacementStringMatchReplacer("x$01x")
             )
         );
     }
@@ -162,11 +163,11 @@ class PatternUtilTest extends TestCase {
         try {
             char[] buffer = new char[300];
 
-            StringBuilder orig      = new StringBuilder();
-            StringBuilder patched   = new StringBuilder();
-            StringBuilder repatched = new StringBuilder();
-            Substitutor   patcher   = PatternUtil.substitutor(Pattern.compile("StringBuilder"), "STRING_" + "BUILDER");
-            Substitutor   repatcher = PatternUtil.substitutor(Pattern.compile("ST" + "RING_BUILDER"), "StringBuilder");
+            StringBuilder            orig      = new StringBuilder();
+            StringBuilder            patched   = new StringBuilder();
+            StringBuilder            repatched = new StringBuilder();
+            Substitutor<NoException> patcher   = PatternUtil.substitutor(Pattern.compile("StringBuilder"), "STRING_" + "BUILDER");
+            Substitutor<NoException> repatcher = PatternUtil.substitutor(Pattern.compile("ST" + "RING_BUILDER"), "StringBuilder");
             for (;;) {
                 int n = r.read(buffer);
                 if (n == -1) break;
@@ -258,7 +259,7 @@ class PatternUtilTest extends TestCase {
         }
 
         // Then, test "Substitutor".
-        Substitutor t = PatternUtil.substitutor(pattern, replacementString);
+        Substitutor<NoException> t = PatternUtil.substitutor(pattern, replacementString);
         TestCase.assertEquals(expected, t.transform(subject).toString() + t.transform(""));
 
         // Test the "Substitutor" with a sequence of single-character strings.
@@ -273,13 +274,19 @@ class PatternUtilTest extends TestCase {
             PatternUtilTest.readAll(PatternUtil.replaceAllFilterReader(
                 new StringReader(subject),
                 pattern,
-                PatternUtil.replacementStringMatchReplacer(replacementString)
+                PatternUtil.<IOException>replacementStringMatchReplacer(replacementString)
             ))
         );
 
         // Then, test the "replaceAllFilterWriter()".
         StringWriter sw = new StringWriter();
-        Writer       w  = PatternUtil.replaceAllFilterWriter(pattern, PatternUtil.replacementStringMatchReplacer(replacementString), sw);
+
+        Writer w = PatternUtil.replaceAllFilterWriter(
+            pattern,
+            PatternUtil.<IOException>replacementStringMatchReplacer(replacementString),
+            sw
+        );
+
         w.write(subject);
         w.close();
         Assert.assertEquals(expected, sw.toString());

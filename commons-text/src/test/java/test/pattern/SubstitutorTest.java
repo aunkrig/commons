@@ -34,6 +34,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import de.unkrig.commons.lang.StringUtil;
+import de.unkrig.commons.lang.protocol.NoException;
 import de.unkrig.commons.text.pattern.PatternUtil;
 import de.unkrig.commons.text.pattern.Substitutor;
 
@@ -44,7 +45,12 @@ class SubstitutorTest {
 
     @Test public void
     testSubstitutor() {
-        Substitutor s = new Substitutor(Pattern.compile("A..B"), PatternUtil.replacementStringMatchReplacer("x"));
+
+        Substitutor<NoException>
+        s = new Substitutor<NoException>(
+            Pattern.compile("A..B"),
+            PatternUtil.<NoException>replacementStringMatchReplacer("x")
+        );
 
         List<CharSequence> result = new ArrayList<CharSequence>();
         for (Character c : StringUtil.asIterable("  AyyB  AyyC  Ay")) {
