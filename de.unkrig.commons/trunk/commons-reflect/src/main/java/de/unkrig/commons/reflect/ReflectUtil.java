@@ -158,6 +158,7 @@ class ReflectUtil {
         return (
             !ReflectUtil.isApplicable(method2.getDeclaringClass(), method1.getDeclaringClass())
             || !ReflectUtil.areApplicable(method2.getParameterTypes(), method1.getParameterTypes())
+            || !ReflectUtil.isApplicable(method2.getReturnType(), method1.getReturnType())
         );
     }
 
