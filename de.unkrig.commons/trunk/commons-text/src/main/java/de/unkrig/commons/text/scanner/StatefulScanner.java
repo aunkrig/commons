@@ -154,7 +154,7 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
         if (this.currentStateRules == this.defaultStateRules) return null;
 
         for (Entry<S, List<Rule>> e : this.nonDefaultStateRules.entrySet()) {
-            S                 state = e.getKey();
+            S          state = e.getKey();
             List<Rule> rules = e.getValue();
 
             if (rules == this.currentStateRules) return state;
@@ -195,7 +195,7 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
                 this.previousTokenOffset = this.offset;
                 this.offset              = matcher.end();
 
-                int gc = matcher.groupCount();
+                int      gc       = matcher.groupCount();
                 String[] captured = new String[gc];
                 for (int i = 0; i < gc; i++) captured[i] = matcher.group(i + 1);
 
@@ -217,7 +217,7 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
             message += " in default state";
         } else {
             for (Entry<S, List<Rule>> e : this.nonDefaultStateRules.entrySet()) {
-                S                 state = e.getKey();
+                S          state = e.getKey();
                 List<Rule> rules = e.getValue();
 
                 if (this.currentStateRules == rules) {
@@ -297,7 +297,7 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
          */
         public Rule
         push(S nextState) {
-            this.pushState = true;
+            this.pushState      = true;
             this.nextStateRules = StatefulScanner.this.nonDefaultStateRules.get(nextState);
             return this;
         }
