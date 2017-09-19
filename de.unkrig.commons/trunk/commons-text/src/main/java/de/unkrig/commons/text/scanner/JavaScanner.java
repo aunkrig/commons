@@ -215,21 +215,19 @@ class JavaScanner {
 
         // Recognize multi-line C-style comments.
         scanner.addRule(
-            "(?s)/\\*.*",                             // regex
-            TokenType.MULTI_LINE_C_COMMENT_BEGINNING, // tokenType
-            State.IN_MULTI_LINE_C_COMMENT             // nextState
-        );
+            "(?s)/\\*.*",                            // regex
+            TokenType.MULTI_LINE_C_COMMENT_BEGINNING // tokenType
+        ).goTo(State.IN_MULTI_LINE_C_COMMENT);
         scanner.addRule(
             State.IN_MULTI_LINE_C_COMMENT,     // state
             ".*?\\*/",                         // regex
             TokenType.MULTI_LINE_C_COMMENT_END // tokenType
         );
         scanner.addRule(
-            State.IN_MULTI_LINE_C_COMMENT,         // state
-            "(?s).+",                              // regex
-            TokenType.MULTI_LINE_C_COMMENT_MIDDLE, // tokenType
-            State.IN_MULTI_LINE_C_COMMENT          // nextState
-        );
+            State.IN_MULTI_LINE_C_COMMENT,        // state
+            "(?s).+",                             // regex
+            TokenType.MULTI_LINE_C_COMMENT_MIDDLE // tokenType
+        ).goTo(State.IN_MULTI_LINE_C_COMMENT);
 
         // Recognize Java keywords.
         scanner.addRule((

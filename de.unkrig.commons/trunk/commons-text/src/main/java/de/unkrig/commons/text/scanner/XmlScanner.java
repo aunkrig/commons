@@ -152,15 +152,15 @@ class XmlScanner {
     stringScanner() {
         StatefulScanner<TokenType, State> scanner = new StatefulScanner<TokenType, State>(State.class);
 
-        String s                  = "(?:[ \\t\\r\\n]+)";
-        String eq                 = "(?:" + s + "?=" + s + "?)";
-        String nameStartChar      = "[:A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]"; // SUPPRESS CHECKSTYLE LineLength
-        String nameChar           = "(?:" + nameStartChar + "|[\\-.0-9\u00B7\u0300-\u036F\u203F-\u2040])";
-        String name               = "(?:" + nameStartChar + nameChar + "*)";
-        String entityReference    = "(?:&" + name + ";)";
-        String characterReference = "(?:&#[0-9]+|&#x[0-9a-zA-Z]+;)";
-        String reference          = "(?:" + entityReference + "|" + characterReference + ")";
-        String attributeValue     = "(?:'(?:[^<&\"]|" + reference + ")*'|\"(?:[^<&\"]|" + reference + ")*\")";
+        final String s                  = "(?:[ \\t\\r\\n]+)";
+        final String eq                 = "(?:" + s + "?=" + s + "?)";
+        final String nameStartChar      = "[:A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]"; // SUPPRESS CHECKSTYLE LineLength
+        final String nameChar           = "(?:" + nameStartChar + "|[\\-.0-9\u00B7\u0300-\u036F\u203F-\u2040])";
+        final String name               = "(?:" + nameStartChar + nameChar + "*)";
+        final String entityReference    = "(?:&" + name + ";)";
+        final String characterReference = "(?:&#[0-9]+|&#x[0-9a-zA-Z]+;)";
+        final String reference          = "(?:" + entityReference + "|" + characterReference + ")";
+        final String attributeValue     = "(?:'(?:[^<&\"]|" + reference + ")*'|\"(?:[^<&\"]|" + reference + ")*\")";
 
         scanner.addRule("<!--(.*?)-->", TokenType.COMMENT);
 
@@ -182,11 +182,11 @@ class XmlScanner {
 
         scanner.addRule("<!DOCTYPE.*?>", TokenType.DOCUMENT_TYPE_DECLARATION);
 
-        scanner.addRule("<(@Name@)".replace("@Name@", name), TokenType.BEGIN_TAG, State.TAG);
+        scanner.addRule("<(@Name@)".replace("@Name@", name), TokenType.BEGIN_TAG).goTo(State.TAG);
 
-        scanner.addRule(State.TAG, s + "(" + name + ")", TokenType.ATTRIBUTE_NAME, State.TAG);
+        scanner.addRule(State.TAG, s + "(" + name + ")", TokenType.ATTRIBUTE_NAME).goTo(State.TAG);
 
-        scanner.addRule(State.TAG, eq + "(" + attributeValue + ")", TokenType.ATTRIBUTE_VALUE, State.TAG);
+        scanner.addRule(State.TAG, eq + "(" + attributeValue + ")", TokenType.ATTRIBUTE_VALUE).goTo(State.TAG);
 
         scanner.addRule(State.TAG, "@S@?>".replace("@S@", s), TokenType.END_START_TAG);
 
