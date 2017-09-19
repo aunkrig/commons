@@ -233,13 +233,13 @@ import de.unkrig.commons.text.scanner.ScannerUtil;
  *   To implement your parser, derive from this class and implement the abstract methods.
  * </p>
  *
- * @param <T> The type returned by {@link #parse()}
- * @param <E> The exception thrown by the abstract handlers (e.g. {@link #conditional(Object, Object, Object)})
+ * @param <T>  The type returned by {@link #parse()}
+ * @param <EX> The exception thrown by the abstract handlers (e.g. {@link #conditional(Object, Object, Object)})
  * @see #enableExtension(Extension)
  * @see #disableExtension(Extension)
  */
 public abstract
-class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
+class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
 
     public
     Parser(ProducerWhichThrows<? extends Token<TokenType>, ? extends ScanException> tokenProducer) {
@@ -261,7 +261,7 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
     /**
      * By default, there is only one import: "java.lang".
      */
-    public Parser<T, E>
+    public Parser<T, EX>
     setImports(String[] imports) {
         this.imports = imports.clone();
         return this;
@@ -277,7 +277,7 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      * @param classLoader Used to load classes named in the expression; by default the class loader which loaded
      *                    the {@link Parser} class.
      */
-    public Parser<T, E>
+    public Parser<T, EX>
     setClassLoader(ClassLoader classLoader) {
         this.classLoader = classLoader;
         return this;
@@ -321,7 +321,7 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      * @return The parsed expression
      */
     public T
-    parse() throws ParseException, E {
+    parse() throws ParseException, EX {
         try {
             final T result = this.parseExpression().toValue();
             this.eoi();
@@ -331,9 +331,26 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
         } catch (RuntimeException re) {
             throw ExceptionUtil.wrap("At " + this.scanner.toString(), re);
         } catch (Exception e) {
-            @SuppressWarnings("unchecked") E ee = (E) e;
+            @SuppressWarnings("unchecked") EX ee = (EX) e;
             throw ExceptionUtil.wrap("At " + this.scanner.toString(), ee);
         }
+    }
+
+    /**
+     * @return The parsed expression
+     */
+    public T
+    parsePart() throws ParseException, EX {
+    	try {
+    		return this.parseExpression().toValue();
+    	} catch (ParseException pe) {
+    		throw ExceptionUtil.wrap("At " + this.scanner.toString(), pe);
+    	} catch (RuntimeException re) {
+    		throw ExceptionUtil.wrap("At " + this.scanner.toString(), re);
+    	} catch (Exception e) {
+    		@SuppressWarnings("unchecked") EX ee = (EX) e;
+    		throw ExceptionUtil.wrap("At " + this.scanner.toString(), ee);
+    	}
     }
 
     /**
@@ -451,7 +468,7 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      * This is why many of the productions (corresponding with the various {@code parse...()} methods) return an
      * {@link Atom}.
      */
-    interface Atom<T, E extends Exception> {
+    interface Atom<T, E extends Throwable> {
 
         /**
          * @return                This atom's value (where {@code null} is a perfectly legal value)
@@ -476,7 +493,7 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
     /**
      * @return An {@link Atom} that poses a value
      */
-    private static <T, E extends Exception> Atom<T, E>
+    private static <T, E extends Throwable> Atom<T, E>
     value(final T t) {
         return new Atom<T, E>() {
 
@@ -494,13 +511,13 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
     /**
      * @return An {@link Atom} that poses a type
      */
-    private Atom<T, E>
+    private Atom<T, EX>
     type(final Class<?> type) {
 
-        return new Atom<T, E>() {
+        return new Atom<T, EX>() {
 
             @Override @NotNull public T
-            toValue() throws E, ParseException {
+            toValue() throws EX, ParseException {
                 if (
                     Parser.this.extensions.contains(Extension.NEW_CLASS_WITHOUT_KEYWORD)
                     && Parser.this.extensions.contains(Extension.NEW_CLASS_WITHOUT_PARENTHESES)
@@ -524,17 +541,17 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      * expression := conditional
      * </pre>
      */
-    private Atom<T, E>
-    parseExpression() throws ParseException, E { return this.parseConditional(); }
+    private Atom<T, EX>
+    parseExpression() throws ParseException, EX { return this.parseConditional(); }
 
     /**
      * <pre>
      * conditional := logical-or [ '?' logical-or ':' conditional ]
      * </pre>
      */
-    private Atom<T, E>
-    parseConditional() throws ParseException, E {
-        Atom<T, E> lhs = this.parseLogicalOr();
+    private Atom<T, EX>
+    parseConditional() throws ParseException, EX {
+        Atom<T, EX> lhs = this.parseLogicalOr();
         if (!this.peekRead("?")) return lhs;
 
         T mhs = this.parseLogicalOr().toValue();
@@ -548,9 +565,9 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      * logical-or := logical-and { '||' logical-and }
      * </pre>
      */
-    private Atom<T, E>
-    parseLogicalOr() throws ParseException, E {
-        Atom<T, E> lhs = this.parseLogicalAnd();
+    private Atom<T, EX>
+    parseLogicalOr() throws ParseException, EX {
+        Atom<T, EX> lhs = this.parseLogicalAnd();
         while (this.peekRead("||")) {
             lhs = Parser.value(this.binaryOperation(
                 lhs.toValue(),
@@ -566,9 +583,9 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      * logical-and := bitwise-or { '&&' bitwise-or }
      * </pre>
      */
-    private Atom<T, E>
-    parseLogicalAnd() throws ParseException, E {
-        Atom<T, E> lhs = this.parseBitwiseOr();
+    private Atom<T, EX>
+    parseLogicalAnd() throws ParseException, EX {
+        Atom<T, EX> lhs = this.parseBitwiseOr();
         while (this.peekRead("&&")) {
             lhs = Parser.value(this.binaryOperation(
                 lhs.toValue(),
@@ -584,9 +601,9 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      * bitwise-or := bitwise-xor { '|' bitwise-xor }
      * </pre>
      */
-    private Atom<T, E>
-    parseBitwiseOr() throws ParseException, E {
-        Atom<T, E> lhs = this.parseBitwiseXor();
+    private Atom<T, EX>
+    parseBitwiseOr() throws ParseException, EX {
+        Atom<T, EX> lhs = this.parseBitwiseXor();
         while (this.peekRead("|")) {
             lhs = Parser.value(this.binaryOperation(
                 lhs.toValue(),
@@ -602,9 +619,9 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      * bitwise-xor := bitwise-and { '^' bitwise-and }
      * </pre>
      */
-    private Atom<T, E>
-    parseBitwiseXor() throws ParseException, E {
-        Atom<T, E> lhs = this.parseBitwiseAnd();
+    private Atom<T, EX>
+    parseBitwiseXor() throws ParseException, EX {
+        Atom<T, EX> lhs = this.parseBitwiseAnd();
         while (this.peekRead("^")) {
             lhs = Parser.value(this.binaryOperation(
                 lhs.toValue(),
@@ -620,9 +637,9 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      * bitwise-and := relational { '^' relational }
      * </pre>
      */
-    private Atom<T, E>
-    parseBitwiseAnd() throws ParseException, E {
-        Atom<T, E> lhs = this.parseRelational();
+    private Atom<T, EX>
+    parseBitwiseAnd() throws ParseException, EX {
+        Atom<T, EX> lhs = this.parseRelational();
         while (this.peekRead("&")) {
             lhs = Parser.value(this.binaryOperation(
                 lhs.toValue(),
@@ -649,9 +666,9 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      *    }
      * </pre>
      */
-    private Atom<T, E>
-    parseRelational() throws ParseException, E {
-        Atom<T, E> lhs = this.parseShift();
+    private Atom<T, EX>
+    parseRelational() throws ParseException, EX {
+        Atom<T, EX> lhs = this.parseShift();
 
         for (;;) {
             BinaryOperator operator;
@@ -696,9 +713,9 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      *     additive { ( '<<' | '>>' | '>>>' ) additive }
      * </pre>
      */
-    private Atom<T, E>
-    parseShift() throws ParseException, E {
-        Atom<T, E> lhs = this.parseAdditive();
+    private Atom<T, EX>
+    parseShift() throws ParseException, EX {
+        Atom<T, EX> lhs = this.parseAdditive();
         for (;;) {
             final BinaryOperator op = this.peekReadEnum(
                 BinaryOperator.LEFT_SHIFT,
@@ -716,9 +733,9 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      *     multiplicative { ( '+' | '-' ) multiplicative }
      * </pre>
      */
-    private Atom<T, E>
-    parseAdditive() throws ParseException, E {
-        Atom<T, E> mul = this.parseMultiplicative();
+    private Atom<T, EX>
+    parseAdditive() throws ParseException, EX {
+        Atom<T, EX> mul = this.parseMultiplicative();
         for (;;) {
             final BinaryOperator op = this.peekReadEnum(BinaryOperator.PLUS, BinaryOperator.MINUS);
             if (op == null) return mul;
@@ -732,9 +749,9 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      *    selector { ( '*' | '/' | '%' ) selector }
      * </pre>
      */
-    private Atom<T, E>
-    parseMultiplicative() throws ParseException, E {
-        Atom<T, E> lhs = this.parseSelector();
+    private Atom<T, EX>
+    parseMultiplicative() throws ParseException, EX {
+        Atom<T, EX> lhs = this.parseSelector();
         for (;;) {
             final BinaryOperator op = this.peekReadEnum(
                 BinaryOperator.MULTIPLY,
@@ -795,9 +812,9 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      *    | primary [ arguments ] '[' expression ']'
      * </pre>
      */
-    private Atom<T, E>
-    parseSelector() throws ParseException, E {
-        Atom<T, E> result = this.parsePrimary();
+    private Atom<T, EX>
+    parseSelector() throws ParseException, EX {
+        Atom<T, EX> result = this.parsePrimary();
 
         if (this.extensions.contains(Extension.NEW_CLASS_WITHOUT_KEYWORD)) {
             List<T> arguments = this.parseOptionalArguments();
@@ -814,7 +831,7 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
                 result = this.parseSelectorRest(result, this.read(IDENTIFIER));
             } else
             if (this.peekRead("[")) {
-                Atom<T, E> index = this.parseExpression();
+                Atom<T, EX> index = this.parseExpression();
                 this.read("]");
                 result = Parser.value(this.arrayAccess(result.toValue(), index.toValue()));
             } else
@@ -831,8 +848,8 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      *    | (nothing)
      * </pre>
      */
-    private Atom<T, E>
-    parseSelectorRest(final Atom<T, E> target, final String identifier) throws ParseException, E {
+    private Atom<T, EX>
+    parseSelectorRest(final Atom<T, EX> target, final String identifier) throws ParseException, EX {
 
         {
             final List<T> arguments = this.parseOptionalArguments();
@@ -844,10 +861,10 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
 
                         // pkg.MyClass(...)
                         final Class<?> clasS = this.loadClass(packagE + '.' + identifier);
-                        if (clasS != null) return new Atom<T, E>() {
+                        if (clasS != null) return new Atom<T, EX>() {
 
                             @Override @NotNull public T
-                            toValue() throws E { return Parser.this.newClass(clasS, arguments); }
+                            toValue() throws EX { return Parser.this.newClass(clasS, arguments); }
 
                             @Override public Class<?>
                             toType() { return clasS; }
@@ -892,10 +909,10 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
         }
 
         // Must be a package or a nonstatic field reference.
-        return new Atom<T, E>() {
+        return new Atom<T, EX>() {
 
             @Override @NotNull public T
-            toValue() throws E, ParseException {
+            toValue() throws EX, ParseException {
                 return Parser.this.fieldReference(target.toValue(), identifier);
             }
 
@@ -931,11 +948,11 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      *    | class-or-interface-type           // Class literal
      * </pre>
      */
-    private Atom<T, E>
-    parsePrimary() throws ParseException, E {
+    private Atom<T, EX>
+    parsePrimary() throws ParseException, EX {
 
         if (this.peekRead("(")) {
-            final Atom<T, E> result = this.parseExpression();
+            final Atom<T, EX> result = this.parseExpression();
             this.read(")");
 
             if (this.peek(
@@ -1034,10 +1051,10 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
             }
 
             // Must be a variable reference or a package.
-            return new Atom<T, E>() {
+            return new Atom<T, EX>() {
 
                 @Override @NotNull public T
-                toValue() throws E, ParseException { return Parser.this.variableReference(identifier); }
+                toValue() throws EX, ParseException { return Parser.this.variableReference(identifier); }
 
                 @Override @Nullable public Class<?>
                 toType() { return null; }
@@ -1056,7 +1073,7 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      * </pre>
      */
     private T
-    parseNewArrayRest(Class<?> clasS) throws ParseException, E {
+    parseNewArrayRest(Class<?> clasS) throws ParseException, EX {
         final List<T> dimensions = new ArrayList<T>();
 
         this.read("[");
@@ -1118,7 +1135,7 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
      * @return {@code null} iff there is no opening parenthesis
      */
     @Nullable private List<T>
-    parseOptionalArguments() throws ParseException, E {
+    parseOptionalArguments() throws ParseException, EX {
         if (!this.peekRead("(")) return null;
         if (this.peekRead(")")) return Collections.emptyList();
 
@@ -1133,21 +1150,21 @@ class Parser<T, E extends Exception> extends AbstractParser<TokenType> {
     // ABSTRACT HANDLERS.
 
     // CHECKSTYLE Method:OFF
-    protected abstract T conditional(T lhs, T mhs, T rhs) throws E;
-    protected abstract T unaryOperation(UnaryOperator operator, T operand) throws E;
-    protected abstract T binaryOperation(T lhs, BinaryOperator operator, T rhs) throws E;
-    protected abstract T fieldReference(T target, String fieldName) throws E;
-    protected abstract T staticFieldReference(Class<?> type, String fieldName) throws E;
-    protected abstract T methodInvocation(T target, String methodName, List<T> arguments) throws E;
-    protected abstract T staticMethodInvocation(Class<?> target, String methodName, List<T> arguments) throws E;
-    protected abstract T variableReference(String variableName) throws E, ParseException;
-    protected abstract T literal(@Nullable Object value) throws E;
-    protected abstract T parenthesized(T value) throws E;
-    protected abstract T instanceoF(T lhs, Class<?> rhs) throws E;
-    protected abstract T newClass(Class<?> clasS, List<T> arguments) throws E;
-    protected abstract T newArray(Class<?> clasS, List<T> dimensions) throws E;
-    protected abstract T cast(Class<?> targetType, T operand) throws E, ParseException;
-    protected abstract T arrayAccess(T lhs, T rhs) throws E;
+    protected abstract T conditional(T lhs, T mhs, T rhs) throws EX;
+    protected abstract T unaryOperation(UnaryOperator operator, T operand) throws EX;
+    protected abstract T binaryOperation(T lhs, BinaryOperator operator, T rhs) throws EX;
+    protected abstract T fieldReference(T target, String fieldName) throws EX;
+    protected abstract T staticFieldReference(Class<?> type, String fieldName) throws EX;
+    protected abstract T methodInvocation(T target, String methodName, List<T> arguments) throws EX;
+    protected abstract T staticMethodInvocation(Class<?> target, String methodName, List<T> arguments) throws EX;
+    protected abstract T variableReference(String variableName) throws EX, ParseException;
+    protected abstract T literal(@Nullable Object value) throws EX;
+    protected abstract T parenthesized(T value) throws EX;
+    protected abstract T instanceoF(T lhs, Class<?> rhs) throws EX;
+    protected abstract T newClass(Class<?> clasS, List<T> arguments) throws EX;
+    protected abstract T newArray(Class<?> clasS, List<T> dimensions) throws EX;
+    protected abstract T cast(Class<?> targetType, T operand) throws EX, ParseException;
+    protected abstract T arrayAccess(T lhs, T rhs) throws EX;
     // CHECKSTYLE Method:ON
 
     // HELPERS.
