@@ -78,15 +78,14 @@ class JsonScanner {
 
         // Multi-line C-style comments require special treatment, i.e. a special scanner state
         // 'IN_MULTI_LINE_C_COMMENT'.
-        scanner.addRule("/\\*.*", TokenType.MULTI_LINE_C_COMMENT_BEGINNING, State.IN_MULTI_LINE_C_COMMENT);
+        scanner.addRule("/\\*.*", TokenType.MULTI_LINE_C_COMMENT_BEGINNING).goTo(State.IN_MULTI_LINE_C_COMMENT);
         {
             scanner.addRule(State.IN_MULTI_LINE_C_COMMENT, ".*?\\*/", TokenType.MULTI_LINE_C_COMMENT_END);
             scanner.addRule(
                 State.IN_MULTI_LINE_C_COMMENT,
                 ".*",
-                TokenType.MULTI_LINE_C_COMMENT_MIDDLE,
-                State.IN_MULTI_LINE_C_COMMENT
-            );
+                TokenType.MULTI_LINE_C_COMMENT_MIDDLE
+            ).goTo(State.IN_MULTI_LINE_C_COMMENT);
         }
 
         scanner.addRule("\\p{Alpha}+", TokenType.KEYWORD);
@@ -94,16 +93,15 @@ class JsonScanner {
         scanner.addRule("-?[0-9.][0-9.Ee]*", TokenType.NUMBER);
 
         // Strings require special treatment, i.e. a special scanner state 'IN_STRING'.
-        scanner.addRule("\"", TokenType.DOUBLE_QUOTE, State.IN_STRING);
+        scanner.addRule("\"", TokenType.DOUBLE_QUOTE).goTo(State.IN_STRING);
         {
             scanner.addRule(
                 State.IN_STRING,
                 "\\\\u\\p{XDigit}\\p{XDigit}\\p{XDigit}\\p{XDigit}",
-                TokenType.STRING_UNICODE_ESCAPE,
-                State.IN_STRING
-            );
-            scanner.addRule(State.IN_STRING, "\\\\.",                TokenType.STRING_ESCAPE, State.IN_STRING);
-            scanner.addRule(State.IN_STRING, "[^\\p{Cntrl}\"\\\\]+", TokenType.STRING_CHARS, State.IN_STRING);
+                TokenType.STRING_UNICODE_ESCAPE
+            ).goTo(State.IN_STRING);
+            scanner.addRule(State.IN_STRING, "\\\\.",                TokenType.STRING_ESCAPE).goTo(State.IN_STRING);
+            scanner.addRule(State.IN_STRING, "[^\\p{Cntrl}\"\\\\]+", TokenType.STRING_CHARS).goTo(State.IN_STRING);
             scanner.addRule(State.IN_STRING, "\"",                   TokenType.DOUBLE_QUOTE);
         }
 
