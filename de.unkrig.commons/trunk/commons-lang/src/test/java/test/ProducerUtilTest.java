@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.unkrig.commons.lang.protocol.NoException;
 import de.unkrig.commons.lang.protocol.Predicate;
 import de.unkrig.commons.lang.protocol.Producer;
 import de.unkrig.commons.lang.protocol.ProducerUtil;
@@ -85,7 +86,7 @@ class ProducerUtilTest {
 
     @Test public void
     testProducerUtilCache1() {
-        ProducerWhichThrows<Integer, RuntimeException> p = ProducerUtil.cache(ProducerUtil.increasing(1), new Toggle());
+        ProducerWhichThrows<Integer, NoException> p = ProducerUtil.cache(ProducerUtil.increasing(1), new Toggle());
         for (int expected : new int[] { 1, 2, 2, 3, 3, 4, 4, 5, 5, }) {
             Assert.assertEquals((Integer) expected, p.produce());
         }
@@ -94,7 +95,7 @@ class ProducerUtilTest {
     @Test public void
     testProducerUtilCache2() {
 
-        ProducerWhichThrows<Integer, RuntimeException>
+        ProducerWhichThrows<Integer, NoException>
         p = ProducerUtil.cache(99, ProducerUtil.increasing(1), new Toggle());
 
         for (int expected : new int[] { 99, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, }) {
@@ -105,7 +106,7 @@ class ProducerUtilTest {
     @Test public void
     testProducerUtilCache3() throws Exception {
 
-        ProducerWhichThrows<Integer, RuntimeException>
+        ProducerWhichThrows<Integer, NoException>
         p = ProducerUtil.cache(ProducerUtil.increasing(1), ProducerUtil.atMostEvery(200, false, true));
 
         Thread.sleep(100);
@@ -124,12 +125,12 @@ class ProducerUtilTest {
 
         final Producer<Integer> inc = ProducerUtil.increasing(1);
 
-        ProducerWhichThrows<Integer, RuntimeException>
+        ProducerWhichThrows<Integer, NoException>
         p = ProducerUtil.cacheAsynchronously(
             new Producer<Future<Integer>>() { // delegate
 
                 @Override @Nullable public Future<Integer>
-                produce() throws RuntimeException {  return ProducerUtilTest.completedFuture(inc.produce()); }
+                produce() { return ProducerUtilTest.completedFuture(inc.produce()); }
             },
             ProducerUtil.oneOutOf(3, 3),      // invalidationCondition
             true                              // prefetch

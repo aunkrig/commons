@@ -70,10 +70,17 @@ class StringTransformers {
     /**
      * Transforms any string to {@code ""} (the empty string).
      */
-    public static final Transformer<CharSequence, String>
-    TO_EMPTY = new Transformer<CharSequence, String>() {
+    @SuppressWarnings("unchecked")
+    public static <EX extends Throwable> TransformerWhichThrows<CharSequence, CharSequence, EX>
+    toEmpty() { return StringTransformers.TO_EMPTY; }
 
-        @Override public String
-        transform(CharSequence in) { return ""; }
+    /**
+     * Transforms any string to {@code ""} (the empty string).
+     */
+    @SuppressWarnings("rawtypes") public static final Transformer
+    TO_EMPTY = new Transformer() {
+
+        @Override public Object
+        transform(Object in) { return ""; }
     };
 }
