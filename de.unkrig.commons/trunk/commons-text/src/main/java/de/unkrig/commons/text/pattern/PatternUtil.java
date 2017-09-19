@@ -36,6 +36,7 @@ import de.unkrig.commons.io.IoUtil;
 import de.unkrig.commons.io.TransformingFilterReader;
 import de.unkrig.commons.io.TransformingFilterWriter;
 import de.unkrig.commons.lang.protocol.Function;
+import de.unkrig.commons.lang.protocol.FunctionWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -69,7 +70,7 @@ class PatternUtil {
     }
 
     /** @deprecated Use {@link #replacementStringMatchReplacer(String)} instead */
-    @Deprecated public static Function<Matcher, String>
+    @Deprecated public static <EX extends Throwable> FunctionWhichThrows<Matcher, String, ? extends EX>
     replacementStringReplacer(final String replacementString) {
         return PatternUtil.replacementStringMatchReplacer(replacementString);
     }
@@ -81,10 +82,10 @@ class PatternUtil {
      * @see                     #constantMatchReplacer(String)
      * @see                     #SYSTEM_PROPERTY_MATCH_REPLACER
      */
-    public static Function<Matcher, String>
+    public static <EX extends Throwable> FunctionWhichThrows<Matcher, String, ? extends EX>
     replacementStringMatchReplacer(final String replacementString) {
 
-        return new Function<Matcher, String>() {
+        return new FunctionWhichThrows<Matcher, String, EX>() {
 
             @Override @Nullable public String
             call(@Nullable Matcher matcher) {
@@ -182,7 +183,7 @@ class PatternUtil {
         return PatternUtil.replaceSome(
             in,
             pattern,
-            PatternUtil.replacementStringMatchReplacer(replacementString),
+            PatternUtil.<IOException>replacementStringMatchReplacer(replacementString),
             out,
             8192
         );
@@ -212,8 +213,11 @@ class PatternUtil {
      * "replacement string" (with variables "$0", "$1", ...), but is computed by the <var>matchReplacer</var>. If the
      * <var>matchReplacer</var> returns {@code null} for a match, then the match is <em>not</em> replaced.
      */
-    public static String
-    replaceSome(Matcher matcher, Function<? super Matcher, ? extends CharSequence> matchReplacer) {
+    public static <EX extends Throwable> String
+    replaceSome(
+        Matcher                                                                    matcher,
+        FunctionWhichThrows<? super Matcher, ? extends CharSequence, ? extends EX> matchReplacer
+    ) throws EX {
 
         matcher.reset();
 
@@ -252,16 +256,16 @@ class PatternUtil {
      * @param bufferCapacity The number of chars that are read repeatedly, until end-of-input, from <var>in</var>
      * @return               The number of replacements that were executed
      */
-    public static int
+    public static <EX extends Throwable> int
     replaceSome(
-        Reader                                            in,
-        Pattern                                           pattern,
-        Function<? super Matcher, ? extends CharSequence> matchReplacer,
-        Appendable                                        out,
-        int                                               bufferCapacity
-    ) throws IOException {
+        Reader                                                                     in,
+        Pattern                                                                    pattern,
+        FunctionWhichThrows<? super Matcher, ? extends CharSequence, ? extends EX> matchReplacer,
+        Appendable                                                                 out,
+        int                                                                        bufferCapacity
+    ) throws IOException, EX {
 
-        Substitutor substitutor = new Substitutor(pattern, matchReplacer);
+        Substitutor<EX> substitutor = new Substitutor<EX>(pattern, matchReplacer);
 
         IoUtil.copyAndTransform(in, substitutor, out, bufferCapacity);
 
@@ -270,25 +274,25 @@ class PatternUtil {
 
     /**
      * Creates and returns a filter {@link Reader} which replaces matches of the <var>pattern</var> within the
-     * character stream on-the-fly with the <var>matchReplacer</var>.
+     * character stream on-the-fly through the <var>matchReplacer</var>.
      */
     public static Reader
     replaceAllFilterReader(
-        Reader                                                  delegate,
-        final Pattern                                           pattern,
-        final Function<? super Matcher, ? extends CharSequence> matchReplacer
-    ) { return TransformingFilterReader.create(delegate, new Substitutor(pattern, matchReplacer)); }
+        Reader                                                                                    delegate,
+        final Pattern                                                                             pattern,
+        final FunctionWhichThrows<? super Matcher, ? extends CharSequence, ? extends IOException> matchReplacer
+    ) { return TransformingFilterReader.create(delegate, new Substitutor<IOException>(pattern, matchReplacer)); }
 
     /**
      * Creates and returns a filter {@link Writer} which replaces matches of the <var>pattern</var> within the
-     * character stream on-the-fly with the <var>matchReplacer</var>.
+     * character stream on-the-fly through the <var>matchReplacer</var>.
      */
     public static Writer
     replaceAllFilterWriter(
-        final Pattern                                           pattern,
-        final Function<? super Matcher, ? extends CharSequence> matchReplacer,
-        final Appendable                                        delegate
-    ) { return TransformingFilterWriter.create(new Substitutor(pattern, matchReplacer), delegate); }
+        final Pattern                                                                             pattern,
+        final FunctionWhichThrows<? super Matcher, ? extends CharSequence, ? extends IOException> matchReplacer,
+        final Appendable                                                                          delegate
+    ) { return TransformingFilterWriter.create(new Substitutor<IOException>(pattern, matchReplacer), delegate); }
 
     /**
      * Creates and returns a {@link Substitutor} which replaces {@link Pattern} matches in a stream of strings through
@@ -305,8 +309,8 @@ class PatternUtil {
      *
      * @param replacementString See {@link Matcher#appendReplacement(StringBuffer, String)}
      */
-    public static Substitutor
+    public static <EX extends Throwable> Substitutor<EX>
     substitutor(Pattern pattern, String replacementString) {
-        return new Substitutor(pattern, PatternUtil.replacementStringMatchReplacer(replacementString));
+        return new Substitutor<EX>(pattern, PatternUtil.<EX>replacementStringMatchReplacer(replacementString));
     }
 }
