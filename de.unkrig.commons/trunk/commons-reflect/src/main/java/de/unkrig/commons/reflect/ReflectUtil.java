@@ -30,6 +30,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import de.unkrig.commons.nullanalysis.Nullable;
@@ -72,11 +74,11 @@ class ReflectUtil {
     throws NoSuchMethodException {
 
         Method mostSpecificMethod = null;
-        for (Method method : targetType.getMethods()) {
-            if (
-                !method.getName().equals(methodName)
-                || !Modifier.isPublic(method.getDeclaringClass().getModifiers())
-            ) continue;
+        for (Method method : ReflectUtil.getMethods(targetType)) {
+
+            if (!method.getName().equals(methodName)) continue;
+
+            if (!Modifier.isPublic(method.getDeclaringClass().getModifiers())) continue;
 
             Class<?>[] parameterTypes = method.getParameterTypes();
             if (!ReflectUtil.areApplicable(parameterTypes, argumentTypes)) continue;
@@ -106,6 +108,29 @@ class ReflectUtil {
         }
 
         return mostSpecificMethod;
+    }
+
+    private static Collection<Method>
+    getMethods(Class<?> type) {
+        Collection<Method> result = new HashSet<Method>();
+        ReflectUtil.getMethods(type, result);
+        return result;
+    }
+
+    private static void
+    getMethods(Class<?> type, Collection<? super Method> result) {
+
+        // Contrary to the JRE documentation, "Class.getMethods()" does NOT include all public methods inherited from
+        // superclasses and superinterfaces, so...
+
+        {
+            Class<?> sc = type.getSuperclass();
+            if (sc != null) ReflectUtil.getMethods(sc, result);
+        }
+
+        for (Class<?> interfacE : type.getInterfaces()) ReflectUtil.getMethods(interfacE, result);
+
+        result.addAll(Arrays.asList(type.getMethods()));
     }
 
     /**
