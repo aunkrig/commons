@@ -48,7 +48,7 @@ class TransformerUtil {
     /**
      * @return A {@link Transformer} that transforms any object reference to itself.
      */
-    @SuppressWarnings("unchecked") public static <O, I extends O> Transformer<I, O>
+    @SuppressWarnings("unchecked") public static <O, I extends O, EX extends Throwable> TransformerWhichThrows<I, O, EX>
     identity() { return TransformerUtil.IDENTITY; }
 
     @SuppressWarnings("rawtypes") private static final Transformer
@@ -60,7 +60,7 @@ class TransformerUtil {
     public static <T, EX extends Throwable> TransformerWhichThrows<? super T, ? extends T, ? extends EX>
     chain(final TransformerWhichThrows<? super T, ? extends T, ? extends EX>... transformers) {
 
-        if (transformers.length == 0) return TransformerUtil.asTransformerWhichThrows(TransformerUtil.<T, T>identity());
+        if (transformers.length == 0) return TransformerUtil.<T, T, EX>identity();
 
         if (transformers.length == 1) return transformers[0];
 

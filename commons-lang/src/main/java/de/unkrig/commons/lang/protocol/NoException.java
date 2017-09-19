@@ -2,7 +2,7 @@
 /*
  * de.unkrig.commons - A general-purpose Java class library
  *
- * Copyright (c) 2015, Arno Unkrig
+ * Copyright (c) 2017, Arno Unkrig
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -26,14 +26,8 @@
 
 package de.unkrig.commons.lang.protocol;
 
-/**
- * A consumer which redirects the subjects it consumes to a delegate consumer.
- *
- * @param <T> See {@link Consumer}
- */
-public
-class ProxyConsumer<T> extends ProxyConsumerWhichThrows<T, NoException> implements Consumer<T> {
-
-    public
-    ProxyConsumer(Consumer<? super T> delegate) { super(delegate); }
+public final
+class NoException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+    private                   NoException() {}
 }
