@@ -81,7 +81,7 @@ class ExpressionEvaluatorTest {
     );
 
     // -----------------------------------------------
-    // CHECKSTYLE WrapAndIndent:OFF
+    // SUPPRESS CHECKSTYLE Javadoc|LineLength:9999
     // -----------------------------------------------
 
     @Test public void
@@ -359,6 +359,17 @@ class ExpressionEvaluatorTest {
             "<!-- 'java.util.Date' has no field 'TTime' nor a method 'TTime()' or 'getTTime()' method -->",
             "abc#da.TTime#def"
         );
+    }
+
+    @Test public void
+    testParsePart() throws Exception {
+
+        ExpressionEvaluator ee = new ExpressionEvaluator();
+
+        int[] offset = new int[1];
+
+        ee.parsePart("1 + 3}xx", offset);
+        Assert.assertEquals(5, offset[0]);
     }
 
     // --------------------------------------------
