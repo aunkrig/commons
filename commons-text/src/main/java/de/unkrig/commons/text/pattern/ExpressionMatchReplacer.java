@@ -60,14 +60,12 @@ class ExpressionMatchReplacer {
      *   Example:
      * </p>
      * <pre>
-     *   Function<Matcher, String> matchReplacer = ExpressionMatchReplacer.parse("m.group.toUpperCase()");
-     *   ...
-     *   Matcher matcher = ...;
-     *   System.out.println(PatternUtil.replaceSome(matcher, matchReplacer));
+     *   Matcher matcher = Pattern.compile(regex).matcher(input);
+     *   String output = PatternUtil.replaceSome(matcher, "m.group.toUpperCase()");
      * </pre>
      * <p>
-     *   If you plan to use the same expression for <em>mutiple</em> {@code replaceAll()} operations, you can reduce
-     *   the overhead of parsing the <var>spec</var> by calling {@link #parse(String)} (once) and {@link
+     *   If you plan to use the same expression for <em>mutiple</em> {@link #replaceSome(Matcher, String)} operations,
+     *   you can reduce the overhead of parsing the <var>spec</var> by calling {@link #parse(String)} (once) and {@link
      *   PatternUtil#replaceSome(Matcher, Function)} (repeatedly).
      * </p>
      *
