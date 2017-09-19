@@ -70,13 +70,13 @@ import de.unkrig.commons.text.scanner.ScannerUtil;
  *   <dt>{@code a || b}</dt>
  *   <dd>
  *     {@code a} if {@code a}, {@link ExpressionEvaluator#toBoolean(Object) converted to boolean}, is true, otherwise
- *     {@code b}. (Equivalent to '{@code a ? a : b}', except that {@code a} is evaluated only once.)
+ *     {@code b}. (Equivalent to "{@code a ? a : b}", except that {@code a} is evaluated only once.)
  *   </dd>
  *
  *   <dt>{@code a && b}</dt>
  *   <dd>
  *     {@code b} if {@code a}, {@link ExpressionEvaluator#toBoolean(Object) converted to boolean}, is true, otherwise
- *     {@code false}. (Equivalent to '{@code a ? b : false}'.)
+ *     {@code false}. (Equivalent to "{@code a ? b : false}".)
  *   </dd>
  *
  *   <dt>{@code == != < <= > >=}</dt>
@@ -162,7 +162,7 @@ import de.unkrig.commons.text.scanner.ScannerUtil;
  *     Float literal
  *   </dd>
  *
- *   <dt>{@code 1D 1d 1.1 1.1e-3}</dt>
+ *   <dt>{@code 1D 1d 1. 1.1 1e-3}</dt>
  *   <dd>
  *     Double literal
  *   </dd>
@@ -189,7 +189,7 @@ import de.unkrig.commons.text.scanner.ScannerUtil;
  *   <dt>{@code pkg.Clazz} (Only with {@link Parser.Extension#NEW_CLASS_WITHOUT_KEYWORD} <em>and</em> {@link
  *   Parser.Extension#NEW_CLASS_WITHOUT_PARENTHESES})</dt>
  *   <dd>
- *     Abbreviated forms of {@code new pkg.Clazz()}
+ *     Abbreviated forms of "{@code new pkg.Clazz()}"
  *   </dd>
  *
  *   <dt>{@code new pkg.Clazz[x]}</dt>
@@ -216,7 +216,8 @@ import de.unkrig.commons.text.scanner.ScannerUtil;
  *
  *   <dt>{@code x.name}</dt>
  *   <dd>
- *     Attribute reference; accesses field "{@code name}", or invokes "{@code name()}" or "{@code getName()}"
+ *     Attribute reference; gets the value of the field "{@code x.name}", or invokes "{@code x.name()}" or "{@code
+ *     x.getName()}" (it is <em>not</em> possible to <em>set</em> an attribute this way)
  *   </dd>
  *
  *   <dt>{@code x.meth(a, b, c)}</dt>
