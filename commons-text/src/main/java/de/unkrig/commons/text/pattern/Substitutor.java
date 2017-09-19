@@ -29,8 +29,8 @@ package de.unkrig.commons.text.pattern;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.unkrig.commons.lang.protocol.Function;
-import de.unkrig.commons.lang.protocol.Transformer;
+import de.unkrig.commons.lang.protocol.FunctionWhichThrows;
+import de.unkrig.commons.lang.protocol.TransformerWhichThrows;
 
 /**
  * Replaces pattern matches in a stream of strings ("chunks"). Matches are allowed across chunks; thus, this
@@ -60,15 +60,15 @@ import de.unkrig.commons.lang.protocol.Transformer;
  * </p>
  */
 public
-class Substitutor implements Transformer<CharSequence, CharSequence> {
+class Substitutor<EX extends Throwable> implements TransformerWhichThrows<CharSequence, CharSequence, EX> {
 
     public static final int DEFAULT_LOOKBEHIND_LIMIT = 10;
 
     // CONFIGURATION
 
-    private final Pattern                                           pattern;
-    private final Function<? super Matcher, ? extends CharSequence> matchReplacer;
-    private final int                                               lookBehindLimit;
+    private final Pattern                                                                    pattern;
+    private final FunctionWhichThrows<? super Matcher, ? extends CharSequence, ? extends EX> matchReplacer;
+    private final int                                                                        lookBehindLimit;
 
     /**
      * Contains a suffix of the input char sequence.
@@ -86,15 +86,18 @@ class Substitutor implements Transformer<CharSequence, CharSequence> {
     private int substitutionCount;
 
     public
-    Substitutor(Pattern pattern, final Function<? super Matcher, ? extends CharSequence> matchReplacer) {
+    Substitutor(
+        Pattern                                                                    pattern,
+        FunctionWhichThrows<? super Matcher, ? extends CharSequence, ? extends EX> matchReplacer
+    ) {
         this(pattern, matchReplacer, Substitutor.DEFAULT_LOOKBEHIND_LIMIT);
     }
 
     public
     Substitutor(
-        Pattern                                           pattern,
-        Function<? super Matcher, ? extends CharSequence> matchReplacer,
-        int                                               lookBehindLimit
+        Pattern                                                                    pattern,
+        FunctionWhichThrows<? super Matcher, ? extends CharSequence, ? extends EX> matchReplacer,
+        int                                                                        lookBehindLimit
     ) {
         this.pattern         = pattern;
         this.matchReplacer   = matchReplacer;
@@ -107,7 +110,7 @@ class Substitutor implements Transformer<CharSequence, CharSequence> {
      * following invocations.
      */
     @Override public CharSequence
-    transform(CharSequence in) {
+    transform(CharSequence in) throws EX {
 
         if (in.length() == 0) return this.flush();
 
@@ -173,7 +176,7 @@ class Substitutor implements Transformer<CharSequence, CharSequence> {
     substitutionCount() { return this.substitutionCount; }
 
     private CharSequence
-    flush() {
+    flush() throws EX {
 
         if (this.buffer.length() == 0) return "";
 
