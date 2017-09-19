@@ -136,7 +136,7 @@ class XmlUtil {
         } catch (TransformerException te) {
             Throwable t = te.getException();
             if (t instanceof SAXException) throw (SAXException) t; // SUPPRESS CHECKSTYLE AvoidHidingCause
-            if (t instanceof IOException) throw (IOException) t; // SUPPRESS CHECKSTYLE AvoidHidingCause
+            if (t instanceof IOException)  throw (IOException)  t; // SUPPRESS CHECKSTYLE AvoidHidingCause
             throw te;
         }
 
