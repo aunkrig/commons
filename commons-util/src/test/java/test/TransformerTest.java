@@ -32,7 +32,7 @@ import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.unkrig.commons.lang.protocol.Transformer;
+import de.unkrig.commons.lang.protocol.NoException;
 import de.unkrig.commons.lang.protocol.TransformerUtil;
 import de.unkrig.commons.lang.protocol.TransformerWhichThrows;
 
@@ -42,8 +42,8 @@ import de.unkrig.commons.lang.protocol.TransformerWhichThrows;
 public
 class TransformerTest {
 
-    private static final Transformer<? super IOException, ? extends IOException>
-    IOE_2_IOE = TransformerUtil.identity();
+    private static final TransformerWhichThrows<? super IOException, ? extends IOException, NoException>
+    IOE_2_IOE = TransformerUtil.<IOException, IOException, NoException>identity();
 
     private static final TransformerWhichThrows<? super IOException, ? extends IOException, ? extends IOException>
     IOE_2_IOE_IOE = TransformerUtil.asTransformerWhichThrows(TransformerTest.IOE_2_IOE);
@@ -52,7 +52,8 @@ class TransformerTest {
     testWidenTransformer() {
 
         // Widen.
-        Transformer<? super FileNotFoundException, ? extends Exception> fnfe2e = TransformerTest.IOE_2_IOE;
+        TransformerWhichThrows<? super IOException, ? extends IOException, NoException>
+        fnfe2e = TransformerTest.IOE_2_IOE;
 
         FileNotFoundException subject = new FileNotFoundException();
         Assert.assertSame(subject, fnfe2e.transform(subject));

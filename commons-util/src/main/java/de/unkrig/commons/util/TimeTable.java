@@ -134,7 +134,7 @@ class TimeTable {
         );
 
         // A look-ahead pseudo token that is produced to indicate that the following pattern is a TIME pattern.
-        scanner.addRule("(?=[^ ]*:)", TokenType.BEFORE_TIME_PATTERN, ScannerState.IN_TIME_PATTERN);
+        scanner.addRule("(?=[^ ]*:)", TokenType.BEFORE_TIME_PATTERN).goTo(ScannerState.IN_TIME_PATTERN);
 
         scanner.addRule(
             "\\d+",
@@ -143,9 +143,8 @@ class TimeTable {
         scanner.addRule(
             ScannerState.IN_TIME_PATTERN,
             "\\d+",
-            TokenType.INTEGER,
-            ScannerState.IN_TIME_PATTERN
-        );
+            TokenType.INTEGER
+        ).goTo(ScannerState.IN_TIME_PATTERN);
         scanner.addRule(
             "[:\\-/\\*(),]",
             TokenType.OPERATOR
@@ -153,9 +152,8 @@ class TimeTable {
         scanner.addRule(
             ScannerState.IN_TIME_PATTERN,
             "[:\\-/\\*(),]",
-            TokenType.OPERATOR,
-            ScannerState.IN_TIME_PATTERN
-        );
+            TokenType.OPERATOR
+        ).goTo(ScannerState.IN_TIME_PATTERN);
 
         scanner.addRule(scanner.ANY_STATE, "\\w+", TokenType.IDENTIFIER);
         scanner.addRule(scanner.ANY_STATE, " +",   TokenType.SPACE);

@@ -100,7 +100,7 @@ class Sets {
      * Desperately missing from {@code java.util.Collections}.
      */
     @SuppressWarnings("unchecked") public static <T> SortedSet<T>
-    emptySortedSet() { return CollectionUtil.EMPTY_SORTED_SET; }
+    emptySortedSet() { return Sets.EMPTY_SORTED_SET; }
 
     @NotNullByDefault(false) @SuppressWarnings("rawtypes") private static
     class EmptySortedSet extends AbstractSet implements SortedSet, Serializable {
@@ -112,9 +112,9 @@ class Sets {
         @Override public boolean    isEmpty()                      { return true; }
         @Override public boolean    contains(Object obj)           { return false; }
         @Override public Comparator comparator()                   { return null; }
-        @Override public SortedSet  subSet(Object from, Object to) { return CollectionUtil.EMPTY_SORTED_SET; }
-        @Override public SortedSet  headSet(Object toElement)      { return CollectionUtil.EMPTY_SORTED_SET; }
-        @Override public SortedSet  tailSet(Object fromElement)    { return CollectionUtil.EMPTY_SORTED_SET; }
+        @Override public SortedSet  subSet(Object from, Object to) { return Sets.EMPTY_SORTED_SET; }
+        @Override public SortedSet  headSet(Object toElement)      { return Sets.EMPTY_SORTED_SET; }
+        @Override public SortedSet  tailSet(Object fromElement)    { return Sets.EMPTY_SORTED_SET; }
         @Override public Object     first()                        { throw new NoSuchElementException(); }
         @Override public Object     last()                         { throw new NoSuchElementException(); }
         @Override public boolean    equals(Object o)               { return (o instanceof SortedSet) && ((SortedSet) o).size() == 0; } // SUPPRESS CHECKSTYLE LineLength
