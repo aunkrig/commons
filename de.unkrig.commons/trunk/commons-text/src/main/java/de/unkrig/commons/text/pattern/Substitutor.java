@@ -30,6 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.unkrig.commons.lang.protocol.FunctionWhichThrows;
+import de.unkrig.commons.lang.protocol.NoException;
 import de.unkrig.commons.lang.protocol.TransformerWhichThrows;
 
 /**
@@ -50,7 +51,8 @@ import de.unkrig.commons.lang.protocol.TransformerWhichThrows;
  * </p>
  * <p>
  *   If you plan to use "look-behinds" (the most common of which is "^"), bear in mind that the look-behind memory is
- *   limited; by default to {@value #DEFAULT_LOOKBEHIND_LIMIT}.
+ *   limited; by default to {@value #DEFAULT_LOOKBEHIND_LIMIT}. If you need more look-behind space, use {@link
+ *   #Substitutor(Pattern, FunctionWhichThrows, int)}.
  * </p>
  * <p>
  *   Also bear in mind that, specifically when using "greedy quantifiers", that it may happen quite easily that the
@@ -58,10 +60,18 @@ import de.unkrig.commons.lang.protocol.TransformerWhichThrows;
  *   soon as it hits the letter "a", will load all the remaining text into memory, because there might still come
  *   (another) "b".
  * </p>
+ *
+ * @param <EX> The exception type that the "match replacer" (see {@link #Substitutor(Pattern, FunctionWhichThrows)}
+ *             is allowed to throw; use {@link NoException} if your match replacer does not throw any (checked)
+ *             exceptions
  */
 public
 class Substitutor<EX extends Throwable> implements TransformerWhichThrows<CharSequence, CharSequence, EX> {
 
+    /**
+     * The number of characters that can safely be used for look-behind, unless a different value is configured through
+     * {@link #Substitutor(Pattern, FunctionWhichThrows, int)}.
+     */
     public static final int DEFAULT_LOOKBEHIND_LIMIT = 10;
 
     // CONFIGURATION
