@@ -31,6 +31,7 @@ import java.util.regex.Matcher;
 
 import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.protocol.Function;
+import de.unkrig.commons.lang.protocol.FunctionWhichThrows;
 import de.unkrig.commons.lang.protocol.Mapping;
 import de.unkrig.commons.lang.protocol.Mappings;
 import de.unkrig.commons.lang.protocol.Predicate;
@@ -66,7 +67,7 @@ class ExpressionMatchReplacer {
      * <p>
      *   If you plan to use the same expression for <em>mutiple</em> {@link #replaceSome(Matcher, String)} operations,
      *   you can reduce the overhead of parsing the <var>spec</var> by calling {@link #parse(String)} (once) and {@link
-     *   PatternUtil#replaceSome(Matcher, Function)} (repeatedly).
+     *   PatternUtil#replaceSome(Matcher, FunctionWhichThrows)} (repeatedly).
      * </p>
      *
      * @param spec            Specifies the expression to use; when the expression evaluates to {@code null}, then
@@ -81,8 +82,8 @@ class ExpressionMatchReplacer {
     }
 
     /**
-     * Creates and returns a "match replacer" that is suitable for {@link PatternUtil#replaceSome(Matcher, Function)}
-     * and implements the substitution through an {@link Expression}.
+     * Creates and returns a "match replacer" that is suitable for {@link PatternUtil#replaceSome(Matcher,
+     * FunctionWhichThrows)} and implements the substitution through an {@link Expression}.
      * <p>
      *   The expression uses a single variable, {@code "m"}, which is the {@link Matcher} of the current match.
      * </p>
@@ -112,8 +113,8 @@ class ExpressionMatchReplacer {
     }
 
     /**
-     * Creates and returns a "match replacer" that is suitable for {@link PatternUtil#replaceSome(Matcher, Function)}
-     * and implements the substitution through an {@link Expression}.
+     * Creates and returns a "match replacer" that is suitable for {@link PatternUtil#replaceSome(Matcher,
+     * FunctionWhichThrows)} and implements the substitution through an {@link Expression}.
      * <p>
      *   The expression uses the named variables, plus one more variable {@code "m"}, which is the {@link Matcher} of
      *   the current match.
@@ -157,8 +158,8 @@ class ExpressionMatchReplacer {
     }
 
     /**
-     * Creates and returns a "match replacer" that is suitable for {@link PatternUtil#replaceSome(Matcher, Function)}
-     * and implements the substitution through the given <var>expression</ver>.
+     * Creates and returns a "match replacer" that is suitable for {@link PatternUtil#replaceSome(Matcher,
+     * FunctionWhichThrows)} and implements the substitution through the given <var>expression</ver>.
      * <p>
      *   When the expression is evaluated, it gets an additional variable {@code "m"}, which is the {@link Matcher} of
      *   the current match.
