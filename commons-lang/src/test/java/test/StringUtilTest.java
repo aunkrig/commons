@@ -32,6 +32,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import de.unkrig.commons.lang.AssertionUtil;
+import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.StringUtil;
 import de.unkrig.commons.lang.StringUtil.IndexOf;
 import de.unkrig.commons.lang.protocol.Producer;
@@ -75,20 +76,86 @@ class StringUtilTest {
 
         Producer<String> rsp = StringUtilTest.randomSubjectProducer(infix);
 
-        for (int j = 0; j < 100000; j++) {
+        for (int j = 0; j < 10000; j++) {
             String subject = AssertionUtil.notNull(rsp.produce());
-            for (int offset = 0;; offset += subject.length()) {
+            for (int offset = 0;; offset += offset == 100 ? subject.length() - 200 : 1) {
 
                 int o1 = subject.indexOf(infix, offset);
                 int o2 = io.indexOf(subject, offset, subject.length());
 
                 if (o1 != o2) {
                     o2 = io.indexOf(subject, offset, subject.length());
-                    System.currentTimeMillis();
                 }
-                Assert.assertEquals("Subject=\"" + subject + "\"", o1, o2);
+                Assert.assertEquals(
+                    "j=" + j + " offset=" + offset + " subject=\"" + subject + "\" subject.length=" + subject.length(),
+                    o1,
+                    o2
+                );
 
                 if (o1 == -1) break;
+            }
+        }
+    }
+
+    @Test public void
+    testIndexOf() throws Throwable {
+
+        String infix = "ABC";
+
+        for (IndexOf io : new IndexOf[] {
+            StringUtil.newNaiveIndexOf(infix),
+            StringUtil.newKnuthMorrisPrattIndexOf(infix),
+        }) {
+
+            try {
+                Assert.assertEquals(3,  io.indexOf("   ABC ABC   "));
+
+                Assert.assertEquals(3,  io.indexOf("   ABC ABC   ", 2));
+                Assert.assertEquals(3,  io.indexOf("   ABC ABC   ", 3));
+                Assert.assertEquals(7,  io.indexOf("   ABC ABC   ", 4));
+
+                Assert.assertEquals(7,  io.indexOf("   ABC ABC   ", 4, 10));
+                Assert.assertEquals(7,  io.indexOf("   ABC ABC   ", 4, 9));
+                Assert.assertEquals(7,  io.indexOf("   ABC ABC   ", 4, 8));
+                Assert.assertEquals(7,  io.indexOf("   ABC ABC   ", 4, 7));
+                Assert.assertEquals(-1, io.indexOf("   ABC ABC   ", 4, 6));
+                Assert.assertEquals(-1, io.indexOf("   ABC ABC   ", 4, 5));
+                Assert.assertEquals(-1, io.indexOf("   ABC ABC   ", 4, 4));
+                Assert.assertEquals(-1, io.indexOf("   ABC ABC   ", 4, 3));
+                Assert.assertEquals(-1, io.indexOf("   ABC ABC   ", 4, 2));
+                Assert.assertEquals(-1, io.indexOf("   ABC ABC   ", 4, 1));
+                Assert.assertEquals(-1, io.indexOf("   ABC ABC   ", 4, 0));
+            } catch (Throwable t) {
+                throw ExceptionUtil.wrap(io.toString(), t);
+            }
+        }
+    }
+
+    @Test public void
+    testLastIndexOf() throws Throwable {
+
+        String infix = "ABC";
+
+        for (IndexOf io : new IndexOf[] {
+            StringUtil.newNaiveIndexOf(infix),
+            StringUtil.newKnuthMorrisPrattIndexOf(infix),
+        }) {
+
+            try {
+                Assert.assertEquals(7,  io.lastIndexOf("   ABC ABC   "));
+
+                Assert.assertEquals(7,  io.lastIndexOf("   ABC ABC   ", 8));
+                Assert.assertEquals(7,  io.lastIndexOf("   ABC ABC   ", 7));
+                Assert.assertEquals(3,  io.lastIndexOf("   ABC ABC   ", 6));
+
+                Assert.assertEquals(7,  io.lastIndexOf("   ABC ABC   ", 0, 8));
+                Assert.assertEquals(7,  io.lastIndexOf("   ABC ABC   ", 0, 7));
+                Assert.assertEquals(3,  io.lastIndexOf("   ABC ABC   ", 0, 6));
+
+                Assert.assertEquals(3,  io.lastIndexOf("   ABC ABC   ", 3, 6));
+                Assert.assertEquals(-1, io.lastIndexOf("   ABC ABC   ", 4, 6));
+            } catch (Throwable t) {
+                throw ExceptionUtil.wrap(io.toString(), t);
             }
         }
     }
