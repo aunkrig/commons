@@ -66,56 +66,83 @@ class ExceptionUtil {
 
         // Try "new TargetThrowable(String message, Throwable cause)". 95% of all throwables should have such a
         // constructor.
-        T wrapping;
-        try {
-            wrapping = (T) causeClass.getConstructor(String.class, Throwable.class).newInstance(message, cause);
-        } catch (Exception e) {
+        T wrapper;
+
+        WRAP:
+        {
+            try {
+                wrapper = (T) causeClass.getConstructor(String.class, Throwable.class).newInstance(message, cause);
+                break WRAP;
+            } catch (Exception e) {
+                ;
+            }
 
             // Try "new TargetThrowable(String message)", plus "initCause(Throwable cause)".
             try {
-                wrapping = (T) causeClass.getConstructor(String.class).newInstance(message);
-                wrapping.initCause(cause);
-            } catch (Exception e2) {
+                wrapper = (T) causeClass.getConstructor(String.class).newInstance(message);
+                wrapper.initCause(cause);
+                break WRAP;
+            } catch (Exception e) {
+                ;
+            }
 
-                // Try "new TargetThrowable(Object message)", plus "initCause(Throwable cause)".
+            // Try "new TargetThrowable(Object message)", plus "initCause(Throwable cause)".
+            try {
+                wrapper = (T) causeClass.getConstructor(Object.class).newInstance(message);
+                wrapper.initCause(cause);
+                break WRAP;
+            } catch (Exception e3) {
+                ;
+            }
+
+            // Special handling for SAXParseException.
+            if (cause instanceof SAXParseException) {
+                SAXParseException spe = (SAXParseException) cause;
+                wrapper = (T) new SAXParseException(
+                    message,
+                    spe.getPublicId(),
+                    spe.getSystemId(),
+                    spe.getLineNumber(),
+                    spe.getColumnNumber()
+                );
+                wrapper.initCause(cause);
+                break WRAP;
+            }
+
+            // Special handling for "org.junit.ComparisonFailure":
+            if (cause.getClass().getName().equals("org.junit.ComparisonFailure")) {
+
+                // Special handling for JUNIT's "org.junit.ComparisonFailure" error.
                 try {
-                    wrapping = (T) causeClass.getConstructor(Object.class).newInstance(message);
-                    wrapping.initCause(cause);
-                } catch (Exception e3) {
-
-                    // Special handling for SAXParEx
-                    if (cause instanceof SAXParseException) {
-                        SAXParseException spe = (SAXParseException) cause;
-                        wrapping = (T) new SAXParseException(
-                            message,
-                            spe.getPublicId(),
-                            spe.getSystemId(),
-                            spe.getLineNumber(),
-                            spe.getColumnNumber()
-                        );
-                        wrapping.initCause(cause);
-                    } else {
-
-                        // Don't know how to wrap the target throwable - give up.
-                        return cause;
-                    }
+                    wrapper = (T) causeClass.getConstructor(String.class, String.class, String.class).newInstance(
+                        causeClass.getField("detailMessage").get(cause),   // message
+                        causeClass.getMethod("getExpected").invoke(cause), // expected
+                        causeClass.getMethod("getActual").invoke(cause)    // actual
+                    );
+                    wrapper.initCause(cause);
+                    break WRAP;
+                } catch (Exception e) {
+                    ;
                 }
             }
+
+            // Don't know how to wrap the target throwable - give up.
+            return cause;
         }
 
         // Eliminate the top frames up to and including this "wrap()" method.
-        StackTraceElement[] st = wrapping.getStackTrace();
+        StackTraceElement[] st = wrapper.getStackTrace();
         for (int i = 0;; i++) {
             if ("wrap".equals(st[i].getMethodName())) {
                 i++;
                 StackTraceElement[] st2 = new StackTraceElement[st.length - i];
                 System.arraycopy(st, i, st2, 0, st2.length);
-                wrapping.setStackTrace(st2);
+                wrapper.setStackTrace(st2);
                 break;
             }
         }
 
-        return wrapping;
+        return wrapper;
     }
 
     /**
@@ -167,6 +194,16 @@ class ExceptionUtil {
             ;
         }
 
+        // Try "new Wrapper(Object message)", plus "initCause(Throwable cause)". (This is mainly for the
+        // AssertionError, which, strange enough, has no "AssertionError(String, Throwable)" constructor.)
+        try {
+            T wrapper = wrapperClass.getConstructor(Object.class).newInstance(message);
+            wrapper.initCause(cause);
+            return wrapper;
+        } catch (Exception e) {
+            ;
+        }
+
         // Try "new Wrapper()", plus "initCause(Throwable cause)".
         try {
             T wrapper = wrapperClass.newInstance();
@@ -176,7 +213,16 @@ class ExceptionUtil {
             ;
         }
 
-        throw new Error("Exception class '" + wrapperClass.getName() + "' has no suitable constructor");
+        if (wrapperClass.isAssignableFrom(cause.getClass())) {
+            @SuppressWarnings("unchecked") T result = (T) cause;
+            return result;
+        }
+
+        AssertionError
+        ae = new AssertionError("Exception class '" + wrapperClass.getName() + "' has no suitable constructor");
+
+        ae.initCause(cause);
+        throw ae;
     }
 
     /**
