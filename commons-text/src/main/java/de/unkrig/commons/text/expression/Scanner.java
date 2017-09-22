@@ -32,6 +32,7 @@ import static de.unkrig.commons.text.expression.Scanner.TokenType.END_OF_IGNORAB
 import static de.unkrig.commons.text.expression.Scanner.TokenType.FLOATING_POINT_LITERAL;
 import static de.unkrig.commons.text.expression.Scanner.TokenType.IDENTIFIER;
 import static de.unkrig.commons.text.expression.Scanner.TokenType.INTEGER_LITERAL;
+import static de.unkrig.commons.text.expression.Scanner.TokenType.INVALID_CHARACTER;
 import static de.unkrig.commons.text.expression.Scanner.TokenType.KEYWORD;
 import static de.unkrig.commons.text.expression.Scanner.TokenType.OPERATOR;
 import static de.unkrig.commons.text.expression.Scanner.TokenType.SPACE;
@@ -59,7 +60,7 @@ class Scanner {
     public
     enum TokenType {
 
-        // CHECKSTYLE JavadocVariable:OFF
+        // SUPPRESS CHECKSTYLE JavadocVariable:11
         SPACE, C_COMMENT,
 
         // Dummy enum constant which separates ignorable (above) from non-ignorable token types (below).
@@ -69,7 +70,8 @@ class Scanner {
         IDENTIFIER,
         OPERATOR,
         CHARACTER_LITERAL, STRING_LITERAL, INTEGER_LITERAL, FLOATING_POINT_LITERAL,
-        // CHECKSTYLE JavadocVariable:ON
+
+        INVALID_CHARACTER,
     }
 
     /**
@@ -117,6 +119,9 @@ class Scanner {
             "'(?:\\\\[btnfr\"'\\\\]|\\\\[0-3][0-7][0-7]|\\\\[0-7][0-7]|\\\\[0-7]|[^\\\\'])*'",
             STRING_LITERAL
         );
+
+        // In order to avoid ScanExceptions, which would break "ExpressionEvaluator.parsePart()":
+        scanner.addRule(".", INVALID_CHARACTER);
 
         return ScannerUtil.filter(scanner, new Predicate<Token<TokenType>>() {
 
