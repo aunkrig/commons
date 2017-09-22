@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
+import de.unkrig.commons.lang.protocol.NoException;
 import de.unkrig.commons.lang.protocol.RunnableWhichThrows;
 import de.unkrig.commons.lang.protocol.Stoppable;
 import de.unkrig.commons.lang.protocol.TransformerUtil;
@@ -54,11 +55,13 @@ class HttpProxy implements RunnableWhichThrows<IOException>, Stoppable {
     private AtomicInteger requestCount = new AtomicInteger();
 
     private static final TransformerWhichThrows<? super HttpRequest, HttpRequest, IOException>
-    REQUEST_IDENTITY = TransformerUtil.asTransformerWhichThrows(TransformerUtil.<HttpRequest, HttpRequest>identity());
+    REQUEST_IDENTITY = TransformerUtil.asTransformerWhichThrows(
+        TransformerUtil.<HttpRequest, HttpRequest, NoException>identity()
+    );
 
     private static final TransformerWhichThrows<? super HttpResponse, HttpResponse, IOException>
     RESPONSE_IDENTITY = TransformerUtil.asTransformerWhichThrows(
-        TransformerUtil.<HttpResponse, HttpResponse>identity()
+        TransformerUtil.<HttpResponse, HttpResponse, NoException>identity()
     );
 
     /**
