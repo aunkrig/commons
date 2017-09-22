@@ -284,7 +284,7 @@ class StringUtil {
          *   For the return value, the following condition holds true:
          * </p>
          * <pre>
-         *   StringUtil.newIndexOf(infix).indexOf(subject) = subject.indexOf(infix)
+         *   StringUtil.newIndexOf(infix).indexOf(subject) == subject.indexOf(infix)
          * </pre>
          *
          * @return {@code 0} ... {@code subject.length() - infix.length()}, or {@code -1}
@@ -297,19 +297,19 @@ class StringUtil {
          *   For the return value, the following condition holds true:
          * </p>
          * <pre>
-         *   StringUtil.newIndexOf(infix).indexOf(subject, fromIndex) = subject.indexOf(infix, fromIndex)
+         *   StringUtil.newIndexOf(infix).indexOf(subject, minIndex) == subject.indexOf(infix, minIndex)
          * </pre>
          *
-         * @return {@code max(0, fromIndex)} ... {@code subject.length() - infix.length()}, or {@code -1}
+         * @return {@code max(0, minIndex)} ... {@code subject.length() - infix.length()}, or {@code -1}
          */
-        int indexOf(CharSequence subject, int fromIndex);
+        int indexOf(CharSequence subject, int minIndex);
 
         /**
-         * Like {@link #indexOf(CharSequence, int)}, but the match terminates at index <var>toIndex</var> (inclusive).
+         * Like {@link #indexOf(CharSequence, int)}, but the match terminates at index <var>maxIndex</var> (inclusive).
          *
-         * @return {@code max(0, fromIndex)} ... {@code min(toIndex, subject.length() - infix.length())}, or {@code -1}
+         * @return {@code max(0, minIndex)} ... {@code min(maxIndex, subject.length() - infix.length())}, or {@code -1}
          */
-        int indexOf(CharSequence subject, int fromIndex, int toIndex);
+        int indexOf(CharSequence subject, int minIndex, int maxIndex);
 
         /**
          * The equivalent of {@link String#lastIndexOf(String)}.
@@ -317,7 +317,7 @@ class StringUtil {
          *   For the return value, the following condition holds true:
          * </p>
          * <pre>
-         *   StringUtil.newIndexOf(infix).lastIndexOf(subject) = subject.lastIndexOf(infix)
+         *   StringUtil.newIndexOf(infix).lastIndexOf(subject) == subject.lastIndexOf(infix)
          * </pre>
          *
          * @return {@code 0} ... {@code subject.length() - infix.length()}, or {@code -1}
@@ -330,20 +330,20 @@ class StringUtil {
          *   For the return value, the following condition holds true:
          * </p>
          * <pre>
-         *   StringUtil.newIndexOf(infix).lastIndexOf(subject, fromIndex) = subject.lastIndexOf(infix, fromIndex)
+         *   StringUtil.newIndexOf(infix).lastIndexOf(subject, maxIndex) == subject.lastIndexOf(infix, maxIndex)
          * </pre>
          *
-         * @return {@code max(0, fromIndex)} ... {@code subject.length() - infix.length()}, or {@code -1}
+         * @return {@code 0} ... {@code min(maxIndex, subject.length() - infix.length())}, or {@code -1}
          */
-        int lastIndexOf(CharSequence subject, int fromIndex);
+        int lastIndexOf(CharSequence subject, int maxIndex);
 
         /**
-         * Like {@link #lastIndexOf(CharSequence, int)}, but the match terminates at index <var>toIndex</var>
-         * (inclusive). (<var>toIndex</var> is usually smaller than <var>fromIndex</var>.)
+         * Like {@link #lastIndexOf(CharSequence, int)}, but the match terminates at index <var>minIndex</var>
+         * (inclusive).
          *
-         * @return {@code max(0, fromIndex)} ... {@code min(toIndex, subject.length() - infix.length())}, or {@code -1}
+         * @return {@code max(0, minIndex)} ... {@code min(maxIndex, subject.length() - infix.length())}, or {@code -1}
          */
-        int lastIndexOf(CharSequence subject, int fromIndex, int toIndex);
+        int lastIndexOf(CharSequence subject, int minIndex, int maxIndex);
 
         /**
          * @return A textual representation of the infix and the search algorithm
@@ -370,10 +370,10 @@ class StringUtil {
 
     private abstract static
     class AbstractIndexOf implements IndexOf {
-        @Override public int indexOf(CharSequence subject)                    { return this.indexOf(subject, 0, Integer.MAX_VALUE);             } // SUPPRESS CHECKSTYLE LineLength:4
-        @Override public int indexOf(CharSequence subject, int fromIndex)     { return this.indexOf(subject, fromIndex, Integer.MAX_VALUE);     }
-        @Override public int lastIndexOf(CharSequence subject)                { return this.lastIndexOf(subject, 0, Integer.MAX_VALUE);         }
-        @Override public int lastIndexOf(CharSequence subject, int fromIndex) { return this.lastIndexOf(subject, fromIndex, Integer.MAX_VALUE); }
+        @Override public int indexOf(CharSequence subject)                   { return this.indexOf(subject, 0, Integer.MAX_VALUE);         } // SUPPRESS CHECKSTYLE LineLength:4
+        @Override public int indexOf(CharSequence subject, int minIndex)    { return this.indexOf(subject, minIndex, Integer.MAX_VALUE); }
+        @Override public int lastIndexOf(CharSequence subject)               { return this.lastIndexOf(subject, 0, Integer.MAX_VALUE);     }
+        @Override public int lastIndexOf(CharSequence subject, int maxIndex) { return this.lastIndexOf(subject, 0, maxIndex);              }
 
         @Override public abstract String toString();
     }
@@ -390,25 +390,25 @@ class StringUtil {
             final int infixLength = infix.length();
 
             @Override public int
-            indexOf(CharSequence subject, int fromIndex, int toIndex) {
+            indexOf(CharSequence subject, int minIndex, int maxIndex) {
 
-                if (toIndex + this.infixLength >= subject.length()) {
-                    return subject.toString().indexOf(infix, fromIndex);
+                if (maxIndex + this.infixLength >= subject.length()) {
+                    return subject.toString().indexOf(infix, minIndex);
                 }
 
-                return subject.toString().substring(0, toIndex + this.infixLength).indexOf(infix, fromIndex);
+                return subject.toString().substring(0, maxIndex + this.infixLength).indexOf(infix, minIndex);
             }
 
             @Override public int
-            lastIndexOf(CharSequence subject, int fromIndex, int toIndex) {
+            lastIndexOf(CharSequence subject, int minIndex, int maxIndex) {
 
-                if (toIndex <= 0) return subject.toString().lastIndexOf(infix, fromIndex);
+                if (minIndex <= 0) return subject.toString().lastIndexOf(infix, maxIndex);
 
-                subject   = subject.subSequence(toIndex, subject.length() - toIndex);
-                fromIndex -= toIndex;
+                subject  =  subject.subSequence(minIndex, subject.length());
+                maxIndex -= minIndex;
 
-                int result = subject.toString().indexOf(infix, fromIndex);
-                return result == -1 ? -1 : result + toIndex;
+                int result = subject.toString().lastIndexOf(infix, maxIndex);
+                return result == -1 ? -1 : result + minIndex;
             }
 
             @Override public String
@@ -431,64 +431,67 @@ class StringUtil {
             final int              infixLength = infix.length();
 
             @Override public int
-            indexOf(CharSequence subject, int fromIndex, int toIndex) {
+            indexOf(CharSequence subject, int minIndex, int maxIndex) {
                 int subjectLength = subject.length();
 
-                if (fromIndex < 0) fromIndex = 0;
+                if (minIndex < 0) minIndex = 0;
 
-                if (toIndex + this.infixLength > subjectLength) toIndex = subjectLength - this.infixLength;
+                if (maxIndex + this.infixLength > subjectLength) maxIndex = subjectLength - this.infixLength;
 
-                for (fromIndex += this.infixLength - 1; fromIndex < subjectLength;) {
+                for (minIndex += this.infixLength - 1; minIndex < subjectLength;) {
 
-                    int delta = this.deltas.get(subject.charAt(fromIndex));
+                    int delta = this.deltas.get(subject.charAt(minIndex));
                     if (delta == -1) {
-                        fromIndex += this.infixLength;
+                        minIndex += this.infixLength;
                         continue;
                     }
 
-                    fromIndex -= delta;
+                    minIndex -= delta;
 
-                    for (int infixIndex = 0, subjectIndex = fromIndex;; subjectIndex++, infixIndex++) {
+                    for (int infixIndex = 0, subjectIndex = minIndex;; subjectIndex++, infixIndex++) {
 
-                        if (infixIndex   >= this.infixLength) return fromIndex;
+                        if (infixIndex   >= this.infixLength) return minIndex;
                         if (subjectIndex >= subjectLength)    return -1;
 
                         if (subject.charAt(subjectIndex) != infix.charAt(infixIndex)) break;
                     }
 
-                    fromIndex += this.infixLength;
+                    minIndex += this.infixLength;
                 }
 
                 return -1;
             }
 
             @Override public int
-            lastIndexOf(CharSequence subject, int fromIndex, int toIndex) {
+            lastIndexOf(CharSequence subject, int minIndex, int maxIndex) {
                 int subjectLength = subject.length();
 
-                if (toIndex < 0) toIndex = 0;
+                if (minIndex < 0) minIndex = 0;
 
-                if (fromIndex + this.infixLength > subjectLength) fromIndex = subjectLength - this.infixLength;
+                {
+                    int limit = subjectLength - this.infixLength;
+                    if (maxIndex > limit) maxIndex = limit;
+                }
 
-                for (fromIndex += this.infixLength - 1; fromIndex >= toIndex;) {
+                while (maxIndex >= minIndex) {
 
-                    int delta = this.deltas.get(subject.charAt(fromIndex));
+                    int delta = this.deltas.get(subject.charAt(maxIndex));
                     if (delta == -1) {
-                        fromIndex -= this.infixLength;
+                        maxIndex -= this.infixLength;
                         continue;
                     }
 
-                    fromIndex -= delta;
+                    maxIndex -= delta;
 
-                    for (int infixIndex = 0, subjectIndex = fromIndex;; subjectIndex++, infixIndex++) {
+                    for (int infixIndex = 0, subjectIndex = maxIndex;; subjectIndex++, infixIndex++) {
 
-                        if (infixIndex >= this.infixLength) return fromIndex;
-                        if (subjectIndex >= subjectLength)    return -1;
+                        if (infixIndex >= this.infixLength) return maxIndex;
+                        if (subjectIndex >= subjectLength)  return -1;
 
                         if (subject.charAt(subjectIndex) != infix.charAt(infixIndex)) break;
                     }
 
-                    fromIndex -= this.infixLength;
+                    maxIndex -= this.infixLength;
                 }
 
                 return -1;
