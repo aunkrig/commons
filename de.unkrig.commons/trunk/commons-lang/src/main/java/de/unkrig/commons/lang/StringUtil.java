@@ -371,7 +371,7 @@ class StringUtil {
     private abstract static
     class AbstractIndexOf implements IndexOf {
         @Override public int indexOf(CharSequence subject)                   { return this.indexOf(subject, 0, Integer.MAX_VALUE);         } // SUPPRESS CHECKSTYLE LineLength:4
-        @Override public int indexOf(CharSequence subject, int minIndex)    { return this.indexOf(subject, minIndex, Integer.MAX_VALUE); }
+        @Override public int indexOf(CharSequence subject, int minIndex)     { return this.indexOf(subject, minIndex, Integer.MAX_VALUE); }
         @Override public int lastIndexOf(CharSequence subject)               { return this.lastIndexOf(subject, 0, Integer.MAX_VALUE);     }
         @Override public int lastIndexOf(CharSequence subject, int maxIndex) { return this.lastIndexOf(subject, 0, maxIndex);              }
 
@@ -392,7 +392,7 @@ class StringUtil {
             @Override public int
             indexOf(CharSequence subject, int minIndex, int maxIndex) {
 
-                if (maxIndex + this.infixLength >= subject.length()) {
+                if (maxIndex >= subject.length() - this.infixLength) {
                     return subject.toString().indexOf(infix, minIndex);
                 }
 
@@ -436,25 +436,35 @@ class StringUtil {
 
                 if (minIndex < 0) minIndex = 0;
 
-                if (maxIndex + this.infixLength > subjectLength) maxIndex = subjectLength - this.infixLength;
+                {
+                    int limit = subjectLength - this.infixLength;
+                    if (maxIndex > limit) maxIndex = limit;
+                }
 
-                for (minIndex += this.infixLength - 1; minIndex < subjectLength;) {
+                if (minIndex > maxIndex) return -1;
+
+                minIndex += this.infixLength - 1;
+                for (;;) {
 
                     int delta = this.deltas.get(subject.charAt(minIndex));
                     if (delta == -1) {
+                        if (minIndex >= maxIndex) break;
                         minIndex += this.infixLength;
                         continue;
                     }
 
                     minIndex -= delta;
 
+                    if (minIndex > maxIndex) break;
+
                     for (int infixIndex = 0, subjectIndex = minIndex;; subjectIndex++, infixIndex++) {
 
-                        if (infixIndex   >= this.infixLength) return minIndex;
-                        if (subjectIndex >= subjectLength)    return -1;
+                        if (infixIndex >= this.infixLength) return minIndex;
 
                         if (subject.charAt(subjectIndex) != infix.charAt(infixIndex)) break;
                     }
+
+                    if (minIndex == maxIndex) break;
 
                     minIndex += this.infixLength;
                 }
@@ -491,7 +501,7 @@ class StringUtil {
                         if (subject.charAt(subjectIndex) != infix.charAt(infixIndex)) break;
                     }
 
-                    maxIndex -= this.infixLength;
+                    maxIndex--;
                 }
 
                 return -1;
