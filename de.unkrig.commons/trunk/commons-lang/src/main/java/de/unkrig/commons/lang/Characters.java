@@ -242,7 +242,7 @@ class Characters {
         evaluate(Integer subject) {
             int cp = subject;
             return (
-                (cp >= 9 && cp <= 13) // 0x09=tab, 0x0a=newline, 0x0b=vertical-tab, 0x0c=form-feed, 0x0d=carriage-return
+                (cp <= 13 && cp >= 9) // 0x09=tab, 0x0a=newline, 0x0b=vertical-tab, 0x0c=form-feed, 0x0d=carriage-return
                 || cp == ' '          // 0x20=space
             );
         }
