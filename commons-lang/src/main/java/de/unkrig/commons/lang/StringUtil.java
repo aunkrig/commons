@@ -483,12 +483,15 @@ class StringUtil {
                         o -= this.infixLength;
                         continue;
                     }
+
                     final int omd = o - delta;
+
                     int o2 = omd;
                     if (o2 < minIndex) return -1;
+
                     for (; o2 < o; o2++) {
                         int delta2 = this.deltas.get(subject.charAt(o2));
-                        int o2md2 = o2 - delta2;
+                        int o2md2  = o2 - delta2;
                         if (o2md2 == omd) {
                             ;
                         } else
