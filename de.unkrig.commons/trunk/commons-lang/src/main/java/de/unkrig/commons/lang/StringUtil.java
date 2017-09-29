@@ -432,79 +432,84 @@ class StringUtil {
 
             @Override public int
             indexOf(CharSequence subject, int minIndex, int maxIndex) {
-                int subjectLength = subject.length();
 
-                if (minIndex < 0) minIndex = 0;
+                final int il1            = this.infixLength - 1;
+                final int subjectLength  = subject.length();
 
-                {
-                    int limit = subjectLength - this.infixLength;
-                    if (maxIndex > limit) maxIndex = limit;
-                }
-
-                if (minIndex > maxIndex) return -1;
-
-                minIndex += this.infixLength - 1;
-                for (;;) {
-
-                    int delta = this.deltas.get(subject.charAt(minIndex));
-                    if (delta == -1) {
-                        if (minIndex >= maxIndex) break;
-                        minIndex += this.infixLength;
-                        continue;
+                for (int o = minIndex - 1;;) {
+                    int o2;
+                    {
+                        o2 = o + this.infixLength;
+                        if (o2 >= subjectLength || o2 - this.infixLength >= maxIndex) return -1;
+                        int delta = this.deltas.get(subject.charAt(o2));
+                        if (delta == -1) {
+                            o = o2;
+                            continue;
+                        }
+                        if (delta == il1) {
+                            o = o2;
+                        } else
+                        if (delta >= o2 - o) {
+                            o = o2;
+                            continue;
+                        } else {
+                            o = o2 - delta - 1;
+                            continue;
+                        }
                     }
-
-                    minIndex -= delta;
-
-                    if (minIndex > maxIndex) break;
-
-                    for (int infixIndex = 0, subjectIndex = minIndex;; subjectIndex++, infixIndex++) {
-
-                        if (infixIndex >= this.infixLength) return minIndex;
-
-                        if (subject.charAt(subjectIndex) != infix.charAt(infixIndex)) break;
+                    // delta == infixLength - 1; subject.charAt(o2) == infix.charAt(il1)
+                    for (int o3 = o - 1;;) {
+                        int delta = this.deltas.get(subject.charAt(o3));
+                        if (delta == -1 || delta != o3 - o + il1) {
+                            o = o3;
+                            break;
+                        }
+                        if (delta == 0) return o3;
+                        o3--;
                     }
-
-                    if (minIndex == maxIndex) break;
-
-                    minIndex += this.infixLength;
                 }
-
-                return -1;
             }
 
             @Override public int
             lastIndexOf(CharSequence subject, int minIndex, int maxIndex) {
-                int subjectLength = subject.length();
 
-                if (minIndex < 0) minIndex = 0;
+                int limit = subject.length() - this.infixLength;
 
-                {
-                    int limit = subjectLength - this.infixLength;
-                    if (maxIndex > limit) maxIndex = limit;
-                }
-
-                while (maxIndex >= minIndex) {
-
-                    int delta = this.deltas.get(subject.charAt(maxIndex));
+                OUTER:
+                for (int o = maxIndex <= limit ? maxIndex : limit;;) {
+                    if (o < minIndex) return -1;
+                    int delta = this.deltas.get(subject.charAt(o));
                     if (delta == -1) {
-                        maxIndex -= this.infixLength;
+                        o -= this.infixLength;
                         continue;
                     }
-
-                    maxIndex -= delta;
-
-                    for (int infixIndex = 0, subjectIndex = maxIndex;; subjectIndex++, infixIndex++) {
-
-                        if (infixIndex >= this.infixLength) return maxIndex;
-                        if (subjectIndex >= subjectLength)  return -1;
-
-                        if (subject.charAt(subjectIndex) != infix.charAt(infixIndex)) break;
+                    final int omd = o - delta;
+                    int o2 = omd;
+                    if (o2 < minIndex) return -1;
+                    for (; o2 < o; o2++) {
+                        int delta2 = this.deltas.get(subject.charAt(o2));
+                        int o2md2 = o2 - delta2;
+                        if (o2md2 == omd) {
+                            ;
+                        } else
+                        if (o2md2 + this.infixLength <= o) {
+                            o = o2md2;
+                            continue OUTER;
+                        } else
+                        {
+                            o = o2 - this.infixLength;
+                            continue OUTER;
+                        }
                     }
-
-                    maxIndex--;
+                    for (o2++; o2 < omd + this.infixLength; o2++) {
+                        int delta2 = this.deltas.get(subject.charAt(o2));
+                        if (o2 - delta2 != omd) {
+                            o = omd - this.infixLength;
+                            continue OUTER;
+                        }
+                    }
+                    return omd;
                 }
-
-                return -1;
             }
 
             private CharToIntMapping
@@ -533,7 +538,146 @@ class StringUtil {
             }
 
             @Override public String
-            toString() { return "knuthMorrisPratt(\"" + infix + "\")"; }
+            toString() { return "knuthMorrisPratt2(" + PrettyPrinter.toString(infix) + ")"; }
+        };
+    }
+
+    /**
+     * Implementation of the Knuth-Morris-Pratt string search algorithm.
+     *
+     * @see <a href="https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm">The Knuth–Morris–Pratt
+     *      algorithm</a>
+     */
+    public static IndexOf
+    newKnuthMorrisPrattIndexOf(final char[][] infix) {
+
+        final int infixLength = infix.length;
+
+        return new AbstractIndexOf() {
+
+            final CharToIntMapping deltas = this.computeDeltas(infix);
+
+            @Override public int
+            indexOf(CharSequence subject, int minIndex, int maxIndex) {
+                int subjectLength = subject.length();
+
+                if (minIndex < 0) minIndex = 0;
+
+                {
+                    int limit = subjectLength - infixLength;
+                    if (maxIndex > limit) maxIndex = limit;
+                }
+
+                if (minIndex > maxIndex) return -1;
+
+                minIndex += infixLength - 1;
+                for (;;) {
+
+                    int delta = this.deltas.get(subject.charAt(minIndex));
+                    if (delta == -1) {
+                        if (minIndex >= maxIndex) break;
+                        minIndex += infixLength;
+                        continue;
+                    }
+
+                    minIndex -= delta;
+
+                    if (minIndex > maxIndex) break;
+
+                    for (int infixIndex = 0, subjectIndex = minIndex;; subjectIndex++, infixIndex++) {
+
+                        if (infixIndex >= infixLength) return minIndex;
+
+                        MATCHES:
+                        {
+                            char sc = subject.charAt(subjectIndex);
+                            for (char c : infix[infixIndex]) {
+                                if (sc == c) break MATCHES;
+                            }
+                            break;
+                        }
+                    }
+
+                    if (minIndex == maxIndex) break;
+
+                    minIndex += infixLength;
+                }
+
+                return -1;
+            }
+
+            @Override public int
+            lastIndexOf(CharSequence subject, int minIndex, int maxIndex) {
+                int subjectLength = subject.length();
+
+                if (minIndex < 0) minIndex = 0;
+
+                {
+                    int limit = subjectLength - infixLength;
+                    if (maxIndex > limit) maxIndex = limit;
+                }
+
+                while (maxIndex >= minIndex) {
+
+                    int delta = this.deltas.get(subject.charAt(maxIndex));
+                    if (delta == -1) {
+                        maxIndex -= infixLength;
+                        continue;
+                    }
+
+                    maxIndex -= delta;
+                    if (maxIndex < minIndex) break;
+
+                    for (int infixIndex = 0, subjectIndex = maxIndex;; subjectIndex++, infixIndex++) {
+
+                        if (infixIndex >= infixLength) return maxIndex;
+                        if (subjectIndex >= subjectLength)  return -1;
+
+                        MATCHES:
+                        {
+                            char sc = subject.charAt(subjectIndex);
+                            for (char c : infix[infixIndex]) {
+                                if (sc == c) break MATCHES;
+                            }
+                            break;
+                        }
+                    }
+
+                    maxIndex--;
+                }
+
+                return -1;
+            }
+
+            private CharToIntMapping
+            computeDeltas(char[][] offsets) {
+
+                char maxChar = 0;
+                for (int i = 0; i < offsets.length; i++) {
+                    for (char c : offsets[i]) {
+                        if (c > maxChar) maxChar = c;
+                    }
+                }
+
+                CharToIntMapping result;
+                if (maxChar < 256) {
+
+                    // The key characters are relative small, so we can use a super-fast, array-based mapping.
+                    result = StringUtil.arrayBasedCharToIntMapping(maxChar);
+                } else {
+
+                    result = StringUtil.hashMapCharToIntMapping();
+                }
+
+                for (int i = 0; i < offsets.length; i++) {
+                    for (char c : offsets[i]) result.put(c, i);
+                }
+
+                return result;
+            }
+
+            @Override public String
+            toString() { return "knuthMorrisPratt(" + infix + ")"; }
         };
     }
 
