@@ -26,6 +26,7 @@
 
 package test;
 
+import java.util.Locale;
 import java.util.Random;
 
 import org.junit.Assert;
@@ -98,7 +99,7 @@ class StringUtilTest {
     }
 
     @Test public void
-    testIndexOf() throws Throwable {
+    testIndexOf1() throws Throwable {
 
         String infix = "ABC";
 
@@ -110,6 +111,7 @@ class StringUtilTest {
             try {
                 Assert.assertEquals(3,  io.indexOf("   ABC ABC   "));
 
+                Assert.assertEquals(3,  io.indexOf("   ABC ABC   ", 1));
                 Assert.assertEquals(3,  io.indexOf("   ABC ABC   ", 2));
                 Assert.assertEquals(3,  io.indexOf("   ABC ABC   ", 3));
                 Assert.assertEquals(7,  io.indexOf("   ABC ABC   ", 4));
@@ -132,7 +134,72 @@ class StringUtilTest {
     }
 
     @Test public void
-    testLastIndexOf() throws Throwable {
+    testIndexOf2() {
+        Random random = new Random(123);
+
+        String infix = "ABC";
+
+        IndexOf io1 = StringUtil.newNaiveIndexOf(infix);
+        IndexOf io2 = StringUtil.newKnuthMorrisPrattIndexOf(infix);
+
+        for (int j = 0; j < 100000; j++) {
+
+            String subject;
+            {
+                StringBuilder sb = new StringBuilder();
+                for (int k = 10 + random.nextInt(10); k > 0; k--) {
+                    sb.append((char) ('A' + random.nextInt(4)));
+                }
+                subject = sb.toString();
+            }
+
+            for (int i = 0;; i++) {
+                int i1 = io1.indexOf(subject, i);
+                int i2 = io2.indexOf(subject, i);
+                Assert.assertEquals(
+                    "Iteration #" + j + ": \"" + subject + "\".indexOf(\"" + infix + "\", " + i + ")",
+                    i1,
+                    i2
+                );
+                if (i1 == -1) break;
+            }
+        }
+    }
+
+    @Test public void
+    testIndexOf3() {
+        Random random = new Random(123);
+
+        for (int i = 0; i < 100; i++) {
+
+            String subject;
+            {
+                StringBuilder sb = new StringBuilder();
+                for (int j = 100 + random.nextInt(10); j > 0; j--) {
+                    sb.append((char) ('A' + random.nextInt(6)));
+                }
+                subject = sb.toString();
+            }
+
+            for (IndexOf io : new IndexOf[] {
+                StringUtil.newNaiveIndexOf("ABCDE"),
+                StringUtil.newKnuthMorrisPrattIndexOf("ABCDE"),
+            }) {
+                long start = System.nanoTime();
+                for (int j = 0; j < 1000; j++) {
+                    for (int k = 0;; k++) {
+                        k = io.indexOf(subject, k);
+                        if (k == -1) break;
+                    }
+                }
+                long end = System.nanoTime();
+                System.out.printf(Locale.US, "%-37s %,d ns%n", io + ".indexOf()", end - start);
+            }
+        }
+    }
+
+    @Test public void
+    testLastIndexOf1() throws Throwable {
 
         String infix = "ABC";
 
@@ -158,6 +225,82 @@ class StringUtilTest {
                 throw ExceptionUtil.wrap(io.toString(), t);
             }
         }
+    }
+
+    @Test public void
+    testLastIndexOf2() {
+
+        String infix = "ABC";
+
+        IndexOf io1 = StringUtil.newNaiveIndexOf(infix);
+        IndexOf io2 = StringUtil.newKnuthMorrisPrattIndexOf(infix);
+
+        Random random = new Random(123);
+
+        for (int j = 0; j < 100000; j++) {
+            StringBuilder sb = new StringBuilder();
+            for (int k = 10 + random.nextInt(10); k > 0; k--) {
+                sb.append((char) ('A' + random.nextInt(4)));
+            }
+            String subject = sb.toString();
+            for (int i = Integer.MAX_VALUE;; i--) {
+                int i1 = io1.lastIndexOf(subject, i);
+                int i2 = io2.lastIndexOf(subject, i);
+                Assert.assertEquals(
+                    "Iteration #" + j + ", \"" + subject + "\".lastindexOf(\"" + infix + "\", " + i + ")",
+                    i1,
+                    i2
+                );
+                if (i1 == -1) break;
+                i = i1;
+            }
+        }
+    }
+
+    @Test public void
+    testLastIndexOf3() {
+        Random random = new Random(123);
+
+        for (int i = 0; i < 100; i++) {
+
+            String subject;
+            {
+                StringBuilder sb = new StringBuilder();
+                for (int j = 100 + random.nextInt(10); j > 0; j--) {
+                    sb.append((char) ('A' + random.nextInt(6)));
+                }
+                subject = sb.toString();
+            }
+
+            for (IndexOf io : new IndexOf[] {
+                StringUtil.newNaiveIndexOf("ABCDE"),
+                StringUtil.newKnuthMorrisPrattIndexOf("ABCDE"),
+            }) {
+                long start = System.nanoTime();
+                for (int j = 0; j < 1000; j++) {
+                    for (int k = Integer.MAX_VALUE;; k--) {
+                        k = io.lastIndexOf(subject, k);
+                        if (k == -1) break;
+                    }
+                }
+                long end = System.nanoTime();
+                System.out.printf(Locale.US, "%-45s %,d ns%n", io + ".lastIndexOf()", end - start);
+            }
+        }
+    }
+
+    @Test public void
+    testLastIndexOf4() {
+        int lidx = StringUtil.newKnuthMorrisPrattIndexOf("ABCDEFGHIJKLMNOP").lastIndexOf(
+            "ABCDEFGLMNOPABCDEFGHIJCDEFGHIJKLMNOPABHIJKLMNOPAIJKLMNOPABCDEFGHIJKLMXXXXXXXXXXXXXXXXXXXXXXOPXXXXXXX"
+            + "XXXXXXXXXXXXXXXXXABCDEFGHIJXXXXXXXXXXXXXXXXXXXGHIJKLMNOPABCDEFGHIJKEFGHIJKLMNOPABCDEFGHXXXXXXXXXXXXX"
+            + "XXXXXXXXXXXXXXXXBCDEFGHIJKLMNOPXXXXXXXXXXXXXXXXXXXXAMNOPABCDEFGHIJHIJKLMNOPABCDEFGHIGHIJKLMNOPXXXXXX"
+            + "XXXXXXXXXXXXXXXXXABCDEFGHIHIJKLMNOPABJKLMNOPABCDEFGHIJKLMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXEFGHIJKLMNOP"
+            + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXABXXXXXXXXXXXXXXXXXXXXXXXXXXMNOPXXXXXXXXABCDEFGXXXXXXXXXXXXXXXXXXXXXX"
+            + "XXXXXXXEFGHIJKLMNOPXXXXXXXXXXXXXXXXXXXXXXXXXXXXABCDEFGHIJKEFGHIJKLMNOPABCDEFGXXXLMNOPXXXXXXXXXXXXXXX"
+            + "XXXABCDEFGHIJKXXXXXXXXXXXXXXXXCDEFGHIJKLMNOPXABCDEFXIJKLMNOP"
+        );
+        Assert.assertEquals(-1, lidx);
     }
 
     private static Producer<String>
