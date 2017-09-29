@@ -541,7 +541,7 @@ class StringUtil {
             }
 
             @Override public String
-            toString() { return "knuthMorrisPratt2(" + PrettyPrinter.toString(infix) + ")"; }
+            toString() { return "knuthMorrisPratt(" + PrettyPrinter.toString(infix) + ")"; }
         };
     }
 
