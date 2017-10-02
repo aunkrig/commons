@@ -34,6 +34,7 @@ import org.junit.Test;
 
 import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.ExceptionUtil;
+import de.unkrig.commons.lang.PrettyPrinter;
 import de.unkrig.commons.lang.StringUtil;
 import de.unkrig.commons.lang.StringUtil.IndexOf;
 import de.unkrig.commons.lang.protocol.Producer;
@@ -69,7 +70,7 @@ class StringUtilTest {
     }
 
     @Test public void
-    testNewKnuthMorrisPrattIndexOf() {
+    testNewKnuthMorrisPrattIndexOf1() {
 
         String infix = "ABCDEFGHIJKLMNOP";
 
@@ -94,6 +95,111 @@ class StringUtilTest {
                 );
 
                 if (o1 == -1) break;
+            }
+        }
+    }
+
+    @Test public void
+    testNewKnuthMorrisPrattIndexOf2() {
+
+        Random r = new Random(9);
+
+        for (int i = 0; i < 1000; i++) {
+
+            String infix;
+            {
+                StringBuilder sb = new StringBuilder();
+                for (int j = 3 + r.nextInt(3); j > 0; j--) {
+                    sb.append((char) ('A' + r.nextInt(5)));
+                }
+                infix = sb.toString();
+            }
+
+            for (int j = 0; j < 100; j++) {
+
+                String subject;
+                {
+                    StringBuilder sb = new StringBuilder();
+                    for (int jj = 100 + r.nextInt(100); jj >= 0; jj--) sb.append((char) ('A' + r.nextInt(8)));
+                    subject = sb.toString();
+                }
+
+                IndexOf io = StringUtil.newKnuthMorrisPrattIndexOf(infix);
+
+                for (int offset = 0; offset < subject.length(); offset++) {
+
+                    int o1 = subject.indexOf(infix, offset);
+                    int o2 = io.indexOf(subject, offset, subject.length());
+
+                    if (o1 == offset) {
+                        System.currentTimeMillis();
+                    }
+                    if (o1 != o2) {
+                        Assert.assertEquals(
+                            "i=" + i + ", j=" + j + ", indexOf(" + PrettyPrinter.toString(subject) + ", " + offset + ")=" + subject.length(),
+                            o1,
+                            o2
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    @Test public void
+    testNewKnuthMorrisPrattIndexOf3() {
+
+        Random r = new Random(9);
+
+        for (int i = 0; i < 1000; i++) {
+
+            String infix;
+            {
+                StringBuilder sb = new StringBuilder();
+                for (int j = 3 + r.nextInt(3); j > 0; j--) {
+                    sb.append((char) ('A' + r.nextInt(5)));
+                }
+                infix = sb.toString();
+            }
+
+            for (int j = 0; j < 100; j++) {
+
+                String subject;
+                {
+                    StringBuilder sb = new StringBuilder();
+                    for (int jj = 100 + r.nextInt(100); jj >= 0; jj--) sb.append((char) ('A' + r.nextInt(8)));
+                    subject = sb.toString();
+                }
+
+                IndexOf io = StringUtil.newKnuthMorrisPrattIndexOf(infix);
+
+                for (int offset = 0; offset < subject.length(); offset++) {
+
+                    if (i == 2 && j == 94 && offset == 98) {
+                        System.currentTimeMillis();//TODO TMP
+                    }
+                    int o1 = subject.lastIndexOf(infix, offset);
+                    int o2 = io.lastIndexOf(subject, offset);
+
+                    if (o1 == offset) {
+                        System.currentTimeMillis();
+                    }
+                    if (o1 != o2) {
+                        Assert.assertEquals((
+                            "i="
+                            + i
+                            + ", j="
+                            + j
+                            + ", "
+                            + PrettyPrinter.toString(subject)
+                            + ".lastIndexOf("
+                            + PrettyPrinter.toString(infix)
+                            + ", "
+                            + offset
+                            + ")"
+                        ), o1, o2);
+                    }
+                }
             }
         }
     }
