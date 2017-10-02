@@ -433,85 +433,72 @@ class StringUtil {
             @Override public int
             indexOf(CharSequence subject, int minIndex, int maxIndex) {
 
-                final int il1            = this.infixLength - 1;
-                final int subjectLength  = subject.length();
+                final int  il       = this.infixLength;
+                final int  il1      = il - 1;
+                final char lastChar = infix.charAt(il1);
 
-                for (int o = minIndex - 1;;) {
-                    int o2;
-                    {
-                        o2 = o + this.infixLength;
-                        if (o2 >= subjectLength || o2 - this.infixLength >= maxIndex) return -1;
-                        int delta = this.deltas.get(subject.charAt(o2));
+                final int limit = subject.length() - il < maxIndex ? subject.length() - 1 : maxIndex + il1;
+                OUTER: for (int o = minIndex + il1; o <= limit;) {
+
+                    char c = subject.charAt(o);
+                    if (c != lastChar) {
+                        int delta = this.deltas.get(c);
                         if (delta == -1) {
-                            o = o2;
+                            o += il;
                             continue;
                         }
-                        if (delta == il1) {
-                            o = o2;
-                        } else
-                        if (delta >= o2 - o) {
-                            o = o2;
-                            continue;
-                        } else {
-                            o = o2 - delta - 1;
-                            continue;
-                        }
+                        o += -delta + il1;
+                        continue;
                     }
-                    // delta == infixLength - 1; subject.charAt(o2) == infix.charAt(il1)
-                    for (int o3 = o - 1;;) {
-                        int delta = this.deltas.get(subject.charAt(o3));
-                        if (delta == -1 || delta != o3 - o + il1) {
-                            o = o3;
-                            break;
+
+                    if (il1 == 0) return o;
+
+                    int o2 = o - 1;
+                    for (int idx = il1 - 1;; idx--, o2--) {
+                        if (infix.charAt(idx) != subject.charAt(o2)) {
+                            o++;
+                            continue OUTER;
                         }
-                        if (delta == 0) return o3;
-                        o3--;
+                        if (idx == 0) return o2;
                     }
                 }
+
+                return -1;
             }
 
             @Override public int
             lastIndexOf(CharSequence subject, int minIndex, int maxIndex) {
 
-                int limit = subject.length() - this.infixLength;
+                final char firstChar = infix.charAt(0);
 
+                final int limit = subject.length() - this.infixLength;
                 OUTER:
                 for (int o = maxIndex <= limit ? maxIndex : limit;;) {
+
                     if (o < minIndex) return -1;
-                    int delta = this.deltas.get(subject.charAt(o));
-                    if (delta == -1) {
-                        o -= this.infixLength;
+
+                    char c = subject.charAt(o);
+                    if (c != firstChar) {
+                        int delta = this.deltas.get(c);
+                        if (delta == -1) {
+                            o -= this.infixLength;
+                            continue;
+                        }
+
+                        o--;
                         continue;
                     }
 
-                    final int omd = o - delta;
-
-                    int o2 = omd;
-                    if (o2 < minIndex) return -1;
-
-                    for (; o2 < o; o2++) {
-                        int delta2 = this.deltas.get(subject.charAt(o2));
-                        int o2md2  = o2 - delta2;
-                        if (o2md2 == omd) {
-                            ;
-                        } else
-                        if (o2md2 + this.infixLength <= o) {
-                            o = o2md2;
-                            continue OUTER;
-                        } else
-                        {
-                            o = o2 - this.infixLength;
+                    int o2 = o;
+                    for (int ii = 0;; ii++, o2++) {
+                        if (subject.charAt(o2) != infix.charAt(ii)) {
+                            o--;
                             continue OUTER;
                         }
-                    }
-                    for (o2++; o2 < omd + this.infixLength; o2++) {
-                        int delta2 = this.deltas.get(subject.charAt(o2));
-                        if (o2 - delta2 != omd) {
-                            o = omd - this.infixLength;
-                            continue OUTER;
+                        if (ii == this.infixLength - 1) {
+                            return o;
                         }
                     }
-                    return omd;
                 }
             }
 
