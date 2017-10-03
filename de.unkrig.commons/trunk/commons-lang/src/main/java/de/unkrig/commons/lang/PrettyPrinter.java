@@ -128,7 +128,7 @@ class PrettyPrinter {
 
         if (o == null) return sb.append("null");
 
-        Class<? extends Object> clasS = o.getClass();
+        Class<?> clasS = o.getClass();
 
         if (clasS.isArray()) return PrettyPrinter.appendArray(o, null, sb);
 
