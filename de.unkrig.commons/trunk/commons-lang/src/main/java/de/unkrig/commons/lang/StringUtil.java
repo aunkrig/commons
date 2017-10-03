@@ -427,7 +427,8 @@ class StringUtil {
 
         return new AbstractIndexOf() {
 
-            final CharToIntMapping deltas      = this.computeDeltas(infix);
+            final CharToIntMapping minOffsets  = this.computeMinOffsets(infix);
+            final CharToIntMapping maxOffsets  = this.computeMaxOffsets(infix);
             final int              infixLength = infix.length();
 
             @Override public int
@@ -442,7 +443,7 @@ class StringUtil {
 
                     char c = subject.charAt(o);
                     if (c != lastChar) {
-                        int delta = this.deltas.get(c);
+                        int delta = this.maxOffsets.get(c);
                         if (delta == -1) {
                             o += il;
                             continue;
@@ -470,59 +471,50 @@ class StringUtil {
             lastIndexOf(CharSequence subject, int minIndex, int maxIndex) {
 
                 final char firstChar = infix.charAt(0);
+                final int  limit     = subject.length() - this.infixLength;
 
-                final int limit = subject.length() - this.infixLength;
-                OUTER:
                 for (int o = maxIndex <= limit ? maxIndex : limit;;) {
 
                     if (o < minIndex) return -1;
 
                     char c = subject.charAt(o);
                     if (c != firstChar) {
-                        int delta = this.deltas.get(c);
+                        int delta = this.minOffsets.get(c);
                         if (delta == -1) {
                             o -= this.infixLength;
                             continue;
                         }
 
-                        o--;
+                        o -= delta;
                         continue;
                     }
 
-                    int o2 = o;
-                    for (int ii = 0;; ii++, o2++) {
-                        if (subject.charAt(o2) != infix.charAt(ii)) {
-                            o--;
-                            continue OUTER;
-                        }
-                        if (ii == this.infixLength - 1) {
-                            return o;
-                        }
+                    int o2 = o + 1;
+                    for (int ii = 1;; ii++, o2++) {
+                        if (ii >= this.infixLength) return o;
+                        if (subject.charAt(o2) != infix.charAt(ii)) break;
                     }
+
+                    o--;
                 }
             }
 
             private CharToIntMapping
-            computeDeltas(CharSequence keys) {
-                int len = keys.length();
+            computeMinOffsets(CharSequence keys) {
 
-                char maxKey = 0;
-                for (int i = 0; i < len; i++) {
-                    char c = keys.charAt(i);
-                    if (c > maxKey) maxKey = c;
-                }
+                CharToIntMapping result = StringUtil.charToIntMapping(keys);
 
-                CharToIntMapping result;
-                if (maxKey < 256) {
+                for (int i = keys.length() - 1; i >= 0; i--) result.put(keys.charAt(i), i);
 
-                    // The key characters are relative small, so we can use a super-fast, array-based mapping.
-                    result = StringUtil.arrayBasedCharToIntMapping(maxKey);
-                } else {
+                return result;
+            }
 
-                    result = StringUtil.hashMapCharToIntMapping();
-                }
+            private CharToIntMapping
+            computeMaxOffsets(CharSequence keys) {
 
-                for (int i = 0; i < len; i++) result.put(keys.charAt(i), i);
+                CharToIntMapping result = StringUtil.charToIntMapping(keys);
+
+                for (int i = 0; i < keys.length(); i++) result.put(keys.charAt(i), i);
 
                 return result;
             }
@@ -649,15 +641,7 @@ class StringUtil {
                     }
                 }
 
-                CharToIntMapping result;
-                if (maxChar < 256) {
-
-                    // The key characters are relative small, so we can use a super-fast, array-based mapping.
-                    result = StringUtil.arrayBasedCharToIntMapping(maxChar);
-                } else {
-
-                    result = StringUtil.hashMapCharToIntMapping();
-                }
+                CharToIntMapping result = StringUtil.charToIntMapping(maxChar);
 
                 for (int i = 0; i < offsets.length; i++) {
                     for (char c : offsets[i]) result.put(c, i);
@@ -686,6 +670,30 @@ class StringUtil {
          * Maps the given <var>key</var> to the given <var>value</var>, replacing any previously mapped value.
          */
         void put(char key, int value);
+    }
+
+    private static CharToIntMapping
+    charToIntMapping(CharSequence chars) {
+
+        char maxKey = 0;
+        for (int i = 0; i < chars.length(); i++) {
+            char c = chars.charAt(i);
+            if (c > maxKey) maxKey = c;
+        }
+
+        return StringUtil.charToIntMapping(maxKey);
+    }
+
+    private static CharToIntMapping
+    charToIntMapping(char maxKey) {
+
+        if (maxKey < 256) {
+
+            // The key characters are relative small, so we can use a super-fast, array-based mapping.
+            return StringUtil.arrayBasedCharToIntMapping(maxKey);
+        } else {
+            return StringUtil.hashMapCharToIntMapping();
+        }
     }
 
     private static CharToIntMapping
