@@ -39,7 +39,7 @@ import de.unkrig.commons.lang.StringUtil;
 import de.unkrig.commons.lang.StringUtil.IndexOf;
 import de.unkrig.commons.lang.protocol.Producer;
 
-// CHECKSTYLE Javadoc:OFF
+// SUPPRESS CHECKSTYLE Javadoc:9999
 
 public
 class StringUtilTest {
@@ -131,12 +131,9 @@ class StringUtilTest {
                     int o1 = subject.indexOf(infix, offset);
                     int o2 = io.indexOf(subject, offset, subject.length());
 
-                    if (o1 == offset) {
-                        System.currentTimeMillis();
-                    }
                     if (o1 != o2) {
                         Assert.assertEquals(
-                            "i=" + i + ", j=" + j + ", indexOf(" + PrettyPrinter.toString(subject) + ", " + offset + ")=" + subject.length(),
+                            "i=" + i + ", j=" + j + ", indexOf(" + PrettyPrinter.toString(subject) + ", " + offset + ")=" + subject.length(), // SUPPRESS CHECKSTYLE LineLength
                             o1,
                             o2
                         );
@@ -175,15 +172,9 @@ class StringUtilTest {
 
                 for (int offset = 0; offset < subject.length(); offset++) {
 
-                    if (i == 2 && j == 94 && offset == 98) {
-                        System.currentTimeMillis();//TODO TMP
-                    }
                     int o1 = subject.lastIndexOf(infix, offset);
                     int o2 = io.lastIndexOf(subject, offset);
 
-                    if (o1 == offset) {
-                        System.currentTimeMillis();
-                    }
                     if (o1 != o2) {
                         Assert.assertEquals((
                             "i="
@@ -202,6 +193,55 @@ class StringUtilTest {
                 }
             }
         }
+    }
+
+    @Test public void
+    testNewKnuthMorrisPrattIndexOf4() {
+
+        String       infix   = "ABAB";
+        final String subject = "      ABA AB ABAB  ";
+
+        IndexOf io = StringUtil.newKnuthMorrisPrattIndexOf(infix);
+
+        final StringBuilder sb       = new StringBuilder();
+        CharSequence        subject2 = new CharSequence() {
+
+            @Override public CharSequence
+            subSequence(int start, int end) {
+                sb.append(" subSequence(").append(start).append(", ").append(end).append(")");
+                return subject.subSequence(start, end);
+            }
+
+            @Override public int
+            length() {
+                sb.append(" length()");
+                return subject.length();
+            }
+
+            @Override public char
+            charAt(int index) {
+                sb.append(" charAt(").append(index).append(')');
+                return subject.charAt(index);
+            }
+        };
+
+        sb.setLength(0);
+        Assert.assertEquals(13, io.indexOf(subject2));
+        Assert.assertEquals((
+            ""
+            + " length() length()"
+            + " charAt(3) charAt(7) charAt(6) charAt(5) charAt(8)"
+            + " charAt(9) charAt(13) charAt(14) charAt(13) charAt(12)"
+            + " charAt(15) charAt(16) charAt(15) charAt(14) charAt(13)"
+        ), sb.toString());
+
+        sb.setLength(0);
+        Assert.assertEquals(13, io.lastIndexOf(subject2));
+        Assert.assertEquals((
+            " length()"
+            + " charAt(15) charAt(16) charAt(17) charAt(14) charAt(13)"
+            + " charAt(14) charAt(15) charAt(16)"
+        ), sb.toString());
     }
 
     @Test public void
@@ -233,7 +273,7 @@ class StringUtilTest {
                 Assert.assertEquals(-1, io.indexOf("   ABC ABC   ", 4, 2));
                 Assert.assertEquals(-1, io.indexOf("   ABC ABC   ", 4, 1));
                 Assert.assertEquals(-1, io.indexOf("   ABC ABC   ", 4, 0));
-            } catch (Throwable t) {
+            } catch (Throwable t) { // SUPPRESS CHECKSTYLE IllegalCatch
                 throw ExceptionUtil.wrap(io.toString(), t);
             }
         }
@@ -327,7 +367,7 @@ class StringUtilTest {
 
                 Assert.assertEquals(3,  io.lastIndexOf("   ABC ABC   ", 3, 6));
                 Assert.assertEquals(-1, io.lastIndexOf("   ABC ABC   ", 4, 6));
-            } catch (Throwable t) {
+            } catch (Throwable t) { // SUPPRESS CHECKSTYLE IllegalCatch
                 throw ExceptionUtil.wrap(io.toString(), t);
             }
         }
