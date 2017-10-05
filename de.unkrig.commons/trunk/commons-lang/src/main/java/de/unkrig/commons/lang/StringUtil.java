@@ -29,9 +29,7 @@ package de.unkrig.commons.lang;
 import java.io.BufferedReader;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 import de.unkrig.commons.lang.protocol.Predicate;
@@ -359,12 +357,12 @@ class StringUtil {
      * </p>
      */
     public static IndexOf
-    newIndexOf(final String infix) {
+    indexOf(final String infix) {
 
         if (infix.length() < 16) {
-            return StringUtil.newNaiveIndexOf(infix);
+            return StringUtil.naiveIndexOf(infix);
         } else {
-            return StringUtil.newKnuthMorrisPrattIndexOf(infix);
+            return StringUtil.boyerMooreHorspoolIndexOf(infix);
         }
     }
 
@@ -383,7 +381,7 @@ class StringUtil {
      *         a naive string search algorithm
      */
     public static IndexOf
-    newNaiveIndexOf(final String infix) {
+    naiveIndexOf(final String infix) {
 
         return new AbstractIndexOf() {
 
@@ -417,342 +415,215 @@ class StringUtil {
     }
 
     /**
-     * Implementation of the Knuth-Morris-Pratt string search algorithm.
+     * Implementation of the Boyer-Moore-Horspool string search algorithm.
      *
-     * @see <a href="https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm">The Knuth–Morris–Pratt
-     *      algorithm</a>
+     * @see <a href="https://en.wikipedia.org/wiki/Boyer%E2%80%93Moore%E2%80%93Horspool_algorithm">The
+     *      Boyer–Moore–Horspool algorithm</a>
      */
     public static IndexOf
-    newKnuthMorrisPrattIndexOf(final String infix) {
+    boyerMooreHorspoolIndexOf(final CharSequence needle) {
 
         return new AbstractIndexOf() {
 
-            final CharToIntMapping minOffsets  = this.computeMinOffsets(infix);
-            final CharToIntMapping maxOffsets  = this.computeMaxOffsets(infix);
-            final int              infixLength = infix.length();
+            final int needleLength = needle.length();
+
+            /**
+             * "Safe-skip" tables for {@link #indexOf()} and {@link #lastIndexOf(CharSequence)}.
+             */
+            final int[] safeSkip1 = new int[256];
+
+            /**
+             * "Safe-skip" tables for {@link #indexOf()} and {@link #lastIndexOf(CharSequence)}.
+             */
+            final int[] safeSkip2 = new int[256];
+
+            {
+                Arrays.fill(this.safeSkip1, this.needleLength);
+                Arrays.fill(this.safeSkip2, this.needleLength);
+                int nl1 = this.needleLength - 1;
+                for (int i = 0; i < this.needleLength; i++) {
+                    this.safeSkip1[0xff & needle.charAt(i)]       = nl1 - i;
+                    this.safeSkip2[0xff & needle.charAt(nl1 - i)] = nl1 - i;
+                }
+            }
 
             @Override public int
-            indexOf(CharSequence subject, int minIndex, int maxIndex) {
+            indexOf(CharSequence haystack, int minIndex, int maxIndex) {
 
-                final int  il       = this.infixLength;
-                final int  il1      = il - 1;
-                final char lastChar = infix.charAt(il1);
+                final int  nl1      = this.needleLength - 1;
+                final char lastChar = needle.charAt(nl1);
 
-                final int limit = subject.length() - il < maxIndex ? subject.length() - 1 : maxIndex + il1;
-                OUTER: for (int o = minIndex + il1; o <= limit;) {
+                final int limit = maxIndex >= haystack.length() - nl1 ? haystack.length() - 1 : maxIndex + nl1;
+                for (int o = minIndex <= 0 ? nl1 : minIndex + nl1; o <= limit;) {
 
-                    char c = subject.charAt(o);
+                    char c = haystack.charAt(o);
                     if (c != lastChar) {
-                        int delta = this.maxOffsets.get(c);
-                        if (delta == -1) {
-                            o += il;
-                            continue;
-                        }
-                        o += -delta + il1;
+                        o += this.safeSkip1[0xff & c];
                         continue;
                     }
 
-                    if (il1 == 0) return o;
+                    if (nl1 == 0) return o;
 
                     int o2 = o - 1;
-                    for (int idx = il1 - 1;; idx--, o2--) {
-                        if (infix.charAt(idx) != subject.charAt(o2)) {
-                            o++;
-                            continue OUTER;
-                        }
-                        if (idx == 0) return o2;
+                    for (int ii = nl1 - 1;; ii--, o2--) {
+                        if (haystack.charAt(o2) != needle.charAt(ii)) break;
+                        if (ii == 0) return o2;
                     }
+
+                    o++;
                 }
 
                 return -1;
             }
 
             @Override public int
-            lastIndexOf(CharSequence subject, int minIndex, int maxIndex) {
+            lastIndexOf(CharSequence haystack, int minIndex, int maxIndex) {
 
-                final char firstChar = infix.charAt(0);
-                final int  limit     = subject.length() - this.infixLength;
+                final int  nl        = this.needleLength;
+                final char firstChar = needle.charAt(0);
 
-                for (int o = maxIndex <= limit ? maxIndex : limit;;) {
+                final int limit = haystack.length() - nl;
+                for (int o = maxIndex <= limit ? maxIndex : limit; o >= minIndex;) {
 
-                    if (o < minIndex) return -1;
-
-                    char c = subject.charAt(o);
+                    char c = haystack.charAt(o);
                     if (c != firstChar) {
-                        int delta = this.minOffsets.get(c);
-                        if (delta == -1) {
-                            o -= this.infixLength;
-                            continue;
-                        }
-
-                        o -= delta;
+                        o -= this.safeSkip2[0xff & c];
                         continue;
                     }
 
+                    if (nl == 1) return o;
+
                     int o2 = o + 1;
                     for (int ii = 1;; ii++, o2++) {
-                        if (ii >= this.infixLength) return o;
-                        if (subject.charAt(o2) != infix.charAt(ii)) break;
+                        if (ii >= nl) return o;
+                        if (haystack.charAt(o2) != needle.charAt(ii)) break;
                     }
 
                     o--;
                 }
-            }
 
-            private CharToIntMapping
-            computeMinOffsets(CharSequence keys) {
-
-                CharToIntMapping result = StringUtil.charToIntMapping(keys);
-
-                for (int i = keys.length() - 1; i >= 0; i--) result.put(keys.charAt(i), i);
-
-                return result;
-            }
-
-            private CharToIntMapping
-            computeMaxOffsets(CharSequence keys) {
-
-                CharToIntMapping result = StringUtil.charToIntMapping(keys);
-
-                for (int i = 0; i < keys.length(); i++) result.put(keys.charAt(i), i);
-
-                return result;
+                return -1;
             }
 
             @Override public String
-            toString() { return "knuthMorrisPratt(" + PrettyPrinter.toString(infix) + ")"; }
+            toString() { return "boyerMooreHorspool(" + PrettyPrinter.toString(needle) + ")"; }
         };
     }
 
     /**
-     * Implementation of the Knuth-Morris-Pratt string search algorithm.
+     * Implementation of the Boyer-Moore-Horspool string search algorithm.
      *
-     * @see <a href="https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm">The Knuth–Morris–Pratt
-     *      algorithm</a>
+     * @see <a href="https://en.wikipedia.org/wiki/Boyer%E2%80%93Moore%E2%80%93Horspool_algorithm">The
+     *      Boyer–Moore–Horspool algorithm</a>
      */
     public static IndexOf
-    newKnuthMorrisPrattIndexOf(final char[][] infix) {
-
-        final int infixLength = infix.length;
+    boyerMooreHorspoolIndexOf(final char[][] needle) {
 
         return new AbstractIndexOf() {
 
-            final CharToIntMapping deltas = this.computeDeltas(infix);
+            final int needleLength = needle.length;
+
+            /**
+             * "Safe-skip" tables for {@link #indexOf()} and {@link #lastIndexOf(CharSequence)}.
+             */
+            final int[] safeSkip1 = new int[256];
+
+            /**
+             * "Safe-skip" tables for {@link #indexOf()} and {@link #lastIndexOf(CharSequence)}.
+             */
+            final int[] safeSkip2 = new int[256];
+
+            {
+                Arrays.fill(this.safeSkip1, this.needleLength);
+                Arrays.fill(this.safeSkip2, this.needleLength);
+                int nl1 = this.needleLength - 1;
+                for (int i = 0; i < this.needleLength; i++) {
+                    for (char c : needle[i]) this.safeSkip1[0xff & c] = nl1 - i;
+                }
+                for (int i = nl1; i >= 0; i--) {
+                    for (char c : needle[i]) this.safeSkip2[0xff & c] = i;
+                }
+            }
 
             @Override public int
-            indexOf(CharSequence subject, int minIndex, int maxIndex) {
-                int subjectLength = subject.length();
+            indexOf(CharSequence haystack, int minIndex, int maxIndex) {
 
-                if (minIndex < 0) minIndex = 0;
+                final int    nl1      = this.needleLength - 1;
+                final char[] lastChars = needle[nl1];
 
-                {
-                    int limit = subjectLength - infixLength;
-                    if (maxIndex > limit) maxIndex = limit;
-                }
+                final int limit = maxIndex >= haystack.length() - nl1 ? haystack.length() - 1 : maxIndex + nl1;
+                for (int o = minIndex <= 0 ? nl1 : minIndex + nl1; o <= limit;) {
 
-                if (minIndex > maxIndex) return -1;
-
-                minIndex += infixLength - 1;
-                for (;;) {
-
-                    int delta = this.deltas.get(subject.charAt(minIndex));
-                    if (delta == -1) {
-                        if (minIndex >= maxIndex) break;
-                        minIndex += infixLength;
+                    char c = haystack.charAt(o);
+                    LC: {
+                        for (char lc : lastChars) {
+                            if (lc == c) break LC;
+                        }
+                        o += this.safeSkip1[0xff & c];
                         continue;
                     }
 
-                    minIndex -= delta;
+                    if (nl1 == 0) return o;
 
-                    if (minIndex > maxIndex) break;
-
-                    for (int infixIndex = 0, subjectIndex = minIndex;; subjectIndex++, infixIndex++) {
-
-                        if (infixIndex >= infixLength) return minIndex;
-
-                        MATCHES:
-                        {
-                            char sc = subject.charAt(subjectIndex);
-                            for (char c : infix[infixIndex]) {
-                                if (sc == c) break MATCHES;
+                    int o2 = o - 1;
+                    for (int ii = nl1 - 1;; ii--, o2--) {
+                        LC: {
+                            for (char lc : lastChars) {
+                                if (c == lc) break LC;
                             }
                             break;
                         }
+                        if (ii == 0) return o2;
                     }
 
-                    if (minIndex == maxIndex) break;
-
-                    minIndex += infixLength;
+                    o++;
                 }
 
                 return -1;
             }
 
             @Override public int
-            lastIndexOf(CharSequence subject, int minIndex, int maxIndex) {
-                int subjectLength = subject.length();
+            lastIndexOf(CharSequence haystack, int minIndex, int maxIndex) {
 
-                if (minIndex < 0) minIndex = 0;
+                final int    nl         = this.needleLength;
+                final char[] firstChars = needle[0];
 
-                {
-                    int limit = subjectLength - infixLength;
-                    if (maxIndex > limit) maxIndex = limit;
-                }
+                final int limit = haystack.length() - nl;
+                for (int o = maxIndex <= limit ? maxIndex : limit; o >= minIndex;) {
 
-                while (maxIndex >= minIndex) {
-
-                    int delta = this.deltas.get(subject.charAt(maxIndex));
-                    if (delta == -1) {
-                        maxIndex -= infixLength;
+                    char c = haystack.charAt(o);
+                    FC: {
+                        for (char fc : firstChars) {
+                            if (c == fc) break FC;
+                        }
+                        o -= this.safeSkip2[0xff & c];
                         continue;
                     }
 
-                    maxIndex -= delta;
-                    if (maxIndex < minIndex) break;
+                    if (nl == 1) return o;
 
-                    for (int infixIndex = 0, subjectIndex = maxIndex;; subjectIndex++, infixIndex++) {
+                    int o2 = o + 1;
+                    for (int ii = 1;; ii++, o2++) {
 
-                        if (infixIndex >= infixLength) return maxIndex;
-                        if (subjectIndex >= subjectLength)  return -1;
+                        if (ii >= nl) return o;
 
-                        MATCHES:
-                        {
-                            char sc = subject.charAt(subjectIndex);
-                            for (char c : infix[infixIndex]) {
-                                if (sc == c) break MATCHES;
+                        c = haystack.charAt(o2);
+                        FC: {
+                            for (char fc : firstChars) {
+                                if (c == fc) break FC;
                             }
                             break;
                         }
                     }
 
-                    maxIndex--;
+                    o--;
                 }
 
                 return -1;
-            }
-
-            private CharToIntMapping
-            computeDeltas(char[][] offsets) {
-
-                char maxChar = 0;
-                for (int i = 0; i < offsets.length; i++) {
-                    for (char c : offsets[i]) {
-                        if (c > maxChar) maxChar = c;
-                    }
-                }
-
-                CharToIntMapping result = StringUtil.charToIntMapping(maxChar);
-
-                for (int i = 0; i < offsets.length; i++) {
-                    for (char c : offsets[i]) result.put(c, i);
-                }
-
-                return result;
             }
 
             @Override public String
-            toString() { return "knuthMorrisPratt(" + infix + ")"; }
+            toString() { return "boyerMooreHorspool(" + PrettyPrinter.toString(needle) + ")"; }
         };
-    }
-
-    /**
-     * Optimized version of a {@code Map<Character, Integer>}.
-     */
-    private
-    interface CharToIntMapping {
-
-        /**
-         * @return The value that the <var>key</var> maps to, or {@code -1}
-         */
-        int get(char key);
-
-        /**
-         * Maps the given <var>key</var> to the given <var>value</var>, replacing any previously mapped value.
-         */
-        void put(char key, int value);
-    }
-
-    private static CharToIntMapping
-    charToIntMapping(CharSequence chars) {
-
-        char maxKey = 0;
-        for (int i = 0; i < chars.length(); i++) {
-            char c = chars.charAt(i);
-            if (c > maxKey) maxKey = c;
-        }
-
-        return StringUtil.charToIntMapping(maxKey);
-    }
-
-    private static CharToIntMapping
-    charToIntMapping(char maxKey) {
-
-        if (maxKey < 256) {
-
-            // The key characters are relative small, so we can use a super-fast, array-based mapping.
-            return StringUtil.arrayBasedCharToIntMapping(maxKey);
-        } else {
-            return StringUtil.hashMapCharToIntMapping();
-        }
-    }
-
-    private static CharToIntMapping
-    arrayBasedCharToIntMapping(final char maxKey) {
-
-        return new CharToIntMapping() {
-
-            final int[] deltas = new int[maxKey + 1];
-            { Arrays.fill(this.deltas, -1); }
-
-            @Override public int
-            get(char c) {
-                return c < this.deltas.length ? this.deltas[c] : -1;
-            }
-
-            @Override public void
-            put(char key, int value) { this.deltas[key] = value; }
-        };
-    }
-
-    private static CharToIntMapping
-    hashMapCharToIntMapping() {
-
-        return new CharToIntMapping() {
-
-            final Map<Character, Integer> deltas = new HashMap<Character, Integer>();
-
-            @Override public int
-            get(char c) {
-                Integer result = this.deltas.get(c);
-                return result != null ? result : -1;
-            }
-
-            @Override public void
-            put(char key, int value) { this.deltas.put(key, value); }
-        };
-    }
-
-    /**
-     * @return The input string, enclosed in double quotes, and special characters replaced with Java escapes
-     */
-    public static String
-    asJavaLiteral(String s) {
-
-        StringBuilder sb = new StringBuilder(s.length() + 2).append('"');
-
-        for (char c : s.toCharArray()) {
-            int idx;
-            if ((idx = "\r\n\b\t\\".indexOf(c)) != -1) {
-                sb.append('\\').append("rnbt\\".charAt(idx));
-            } else
-            if (c < 32 || c == 127 || c > 255) {
-                sb.append(String.format("\\u%04x", (int) c));
-            } else
-            {
-                sb.append(c);
-            }
-        }
-
-        return sb.append('"').toString();
     }
 }

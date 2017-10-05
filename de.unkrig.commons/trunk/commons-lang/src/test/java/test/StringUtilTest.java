@@ -51,7 +51,7 @@ class StringUtilTest {
 
         String infix = "ABCDEFGHIJKLMNOP";
 
-        IndexOf io = StringUtil.newNaiveIndexOf(infix);
+        IndexOf io = StringUtil.naiveIndexOf(infix);
 
         Producer<String> rsp = StringUtilTest.randomSubjectProducer(infix);
 
@@ -70,37 +70,45 @@ class StringUtilTest {
     }
 
     @Test public void
-    testNewKnuthMorrisPrattIndexOf1() {
+    testBoyerMooreHorspoolIndexOf1() {
 
         String infix = "ABCDEFGHIJKLMNOP";
 
-        IndexOf io = StringUtil.newKnuthMorrisPrattIndexOf(infix);
+        IndexOf io = StringUtil.boyerMooreHorspoolIndexOf(infix);
 
         Producer<String> rsp = StringUtilTest.randomSubjectProducer(infix);
 
         for (int j = 0; j < 10000; j++) {
             String subject = AssertionUtil.notNull(rsp.produce());
-            for (int offset = 0;; offset += offset == 100 ? subject.length() - 200 : 1) {
+            for (int offset = -10; offset < subject.length() + 10; offset += offset == 100 ? subject.length() - 200 : 1) {
 
-                int o1 = subject.indexOf(infix, offset);
-                int o2 = io.indexOf(subject, offset, subject.length());
+                int i1 = subject.indexOf(infix, offset);
+                int i2 = io.indexOf(subject, offset);
 
-                if (o1 != o2) {
-                    o2 = io.indexOf(subject, offset, subject.length());
+                if (i1 != i2) {
+                    Assert.assertEquals(
+                        "j=" + j + " " + io + ".indexOf(" + PrettyPrinter.toString(subject) + ", " + offset + ")",
+                        i1,
+                        i2
+                    );
                 }
-                Assert.assertEquals(
-                    "j=" + j + " offset=" + offset + " subject=\"" + subject + "\" subject.length=" + subject.length(),
-                    o1,
-                    o2
-                );
 
-                if (o1 == -1) break;
+                int li1 = subject.lastIndexOf(infix, offset);
+                int li2 = io.lastIndexOf(subject, offset);
+
+                if (li1 != li2) {
+                    Assert.assertEquals(
+                        "j=" + j + " " + io + ".lastIndexOf(" + PrettyPrinter.toString(subject) + ", " + offset + ")",
+                        li1,
+                        li2
+                    );
+                }
             }
         }
     }
 
     @Test public void
-    testNewKnuthMorrisPrattIndexOf2() {
+    testBoyerMooreHorspoolIndexOf2() {
 
         Random r = new Random(9);
 
@@ -124,16 +132,71 @@ class StringUtilTest {
                     subject = sb.toString();
                 }
 
-                IndexOf io = StringUtil.newKnuthMorrisPrattIndexOf(infix);
+                IndexOf io = StringUtil.boyerMooreHorspoolIndexOf(infix);
+
+                for (int offset = -10; offset < subject.length() + 10; offset += offset == 10 ? subject.length() - 20 : 1) {
+
+                    int i1 = subject.indexOf(infix, offset);
+                    int i2 = io.indexOf(subject, offset);
+
+                    if (i1 != i2) {
+                        Assert.assertEquals(
+                            "i=" + i + ", j=" + j + " " + io + ".indexOf(" + PrettyPrinter.toString(subject) + ", " + offset + ")",
+                            i1,
+                            i2
+                        );
+                    }
+
+                    int li1 = subject.lastIndexOf(infix, offset);
+                    int li2 = io.lastIndexOf(subject, offset);
+
+                    if (li1 != li2) {
+                        Assert.assertEquals(
+                            "i=" + i + ", j=" + j + " " + io + ".lastIndexOf(" + PrettyPrinter.toString(subject) + ", " + offset + ")",
+                            li1,
+                            li2
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    @Test public void
+    testBoyerMooreHorspoolIndexOf3() {
+
+        Random r = new Random(9);
+
+        for (int i = 0; i < 1000; i++) {
+
+            String infix;
+            {
+                StringBuilder sb = new StringBuilder();
+                for (int j = 3 + r.nextInt(3); j > 0; j--) {
+                    sb.append((char) ('A' + r.nextInt(5)));
+                }
+                infix = sb.toString();
+            }
+
+            for (int j = 0; j < 100; j++) {
+
+                String subject;
+                {
+                    StringBuilder sb = new StringBuilder();
+                    for (int jj = 100 + r.nextInt(100); jj >= 0; jj--) sb.append((char) ('A' + r.nextInt(8)));
+                    subject = sb.toString();
+                }
+
+                IndexOf io = StringUtil.boyerMooreHorspoolIndexOf(infix);
 
                 for (int offset = 0; offset < subject.length(); offset++) {
 
-                    int o1 = subject.indexOf(infix, offset);
-                    int o2 = io.indexOf(subject, offset, subject.length());
+                    int o1 = subject.lastIndexOf(infix, offset);
+                    int o2 = io.lastIndexOf(subject, offset);
 
                     if (o1 != o2) {
                         Assert.assertEquals(
-                            "i=" + i + ", j=" + j + ", indexOf(" + PrettyPrinter.toString(subject) + ", " + offset + ")=" + subject.length(), // SUPPRESS CHECKSTYLE LineLength
+                            "i=" + i + ", j=" + j + " " + io + ".lastIndexOf(" + PrettyPrinter.toString(subject) + ", " + offset + ")",
                             o1,
                             o2
                         );
@@ -144,64 +207,12 @@ class StringUtilTest {
     }
 
     @Test public void
-    testNewKnuthMorrisPrattIndexOf3() {
-
-        Random r = new Random(9);
-
-        for (int i = 0; i < 1000; i++) {
-
-            String infix;
-            {
-                StringBuilder sb = new StringBuilder();
-                for (int j = 3 + r.nextInt(3); j > 0; j--) {
-                    sb.append((char) ('A' + r.nextInt(5)));
-                }
-                infix = sb.toString();
-            }
-
-            for (int j = 0; j < 100; j++) {
-
-                String subject;
-                {
-                    StringBuilder sb = new StringBuilder();
-                    for (int jj = 100 + r.nextInt(100); jj >= 0; jj--) sb.append((char) ('A' + r.nextInt(8)));
-                    subject = sb.toString();
-                }
-
-                IndexOf io = StringUtil.newKnuthMorrisPrattIndexOf(infix);
-
-                for (int offset = 0; offset < subject.length(); offset++) {
-
-                    int o1 = subject.lastIndexOf(infix, offset);
-                    int o2 = io.lastIndexOf(subject, offset);
-
-                    if (o1 != o2) {
-                        Assert.assertEquals((
-                            "i="
-                            + i
-                            + ", j="
-                            + j
-                            + ", "
-                            + PrettyPrinter.toString(subject)
-                            + ".lastIndexOf("
-                            + PrettyPrinter.toString(infix)
-                            + ", "
-                            + offset
-                            + ")"
-                        ), o1, o2);
-                    }
-                }
-            }
-        }
-    }
-
-    @Test public void
-    testNewKnuthMorrisPrattIndexOf4() {
+    testBoyerMooreHorspoolIndexOf4() {
 
         String       infix   = "ABAB";
         final String subject = "      ABA AB ABAB  ";
 
-        IndexOf io = StringUtil.newKnuthMorrisPrattIndexOf(infix);
+        IndexOf io = StringUtil.boyerMooreHorspoolIndexOf(infix);
 
         final StringBuilder sb       = new StringBuilder();
         CharSequence        subject2 = new CharSequence() {
@@ -250,8 +261,8 @@ class StringUtilTest {
         String infix = "ABC";
 
         for (IndexOf io : new IndexOf[] {
-            StringUtil.newNaiveIndexOf(infix),
-            StringUtil.newKnuthMorrisPrattIndexOf(infix),
+            StringUtil.naiveIndexOf(infix),
+            StringUtil.boyerMooreHorspoolIndexOf(infix),
         }) {
 
             try {
@@ -285,8 +296,10 @@ class StringUtilTest {
 
         String infix = "ABC";
 
-        IndexOf io1 = StringUtil.newNaiveIndexOf(infix);
-        IndexOf io2 = StringUtil.newKnuthMorrisPrattIndexOf(infix);
+        IndexOf[] ios = {
+            StringUtil.naiveIndexOf(infix),
+            StringUtil.boyerMooreHorspoolIndexOf(infix),
+        };
 
         for (int j = 0; j < 100000; j++) {
 
@@ -300,14 +313,16 @@ class StringUtilTest {
             }
 
             for (int i = 0;; i++) {
-                int i1 = io1.indexOf(subject, i);
-                int i2 = io2.indexOf(subject, i);
-                Assert.assertEquals(
-                    "Iteration #" + j + ": \"" + subject + "\".indexOf(\"" + infix + "\", " + i + ")",
-                    i1,
-                    i2
-                );
-                if (i1 == -1) break;
+                int index0 = ios[0].indexOf(subject, i);
+                for (int k = 1; k < ios.length; k++) {
+                    int indexK = ios[k].indexOf(subject, i);
+                    Assert.assertEquals(
+                        "Iteration #" + j + ": " + ios[k] + ".indexOf(" + PrettyPrinter.toString(subject) + ", " + i + ")",
+                        index0,
+                        indexK
+                    );
+                }
+                if (index0 == -1) break;
             }
         }
     }
@@ -328,8 +343,8 @@ class StringUtilTest {
             }
 
             for (IndexOf io : new IndexOf[] {
-                StringUtil.newNaiveIndexOf("ABCDE"),
-                StringUtil.newKnuthMorrisPrattIndexOf("ABCDE"),
+                StringUtil.naiveIndexOf("ABCDE"),
+                StringUtil.boyerMooreHorspoolIndexOf("ABCDE"),
             }) {
                 long start = System.nanoTime();
                 for (int j = 0; j < 1000; j++) {
@@ -350,8 +365,8 @@ class StringUtilTest {
         String infix = "ABC";
 
         for (IndexOf io : new IndexOf[] {
-            StringUtil.newNaiveIndexOf(infix),
-            StringUtil.newKnuthMorrisPrattIndexOf(infix),
+            StringUtil.naiveIndexOf(infix),
+            StringUtil.boyerMooreHorspoolIndexOf(infix),
         }) {
 
             try {
@@ -378,8 +393,8 @@ class StringUtilTest {
 
         String infix = "ABC";
 
-        IndexOf io1 = StringUtil.newNaiveIndexOf(infix);
-        IndexOf io2 = StringUtil.newKnuthMorrisPrattIndexOf(infix);
+        IndexOf io1 = StringUtil.naiveIndexOf(infix);
+        IndexOf io2 = StringUtil.boyerMooreHorspoolIndexOf(infix);
 
         Random random = new Random(123);
 
@@ -419,8 +434,8 @@ class StringUtilTest {
             }
 
             for (IndexOf io : new IndexOf[] {
-                StringUtil.newNaiveIndexOf("ABCDE"),
-                StringUtil.newKnuthMorrisPrattIndexOf("ABCDE"),
+                StringUtil.naiveIndexOf("ABCDE"),
+                StringUtil.boyerMooreHorspoolIndexOf("ABCDE"),
             }) {
                 long start = System.nanoTime();
                 for (int j = 0; j < 1000; j++) {
@@ -437,7 +452,7 @@ class StringUtilTest {
 
     @Test public void
     testLastIndexOf4() {
-        int lidx = StringUtil.newKnuthMorrisPrattIndexOf("ABCDEFGHIJKLMNOP").lastIndexOf(
+        int lidx = StringUtil.boyerMooreHorspoolIndexOf("ABCDEFGHIJKLMNOP").lastIndexOf(
             "ABCDEFGLMNOPABCDEFGHIJCDEFGHIJKLMNOPABHIJKLMNOPAIJKLMNOPABCDEFGHIJKLMXXXXXXXXXXXXXXXXXXXXXXOPXXXXXXX"
             + "XXXXXXXXXXXXXXXXXABCDEFGHIJXXXXXXXXXXXXXXXXXXXGHIJKLMNOPABCDEFGHIJKEFGHIJKLMNOPABCDEFGHXXXXXXXXXXXXX"
             + "XXXXXXXXXXXXXXXXBCDEFGHIJKLMNOPXXXXXXXXXXXXXXXXXXXXAMNOPABCDEFGHIJHIJKLMNOPABCDEFGHIGHIJKLMNOPXXXXXX"
