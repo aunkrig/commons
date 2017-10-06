@@ -108,16 +108,34 @@ class StringUtil {
     }
 
     /**
-     * @return A string consisting of <var>n</var> times the string <var>s</var>
+     * @return A string consisting of <var>n</var> times the character sequence <var>chars</var>
      */
     public static String
-    repeat(int n, String s) {
+    repeat(int n, char[] chars) {
+
+        if (n == 0) return "";
+        int len = chars.length;
+        if (len == 0) return "";
+        if (len == 1) return StringUtil.repeat(n, chars[0]);
+
+        char[] ca = new char[n * len];
+        for (int i = 0, o = 0; i < n; i++) {
+            for (int j = 0; j < len; j++) ca[o++] = chars[j];
+        }
+        return String.copyValueOf(ca);
+    }
+
+    /**
+     * @return A string consisting of <var>n</var> times the <var>cs</var>
+     */
+    public static String
+    repeat(int n, CharSequence cs) {
 
         if (n <= 0) return "";
-        if (n == 1) return s;
+        if (n == 1) return cs.toString();
 
-        int    len = s.length();
-        char[] src = s.toCharArray();
+        int    len = cs.length();
+        char[] src = StringUtil.toCharArray(cs);
         char[] dst = new char[n * len];
         for (int i = 0; i < n; i++) {
             System.arraycopy(src, 0, dst, i * len, len);
@@ -357,7 +375,7 @@ class StringUtil {
      * </p>
      */
     public static IndexOf
-    indexOf(final String infix) {
+    indexOf(final CharSequence infix) {
 
         if (infix.length() < 16) {
             return StringUtil.naiveIndexOf(infix);
@@ -381,7 +399,9 @@ class StringUtil {
      *         a naive string search algorithm
      */
     public static IndexOf
-    naiveIndexOf(final String infix) {
+    naiveIndexOf(final CharSequence infix) {
+
+        final String infix2 = infix.toString();
 
         return new AbstractIndexOf() {
 
@@ -391,21 +411,21 @@ class StringUtil {
             indexOf(CharSequence subject, int minIndex, int maxIndex) {
 
                 if (maxIndex >= subject.length() - this.infixLength) {
-                    return subject.toString().indexOf(infix, minIndex);
+                    return subject.toString().indexOf(infix2, minIndex);
                 }
 
-                return subject.toString().substring(0, maxIndex + this.infixLength).indexOf(infix, minIndex);
+                return subject.toString().substring(0, maxIndex + this.infixLength).indexOf(infix2, minIndex);
             }
 
             @Override public int
             lastIndexOf(CharSequence subject, int minIndex, int maxIndex) {
 
-                if (minIndex <= 0) return subject.toString().lastIndexOf(infix, maxIndex);
+                if (minIndex <= 0) return subject.toString().lastIndexOf(infix2, maxIndex);
 
                 subject  =  subject.subSequence(minIndex, subject.length());
                 maxIndex -= minIndex;
 
-                int result = subject.toString().lastIndexOf(infix, maxIndex);
+                int result = subject.toString().lastIndexOf(infix2, maxIndex);
                 return result == -1 ? -1 : result + minIndex;
             }
 
@@ -465,9 +485,9 @@ class StringUtil {
                     if (nl1 == 0) return o;
 
                     int o2 = o - 1;
-                    for (int ii = nl1 - 1;; ii--, o2--) {
-                        if (haystack.charAt(o2) != needle.charAt(ii)) break;
-                        if (ii == 0) return o2;
+                    for (int ni = nl1 - 1;; ni--, o2--) {
+                        if (haystack.charAt(o2) != needle.charAt(ni)) break;
+                        if (ni == 0) return o2;
                     }
 
                     o++;
@@ -510,6 +530,76 @@ class StringUtil {
         };
     }
 
+    public static IndexOf
+    indexOf(char[][] needle) {
+
+        return (
+            needle.length < 3
+            ? StringUtil.naiveIndexOf(needle)
+            : StringUtil.boyerMooreHorspoolIndexOf(needle)
+        );
+    }
+
+    private static IndexOf
+    naiveIndexOf(final char[][] needle) {
+
+        return new AbstractIndexOf() {
+
+            @Override public int
+            indexOf(CharSequence subject, int minIndex, int maxIndex) {
+
+                if (minIndex < 0) minIndex = 0;
+                if (maxIndex > subject.length() - needle.length) maxIndex = subject.length() - needle.length;
+
+                CHARS: for (; minIndex <= maxIndex; minIndex++) {
+
+                    int o = minIndex;
+                    for (char[] n : needle) {
+                        char c = subject.charAt(o++);
+                        NC: {
+                            for (char nc : n) {
+                                if (c == nc) break NC;
+                            }
+                            continue CHARS;
+                        }
+                    }
+
+                    return minIndex;
+                }
+
+                return -1;
+            }
+
+            @Override public int
+            lastIndexOf(CharSequence subject, int minIndex, int maxIndex) {
+
+                if (minIndex < 0) minIndex = 0;
+                if (maxIndex > subject.length() - needle.length) maxIndex = subject.length() - needle.length;
+
+                CHARS: for (; maxIndex >= minIndex; maxIndex++) {
+
+                    int o = maxIndex;
+                    for (char[] n : needle) {
+                        char c = subject.charAt(o++);
+                        NC: {
+                            for (char nc : n) {
+                                if (c == nc) break NC;
+                            }
+                            continue CHARS;
+                        }
+                    }
+
+                    return maxIndex;
+                }
+
+                return -1;
+            }
+
+            @Override public String
+            toString() { return "naiveIndexOf(" + Arrays.deepToString(needle) + ")"; }
+        };
+    }
+
     /**
      * Implementation of the Boyer-Moore-Horspool string search algorithm.
      *
@@ -518,6 +608,28 @@ class StringUtil {
      */
     public static IndexOf
     boyerMooreHorspoolIndexOf(final char[][] needle) {
+
+        boolean univalent = true;
+        for (int i = needle.length - 1; i >= 0; i--) {
+            char[] n = needle[i];
+
+            // Compact duplicates in the char array.
+            for (int j = n.length - 1; j >= 0; j--) {
+                for (int k = j - 1; k >= 0; k--) {
+                    if (n[k] == n[j]) {
+                        needle[i] = new char[n.length - 1];
+                        System.arraycopy(n, 0, needle[i], 0, k);
+                        System.arraycopy(n, k + 1, needle[i], k, n.length - 1 - k);
+                        j--;
+                        k--;
+                        n = needle[i];
+                    }
+                }
+            }
+            if (n.length != 1) univalent = false;
+        }
+
+        if (univalent) return StringUtil.boyerMooreHorspoolIndexOf(StringUtil.mirror(needle));
 
         return new AbstractIndexOf() {
 
@@ -548,7 +660,7 @@ class StringUtil {
             @Override public int
             indexOf(CharSequence haystack, int minIndex, int maxIndex) {
 
-                final int    nl1      = this.needleLength - 1;
+                final int    nl1       = this.needleLength - 1;
                 final char[] lastChars = needle[nl1];
 
                 final int limit = maxIndex >= haystack.length() - nl1 ? haystack.length() - 1 : maxIndex + nl1;
@@ -566,14 +678,16 @@ class StringUtil {
                     if (nl1 == 0) return o;
 
                     int o2 = o - 1;
-                    for (int ii = nl1 - 1;; ii--, o2--) {
-                        LC: {
-                            for (char lc : lastChars) {
-                                if (c == lc) break LC;
+                    for (int ni = nl1 - 1;; ni--, o2--) {
+
+                        c = haystack.charAt(o2);
+                        NC: {
+                            for (char nc : needle[ni]) {
+                                if (c == nc) break NC;
                             }
                             break;
                         }
-                        if (ii == 0) return o2;
+                        if (ni == 0) return o2;
                     }
 
                     o++;
@@ -603,14 +717,14 @@ class StringUtil {
                     if (nl == 1) return o;
 
                     int o2 = o + 1;
-                    for (int ii = 1;; ii++, o2++) {
+                    for (int ni = 1;; ni++, o2++) {
 
-                        if (ii >= nl) return o;
+                        if (ni >= nl) return o;
 
                         c = haystack.charAt(o2);
-                        FC: {
-                            for (char fc : firstChars) {
-                                if (c == fc) break FC;
+                        NC: {
+                            for (char nc : needle[ni]) {
+                                if (c == nc) break NC;
                             }
                             break;
                         }
@@ -623,7 +737,41 @@ class StringUtil {
             }
 
             @Override public String
-            toString() { return "boyerMooreHorspool(" + PrettyPrinter.toString(needle) + ")"; }
+            toString() { return "boyerMooreHorspool(" + Arrays.deepToString(needle) + ")"; }
         };
+    }
+
+    private static char[][]
+    mirror(char[][] subject) {
+
+        int height = subject.length;
+        if (height == 0) return new char[0][];
+
+        int width = subject[0].length;
+
+        char[][] result = new char[width][];
+        result[0] = new char[height];
+        for (int j = 0; j < height; j++) {
+            if (subject[j].length != width) throw new IllegalArgumentException();
+            result[0][j] = subject[j][0];
+        }
+        for (int i = 1; i < width; i++) {
+            result[i] = new char[height];
+            for (int j = 0; j < height; j++) {
+                if (subject[j].length != width) throw new IllegalArgumentException();
+                result[i][j] = subject[j][i];
+            }
+        }
+        return result;
+    }
+
+    /**
+     * An optimization of "{@code cs.toString().toCharArray()}".
+     */
+    public static char[]
+    toCharArray(CharSequence cs) {
+        char[] result = new char[cs.length()];
+        for (int i = cs.length() - 1; i >= 0; i--) result[i] = cs.charAt(i);
+        return result;
     }
 }
