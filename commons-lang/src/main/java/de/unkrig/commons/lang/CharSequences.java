@@ -100,4 +100,14 @@ class CharSequences {
             charAt(int index) { return buf[off + index]; }
         };
     }
+
+    /**
+     * An optimization of "{@code cs.toString().toCharArray()}".
+     */
+    public static char[]
+    toCharArray(CharSequence cs) {
+        char[] result = new char[cs.length()];
+        for (int i = cs.length() - 1; i >= 0; i--) result[i] = cs.charAt(i);
+        return result;
+    }
 }
