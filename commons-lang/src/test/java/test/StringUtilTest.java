@@ -80,7 +80,11 @@ class StringUtilTest {
 
         for (int j = 0; j < 10000; j++) {
             String subject = AssertionUtil.notNull(rsp.produce());
-            for (int offset = -10; offset < subject.length() + 10; offset += offset == 100 ? subject.length() - 200 : 1) {
+            for (
+                int offset = -10;
+                offset < subject.length() + 10;
+                offset += offset == 100 ? subject.length() - 200 : 1
+            ) {
 
                 int i1 = subject.indexOf(infix, offset);
                 int i2 = io.indexOf(subject, offset);
@@ -134,14 +138,18 @@ class StringUtilTest {
 
                 IndexOf io = StringUtil.boyerMooreHorspoolIndexOf(infix);
 
-                for (int offset = -10; offset < subject.length() + 10; offset += offset == 10 ? subject.length() - 20 : 1) {
+                for (
+                    int offset = -10;
+                    offset < subject.length() + 10;
+                    offset += offset == 10 ? subject.length() - 20 : 1
+                ) {
 
                     int i1 = subject.indexOf(infix, offset);
                     int i2 = io.indexOf(subject, offset);
 
                     if (i1 != i2) {
                         Assert.assertEquals(
-                            "i=" + i + ", j=" + j + " " + io + ".indexOf(" + PrettyPrinter.toString(subject) + ", " + offset + ")",
+                            "i=" + i + ", j=" + j + " " + io + ".indexOf(" + PrettyPrinter.toString(subject) + ", " + offset + ")", // SUPPRESS CHECKSTYLE LineLength
                             i1,
                             i2
                         );
@@ -152,7 +160,7 @@ class StringUtilTest {
 
                     if (li1 != li2) {
                         Assert.assertEquals(
-                            "i=" + i + ", j=" + j + " " + io + ".lastIndexOf(" + PrettyPrinter.toString(subject) + ", " + offset + ")",
+                            "i=" + i + ", j=" + j + " " + io + ".lastIndexOf(" + PrettyPrinter.toString(subject) + ", " + offset + ")", // SUPPRESS CHECKSTYLE LineLength
                             li1,
                             li2
                         );
@@ -196,7 +204,7 @@ class StringUtilTest {
 
                     if (o1 != o2) {
                         Assert.assertEquals(
-                            "i=" + i + ", j=" + j + " " + io + ".lastIndexOf(" + PrettyPrinter.toString(subject) + ", " + offset + ")",
+                            "i=" + i + ", j=" + j + " " + io + ".lastIndexOf(" + PrettyPrinter.toString(subject) + ", " + offset + ")", // SUPPRESS CHECKSTYLE LineLength
                             o1,
                             o2
                         );
@@ -317,7 +325,7 @@ class StringUtilTest {
                 for (int k = 1; k < ios.length; k++) {
                     int indexK = ios[k].indexOf(subject, i);
                     Assert.assertEquals(
-                        "Iteration #" + j + ": " + ios[k] + ".indexOf(" + PrettyPrinter.toString(subject) + ", " + i + ")",
+                        "Iteration #" + j + ": " + ios[k] + ".indexOf(" + PrettyPrinter.toString(subject) + ", " + i + ")", // SUPPRESS CHECKSTYLE LineLength
                         index0,
                         indexK
                     );
