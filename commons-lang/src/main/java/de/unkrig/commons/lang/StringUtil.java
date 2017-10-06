@@ -135,7 +135,7 @@ class StringUtil {
         if (n == 1) return cs.toString();
 
         int    len = cs.length();
-        char[] src = StringUtil.toCharArray(cs);
+        char[] src = CharSequences.toCharArray(cs);
         char[] dst = new char[n * len];
         for (int i = 0; i < n; i++) {
             System.arraycopy(src, 0, dst, i * len, len);
@@ -300,12 +300,12 @@ class StringUtil {
          *   For the return value, the following condition holds true:
          * </p>
          * <pre>
-         *   StringUtil.newIndexOf(infix).indexOf(subject) == subject.indexOf(infix)
+         *   StringUtil.newIndexOf(needle).indexOf(haystack) == haystack.indexOf(needle)
          * </pre>
          *
-         * @return {@code 0} ... {@code subject.length() - infix.length()}, or {@code -1}
+         * @return {@code 0} ... {@code haystack.length() - needle.length()}, or {@code -1}
          */
-        int indexOf(CharSequence subject);
+        int indexOf(CharSequence haystack);
 
         /**
          * The equivalent of {@link String#indexOf(String, int)}.
@@ -313,19 +313,20 @@ class StringUtil {
          *   For the return value, the following condition holds true:
          * </p>
          * <pre>
-         *   StringUtil.newIndexOf(infix).indexOf(subject, minIndex) == subject.indexOf(infix, minIndex)
+         *   StringUtil.newIndexOf(needle).indexOf(haystack, minIndex) == haystack.indexOf(needle, minIndex)
          * </pre>
          *
-         * @return {@code max(0, minIndex)} ... {@code subject.length() - infix.length()}, or {@code -1}
+         * @return {@code max(0, minIndex)} ... {@code haystack.length() - needle.length()}, or {@code -1}
          */
-        int indexOf(CharSequence subject, int minIndex);
+        int indexOf(CharSequence haystack, int minIndex);
 
         /**
          * Like {@link #indexOf(CharSequence, int)}, but the match terminates at index <var>maxIndex</var> (inclusive).
          *
-         * @return {@code max(0, minIndex)} ... {@code min(maxIndex, subject.length() - infix.length())}, or {@code -1}
+         * @return {@code max(0, minIndex)} ... {@code min(maxIndex, haystack.length() - needle.length())}, or {@code
+         *         -1}
          */
-        int indexOf(CharSequence subject, int minIndex, int maxIndex);
+        int indexOf(CharSequence haystack, int minIndex, int maxIndex);
 
         /**
          * The equivalent of {@link String#lastIndexOf(String)}.
@@ -333,12 +334,12 @@ class StringUtil {
          *   For the return value, the following condition holds true:
          * </p>
          * <pre>
-         *   StringUtil.newIndexOf(infix).lastIndexOf(subject) == subject.lastIndexOf(infix)
+         *   StringUtil.newIndexOf(needle).lastIndexOf(haystack) == haystack.lastIndexOf(needle)
          * </pre>
          *
-         * @return {@code 0} ... {@code subject.length() - infix.length()}, or {@code -1}
+         * @return {@code 0} ... {@code haystack.length() - needle.length()}, or {@code -1}
          */
-        int lastIndexOf(CharSequence subject);
+        int lastIndexOf(CharSequence haystack);
 
         /**
          * The equivalent of {@link String#lastIndexOf(String, int)}.
@@ -346,23 +347,24 @@ class StringUtil {
          *   For the return value, the following condition holds true:
          * </p>
          * <pre>
-         *   StringUtil.newIndexOf(infix).lastIndexOf(subject, maxIndex) == subject.lastIndexOf(infix, maxIndex)
+         *   StringUtil.newIndexOf(needle).lastIndexOf(haystack, maxIndex) == haystack.lastIndexOf(needle, maxIndex)
          * </pre>
          *
-         * @return {@code 0} ... {@code min(maxIndex, subject.length() - infix.length())}, or {@code -1}
+         * @return {@code 0} ... {@code min(maxIndex, haystack.length() - needle.length())}, or {@code -1}
          */
-        int lastIndexOf(CharSequence subject, int maxIndex);
+        int lastIndexOf(CharSequence haystack, int maxIndex);
 
         /**
          * Like {@link #lastIndexOf(CharSequence, int)}, but the match terminates at index <var>minIndex</var>
          * (inclusive).
          *
-         * @return {@code max(0, minIndex)} ... {@code min(maxIndex, subject.length() - infix.length())}, or {@code -1}
+         * @return {@code max(0, minIndex)} ... {@code min(maxIndex, haystack.length() - needle.length())}, or {@code
+         *         -1}
          */
-        int lastIndexOf(CharSequence subject, int minIndex, int maxIndex);
+        int lastIndexOf(CharSequence haystack, int minIndex, int maxIndex);
 
         /**
-         * @return A textual representation of the infix and the search algorithm
+         * @return A textual representation of the needle and the search algorithm
          */
         @Override String toString();
     }
@@ -370,26 +372,40 @@ class StringUtil {
     /**
      * Runtime-optimized reimplementation of {@link String#indexOf(String)} and {@link String#lastIndexOf(String)}.
      * <p>
-     *   This method returns an implementation that performs at least as well as the {@link String} methods by analyzing
-     *   the <var>infix</var> (the string to search for).
+     *   This method returns an implementation that performs at least as well as the {@link String} methods by
+     *   analyzing the <var>needle</var> (the string to search for).
      * </p>
+     *
+     * @param needle The string to search for
      */
     public static IndexOf
-    indexOf(final CharSequence infix) {
+    indexOf(char[] needle) { return StringUtil.indexOf(CharSequences.from(needle)); }
 
-        if (infix.length() < 16) {
-            return StringUtil.naiveIndexOf(infix);
+    /**
+     * Runtime-optimized reimplementation of {@link String#indexOf(String)} and {@link String#lastIndexOf(String)}.
+     * <p>
+     *   This method returns an implementation that performs at least as well as the {@link String} methods by
+     *   analyzing the <var>needle</var> (the string to search for).
+     * </p>
+     *
+     * @param needle The string to search for
+     */
+    public static IndexOf
+    indexOf(final CharSequence needle) {
+
+        if (needle.length() < 16) {
+            return StringUtil.naiveIndexOf(needle);
         } else {
-            return StringUtil.boyerMooreHorspoolIndexOf(infix);
+            return StringUtil.boyerMooreHorspoolIndexOf(needle);
         }
     }
 
     private abstract static
     class AbstractIndexOf implements IndexOf {
-        @Override public int indexOf(CharSequence subject)                   { return this.indexOf(subject, 0, Integer.MAX_VALUE);         } // SUPPRESS CHECKSTYLE LineLength:4
-        @Override public int indexOf(CharSequence subject, int minIndex)     { return this.indexOf(subject, minIndex, Integer.MAX_VALUE); }
-        @Override public int lastIndexOf(CharSequence subject)               { return this.lastIndexOf(subject, 0, Integer.MAX_VALUE);     }
-        @Override public int lastIndexOf(CharSequence subject, int maxIndex) { return this.lastIndexOf(subject, 0, maxIndex);              }
+        @Override public int indexOf(CharSequence haystack)                   { return this.indexOf(haystack, 0, Integer.MAX_VALUE);        } // SUPPRESS CHECKSTYLE LineLength:4
+        @Override public int indexOf(CharSequence haystack, int minIndex)     { return this.indexOf(haystack, minIndex, Integer.MAX_VALUE); }
+        @Override public int lastIndexOf(CharSequence haystack)               { return this.lastIndexOf(haystack, 0, Integer.MAX_VALUE);    }
+        @Override public int lastIndexOf(CharSequence haystack, int maxIndex) { return this.lastIndexOf(haystack, 0, maxIndex);             }
 
         @Override public abstract String toString();
     }
@@ -399,46 +415,47 @@ class StringUtil {
      *         a naive string search algorithm
      */
     public static IndexOf
-    naiveIndexOf(final CharSequence infix) {
+    naiveIndexOf(final CharSequence needle) {
 
-        final String infix2 = infix.toString();
+        final String needle2 = needle.toString();
 
         return new AbstractIndexOf() {
 
-            final int infixLength = infix.length();
+            final int needleLength = needle.length();
 
             @Override public int
-            indexOf(CharSequence subject, int minIndex, int maxIndex) {
+            indexOf(CharSequence haystack, int minIndex, int maxIndex) {
 
-                if (maxIndex >= subject.length() - this.infixLength) {
-                    return subject.toString().indexOf(infix2, minIndex);
+                if (maxIndex >= haystack.length() - this.needleLength) {
+                    return haystack.toString().indexOf(needle2, minIndex);
                 }
 
-                return subject.toString().substring(0, maxIndex + this.infixLength).indexOf(infix2, minIndex);
+                return haystack.toString().substring(0, maxIndex + this.needleLength).indexOf(needle2, minIndex);
             }
 
             @Override public int
-            lastIndexOf(CharSequence subject, int minIndex, int maxIndex) {
+            lastIndexOf(CharSequence haystack, int minIndex, int maxIndex) {
 
-                if (minIndex <= 0) return subject.toString().lastIndexOf(infix2, maxIndex);
+                if (minIndex <= 0) return haystack.toString().lastIndexOf(needle2, maxIndex);
 
-                subject  =  subject.subSequence(minIndex, subject.length());
+                haystack =  haystack.subSequence(minIndex, haystack.length());
                 maxIndex -= minIndex;
 
-                int result = subject.toString().lastIndexOf(infix2, maxIndex);
+                int result = haystack.toString().lastIndexOf(needle2, maxIndex);
                 return result == -1 ? -1 : result + minIndex;
             }
 
             @Override public String
-            toString() { return "naive(" + PrettyPrinter.toString(infix) + ")"; }
+            toString() { return "naive(" + PrettyPrinter.toString(needle) + ")"; }
         };
     }
 
     /**
      * Implementation of the Boyer-Moore-Horspool string search algorithm.
      *
-     * @see <a href="https://en.wikipedia.org/wiki/Boyer%E2%80%93Moore%E2%80%93Horspool_algorithm">The
-     *      Boyer–Moore–Horspool algorithm</a>
+     * @param needle The string to search for
+     * @see          <a href="https://en.wikipedia.org/wiki/Boyer%E2%80%93Moore%E2%80%93Horspool_algorithm">The
+     *               Boyer–Moore–Horspool algorithm</a>
      */
     public static IndexOf
     boyerMooreHorspoolIndexOf(final CharSequence needle) {
@@ -448,12 +465,12 @@ class StringUtil {
             final int needleLength = needle.length();
 
             /**
-             * "Safe-skip" tables for {@link #indexOf()} and {@link #lastIndexOf(CharSequence)}.
+             * The "Safe-skip" table for {@link #indexOf()}.
              */
             final int[] safeSkip1 = new int[256];
 
             /**
-             * "Safe-skip" tables for {@link #indexOf()} and {@link #lastIndexOf(CharSequence)}.
+             * The "Safe-skip" table for {@link #lastIndexOf(CharSequence)}.
              */
             final int[] safeSkip2 = new int[256];
 
@@ -530,11 +547,33 @@ class StringUtil {
         };
     }
 
+    /**
+     * Creates a highly optimized {@link IndexOf} object that searches for "multivalent" <var>needle</var>.
+     * Multivalent means that a character in the haystack equals <em>any of</em> {@code needle[offset]}.
+     * <p>
+     *   E.g. a case-insensitive search for {@code "abc"} in the {@code haystack} string could be implemented like
+     *   this:
+     * </p>
+     * <pre>
+     *   int idx = StringUtil.indexOf(new char[][] { { 'a', 'A' }, { 'b', 'B' }, { 'c', 'C' } }).indexOf(haystack);
+     * </pre>
+     */
     public static IndexOf
     indexOf(char[][] needle) {
+        int len = needle.length;
+
+        UNIVALENT_NEEDLE: {
+            char[] univalentNeedle = new char[len];
+            for (int i = 0; i < len; i++) {
+                if (needle[i].length != 1) break UNIVALENT_NEEDLE;
+                univalentNeedle[i] = needle[i][0];
+            }
+
+            return StringUtil.indexOf(univalentNeedle);
+        }
 
         return (
-            needle.length < 3
+            len < 3
             ? StringUtil.naiveIndexOf(needle)
             : StringUtil.boyerMooreHorspoolIndexOf(needle)
         );
@@ -546,16 +585,16 @@ class StringUtil {
         return new AbstractIndexOf() {
 
             @Override public int
-            indexOf(CharSequence subject, int minIndex, int maxIndex) {
+            indexOf(CharSequence haystack, int minIndex, int maxIndex) {
 
                 if (minIndex < 0) minIndex = 0;
-                if (maxIndex > subject.length() - needle.length) maxIndex = subject.length() - needle.length;
+                if (maxIndex > haystack.length() - needle.length) maxIndex = haystack.length() - needle.length;
 
                 CHARS: for (; minIndex <= maxIndex; minIndex++) {
 
                     int o = minIndex;
                     for (char[] n : needle) {
-                        char c = subject.charAt(o++);
+                        char c = haystack.charAt(o++);
                         NC: {
                             for (char nc : n) {
                                 if (c == nc) break NC;
@@ -571,16 +610,16 @@ class StringUtil {
             }
 
             @Override public int
-            lastIndexOf(CharSequence subject, int minIndex, int maxIndex) {
+            lastIndexOf(CharSequence haystack, int minIndex, int maxIndex) {
 
                 if (minIndex < 0) minIndex = 0;
-                if (maxIndex > subject.length() - needle.length) maxIndex = subject.length() - needle.length;
+                if (maxIndex > haystack.length() - needle.length) maxIndex = haystack.length() - needle.length;
 
                 CHARS: for (; maxIndex >= minIndex; maxIndex++) {
 
                     int o = maxIndex;
                     for (char[] n : needle) {
-                        char c = subject.charAt(o++);
+                        char c = haystack.charAt(o++);
                         NC: {
                             for (char nc : n) {
                                 if (c == nc) break NC;
@@ -602,6 +641,10 @@ class StringUtil {
 
     /**
      * Implementation of the Boyer-Moore-Horspool string search algorithm.
+     * <p>
+     *   Notice that the {@link #indexOf(char[][])} method performs some extra optimizations, e.g. when the needle
+     *   is actually univalent (all of {@code needle[n].length} are 1), or when the needle is very short.
+     * </p>
      *
      * @see <a href="https://en.wikipedia.org/wiki/Boyer%E2%80%93Moore%E2%80%93Horspool_algorithm">The
      *      Boyer–Moore–Horspool algorithm</a>
@@ -636,12 +679,12 @@ class StringUtil {
             final int needleLength = needle.length;
 
             /**
-             * "Safe-skip" tables for {@link #indexOf()} and {@link #lastIndexOf(CharSequence)}.
+             * The "Safe-skip" table for {@link #indexOf()}.
              */
             final int[] safeSkip1 = new int[256];
 
             /**
-             * "Safe-skip" tables for {@link #indexOf()} and {@link #lastIndexOf(CharSequence)}.
+             * The "Safe-skip" table for {@link #lastIndexOf(CharSequence)}.
              */
             final int[] safeSkip2 = new int[256];
 
@@ -751,28 +794,20 @@ class StringUtil {
         int width = subject[0].length;
 
         char[][] result = new char[width][];
+
         result[0] = new char[height];
         for (int j = 0; j < height; j++) {
             if (subject[j].length != width) throw new IllegalArgumentException();
             result[0][j] = subject[j][0];
         }
+
         for (int i = 1; i < width; i++) {
             result[i] = new char[height];
             for (int j = 0; j < height; j++) {
-                if (subject[j].length != width) throw new IllegalArgumentException();
                 result[i][j] = subject[j][i];
             }
         }
-        return result;
-    }
 
-    /**
-     * An optimization of "{@code cs.toString().toCharArray()}".
-     */
-    public static char[]
-    toCharArray(CharSequence cs) {
-        char[] result = new char[cs.length()];
-        for (int i = cs.length() - 1; i >= 0; i--) result[i] = cs.charAt(i);
         return result;
     }
 }
