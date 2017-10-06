@@ -120,4 +120,29 @@ class Sets {
         @Override public boolean    equals(Object o)               { return (o instanceof SortedSet) && ((SortedSet) o).size() == 0; } // SUPPRESS CHECKSTYLE LineLength
         @Override public int        hashCode()                     { return 0; }
     }
+
+    public static <T> Set<T>
+    of(T... values) {
+
+        if (values.length == 1) return Collections.singleton(values[0]);
+
+        Set<T> result = new HashSet<T>(values.length);
+        for (T v : values) result.add(v);
+
+        return result;
+    }
+
+    public static <T> Set<T>
+    union(Set<? extends T> lhs, Set<? extends T> rhs) {
+        Set<T> result = new HashSet<T>(lhs);
+        result.addAll(rhs);
+        return result;
+    }
+
+    public static <T> Set<T>
+    intersection(Set<? extends T> lhs, Set<? extends T> rhs) {
+        Set<T> result = new HashSet<T>(lhs);
+        result.retainAll(rhs);
+        return result;
+    }
 }
