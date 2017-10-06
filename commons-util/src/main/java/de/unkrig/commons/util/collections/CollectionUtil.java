@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -143,5 +144,35 @@ class CollectionUtil {
         Arrays.sort(a);
 
         return (Collection<T>) Arrays.asList(a);
+    }
+
+    /**
+     * @return                      A {@code char[]} that contains all elements of the <var>charSet</var>
+     * @throws NullPointerException The <var>charSet</var> contained a {@code null} element
+     */
+    public static char[]
+    toCharArray(Set<Character> charSet) {
+
+        char[] result = new char[charSet.size()];
+
+        int i = 0;
+        for (Character c : charSet) result[i++] = c;
+
+        return result;
+    }
+
+    /**
+     * @return                      An {@code int[]} that contains all elements of the <var>intSet</var>
+     * @throws NullPointerException The <var>intSet</var> contained a {@code null} element
+     */
+    public static int[]
+    toIntArray(Set<Integer> intSet) {
+
+        int[] result = new int[intSet.size()];
+
+        int i = 0;
+        for (int v : intSet) result[i++] = v;
+
+        return result;
     }
 }
