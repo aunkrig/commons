@@ -50,4 +50,49 @@ class ArrayUtil {
         System.arraycopy(values, 0, result, a.length, values.length);
         return result;
     }
+
+    /**
+     * @return An array of size {@code a.length + values.length}, filled with the values from <var>a</var> and
+     *         <var>values</var>
+     */
+    public static char[]
+    append(char[] a, char... values) {
+        char[] result = new char[a.length + values.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(values, 0, result, a.length, values.length);
+        return result;
+    }
+
+    public static char[][]
+    mirror(char[]... cas) {
+
+        int n1 = cas.length;
+        if (n1 == 0) return cas;
+
+        int n2 = cas[0].length;
+
+        char[][] result = new char[n2][n1];
+
+        for (int j = 0; j < n2; j++) {
+            result[j][0] = cas[0][j];
+        }
+
+        for (int i = 1; i < n1; i++) {
+
+            if (cas[i].length != n2) {
+                throw new IllegalArgumentException(
+                    "Length of element #"
+                    + i
+                    + " should be "
+                    + n2
+                    + ", but is "
+                    + cas[i].length
+                );
+            }
+
+            for (int j = 0; j < n2; j++) result[j][i] = cas[i][j];
+        }
+
+        return result;
+    }
 }
