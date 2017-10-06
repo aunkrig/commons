@@ -741,6 +741,7 @@ class StringUtil {
         };
     }
 
+    // Duplicated from "ArrayUtil".
     private static char[][]
     mirror(char[][] subject) {
 
