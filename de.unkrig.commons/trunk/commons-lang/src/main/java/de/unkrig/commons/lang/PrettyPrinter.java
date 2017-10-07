@@ -89,7 +89,9 @@ class PrettyPrinter {
      *   <dt>Any other object:</dt>
      *   <dd>The string returned by {@link Object#toString()}</dd>
      * </dl>
-     * Large objects are abbreviated with an ellipsis as shown above:
+     * <p>
+     *   Large objects are abbreviated with an ellipsis as shown above:
+     * </p>
      * <dl>
      *   <dt>Char array:</dt>
      *   <dd>{@value #CHAR_ARRAY_ELLIPSIS} chars</dd>
@@ -98,33 +100,92 @@ class PrettyPrinter {
      *   <dt>CharSequence:</dt>
      *   <dd>{@value #CHAR_SEQUENCE_ELLIPSIS} chars</dd>
      * </dl>
-     * As the result string exceeds {@value #TOTAL_LENGTH_ELLIPSIS} characters, all remaining arrays and
-     * {@link CharSequence}s are abbreviated, so the result string will effectively not be much longer than {@value
-     * #TOTAL_LENGTH_ELLIPSIS} characters.
+     * <p>
+     *   As the result string exceeds {@value #TOTAL_LENGTH_ELLIPSIS} characters, all remaining arrays and
+     *   {@link CharSequence}s are abbreviated, so the result string will effectively not be much longer than {@value
+     *   #TOTAL_LENGTH_ELLIPSIS} characters.
+     * </p>
+     *
+     * @see #toJavaStringLiteral(CharSequence)
+     * @see #toJavaCharLiteral(char)
+     * @see #toJavaInitializer(Object)
      */
     @Nullable public static String
     toString(@Nullable Object o) {
-
-        if (o == null) return "null";
-
-        StringBuilder sb = new StringBuilder();
-        return PrettyPrinter.append(o, sb).toString();
+        return o == null ? "null" : PrettyPrinter.appendObject(o, new StringBuilder()).toString();
     }
 
     /**
-     * Converts a code point into a JAVA character literal (e.g. {@code "'\n'"}, {@code "'A'"}), or, iff <var>cp</var>
-     * {@code > Character.MAX_VALUE}, into a JAVA hexadecimal integer literal (e.g. {@code "0x10000"}).
+     * Converts a {@link CharSequence} into a Java string literal.
+     * <dl>
+     *   <dt>String:</dt>
+     *   <dd>{@code "abc\n"}<br/>{@code "abcdef"... (123 chars)}</dd>
+     *   <dt>Other {@link CharSequence}:</dt>
+     *   <dd>{@code StringBuilder "abc\n"}</dd>
+     * </dl>
+     * <p>
+     *   {@link CharSequence}s are abbreviated with an ellipsis as shown above when their length exceeds {@value
+     *   #CHAR_SEQUENCE_ELLIPSIS} chars.
+     * </p>
      */
-    @Nullable public static String
-    codePointToString(int cp) {
-
-        if (cp <= Character.MAX_VALUE) return PrettyPrinter.append((char) cp, new StringBuilder()).toString();
-
-        return new Formatter().format("0x%x", cp).toString();
+    public static String
+    toJavaStringLiteral(@Nullable CharSequence cs) {
+        return cs == null ? "null" : PrettyPrinter.appendCharSequence(cs, new StringBuilder()).toString();
     }
 
+    /**
+     * Converts a {@code char} into a Java character literal, like {@code '\n'}.
+     */
+    public static String
+    toJavaCharLiteral(char c) {
+        return PrettyPrinter.appendCharLiteral(c, new StringBuilder()).toString();
+    }
+
+    /**
+     * Converts an array into a Java array initializer.
+     * <dl>
+     *   <dt>Char array:</dt>
+     *   <dd>{@code char[4] 'abc\n'}<br/>{@code char[99] 'abcdef'...}</dd>
+     *   <dt>Other array:</dt>
+     *   <dd><code>int[3] { 1, 2, 3 }</code><br/><code>short[199] { 1, 2, 3, 4, 5, 6, ... }</code></dd>
+     *   <dt>Nested array:</dt>
+     *   <dd><code>Object[3][] { [self], null, Object[2] { "abc", [parent] } }</code></dd>
+     * </dl>
+     * <p>
+     *   Large arrays are abbreviated with an ellipsis as shown above:
+     * </p>
+     * <dl>
+     *   <dt>Char array:</dt>
+     *   <dd>{@value #CHAR_ARRAY_ELLIPSIS} chars</dd>
+     *   <dt>Other array:</dt>
+     *   <dd>{@value #ARRAY_ELLIPSIS} elements</dd>
+     * </dl>
+     */
+    public static String
+    toJavaArrayInitializer(@Nullable Object array) {
+        return array == null ? "null" : PrettyPrinter.appendArray(array, null, new StringBuilder()).toString();
+    }
+
+    /**
+     * Converts the <var>codePoint</var> into a JAVA char literal (e.g. {@code '\n'} or {@code 'A'}), or, iff the
+     * <var>codePoint</var> is supplementary (>= 64k), into a JAVA hexadecimal integer literal (e.g. {@code 0x10000}).
+     */
+    @Nullable public static String
+    codePointToJavaLiteral(int codePoint) {
+
+        if (Character.isSupplementaryCodePoint(codePoint)) {
+            return new Formatter().format("0x%x", codePoint).toString();
+        } else {
+            return PrettyPrinter.appendCharLiteral((char) codePoint, new StringBuilder()).toString();
+        }
+    }
+
+    /** @deprecated Use {@link #codePointToJavaLiteral(int)} instead */
+    @Deprecated @Nullable public static String
+    codePointToString(int cp) { return PrettyPrinter.codePointToJavaLiteral(cp); }
+
     private static StringBuilder
-    append(@Nullable Object o, StringBuilder sb) {
+    appendObject(@Nullable Object o, StringBuilder sb) {
 
         if (o == null) return sb.append("null");
 
@@ -132,9 +193,9 @@ class PrettyPrinter {
 
         if (clasS.isArray()) return PrettyPrinter.appendArray(o, null, sb);
 
-        if (o instanceof CharSequence) return PrettyPrinter.append((CharSequence) o, sb);
+        if (o instanceof CharSequence) return PrettyPrinter.appendCharSequence((CharSequence) o, sb);
 
-        if (clasS == Character.class) return PrettyPrinter.append(((Character) o).charValue(), sb);
+        if (clasS == Character.class) return PrettyPrinter.appendCharLiteral(((Character) o).charValue(), sb);
 
         if (clasS == Byte.class)   return sb.append(((Byte)  o).toString()).append('B');
         if (clasS == Short.class)  return sb.append(((Short) o).toString()).append('S');
@@ -199,7 +260,7 @@ class PrettyPrinter {
                     PrettyPrinter.appendArray(element, tmp, sb);
                 }
             } else {
-                PrettyPrinter.append(element, sb);
+                PrettyPrinter.appendObject(element, sb);
             }
 
             if (++i == length) break;
@@ -228,7 +289,7 @@ class PrettyPrinter {
      * Converts a char sequence into a JAVA string literal like {@code "Hello!\n"}.
      */
     private static StringBuilder
-    append(CharSequence cs, StringBuilder sb) {
+    appendCharSequence(CharSequence cs, StringBuilder sb) {
 
         if (cs instanceof String) {
             sb.append('"');
@@ -247,12 +308,11 @@ class PrettyPrinter {
     }
 
     /**
-     * Converts a character into a JAVA character literal like {@code '\n'}.
+     * Converts a char into a JAVA char literal like {@code '\n'}.
      */
     private static StringBuilder
-    append(char c, StringBuilder sb) {
-        sb.append('\'');
-        return PrettyPrinter.appendChar(c, sb).append('\'');
+    appendCharLiteral(char c, StringBuilder sb) {
+        return PrettyPrinter.appendChar(c, sb.append('\'')).append('\'');
     }
 
     @SuppressWarnings("resource") private static StringBuilder
