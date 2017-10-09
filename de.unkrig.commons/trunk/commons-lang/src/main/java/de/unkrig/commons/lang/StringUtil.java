@@ -566,22 +566,28 @@ class StringUtil {
 
                 int minResult = Integer.MIN_VALUE, maxResult = Integer.MAX_VALUE;
                 for (int o = limit - 1; o > limit - this.needleLength; o--) {
-                    int ss1 = this.safeSkip1[haystack.charAt(0xff & o)];
+                    char c = haystack.charAt(o);
+
+                    int ss1 = this.safeSkip1[0xff & c];
                     if (ss1 == this.needleLength) {
-                        minResult = o + 1;
-                        break;
+                        return -1;
                     }
                     int minOffset = o + ss1 - nl1;
                     if (minOffset > minResult) minResult = minOffset;
 
-                    int ss2       = this.safeSkip2[haystack.charAt(0xff & o)];
-                    int maxOffset = o - ss2;
+                    int maxOffset;
+                    if (c == needle.charAt(0)) {
+                        maxOffset = o;
+                    } else {
+                        int ss2 = this.safeSkip2[0xff & c];
+                        maxOffset = o - ss2;
+                    }
                     if (maxOffset < maxResult) maxResult = maxOffset;
 
                     if (maxResult == minResult) break;
                 }
-                if (minResult < limit - nl1) minResult = limit - nl1;
-                if (maxResult > maxIndex)    maxResult = maxIndex;
+                if (minResult < minIndex) minResult = minIndex;
+                if (maxResult > maxIndex) maxResult = maxIndex;
 
                 for (int i = minResult; i <= maxResult; i++) {
                     M: {

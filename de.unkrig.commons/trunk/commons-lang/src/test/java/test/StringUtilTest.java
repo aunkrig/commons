@@ -269,50 +269,50 @@ class StringUtilTest {
         IndexOf io     = StringUtil.boyerMooreHorspoolIndexOf(needle);
 
         // Variations on the haystack.
-        Assert.assertEquals(1,  io.indexOf("_ABCDE_**", 1, 1, 7));
-        Assert.assertEquals(2,  io.indexOf("__ABCDE**", 2, 2, 7));
-        Assert.assertEquals(3,  io.indexOf("___ABCD**", 3, 3, 7));
-        Assert.assertEquals(4,  io.indexOf("____ABC**", 4, 4, 7));
-        Assert.assertEquals(5,  io.indexOf("_____AB**", 5, 5, 7));
-        Assert.assertEquals(6,  io.indexOf("______A**", 6, 6, 7));
-        Assert.assertEquals(-1, io.indexOf("_______**", 7, 7, 7));
+        Assert.assertEquals(1,  io.indexOf("_ABCDE_**",   1,   1, 7));
+        Assert.assertEquals(2,  io.indexOf("__ABCDE**",   2,   2, 7));
+        Assert.assertEquals(3,  io.indexOf("___ABCD**",   3,   3, 7));
+        Assert.assertEquals(4,  io.indexOf("____ABC**",   4,   4, 7));
+        Assert.assertEquals(5,  io.indexOf("_____AB**",   5,   5, 7));
+        Assert.assertEquals(6,  io.indexOf("______A**",   6,   6, 7));
+        Assert.assertEquals(-1, io.indexOf("_______**",   7,   7, 7));
 
         // Variations on the limit.
-        Assert.assertEquals(-1, io.indexOf("_ABC___**", -99, 99, 7));
-        Assert.assertEquals(-1, io.indexOf("_ABC__***", -99, 99, 6));
-        Assert.assertEquals(-1, io.indexOf("_ABC_****", -99, 99, 5));
-        Assert.assertEquals(1,  io.indexOf("_ABC*****", -99, 99, 4));
-        Assert.assertEquals(1,  io.indexOf("_AB******", -99, 99, 3));
-        Assert.assertEquals(1,  io.indexOf("_A*******", -99, 99, 2));
-        Assert.assertEquals(1,  io.indexOf("_********", -99, 99, 1));
+        Assert.assertEquals(-1, io.indexOf("_ABC___**", -99,  99, 7));
+        Assert.assertEquals(-1, io.indexOf("_ABC__***", -99,  99, 6));
+        Assert.assertEquals(-1, io.indexOf("_ABC_****", -99,  99, 5));
+        Assert.assertEquals(1,  io.indexOf("_ABC*****", -99,  99, 4));
+        Assert.assertEquals(1,  io.indexOf("_AB******", -99,  99, 3));
+        Assert.assertEquals(1,  io.indexOf("_A*******", -99,  99, 2));
+        Assert.assertEquals(-1, io.indexOf("_********", -99,  99, 1));
 
         // Variations on the minIndex.
-        Assert.assertEquals(4,  io.indexOf("____ABC**", -99, 99, 7));
-        Assert.assertEquals(4,  io.indexOf("____ABC**",   0, 99, 7));
-        Assert.assertEquals(4,  io.indexOf("____ABC**",   1, 99, 7));
-        Assert.assertEquals(4,  io.indexOf("____ABC**",   2, 99, 7));
-        Assert.assertEquals(4,  io.indexOf("____ABC**",   3, 99, 7));
-        Assert.assertEquals(4,  io.indexOf("____ABC**",   4, 99, 7));
-        Assert.assertEquals(-1, io.indexOf("____ABC**",   5, 99, 7));
-        Assert.assertEquals(-1, io.indexOf("____ABC**",   6, 99, 7));
-        Assert.assertEquals(-1, io.indexOf("____ABC**",   7, 99, 7));
-        Assert.assertEquals(-1, io.indexOf("____ABC**",  99, 99, 7));
+        Assert.assertEquals(4,  io.indexOf("____ABC**", -99,  99, 7));
+        Assert.assertEquals(4,  io.indexOf("____ABC**",   0,  99, 7));
+        Assert.assertEquals(4,  io.indexOf("____ABC**",   1,  99, 7));
+        Assert.assertEquals(4,  io.indexOf("____ABC**",   2,  99, 7));
+        Assert.assertEquals(4,  io.indexOf("____ABC**",   3,  99, 7));
+        Assert.assertEquals(4,  io.indexOf("____ABC**",   4,  99, 7));
+        Assert.assertEquals(-1, io.indexOf("____ABC**",   5,  99, 7));
+        Assert.assertEquals(-1, io.indexOf("____ABC**",   6,  99, 7));
+        Assert.assertEquals(-1, io.indexOf("____ABC**",   7,  99, 7));
+        Assert.assertEquals(-1, io.indexOf("____ABC**",  99,  99, 7));
 
         // Variations on the maxIndex.
-        Assert.assertEquals(4,  io.indexOf("____ABC**", -99, -99, 7));
-        Assert.assertEquals(4,  io.indexOf("____ABC**", -99,  -1, 7));
-        Assert.assertEquals(4,  io.indexOf("____ABC**", -99,   0, 7));
-        Assert.assertEquals(4,  io.indexOf("____ABC**", -99,   1, 7));
-        Assert.assertEquals(4,  io.indexOf("____ABC**", -99,   2, 7));
-        Assert.assertEquals(4,  io.indexOf("____ABC**", -99,   3, 7));
+        Assert.assertEquals(-1, io.indexOf("____ABC**", -99, -99, 7));
+        Assert.assertEquals(-1, io.indexOf("____ABC**", -99,  -1, 7));
+        Assert.assertEquals(-1, io.indexOf("____ABC**", -99,   0, 7));
+        Assert.assertEquals(-1, io.indexOf("____ABC**", -99,   1, 7));
+        Assert.assertEquals(-1, io.indexOf("____ABC**", -99,   2, 7));
+        Assert.assertEquals(-1, io.indexOf("____ABC**", -99,   3, 7));
         Assert.assertEquals(4,  io.indexOf("____ABC**", -99,   4, 7));
-        Assert.assertEquals(-1, io.indexOf("____ABC**", -99,   5, 7));
-        Assert.assertEquals(-1, io.indexOf("____ABC**", -99,   6, 7));
-        Assert.assertEquals(-1, io.indexOf("____ABC**", -99,   7, 7));
-        Assert.assertEquals(-1, io.indexOf("____ABC**", -99,   8, 7));
-        Assert.assertEquals(-1, io.indexOf("____ABC**", -99,   9, 7));
-        Assert.assertEquals(-1, io.indexOf("____ABC**", -99,  10, 7));
-        Assert.assertEquals(-1, io.indexOf("____ABC**", -99,  99, 7));
+        Assert.assertEquals(4,  io.indexOf("____ABC**", -99,   5, 7));
+        Assert.assertEquals(4,  io.indexOf("____ABC**", -99,   6, 7));
+        Assert.assertEquals(4,  io.indexOf("____ABC**", -99,   7, 7));
+        Assert.assertEquals(4,  io.indexOf("____ABC**", -99,   8, 7));
+        Assert.assertEquals(4,  io.indexOf("____ABC**", -99,   9, 7));
+        Assert.assertEquals(4,  io.indexOf("____ABC**", -99,  10, 7));
+        Assert.assertEquals(4,  io.indexOf("____ABC**", -99,  99, 7));
     }
 
     @Test public void
@@ -326,9 +326,9 @@ class StringUtilTest {
         Assert.assertEquals(4,  io.indexOf("____ABCABC**", 4, 4, 10));
         Assert.assertEquals(5,  io.indexOf("_____ABCAB**", 5, 5, 10));
         Assert.assertEquals(6,  io.indexOf("______ABCA**", 6, 6, 10));
-        Assert.assertEquals(7,  io.indexOf("_______ABC**", 7, 7, 10));
-        Assert.assertEquals(8,  io.indexOf("________AB**", 8, 8, 10));
-        Assert.assertEquals(9,  io.indexOf("_________A**", 9, 9, 10));
+        Assert.assertEquals(-1, io.indexOf("_______ABC**", 7, 7, 10));
+        Assert.assertEquals(-1, io.indexOf("________AB**", 8, 8, 10));
+        Assert.assertEquals(-1, io.indexOf("_________A**", 9, 9, 10));
         Assert.assertEquals(-1, io.indexOf("__________**", 7, 7, 10));
     }
 
