@@ -485,7 +485,7 @@ class StringUtil {
             }
 
             @Override public String
-            toString() { return "naive(" + PrettyPrinter.toString(needle) + ")"; }
+            toString() { return "naive(" + PrettyPrinter.toJavaStringLiteral(needle) + ")"; }
         };
     }
 
@@ -518,8 +518,10 @@ class StringUtil {
                 Arrays.fill(this.safeSkip2, this.needleLength);
                 int nl1 = this.needleLength - 1;
                 for (int i = 0; i < this.needleLength; i++) {
-                    this.safeSkip1[0xff & needle.charAt(i)]       = nl1 - i;
-                    this.safeSkip2[0xff & needle.charAt(nl1 - i)] = nl1 - i;
+                    int ss  = nl1 - i;
+                    int ss2 = ss == 0 ? 1 : ss;
+                    this.safeSkip1[0xff & needle.charAt(i)]  = ss2;
+                    this.safeSkip2[0xff & needle.charAt(ss)] = ss2;
                 }
             }
 
@@ -624,7 +626,7 @@ class StringUtil {
             }
 
             @Override public String
-            toString() { return "boyerMooreHorspool(" + PrettyPrinter.toString(needle) + ")"; }
+            toString() { return "boyerMooreHorspool(" + PrettyPrinter.toJavaStringLiteral(needle) + ")"; }
         };
     }
 
@@ -721,7 +723,7 @@ class StringUtil {
             }
 
             @Override public String
-            toString() { return "naiveIndexOf(" + Arrays.deepToString(needle) + ")"; }
+            toString() { return "naiveIndexOf(" + PrettyPrinter.toJavaArrayInitializer(needle) + ")"; }
         };
     }
 
@@ -871,7 +873,7 @@ class StringUtil {
             }
 
             @Override public String
-            toString() { return "boyerMooreHorspool(" + Arrays.deepToString(needle) + ")"; }
+            toString() { return "boyerMooreHorspool(" + PrettyPrinter.toJavaArrayInitializer(needle) + ")"; }
         };
     }
 
