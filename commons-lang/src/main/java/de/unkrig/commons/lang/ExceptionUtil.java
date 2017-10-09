@@ -26,6 +26,7 @@
 
 package de.unkrig.commons.lang;
 
+import java.lang.reflect.Field;
 import java.util.Iterator;
 
 import org.xml.sax.SAXParseException;
@@ -40,6 +41,21 @@ class ExceptionUtil {
 
     private
     ExceptionUtil() {}
+
+    private static final Field
+    THROWABLE_DETAIL_MESSAGE_FIELD = ExceptionUtil.getDeclaredField(Throwable.class, "detailMessage");
+
+    private static Field
+    getDeclaredField(Class<Throwable> declaringClass, String fieldName) {
+
+        try {
+            Field f = declaringClass.getDeclaredField(fieldName);
+            f.setAccessible(true);
+            return f;
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
     /**
      * Wraps a given 'cause' in another throwable of the same type, with a detail message composed from {@code
@@ -60,7 +76,15 @@ class ExceptionUtil {
         // Determine the new detail message and the root cause.
         String message;
         {
-            String causeMessage = cause.getMessage();
+            String causeMessage;
+            try {
+
+                // Some classes override "getMessage()", so it is better to get the message from the
+                // "Throwable.detailMessage" field.
+                causeMessage = (String) ExceptionUtil.THROWABLE_DETAIL_MESSAGE_FIELD.get(cause);
+            } catch (Exception e) {
+                causeMessage = cause.getMessage();
+            }
             message = prefix == null ? causeMessage : causeMessage == null ? prefix : prefix + ": " + causeMessage;
         }
 
@@ -109,13 +133,12 @@ class ExceptionUtil {
                 break WRAP;
             }
 
-            // Special handling for "org.junit.ComparisonFailure":
+            // Special handling for JUNIT's "org.junit.ComparisonFailure" error.
             if (cause.getClass().getName().equals("org.junit.ComparisonFailure")) {
 
-                // Special handling for JUNIT's "org.junit.ComparisonFailure" error.
                 try {
                     wrapper = (T) causeClass.getConstructor(String.class, String.class, String.class).newInstance(
-                        causeClass.getField("detailMessage").get(cause),   // message
+                        message,                                           // message
                         causeClass.getMethod("getExpected").invoke(cause), // expected
                         causeClass.getMethod("getActual").invoke(cause)    // actual
                     );
