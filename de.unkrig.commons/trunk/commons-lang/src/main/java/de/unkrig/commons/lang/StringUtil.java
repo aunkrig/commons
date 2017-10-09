@@ -329,6 +329,40 @@ class StringUtil {
         int indexOf(CharSequence haystack, int minIndex, int maxIndex);
 
         /**
+         * Like {@link #indexOf(CharSequence, int, int)}, but never accesses <var>haystack</var> chars at position
+         * <var>limit</var> or greater.
+         * Instead, if there are <em>partial matches</em> at positions <var>limit</var> {@code -}
+         * <var>needle</var>{@code .length - 1} ... <var>limit</var> {@code - 1}, then the <em>first</em> of these is
+         * returned.
+         * <p>
+         *   Examples:
+         * </p>
+         * <table border="1">
+         *   <tr>
+         *     <th>needle</th>
+         *     <th>haystack</th>
+         *     <th>minIndex</th>
+         *     <th>maxIndex</th>
+         *     <th>limit</th>
+         *     <th>result</th>
+         *   </tr>
+         *   <tr><td>{@code ABCDE}</td><td>{@code _ABCDE_**}</td><td>&lt;=1</td><td>&gt;=1</td><td>7</td><td>1</td></tr>
+         *   <tr><td>{@code ABCDE}</td><td>{@code __ABCDE**}</td><td>&lt;=2</td><td>&gt;=2</td><td>7</td><td>2</td></tr>
+         *   <tr><td>{@code ABCDE}</td><td>{@code ___ABCD**}</td><td>&lt;=3</td><td>&gt;=3</td><td>7</td><td>3</td></tr>
+         *   <tr><td>{@code ABCDE}</td><td>{@code ____ABC**}</td><td>&lt;=4</td><td>&gt;=4</td><td>7</td><td>4</td></tr>
+         *   <tr><td>{@code ABCDE}</td><td>{@code _____AB**}</td><td>&lt;=5</td><td>&gt;=5</td><td>7</td><td>5</td></tr>
+         *   <tr><td>{@code ABCDE}</td><td>{@code ______A**}</td><td>&lt;=6</td><td>&gt;=6</td><td>7</td><td>6</td></tr>
+         *   <tr><td>{@code ABCDE}</td><td>{@code _______**}</td><td>&lt;=7</td><td>&gt;=7</td><td>7</td><td>7</td></tr>
+         * </table>
+         * <p>
+         *   ("{@code _}": Any character but "{@code ABCDE}"; "{@code *}": Any character.)
+         * </p>
+         *
+         * @param limit 0...<var>haystack</var>{@code .length}
+         */
+        int indexOf(CharSequence haystack, int minIndex, int maxIndex, int limit);
+
+        /**
          * The equivalent of {@link String#lastIndexOf(String)}.
          * <p>
          *   For the return value, the following condition holds true:
@@ -434,6 +468,11 @@ class StringUtil {
             }
 
             @Override public int
+            indexOf(CharSequence haystack, int minIndex, int maxIndex, int limit) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override public int
             lastIndexOf(CharSequence haystack, int minIndex, int maxIndex) {
 
                 if (minIndex <= 0) return haystack.toString().lastIndexOf(needle2, maxIndex);
@@ -508,6 +547,48 @@ class StringUtil {
                     }
 
                     o++;
+                }
+
+                return -1;
+            }
+
+            @Override public int
+            indexOf(CharSequence haystack, int minIndex, int maxIndex, int limit) {
+
+                if (maxIndex <= limit - this.needleLength) return this.indexOf(haystack, minIndex, maxIndex);
+
+                int result = this.indexOf(haystack, minIndex, limit - this.needleLength);
+                if (result != -1) return result;
+
+                int nl1 = this.needleLength - 1;
+
+                int minResult = Integer.MIN_VALUE, maxResult = Integer.MAX_VALUE;
+                for (int o = limit - 1; o > limit - this.needleLength; o--) {
+                    int ss1 = this.safeSkip1[haystack.charAt(0xff & o)];
+                    if (ss1 == this.needleLength) {
+                        minResult = o + 1;
+                        break;
+                    }
+                    int minOffset = o + ss1 - nl1;
+                    if (minOffset > minResult) minResult = minOffset;
+
+                    int ss2       = this.safeSkip2[haystack.charAt(0xff & o)];
+                    int maxOffset = o - ss2;
+                    if (maxOffset < maxResult) maxResult = maxOffset;
+
+                    if (maxResult == minResult) break;
+                }
+                if (minResult < limit - nl1) minResult = limit - nl1;
+                if (maxResult > maxIndex)    maxResult = maxIndex;
+
+                for (int i = minResult; i <= maxResult; i++) {
+                    M: {
+                        for (int j = 0, i2 = i; j < needle.length(); j++, i2++) {
+                            if (i2 == limit) return i;
+                            if (needle.charAt(j) != haystack.charAt(i2)) break M;
+                        }
+                        return i;
+                    }
                 }
 
                 return -1;
@@ -607,6 +688,11 @@ class StringUtil {
                 }
 
                 return -1;
+            }
+
+            @Override public int
+            indexOf(CharSequence haystack, int minIndex, int maxIndex, int limit) {
+                throw new UnsupportedOperationException();
             }
 
             @Override public int
@@ -737,6 +823,11 @@ class StringUtil {
                 }
 
                 return -1;
+            }
+
+            @Override public int
+            indexOf(CharSequence haystack, int minIndex, int maxIndex, int limit) {
+                throw new UnsupportedOperationException();
             }
 
             @Override public int
