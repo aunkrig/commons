@@ -355,7 +355,7 @@ class Characters {
 
     /**  A word character: [a-zA-Z_0-9] */
     public static final Predicate<Integer>
-    IS_WORD = new IntegerPredicate("word") {
+    IS_WORD = new IntegerPredicate("posixWord") {
         @Override public boolean evaluate(Integer subject) { return Characters.isWordCharacter(subject); }
     };
 
