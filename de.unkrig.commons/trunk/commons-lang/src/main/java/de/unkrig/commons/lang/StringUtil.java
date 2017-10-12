@@ -748,22 +748,12 @@ class StringUtil {
 
         boolean univalent = true;
         for (int i = needle.length - 1; i >= 0; i--) {
-            char[] n = needle[i];
 
-            // Compact duplicates in the char array.
-            for (int j = n.length - 1; j >= 0; j--) {
-                for (int k = j - 1; k >= 0; k--) {
-                    if (n[k] == n[j]) {
-                        needle[i] = new char[n.length - 1];
-                        System.arraycopy(n, 0, needle[i], 0, k);
-                        System.arraycopy(n, k + 1, needle[i], k, n.length - 1 - k);
-                        j--;
-                        k--;
-                        n = needle[i];
-                    }
-                }
-            }
+            char[] n = StringUtil.removeDuplicates(needle[i]);
+
             if (n.length != 1) univalent = false;
+
+            needle[i] = n;
         }
 
         if (univalent) return StringUtil.boyerMooreHorspoolIndexOf(StringUtil.mirror(needle));
@@ -804,7 +794,25 @@ class StringUtil {
                 for (int o = minIndex <= 0 ? nl1 : minIndex + nl1; o <= limit;) {
 
                     char c = haystack.charAt(o);
-                    LC: {
+                    LC:
+                    switch (lastChars.length) {
+
+                    case 1:
+                        if (c == lastChars[0]) break;
+                        o += this.safeSkip1[0xff & c];
+                        continue;
+
+                    case 2:
+                        if (c == lastChars[0] || c == lastChars[1]) break;
+                        o += this.safeSkip1[0xff & c];
+                        continue;
+
+                    case 3:
+                        if (c == lastChars[0] || c == lastChars[1] || c == lastChars[2]) break;
+                        o += this.safeSkip1[0xff & c];
+                        continue;
+
+                    default:
                         for (char lc : lastChars) {
                             if (lc == c) break LC;
                         }
@@ -848,11 +856,29 @@ class StringUtil {
                 for (int o = maxIndex <= limit ? maxIndex : limit; o >= minIndex;) {
 
                     char c = haystack.charAt(o);
-                    FC: {
+                    FC:
+                    switch (firstChars.length) {
+
+                    case 1:
+                        if (c == firstChars[0]) break;
+                        o += this.safeSkip2[0xff & c];
+                        continue;
+
+                    case 2:
+                        if (c == firstChars[0] || c == firstChars[1]) break;
+                        o += this.safeSkip2[0xff & c];
+                        continue;
+
+                    case 3:
+                        if (c == firstChars[0] || c == firstChars[1] || c == firstChars[2]) break;
+                        o += this.safeSkip2[0xff & c];
+                        continue;
+
+                    default:
                         for (char fc : firstChars) {
-                            if (c == fc) break FC;
+                            if (fc == c) break FC;
                         }
-                        o -= this.safeSkip2[0xff & c];
+                        o += this.safeSkip2[0xff & c];
                         continue;
                     }
 
@@ -908,5 +934,24 @@ class StringUtil {
         }
 
         return result;
+    }
+
+    private static char[]
+    removeDuplicates(char[] subject) {
+
+        for (int j = subject.length - 1; j >= 0; j--) {
+            for (int k = j - 1; k >= 0; k--) {
+                if (subject[k] == subject[j]) {
+                    char[] tmp = new char[subject.length - 1];
+                    System.arraycopy(subject, 0, tmp, 0, k);
+                    System.arraycopy(subject, k + 1, tmp, k, subject.length - 1 - k);
+                    j--;
+                    k--;
+                    subject = tmp;
+                }
+            }
+        }
+
+        return subject;
     }
 }
