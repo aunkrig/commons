@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import de.unkrig.commons.lang.OptionalMethods.MethodWrapper1;
 import de.unkrig.commons.lang.protocol.NoException;
@@ -405,12 +406,25 @@ class Characters {
     public static final Predicate<Integer> IS_UNICODE_INITIAL_QUOTE_PUNCTUATION = Characters.unicodeGeneralCategoryPredicate("unicodeInitialQuotePunctuation", Character.INITIAL_QUOTE_PUNCTUATION);
     public static final Predicate<Integer> IS_UNICODE_FINAL_QUOTE_PUNCTUATION   = Characters.unicodeGeneralCategoryPredicate("unicodeFinalQuotePunctuation",   Character.FINAL_QUOTE_PUNCTUATION);
 
+    /**
+     * @throws UnsupportedOperationException The JRE is pre-1.7
+     */
     public static final Predicate<Integer>
     IS_UNICODE_ALPHA = new IntegerPredicate("unicodeAlpha") {
 
-        @SuppressWarnings("null") @Override public boolean
-        evaluate(Integer subject) { return Characters.CHARACTER_IS_ALPHABETIC.invoke(null, subject); }
+        @Override public boolean
+        evaluate(Integer subject) { return Characters.isAlphabetic(subject); }
     };
+
+    /**
+     * Calls {@code java.lang.Character.isAlphabetic(int)}, which is available only sind JRE 1.7.
+     *
+     * @throws UnsupportedOperationException The JRE is pre-1.7
+     */
+    @SuppressWarnings("null") public static boolean
+    isAlphabetic(Integer codePoint) {
+        return Characters.CHARACTER_IS_ALPHABETIC.invoke(null, codePoint);
+    }
 
     private static final MethodWrapper1<Character, Boolean, Integer, NoException>
     CHARACTER_IS_ALPHABETIC = OptionalMethods.get1(
@@ -656,21 +670,33 @@ class Characters {
     public static final Predicate<Integer>
     IS_UNICODE_LATIN1 = Characters.rangePredicate("unicodeAlpha2", 0, 0xff);
 
-    protected static boolean
-    isUnicodeWord(Integer subject) {
+    /**
+     * @return Whether the <var>codePoint</var> is a "word character" in the sense of the regular expression {@code
+     *         "\w"}, with the {@link Pattern#UNICODE_CHARACTER_CLASS} flag set
+     */
+    public static boolean
+    isUnicodeWord(int codePoint) {
 
-        if (
-            Characters.IS_UNICODE_ALPHA.evaluate(subject)
-            || Characters.IS_UNICODE_JOIN_CONTROL.evaluate(subject)
-        ) return true;
-
-        int type = Character.getType(subject);
+        int type = Character.getType(codePoint);
         return (
-            type == Character.NON_SPACING_MARK
-            || type == Character.ENCLOSING_MARK
-            || type == Character.COMBINING_SPACING_MARK
-            || type == Character.DECIMAL_DIGIT_NUMBER
-            || type == Character.CONNECTOR_PUNCTUATION
+            (type >= 1 && type <= 10)
+//            || type == Character.UPPERCASE_LETTER       // 1
+//            || type == Character.LOWERCASE_LETTER       // 2
+//            || type == Character.TITLECASE_LETTER       // 3
+//            || type == Character.MODIFIER_LETTER        // 4
+//            || type == Character.OTHER_LETTER           // 5
+//            || type == Character.NON_SPACING_MARK       // 6
+//            || type == Character.ENCLOSING_MARK         // 7
+//            || type == Character.COMBINING_SPACING_MARK // 8
+//            || type == Character.DECIMAL_DIGIT_NUMBER   // 9
+//            || type == Character.LETTER_NUMBER          // 10
+            || (
+                type == Character.OTHER_SYMBOL            // 28
+                && codePoint >= 0x24b6
+                && codePoint <= 0x24e9
+            )
+            || type == Character.CONNECTOR_PUNCTUATION    // 23
+            || codePoint == 0x200C || codePoint == 0x200D // JOIN CONTROL
         );
     }
 
