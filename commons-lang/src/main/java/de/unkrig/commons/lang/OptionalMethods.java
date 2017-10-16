@@ -109,7 +109,7 @@ class OptionalMethods {
      *
      * @param <R> The return type of the method
      */
-    public static <R> MethodWrapper0<?, R, RuntimeException>
+    public static <R> MethodWrapper0<Object, R, RuntimeException>
     get0(
         @Nullable ClassLoader declaringClassLoader,
         final String          declaringClassName,
@@ -131,7 +131,7 @@ class OptionalMethods {
      * @param <R>  The return type of the method
      * @param <EX> The (single) checked exception declared for the method
      */
-    public static <R, EX extends Throwable> MethodWrapper0<?, R, EX>
+    public static <R, EX extends Throwable> MethodWrapper0<Object, R, EX>
     get0(
         @Nullable ClassLoader     declaringClassLoader,
         final String              declaringClassName,
@@ -159,7 +159,10 @@ class OptionalMethods {
             };
         }
 
-        return OptionalMethods.get0(declaringClass, methodName, checkedException);
+        @SuppressWarnings("unchecked") MethodWrapper0<Object, R, EX>
+        result = (MethodWrapper0<Object, R, EX>) OptionalMethods.get0(declaringClass, methodName, checkedException);
+
+        return result;
     }
 
     /**
@@ -350,7 +353,7 @@ class OptionalMethods {
     get1(
         final Class<DC>           declaringClass,
         final String              methodName,
-        Class<P>                  parameterType,
+        final Class<P>            parameterType,
         @Nullable final Class<EX> checkedException
     ) {
 
@@ -376,7 +379,7 @@ class OptionalMethods {
                         + "."
                         + methodName
                         + "("
-                        + parameter
+                        + parameterType.getName()
                         + ")"
                     );
                 }
