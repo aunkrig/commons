@@ -29,6 +29,7 @@ package de.unkrig.commons.util.collections;
 import java.io.Serializable;
 import java.util.AbstractSet;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -121,6 +122,12 @@ class Sets {
         @Override public int        hashCode()                     { return 0; }
     }
 
+    /**
+     * Creates and returns a {@link Set} that contains the given <var>values</var>.
+     * <p>
+     *   The implementation of the set, and whether the set is modifiable or not, is unspecified.
+     * </p>
+     */
     public static <T> Set<T>
     of(T... values) {
 
@@ -132,17 +139,32 @@ class Sets {
         return result;
     }
 
+    /**
+     * Creates and returns a set that contains all elements of <var>lhs</var> and <var>rhs</var>.
+     * <p>
+     *   The implementation of the result set, and whether it is modifiable or not, is unspecified.
+     * </p>
+     */
     public static <T> Set<T>
-    union(Set<? extends T> lhs, Set<? extends T> rhs) {
+    union(Collection<? extends T> lhs, Collection<? extends T> rhs) {
         Set<T> result = new HashSet<T>(lhs);
         result.addAll(rhs);
         return result;
     }
 
+    /**
+     * Creates and returns a set that contains all elements that are contained both in <var>lhs</var> and
+     * <var>rhs</var>.
+     * <p>
+     *   The implementation of the result set, and whether it is modifiable or not, is unspecified.
+     * </p>
+     */
     public static <T> Set<T>
-    intersection(Set<? extends T> lhs, Set<? extends T> rhs) {
-        Set<T> result = new HashSet<T>(lhs);
-        result.retainAll(rhs);
+    intersection(Collection<? extends T> lhs, Collection<? extends T> rhs) {
+        Set<T> result = new HashSet<T>();
+        for (T e : lhs) {
+            if (rhs.contains(e)) result.add(e);
+        }
         return result;
     }
 }

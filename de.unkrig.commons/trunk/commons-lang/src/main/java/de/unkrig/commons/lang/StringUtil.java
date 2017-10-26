@@ -434,12 +434,16 @@ class StringUtil {
         }
     }
 
-    private abstract static
+    public abstract static
     class AbstractIndexOf implements IndexOf {
-        @Override public int indexOf(CharSequence haystack)                   { return this.indexOf(haystack, 0, Integer.MAX_VALUE);        } // SUPPRESS CHECKSTYLE LineLength:4
+        @Override public int indexOf(CharSequence haystack)                   { return this.indexOf(haystack, 0, Integer.MAX_VALUE);        } // SUPPRESS CHECKSTYLE LineLength:3
         @Override public int indexOf(CharSequence haystack, int minIndex)     { return this.indexOf(haystack, minIndex, Integer.MAX_VALUE); }
         @Override public int lastIndexOf(CharSequence haystack)               { return this.lastIndexOf(haystack, 0, Integer.MAX_VALUE);    }
         @Override public int lastIndexOf(CharSequence haystack, int maxIndex) { return this.lastIndexOf(haystack, 0, maxIndex);             }
+
+        @Override public int indexOf(CharSequence haystack, int minIndex, int maxIndex)            { throw new UnsupportedOperationException(); } // SUPPRESS CHECKSTYLE LineLength:2
+        @Override public int indexOf(CharSequence haystack, int minIndex, int maxIndex, int limit) { throw new UnsupportedOperationException(); }
+        @Override public int lastIndexOf(CharSequence haystack, int minIndex, int maxIndex)        { throw new UnsupportedOperationException(); }
 
         @Override public abstract String toString();
     }
