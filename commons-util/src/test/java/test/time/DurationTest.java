@@ -31,8 +31,7 @@ import org.junit.Test;
 
 import de.unkrig.commons.util.time.Duration;
 
-// CHECKSTYLE Javadoc:OFF
-// CHECKSTYLE R_PAREN__METH_INVOCATION:OFF
+// SUPPRESS CHECKSTYLE LineLength|Whitespace|Javadoc:999
 
 public
 class DurationTest {

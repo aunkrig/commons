@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// SUPPRESS CHECKSTYLE Javadoc:9999
+
 package test;
 
 import static de.unkrig.commons.util.annotation.CommandLineOption.Cardinality.MANDATORY;
@@ -49,10 +51,6 @@ import de.unkrig.commons.util.CommandLineOptionException.RequiredOptionMissing;
 import de.unkrig.commons.util.CommandLineOptions;
 import de.unkrig.commons.util.annotation.CommandLineOption;
 import de.unkrig.commons.util.annotation.CommandLineOptionGroup;
-
-//CHECKSTYLE JavadocMethod:OFF
-//CHECKSTYLE JavadocType:OFF
-//CHECKSTYLE JavadocVariable:OFF
 
 public
 class CommandLineOptionsTest {

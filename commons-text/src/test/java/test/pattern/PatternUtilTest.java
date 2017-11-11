@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// SUPPRESS CHECKSTYLE JavadocMethod|JavadocType|LineLength:9999
+
 package test.pattern;
 
 import java.io.File;
@@ -54,10 +56,6 @@ import de.unkrig.commons.text.pattern.PatternUtil;
 import de.unkrig.commons.text.pattern.Substitutor;
 import junit.framework.ComparisonFailure;
 import junit.framework.TestCase;
-
-// CHECKSTYLE JavadocMethod:OFF
-// CHECKSTYLE JavadocType:OFF
-//CHECKSTYLE LineLength:OFF
 
 public
 class PatternUtilTest extends TestCase {

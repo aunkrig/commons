@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// SUPPRESS CHECKSTYLE Javadoc:9999
+
 package test.pattern;
 
 import java.io.File;
@@ -34,16 +36,13 @@ import org.junit.Test;
 import de.unkrig.commons.text.pattern.Glob;
 import de.unkrig.commons.text.pattern.Pattern2;
 
-//CHECKSTYLE JavadocMethod:OFF
-//CHECKSTYLE JavadocType:OFF
-//CHECKSTYLE LineLength:OFF
-
 public
 class GlobTest {
 
     @Test public void
     testCompile() {
-        // CHECKSTYLE L_PAREN__METH_INVOCATION:OFF
+
+        // SUPPRESS CHECKSTYLE L_PAREN__METH_INVOCATION:103
         Assert.assertTrue (Glob.compile("x", Pattern2.WILDCARD).matches("x"));
         Assert.assertFalse(Glob.compile("x", Pattern2.WILDCARD).matches("y"));
         Assert.assertTrue (Glob.compile("xxx", Pattern2.WILDCARD).matches("xxx"));
@@ -147,12 +146,11 @@ class GlobTest {
         Assert.assertTrue (Glob.compile("a/b!c", Pattern2.WILDCARD).matches("a/b!"));
         Assert.assertTrue (Glob.compile("**",    Pattern2.WILDCARD).matches("a/b/"));
         Assert.assertFalse(Glob.compile("*",     Pattern2.WILDCARD).matches("a/b/"));
-        // CHECKSTYLE L_PAREN__METH_INVOCATION:ON
     }
 
     @Test public void
     testAlternatives() {
-        // CHECKSTYLE L_PAREN__METH_INVOCATION:OFF
+        // SUPPRESS CHECKSTYLE L_PAREN__METH_INVOCATION:25
         Assert.assertTrue (Glob.compile("x", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("x"));
         Assert.assertFalse(Glob.compile("x", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("y"));
         Assert.assertTrue (Glob.compile("*", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches(""));
@@ -166,7 +164,7 @@ class GlobTest {
         Assert.assertFalse(Glob.compile("a,b",   Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("a,b"));
         Assert.assertTrue (Glob.compile("a\\,b", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("a,b"));
 
-        Assert.assertTrue (Glob.compile("a*~aa*,aaaa", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("")); // <= Container match
+        Assert.assertTrue (Glob.compile("a*~aa*,aaaa", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches(""));
         Assert.assertTrue (Glob.compile("a*~aa*,aaaa", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("a"));
         Assert.assertFalse(Glob.compile("a*~aa*,aaaa", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("aa"));
         Assert.assertFalse(Glob.compile("a*~aa*,aaaa", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("aaa"));
@@ -176,6 +174,5 @@ class GlobTest {
         // Container matches.
         Assert.assertTrue (Glob.compile("~a/a",    Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("a/"));
         Assert.assertTrue (Glob.compile("~a/**a*", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("a/a/"));
-        // CHECKSTYLE L_PAREN__METH_INVOCATION:ON
     }
 }

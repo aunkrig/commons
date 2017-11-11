@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// SUPPRESS CHECKSTYLE Javadoc:9999
+
 package test.pattern;
 
 import java.util.ArrayList;
@@ -37,8 +39,6 @@ import de.unkrig.commons.lang.StringUtil;
 import de.unkrig.commons.lang.protocol.NoException;
 import de.unkrig.commons.text.pattern.PatternUtil;
 import de.unkrig.commons.text.pattern.Substitutor;
-
-// CHECKSTYLE Javadoc:OFF
 
 public
 class SubstitutorTest {

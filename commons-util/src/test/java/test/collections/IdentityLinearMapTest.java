@@ -24,22 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package test.collections;
+// SUPPRESS CHECKSTYLE Javadoc:9999
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+package test.collections;
 
 import java.util.Map;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import de.unkrig.commons.util.collections.IdentityLinearMap;
-
-//CHECKSTYLE JavadocMethod:OFF
-//CHECKSTYLE JavadocType:OFF
 
 public
 class IdentityLinearMapTest {
@@ -47,34 +41,34 @@ class IdentityLinearMapTest {
     @Test public void
     test() {
         Map<String, String> m = new IdentityLinearMap<String, String>();
-        assertTrue(m.isEmpty());
-        assertEquals(0, m.size());
-        assertFalse(m.containsKey("xx"));
+        Assert.assertTrue(m.isEmpty());
+        Assert.assertEquals(0, m.size());
+        Assert.assertFalse(m.containsKey("xx"));
 
-        assertNull(m.put("foo", "bar"));
-        assertFalse(m.isEmpty());
-        assertEquals(1, m.size());
-        assertNull(m.get("xx"));
-        assertSame("bar", m.get("foo"));
-        assertNull(m.get(new String("foo")));
-        assertFalse(m.containsKey("xx"));
-        assertTrue(m.containsKey("foo"));
-        assertFalse(m.containsKey(new String("foo")));
-        assertFalse(m.containsValue("xx"));
-        assertTrue(m.containsValue("bar"));
-        assertFalse(m.containsValue(new String("bar")));
+        Assert.assertNull(m.put("foo", "bar"));
+        Assert.assertFalse(m.isEmpty());
+        Assert.assertEquals(1, m.size());
+        Assert.assertNull(m.get("xx"));
+        Assert.assertSame("bar", m.get("foo"));
+        Assert.assertNull(m.get(new String("foo")));
+        Assert.assertFalse(m.containsKey("xx"));
+        Assert.assertTrue(m.containsKey("foo"));
+        Assert.assertFalse(m.containsKey(new String("foo")));
+        Assert.assertFalse(m.containsValue("xx"));
+        Assert.assertTrue(m.containsValue("bar"));
+        Assert.assertFalse(m.containsValue(new String("bar")));
 
-        assertNull(m.put("hello", "world"));
-        assertFalse(m.isEmpty());
-        assertEquals(2, m.size());
-        assertTrue(m.containsValue("world"));
+        Assert.assertNull(m.put("hello", "world"));
+        Assert.assertFalse(m.isEmpty());
+        Assert.assertEquals(2, m.size());
+        Assert.assertTrue(m.containsValue("world"));
 
-        assertSame("world", m.put("hello", "WORLD"));
-        assertFalse(m.isEmpty());
-        assertEquals(2, m.size());
-        assertSame("WORLD", m.get("hello"));
-        assertTrue(m.containsKey("hello"));
-        assertTrue(m.containsValue("WORLD"));
-        assertFalse(m.containsValue("world"));
+        Assert.assertSame("world", m.put("hello", "WORLD"));
+        Assert.assertFalse(m.isEmpty());
+        Assert.assertEquals(2, m.size());
+        Assert.assertSame("WORLD", m.get("hello"));
+        Assert.assertTrue(m.containsKey("hello"));
+        Assert.assertTrue(m.containsValue("WORLD"));
+        Assert.assertFalse(m.containsValue("world"));
     }
 }

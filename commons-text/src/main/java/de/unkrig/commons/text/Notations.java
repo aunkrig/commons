@@ -95,10 +95,6 @@ class Notations {
         String toLowerCaseUnderscored();
     }
 
-    /**
-     *
-     * @copyright (C) 2015, SWM Services GmbH
-     */
     private static
     class PhraseImpl implements Phrase {
 

@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// SUPPRESS CHECKSTYLE Javadoc:9999
+
 package test;
 
 import java.util.Iterator;
@@ -32,10 +34,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import de.unkrig.commons.util.EnhancedServiceLoader;
-
-//CHECKSTYLE JavadocMethod:OFF
-//CHECKSTYLE JavadocType:OFF
-//CHECKSTYLE JavadocVariable:OFF
 
 public
 class EnhancedServiceLoaderTest {

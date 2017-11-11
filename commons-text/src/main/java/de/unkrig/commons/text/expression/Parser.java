@@ -341,16 +341,16 @@ class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
      */
     public T
     parsePart() throws ParseException, EX {
-    	try {
-    		return this.parseExpression().toValue();
-    	} catch (ParseException pe) {
-    		throw ExceptionUtil.wrap("At " + this.scanner.toString(), pe);
-    	} catch (RuntimeException re) {
-    		throw ExceptionUtil.wrap("At " + this.scanner.toString(), re);
-    	} catch (Exception e) {
-    		@SuppressWarnings("unchecked") EX ee = (EX) e;
-    		throw ExceptionUtil.wrap("At " + this.scanner.toString(), ee);
-    	}
+        try {
+            return this.parseExpression().toValue();
+        } catch (ParseException pe) {
+            throw ExceptionUtil.wrap("At " + this.scanner.toString(), pe);
+        } catch (RuntimeException re) {
+            throw ExceptionUtil.wrap("At " + this.scanner.toString(), re);
+        } catch (Exception e) {
+            @SuppressWarnings("unchecked") EX ee = (EX) e;
+            throw ExceptionUtil.wrap("At " + this.scanner.toString(), ee);
+        }
     }
 
     /**
@@ -359,11 +359,9 @@ class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
     public
     enum UnaryOperator {
 
-        // CHECKSTYLE Variable:OFF
-        MINUS("-"),
+        MINUS("-"), // SUPPRESS CHECKSTYLE JavadocVariable:2
         LOGICAL_COMPLEMENT("!"),
         BITWISE_COMPLEMENT("~");
-        // CHECKSTYLE Variable:ON
 
         private final String text;
 
@@ -379,8 +377,7 @@ class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
     public
     enum BinaryOperator {
 
-        // CHECKSTYLE JavadocVariable:OFF
-        EQUAL("=="),
+        EQUAL("=="), // SUPPRESS CHECKSTYLE JavadocVariable:20
         GLOB("=*"),
         REGEX("=~"),
         NOT_EQUAL("!="),
@@ -400,8 +397,9 @@ class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
         BITWISE_AND("&"),
         LEFT_SHIFT("<<"),
         RIGHT_SHIFT(">>"),
-        RIGHT_USHIFT(">>>");
-        // CHECKSTYLE JavadocVariable:ON
+        RIGHT_USHIFT(">>>"),
+
+        ;
 
         private final String text;
 
@@ -1149,7 +1147,7 @@ class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
 
     // ABSTRACT HANDLERS.
 
-    // CHECKSTYLE Method:OFF
+    // SUPPRESS CHECKSTYLE JavadocMethod:15
     protected abstract T conditional(T lhs, T mhs, T rhs) throws EX;
     protected abstract T unaryOperation(UnaryOperator operator, T operand) throws EX;
     protected abstract T binaryOperation(T lhs, BinaryOperator operator, T rhs) throws EX;
@@ -1165,7 +1163,6 @@ class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
     protected abstract T newArray(Class<?> clasS, List<T> dimensions) throws EX;
     protected abstract T cast(Class<?> targetType, T operand) throws EX, ParseException;
     protected abstract T arrayAccess(T lhs, T rhs) throws EX;
-    // CHECKSTYLE Method:ON
 
     // HELPERS.
 

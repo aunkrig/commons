@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// SUPPRESS CHECKSTYLE Javadoc:9999
+
 package test;
 
 import java.io.FileNotFoundException;
@@ -35,9 +37,6 @@ import org.junit.Test;
 import de.unkrig.commons.lang.protocol.NoException;
 import de.unkrig.commons.lang.protocol.TransformerUtil;
 import de.unkrig.commons.lang.protocol.TransformerWhichThrows;
-
-//CHECKSTYLE JavadocMethod:OFF
-//CHECKSTYLE JavadocType:OFF
 
 public
 class TransformerTest {

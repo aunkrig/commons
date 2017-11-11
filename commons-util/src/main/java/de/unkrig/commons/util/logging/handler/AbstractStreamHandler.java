@@ -46,13 +46,11 @@ class AbstractStreamHandler extends java.util.logging.StreamHandler {
 
     // Declare a set of constants for the handler property default values, so they can be used with the {@value} doc
     // tag.
-    // SUPPRESS CHECKSTYLE Javadoc:OFF
-    public static final Level            DEFAULT_LEVEL      = Level.INFO;
+    public static final Level            DEFAULT_LEVEL      = Level.INFO; // SUPPRESS CHECKSTYLE JavadocVariable:4
     public static final boolean          DEFAULT_AUTO_FLUSH = true;
     @Nullable public static final Filter DEFAULT_FILTER     = null;
     public static final SimpleFormatter  DEFAULT_FORMATTER  = new SimpleFormatter();
     @Nullable public static final String DEFAULT_ENCODING   = null;
-    // SUPPRESS CHECKSTYLE Javadoc:ON
 
     private boolean autoFlush;
 
