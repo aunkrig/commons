@@ -104,11 +104,10 @@ class Main {
                 if (!arg.startsWith("-")) break;
                 i++;
                 if ("-help".equals(arg)) {
-                    // CHECKSTYLE LineLength:OFF
                     System.out.println("Usage:");
                     System.out.println("  java " + Main.class.getName());
                     System.out.println("        [ <global-option> ... ]");
-                    System.out.println("        ( [ <local-option> ... ] <local-port> <remote-server-host-name> <remote-server-port> ) ...");
+                    System.out.println("        ( [ <local-option> ... ] <local-port> <remote-server-host-name> <remote-server-port> ) ..."); // SUPPRESS CHECKSTYLE LineLength
                     System.out.println("Valid <global-option>s are:");
                     System.out.println("  -help");
                     System.out.println("  -nowarn         Suppress all messages except errors");
@@ -142,7 +141,7 @@ class Main {
                     System.out.println("                  Remove all headers with the given <name>");
                     System.out.println("  -modify-header <name> s/<regex>/<replacement>/<flags>");
                     System.out.println("                  Modify the value of all headers with the given <name>");
-                    // CHECKSTYLE LineLength:ON
+
                     System.exit(0);
                 } else
                 if ("-nowarn".equals(arg)) {

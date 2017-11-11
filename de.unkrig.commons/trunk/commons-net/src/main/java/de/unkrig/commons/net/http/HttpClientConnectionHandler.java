@@ -202,9 +202,10 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
 
             this.stoppables.add(stoppable);
             LOGGER.fine(this.readRequestLogginPrefix + "Reading request from client");
-            long t1 = System.currentTimeMillis();
+
+            long        t1      = System.currentTimeMillis();
             HttpRequest request = HttpRequest.read(in, this.readRequestLogginPrefix);
-            long t2 = System.currentTimeMillis();
+            long        t2      = System.currentTimeMillis();
 
             HttpResponse httpResponse;
             HANDLE:

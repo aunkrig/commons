@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// SUPPRESS CHECKSTYLE Javadoc:9999
+
 package test;
 
 import static org.junit.Assert.assertEquals;
@@ -33,9 +35,6 @@ import org.junit.Test;
 
 import de.unkrig.commons.lang.protocol.Producer;
 import de.unkrig.commons.math.Sequences;
-
-// CHECKSTYLE JavadocMethod:OFF
-// CHECKSTYLE JavadocType:OFF
 
 public
 class SequencesTest {

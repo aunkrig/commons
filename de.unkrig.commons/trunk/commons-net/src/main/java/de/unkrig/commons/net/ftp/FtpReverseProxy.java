@@ -255,16 +255,13 @@ class FtpReverseProxy implements RunnableWhichThrows<IOException> {
             }
         );
     }
-    // CHECKSTYLE LineLength:OFF
-    // CHECKSTYLE JavadocVariable:OFF
+    // SUPPRESS CHECKSTYLE LineLength|JavadocVariable:6
     static final Pattern REPLY           = Pattern.compile("(\\d\\d\\d) (.*)");
     static final Pattern BRACKETED_REPLY = Pattern.compile("(\\d\\d\\d)-(.*)");
     static final Pattern REPLY_227       = Pattern.compile("227 .*\\((\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)\\).*");
     static final Pattern REPLY_229       = Pattern.compile("229 .*\\(\\|\\|\\|(\\d+)\\|\\).*");
     static final Pattern COMMAND_PORT    = Pattern.compile("PORT (\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)", Pattern.CASE_INSENSITIVE);
     static final Pattern COMMAND_EPRT    = Pattern.compile("EPRT \\|([12])\\|([^\\|]+)\\|(\\d+)\\|", Pattern.CASE_INSENSITIVE);
-    // CHECKSTYLE LineLength:ON
-    // CHECKSTYLE JavadocVariable:ON
 
     /**
      * Converts an (IPv4) {@link InetSocketAddress} into the 'a1,a2,a3,a4,p1,p2' format used by FTP.

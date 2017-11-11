@@ -58,7 +58,8 @@ class Main {
                 if (!arg.startsWith("-")) break;
                 i++;
                 if ("-help".equals(arg)) {
-                    // CHECKSTYLE LineLength:OFF
+
+                    // SUPPRESS CHECKSTYLE LineLength:20
                     System.out.println("Usage:");
                     System.out.println("  java " + Main.class.getName());
                     System.out.println("        [ <global-option> ... ]");
@@ -86,7 +87,7 @@ class Main {
                     System.out.println("                  Accept connect requests to only this address");
                     System.out.println("  -server-connection-timeout <ms>");
                     System.out.println("                  Timeout for creating connections to the remote server");
-                    // CHECKSTYLE LineLength:ON
+
                     System.exit(0);
                 } else
                 if ("-data-connection-port".equals(arg)) {
