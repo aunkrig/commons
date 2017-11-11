@@ -239,10 +239,10 @@ class ContentsProcessings {
 
             @Override @Nullable public T
             process(
-                String path,
-                InputStream inputStream,
-                long size,
-                long crc32,
+                String                                                            path,
+                InputStream                                                       inputStream,
+                long                                                              size,
+                long                                                              crc32,
                 ProducerWhichThrows<? extends InputStream, ? extends IOException> opener
             ) throws IOException {
 

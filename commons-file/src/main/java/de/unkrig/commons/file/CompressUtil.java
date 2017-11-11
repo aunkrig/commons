@@ -323,7 +323,7 @@ class CompressUtil {
             throw ExceptionUtil.wrap(file.toString(), ioe);
         } catch (RuntimeException re) {
             throw ExceptionUtil.wrap(file.toString(), re);
-        } catch (Error e) {
+        } catch (Error e) { // SUPPRESS CHECKSTYLE IllegalCatch
             throw ExceptionUtil.wrap(file.toString(), e);
         } finally {
             try { is.close(); } catch (Exception e) {}

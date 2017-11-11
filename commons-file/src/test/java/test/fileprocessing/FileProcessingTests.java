@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// SUPPRESS CHECKSTYLE JavadocMethod:9999
+
 package test.fileprocessing;
 
 import java.io.File;
@@ -51,8 +53,6 @@ import de.unkrig.commons.text.pattern.Glob;
 import de.unkrig.commons.text.pattern.Pattern2;
 import de.unkrig.commons.util.concurrent.ConcurrentUtil;
 import de.unkrig.commons.util.concurrent.SquadExecutor;
-
-// CHECKSTYLE JavadocMethod:OFF
 
 /**
  * Tests for the {@code de.unkrig.commons.file.fileprocessing' package.

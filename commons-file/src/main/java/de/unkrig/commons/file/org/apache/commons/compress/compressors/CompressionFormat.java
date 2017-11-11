@@ -42,7 +42,7 @@ import org.apache.commons.compress.compressors.CompressorOutputStream;
 public
 interface CompressionFormat {
 
-    /** @return A short, familiar text which describes this compression format, e.g. 'bzip2', 'gz', 'z' */
+    /** @return A short, familiar text which describes this compression format, e.g. "bzip2", "gz", "z" */
     String
     getName();
 
@@ -52,14 +52,15 @@ interface CompressionFormat {
 
     /**
      * Maps the given <var>fileName</var> to the name that a corresponding compressed file would have. This is typically
-     * achieved by appending a suffix, like '.bzip2', '.gz', '.Z'.
+     * achieved by appending a suffix, like ".bzip2", ".gz", ".Z".
      */
     String
     getCompressedFileName(String fileName);
 
     /**
      * Maps the given <var>fileName</var> to the name that a corresponding uncompressed file would have. This is
-     * typically achieved by removing a suffix, like '.bzip2', '.gz', '.Z', or by changing the suffix, e.g. from '.tgz' to '.tar'.
+     * typically achieved by removing a suffix, like ".bzip2", ".gz", ".Z", or by changing the suffix, e.g. from
+     * ".tgz" to ".tar".
      */
     String
     getUncompressedFileName(String fileName);
