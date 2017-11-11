@@ -39,7 +39,7 @@ class Types {
     private
     Types() {}
 
-    // CHECKSTYLE JavadocVariable:OFF
+    // SUPPRESS CHECKSTYLE JavadocVariable:13
     public static final Type OBJECT_TYPE          = Type.getObjectType("java/lang/Object");
     public static final Type STRING_TYPE          = Type.getObjectType("java/lang/String");
     public static final Type CHAR_SEQUENCE_TYPE   = Type.getObjectType("java/lang/CharSequence");
@@ -53,7 +53,6 @@ class Types {
     public static final Type DOUBLE_ARRAY_TYPE    = Type.getType("[D");
     public static final Type CHAR_ARRAY_TYPE      = Type.getType("[C");
     public static final Type REFERENCE_ARRAY_TYPE = Type.getType("[Ljava/lang/Object;");
-    // CHECKSTYLE JavadocVariable:ON
 
     /**
      * Guess the operand/result type from the opcode. Notice that this is not always reliable
