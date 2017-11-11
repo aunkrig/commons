@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// SUPPRESS CHECKSTYLE Javadoc:9999
+
 package test;
 
 import java.io.ByteArrayOutputStream;
@@ -38,9 +40,6 @@ import org.junit.Test;
 import de.unkrig.commons.io.ByteFilter;
 import de.unkrig.commons.io.ByteFilterOutputStream;
 import de.unkrig.commons.nullanalysis.Nullable;
-
-//CHECKSTYLE JavadocMethod:OFF
-//CHECKSTYLE JavadocType:OFF
 
 public
 class ByteFilterOutputStreamTest {
