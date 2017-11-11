@@ -95,6 +95,7 @@ class Sequences {
         Long.MAX_VALUE,
     };
     private static final long[] A = {
+                                                                                           5L,
                          7L,                  11L,                  31L,                  23L,
                         33L,                  35L,                  65L,                 995L,
                        209L,                 884L,                 572L,                 219L,
