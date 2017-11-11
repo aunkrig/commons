@@ -54,13 +54,13 @@ class Main {
             if (!arg.startsWith("-")) break;
             i++;
             if ("-help".equals(arg)) {
-                // CHECKSTYLE LineLength:OFF
-                System.out.println("Creates a TCP connection to a server and forwards STDIN/STDOUT to that connection.");
+
+                System.out.println("Creates a TCP connection to a server and forwards STDIN/STDOUT to that connection."); // SUPPRESS CHECKSTYLE LineLength
                 System.out.println();
                 System.out.println("Usage:");
                 System.out.println("  java " + Main.class.getName() + " -help");
                 System.out.println("  java " + Main.class.getName() + " <server-host-name> <server-port> )");
-                // CHECKSTYLE LineLength:ON
+
                 System.exit(0);
             } else
             {

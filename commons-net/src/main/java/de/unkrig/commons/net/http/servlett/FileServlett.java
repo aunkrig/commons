@@ -281,7 +281,9 @@ class FileServlett extends AbstractServlett {
         long contentLength = to - from;
 
         FileInputStream is = new FileInputStream(file);
-        if (InputStreams.skip(is, from) != from) throw new IOException("Cannot skip " + from + " bytes of \"" + file + "\"");
+        if (InputStreams.skip(is, from) != from) {
+            throw new IOException("Cannot skip " + from + " bytes of \"" + file + "\"");
+        }
 
         // Create the response.
         HttpResponse httpResponse = HttpResponse.response(

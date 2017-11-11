@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// SUPPRESS CHECKSTYLE Javadoc:9999
+
 package test;
 
 import java.io.IOException;
@@ -32,9 +34,6 @@ import java.io.OutputStream;
 import org.junit.Test;
 
 import de.unkrig.commons.net.stream.PassiveSocketOutputStream;
-
-//CHECKSTYLE JavadocMethod:OFF
-//CHECKSTYLE JavadocType:OFF
 
 public
 class PassiveSocketOutputStreamTest {

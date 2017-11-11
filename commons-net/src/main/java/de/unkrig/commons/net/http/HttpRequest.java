@@ -48,6 +48,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,6 +67,8 @@ import de.unkrig.commons.nullanalysis.Nullable;
 public
 class HttpRequest extends HttpMessage {
 
+    private static final Logger LOGGER = Logger.getLogger(HttpRequest.class.getName());
+
     private static final Charset CHARSET_UTF_8 = Charset.forName("UTF-8");
 
     private static final Charset CHARSET_ISO_8859_1 = Charset.forName("ISO-8859-1");
@@ -80,12 +83,13 @@ class HttpRequest extends HttpMessage {
     /**
      * Representation of the various HTTP methods.
      */
-    public enum Method {
+    public
+    enum Method {
         GET(false), POST(true), HEAD(false), PUT(true), CONNECT(true);
 
         private boolean hasBody;
 
-        private Method(boolean hasBody) { this.hasBody = hasBody; }
+        Method(boolean hasBody) { this.hasBody = hasBody; }
 
         public boolean hasBody() { return this.hasBody; }
     }

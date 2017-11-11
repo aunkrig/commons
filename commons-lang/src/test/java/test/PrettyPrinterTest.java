@@ -24,16 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// SUPPRESS CHECKSTYLE Javadoc:9999
+
 package test;
 
-import static org.junit.Assert.*;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 import de.unkrig.commons.lang.PrettyPrinter;
-
-// CHECKSTYLE JavadocMethod:OFF
-// CHECKSTYLE JavadocType:OFF
 
 public
 class PrettyPrinterTest {
@@ -45,39 +43,39 @@ class PrettyPrinterTest {
 
     @Test public void
     testToString() {
-        assertEquals("null", PrettyPrinter.toString(null));
-        assertEquals("7", PrettyPrinter.toString(7));
-        assertEquals("\"HELLO\\n\"", PrettyPrinter.toString("HELLO\n"));
+        Assert.assertEquals("null", PrettyPrinter.toString(null));
+        Assert.assertEquals("7", PrettyPrinter.toString(7));
+        Assert.assertEquals("\"HELLO\\n\"", PrettyPrinter.toString("HELLO\n"));
     }
 
     @Test public void
     testIntArray0ToString() {
-        assertEquals("int[0]", PrettyPrinter.toString(new int[0]));
+        Assert.assertEquals("int[0]", PrettyPrinter.toString(new int[0]));
     }
 
     @Test public void
     testStringArray0ToString() {
-        assertEquals("String[0]", PrettyPrinter.toString(new String[0]));
+        Assert.assertEquals("String[0]", PrettyPrinter.toString(new String[0]));
     }
 
     @Test public void
     testCharArray4ToString() {
-        assertEquals("char[4] 'abc\\n'", PrettyPrinter.toString(new char[] { 'a', 'b', 'c', '\n' }));
+        Assert.assertEquals("char[4] 'abc\\n'", PrettyPrinter.toString(new char[] { 'a', 'b', 'c', '\n' }));
     }
 
     @Test public void
     testIntArray3ToString() {
-        assertEquals("int[3] { 1, 2, 3 }", PrettyPrinter.toString(new int[] { 1, 2, 3 }));
+        Assert.assertEquals("int[3] { 1, 2, 3 }", PrettyPrinter.toString(new int[] { 1, 2, 3 }));
     }
 
     @Test public void
     testIntArray12ToString() {
-        assertEquals("int[12] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ... }", PrettyPrinter.toString(new int[12]));
+        Assert.assertEquals("int[12] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ... }", PrettyPrinter.toString(new int[12]));
     }
 
     @Test public void
     testNestedByteArrayToString() {
-        assertEquals(
+        Assert.assertEquals(
             "byte[3][] { byte[2] { 0B, 0B }, byte[2] { 0B, 0B }, byte[2] { 0B, 0B } }",
             PrettyPrinter.toString(new byte[3][2])
         );
@@ -85,7 +83,7 @@ class PrettyPrinterTest {
 
     @Test public void
     testNestedObjectArrayToString() {
-        assertEquals(
+        Assert.assertEquals(
             "Object[3] { \"WORLD\\n\", 7, char[3] 'abc' }",
             PrettyPrinter.toString(new Object[] { "WORLD\n", 7, new char[] { 'a', 'b', 'c' } })
         );
@@ -93,7 +91,7 @@ class PrettyPrinterTest {
         {
             Object[] oa = new Object[3];
             oa[1] = oa;
-            assertEquals("Object[3] { null, [self], null }", PrettyPrinter.toString(oa));
+            Assert.assertEquals("Object[3] { null, [self], null }", PrettyPrinter.toString(oa));
         }
 
         {
@@ -103,7 +101,7 @@ class PrettyPrinterTest {
             oa1[1] = oa2;
             oa2[0] = oa2;
             oa2[1] = oa1;
-            assertEquals(
+            Assert.assertEquals(
                 "Object[3] { [self], Object[3] { [self], [parent], null }, null }",
                 PrettyPrinter.toString(oa1)
             );
@@ -112,42 +110,48 @@ class PrettyPrinterTest {
 
     @Test public void
     testString0ToString() {
-        assertEquals("\"\"", PrettyPrinter.toString(""));
+        Assert.assertEquals("\"\"", PrettyPrinter.toString(""));
     }
 
     @Test public void
     testString1ToString() {
-        assertEquals("\"\\n\"", PrettyPrinter.toString("\n"));
+        Assert.assertEquals("\"\\n\"", PrettyPrinter.toString("\n"));
     }
 
     @Test public void
     testString100ToString() {
-        assertEquals("\"" + S100 + "\"", PrettyPrinter.toString(S100));
+        Assert.assertEquals("\"" + PrettyPrinterTest.S100 + "\"", PrettyPrinter.toString(PrettyPrinterTest.S100));
     }
 
     @Test public void
     testString101ToString() {
-        assertEquals("\"" + S100 + "\"... (101 chars)", PrettyPrinter.toString(S100 + "0"));
+        Assert.assertEquals(
+            "\"" + PrettyPrinterTest.S100 + "\"... (101 chars)",
+            PrettyPrinter.toString(PrettyPrinterTest.S100 + "0")
+        );
     }
 
     @Test public void
     testCharArray0ToString() {
-        assertEquals("char[0]", PrettyPrinter.toString(new char[0]));
+        Assert.assertEquals("char[0]", PrettyPrinter.toString(new char[0]));
     }
 
     @Test public void
     testCharArray1ToString() {
-        assertEquals("char[1] 'A'", PrettyPrinter.toString(new char[] { 'A' }));
+        Assert.assertEquals("char[1] 'A'", PrettyPrinter.toString(new char[] { 'A' }));
     }
 
     @Test public void
     testCharArray20ToString() {
-        assertEquals("char[20] '01234567890123456789'", PrettyPrinter.toString("01234567890123456789".toCharArray()));
+        Assert.assertEquals(
+            "char[20] '01234567890123456789'",
+            PrettyPrinter.toString("01234567890123456789".toCharArray())
+        );
     }
 
     @Test public void
     testCharArray21ToString() {
-        assertEquals(
+        Assert.assertEquals(
             "char[21] '01234567890123456789'...",
             PrettyPrinter.toString("012345678901234567890".toCharArray())
         );
@@ -158,22 +162,56 @@ class PrettyPrinterTest {
 
         {
             String[] sa = new String[10];
-            for (int i = 0; i < sa.length; i++) sa[i] = S10;
-            assertEquals((
+            for (int i = 0; i < sa.length; i++) sa[i] = PrettyPrinterTest.S10;
+            Assert.assertEquals((
                 "String[10] { \""
-                + S10 + "\", \"" + S10 + "\", \"" + S10 + "\", \"" + S10 + "\", \"" + S10 + "\", \"" + S10 + "\", \""
-                + S10 + "\", \"" + S10 + "\", \"" + S10 + "\", \"" + S10
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
                 + "\" }"
             ), PrettyPrinter.toString(sa));
         }
 
         {
             String[] sa = new String[11];
-            for (int i = 0; i < sa.length; i++) sa[i] = S10;
-            assertEquals((
+            for (int i = 0; i < sa.length; i++) sa[i] = PrettyPrinterTest.S10;
+            Assert.assertEquals((
                 "String[11] { \""
-                + S10 + "\", \"" + S10 + "\", \"" + S10 + "\", \"" + S10 + "\", \"" + S10 + "\", \"" + S10 + "\", \""
-                + S10 + "\", \"" + S10 + "\", \"" + S10 + "\", \"" + S10
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
+                + "\", \""
+                + PrettyPrinterTest.S10
                 + "\", ... }"
             ), PrettyPrinter.toString(sa));
         }
@@ -183,15 +221,25 @@ class PrettyPrinterTest {
     testLargeResult() {
 
         String[] sa = new String[4];
-        for (int i = 0; i < sa.length; i++) sa[i] = S100;
+        for (int i = 0; i < sa.length; i++) sa[i] = PrettyPrinterTest.S100;
         String ex1 = (
-            "String[" + sa.length + "] { \"" + S100 + "\", \"" + S100 + "\", \"" + S100 + "\", \"" + S100 + "\" }"
+            "String["
+            + sa.length
+            + "] { \""
+            + PrettyPrinterTest.S100
+            + "\", \""
+            + PrettyPrinterTest.S100
+            + "\", \""
+            + PrettyPrinterTest.S100
+            + "\", \""
+            + PrettyPrinterTest.S100
+            + "\" }"
         );
 
         {
             String[][] saa = new String[2][];
             for (int i = 0; i < saa.length; i++) saa[i] = sa;
-            assertEquals(
+            Assert.assertEquals(
                 "String[" + saa.length + "][] { " + ex1 + ", " + ex1 + " }",
                 PrettyPrinter.toString(saa)
             );
@@ -200,13 +248,18 @@ class PrettyPrinterTest {
         {
             String[][] saa = new String[3][];
             for (int i = 0; i < saa.length; i++) saa[i] = sa;
-            assertEquals((
+            Assert.assertEquals((
                 "String[" + saa.length + "][] { "
                 + ex1
                 + ", "
                 + ex1
                 + ", "
-                + "String[" + sa.length + "] { \"" + S100 + "\", \"" + S100.substring(0, 33)
+                + "String["
+                + sa.length
+                + "] { \""
+                + PrettyPrinterTest.S100
+                + "\", \""
+                + PrettyPrinterTest.S100.substring(0, 33)
                 + "\"... (100 chars), ... }"
                 + " }"
             ), PrettyPrinter.toString(saa));

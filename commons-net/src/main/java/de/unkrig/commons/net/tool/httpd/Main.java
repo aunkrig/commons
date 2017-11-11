@@ -48,13 +48,14 @@ class Main {
             if (!arg.startsWith("-")) break;
             i++;
             if ("-help".equals(arg)) {
-                // CHECKSTYLE LineLength:OFF
+
+                // SUPPRESS CHECKSTYLE LineLength:5
                 System.out.println("Usage:");
-                System.out.println("  java " + Main.class.getName() + " [ <option> ... ] ( <local-port> <document-root> ) ...");
+                System.out.println("  java " + Main.class.getName() + " [ <option> ... ] ( <local-port> <document-root> ) ..."); // SUPPRESS CHECKSTYLE LineLength
                 System.out.println("Valid options are:");
                 System.out.println("  -help");
                 System.out.println("  -log <level> Log to STDERR");
-                // CHECKSTYLE LineLength:ON
+
                 return;
             } else
             if ("-log".equals(arg)) {

@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// SUPPRESS CHECKSTYLE Javadoc:9999
+
 package test.http;
 
 import java.io.File;
@@ -45,9 +47,6 @@ import de.unkrig.commons.lang.ThreadUtil;
 import de.unkrig.commons.net.http.HttpProxy;
 import de.unkrig.commons.net.security.KeyStores;
 import de.unkrig.commons.net.tool.httpd.Httpd;
-
-//CHECKSTYLE JavadocMethod:OFF
-//CHECKSTYLE JavadocType:OFF
 
 public
 class HttpdTest {

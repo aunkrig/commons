@@ -89,12 +89,10 @@ import de.unkrig.commons.util.logging.LogUtil;
 public
 class HttpMessage {
 
-    // CHECKSTYLE LineLength:OFF
-    // CHECKSTYLE JavadocVariable:OFF
-    static final Logger          LOGGER         = Logger.getLogger(HttpMessage.class.getName());
-    private static final Pattern HEADER_PATTERN = Pattern.compile("([ -~&&[^()<>@,;:\\\\/\\[\\]?={} \\t]]+)\\s*:\\s*(.*?)\\s*");
-    // CHECKSTYLE LineLength:ON
-    // CHECKSTYLE JavadocVariable:ON
+    private static final Logger LOGGER = Logger.getLogger(HttpMessage.class.getName());
+
+    private static final Pattern
+    HEADER_PATTERN = Pattern.compile("([ -~&&[^()<>@,;:\\\\/\\[\\]?={} \\t]]+)\\s*:\\s*(.*?)\\s*");
 
     private static final DateFormat[] HEADER_DATE_FORMATS = {
 

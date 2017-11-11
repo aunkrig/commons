@@ -35,6 +35,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,8 +47,9 @@ import de.unkrig.commons.nullanalysis.Nullable;
 public
 class HttpResponse extends HttpMessage {
 
+    private static final Logger LOGGER = Logger.getLogger(HttpResponse.class.getName());
+
     private static final Pattern STATUS_LINE_PATTERN = Pattern.compile("HTTP/(\\d+\\.\\d+) (\\d+) (.*)");
-//    private static final Logger  LOGGER = Logger.getLogger(HttpResponse.class.getName());
 
     private String       httpVersion;
     private final Status status;
@@ -57,7 +59,7 @@ class HttpResponse extends HttpMessage {
     public
     enum Status {
 
-        // CHECKSTYLE JavadocVariable:OFF
+        // SUPPRESS CHECKSTYLE JavadocVariable:40
         CONTINUE                       (100, "Continue",                        false),
         SWITCHING_PROTOCOLS            (101, "Switching Protocols",             false),
         OK                             (200, "OK",                              true),
@@ -98,7 +100,6 @@ class HttpResponse extends HttpMessage {
         SERVICE_UNAVAILABLE            (503, "Service Unavailable",             true),
         GATEWAY_TIMEOUT                (504, "Gateway Time-out",                true),
         HTTP_VERSION_NOT_SUPPORTED     (505, "HTTP Version not supported",      true);
-        // CHECKSTYLE JavadocVariable:ON
 
         private final int     code;
         private final String  reasonPhrase;
@@ -265,7 +266,7 @@ class HttpResponse extends HttpMessage {
             // Read and parse status line.
             {
                 String statusLine = HttpMessage.readLine(in);
-                if (HttpMessage.LOGGER.isLoggable(Level.FINE)) HttpMessage.LOGGER.fine(loggingPrefix + statusLine);
+                if (LOGGER.isLoggable(Level.FINE)) LOGGER.fine(loggingPrefix + statusLine);
 
                 Matcher m = HttpResponse.STATUS_LINE_PATTERN.matcher(statusLine);
                 if (!m.matches()) throw new InvalidHttpMessageException("Invalid status line");
@@ -302,7 +303,7 @@ class HttpResponse extends HttpMessage {
 
         String statusLine = "HTTP/" + this.httpVersion + ' ' + this.status.getCode() + ' ' + this.reasonPhrase;
 
-        HttpMessage.LOGGER.fine(loggingPrefix + statusLine);
+        LOGGER.fine(loggingPrefix + statusLine);
 
         out.write((statusLine + "\r\n").getBytes("ASCII"));
 

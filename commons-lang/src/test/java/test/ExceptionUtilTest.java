@@ -24,17 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package test;
+// SUPPRESS CHECKSTYLE Javadoc:9999
 
-import static de.unkrig.commons.lang.ExceptionUtil.throwUndeclared;
-import static org.junit.Assert.assertSame;
+package test;
 
 import java.io.IOException;
 
+import org.junit.Assert;
 import org.junit.Test;
 
-// CHECKSTYLE JavadocMethod:OFF
-// CHECKSTYLE JavadocType:OFF
+import de.unkrig.commons.lang.ExceptionUtil;
 
 @SuppressWarnings({ "static-method", "unused" }) public
 class ExceptionUtilTest {
@@ -44,7 +43,7 @@ class ExceptionUtilTest {
         try {
             this.meth1();
         } catch (Exception e) {
-            assertSame(ClassNotFoundException.class, e.getClass());
+            Assert.assertSame(ClassNotFoundException.class, e.getClass());
         }
     }
 
@@ -53,13 +52,13 @@ class ExceptionUtilTest {
         try {
             this.meth3();
         } catch (Exception e) {
-            assertSame(ClassNotFoundException.class, e.getClass());
+            Assert.assertSame(ClassNotFoundException.class, e.getClass());
         }
     }
 
     private void meth1() { this.meth2(); }
-    private void meth2() { throwUndeclared(new ClassNotFoundException()); }
+    private void meth2() { ExceptionUtil.throwUndeclared(new ClassNotFoundException()); }
 
     private void meth3() throws IOException { this.meth4(); }
-    private void meth4() throws IOException { throwUndeclared(new ClassNotFoundException()); }
+    private void meth4() throws IOException { ExceptionUtil.throwUndeclared(new ClassNotFoundException()); }
 }
