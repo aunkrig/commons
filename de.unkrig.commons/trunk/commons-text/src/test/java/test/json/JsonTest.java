@@ -24,15 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package test.json;
+// SUPPRESS CHECKSTYLE Javadoc:9999
 
-import static org.junit.Assert.assertEquals;
+package test.json;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import de.unkrig.commons.io.CountingReader;
@@ -40,8 +41,6 @@ import de.unkrig.commons.text.json.Json;
 import de.unkrig.commons.text.json.JsonParser;
 import de.unkrig.commons.text.json.JsonUnparseVisitor;
 import de.unkrig.commons.text.parser.ParseException;
-
-// CHECKSTYLE Javadoc:OFF
 
 public
 class JsonTest {
@@ -76,7 +75,7 @@ class JsonTest {
         }
         StringWriter sw = new StringWriter();
         value.accept(new JsonUnparseVisitor(new PrintWriter(sw), ""));
-        assertEquals(text, sw.toString());
+        Assert.assertEquals(text, sw.toString());
     }
 
     @Test public void

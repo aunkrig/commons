@@ -45,9 +45,7 @@ class Duration {
      *   ("{@code hh:mm}" vs. "{@code mm:ss}"). Same for "{@code 99[.9]}".
      * </p>
      */
-    // CHECKSTYLE WrapAndIndent:OFF
-    // CHECKSTYLE ConstantName:OFF
-    // CHECKSTYLE LineLength:OFF
+    // SUPPRESS CHECKSTYLE LineLength|ConstantName:30
     private static final Pattern
     TI_X            = Pattern.compile("\\d++(?:\\.\\d*)?"),                                                                           // 9[.9] - disallowed!
     TI_MS           = Pattern.compile("(\\d+)ms(?:ecs?)?"),                                                                           // 999ms[ec[s]]
@@ -74,9 +72,6 @@ class Duration {
     TI_W_D_H_M__2   = Pattern.compile("(\\d+)w(?:eeks?)? (\\d+)d(?:ays?)? (\\d+)h(?:ours?)? (\\d+)mins?"),                            // 1w[eek[s]] 1d[ay[s]] 23h[our[s]] 59min[s]
     TI_W_D_H_M_S__1 = Pattern.compile("(\\d+)w(?:eeks?)? (\\d+)d(?:ays?)? (\\d+):(\\d+):(\\d+)(\\.\\d*)?"),                           // 1w[eek[s]] 1d[ay[s]] 23:59:59[.9]
     TI_W_D_H_M_S__2 = Pattern.compile("(\\d+)w(?:eeks?)? (\\d+)d(?:ays?)? (\\d+)h(?:ours?)? (\\d+)mins? (\\d+)(\\.\\d*)?s(?:ecs?)?"); // 1w[eek[s]] 1d[ay[s]] 23h[our[s]] 59min[s] 59[.9]s[ec[s]]
-    // CHECKSTYLE WrapAndIndent:ON
-    // CHECKSTYLE ConstantName:ON
-    // CHECKSTYLE LineLength:ON
 
     private final long ms;
 

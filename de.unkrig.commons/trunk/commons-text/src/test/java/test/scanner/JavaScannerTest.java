@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// SUPPRESS CHECKSTYLE Javadoc:9999
+
 package test.scanner;
 
 import static de.unkrig.commons.text.scanner.JavaScanner.TokenType.CXX_COMMENT;
@@ -58,9 +60,6 @@ import de.unkrig.commons.text.scanner.JavaScanner.TokenType;
 import de.unkrig.commons.text.scanner.ScanException;
 import de.unkrig.commons.text.scanner.ScannerUtil;
 import de.unkrig.commons.text.scanner.StringScanner;
-
-//CHECKSTYLE JavadocMethod:OFF
-//CHECKSTYLE JavadocType:OFF
 
 public
 class JavaScannerTest {

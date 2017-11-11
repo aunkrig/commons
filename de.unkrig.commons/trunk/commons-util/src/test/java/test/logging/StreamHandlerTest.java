@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// SUPPRESS CHECKSTYLE Javadoc:9999
+
 package test.logging;
 
 import java.io.ByteArrayInputStream;
@@ -35,9 +37,6 @@ import org.junit.Test;
 
 import de.unkrig.commons.util.logging.formatter.PrintfFormatter;
 import de.unkrig.commons.util.logging.handler.StreamHandler;
-
-//CHECKSTYLE JavadocMethod:OFF
-//CHECKSTYLE JavadocType:OFF
 
 public
 class StreamHandlerTest {

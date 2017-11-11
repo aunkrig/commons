@@ -45,7 +45,7 @@ class JsonScanner {
     public
     enum TokenType {
 
-        // CHECKSTYLE JavadocVariable:OFF
+        // SUPPRESS CHECKSTYLE JavadocVariable:11
         SPACE,
 
         CXX_COMMENT,
@@ -57,8 +57,6 @@ class JsonScanner {
         OPERATOR, NUMBER, KEYWORD,
 
         DOUBLE_QUOTE, STRING_UNICODE_ESCAPE, STRING_ESCAPE, STRING_CHARS,
-        // CHECKSTYLE JavadocVariable:ON
-
     }
 
     private

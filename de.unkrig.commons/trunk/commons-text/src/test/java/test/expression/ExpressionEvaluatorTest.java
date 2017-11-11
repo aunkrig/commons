@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// SUPPRESS CHECKSTYLE Javadoc|LineLength:9999
+
 package test.expression;
 
 import static de.unkrig.commons.text.expression.Parser.Extension.NEW_CLASS_WITHOUT_KEYWORD;
@@ -58,10 +60,6 @@ import de.unkrig.commons.text.expression.Parser;
 import de.unkrig.commons.text.expression.Parser.Extension;
 import de.unkrig.commons.text.parser.ParseException;
 
-//CHECKSTYLE JavadocMethod:OFF
-//CHECKSTYLE JavadocType:OFF
-//CHECKSTYLE LineLength:OFF
-
 public
 class ExpressionEvaluatorTest {
 
@@ -79,10 +77,6 @@ class ExpressionEvaluatorTest {
         "ia", new int[] { 1, 2, 3 },
         "sa", new String[] { "alpha", "beta", "gamma" }
     );
-
-    // -----------------------------------------------
-    // SUPPRESS CHECKSTYLE Javadoc|LineLength:9999
-    // -----------------------------------------------
 
     @Test public void
     testStringLiterals() throws EvaluationException, ParseException {
@@ -371,10 +365,6 @@ class ExpressionEvaluatorTest {
         ee.parsePart("1 + 3}xx", offset);
         Assert.assertEquals(5, offset[0]);
     }
-
-    // --------------------------------------------
-    // CHECKSTYLE WrapAndIndent:ON
-    // --------------------------------------------
 
     /**
      * For all possible parsing {@link Extension} combinations that contain the given <var>extensionVarargs</var>:

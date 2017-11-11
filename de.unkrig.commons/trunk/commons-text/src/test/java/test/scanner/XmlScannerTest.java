@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// SUPPRESS CHECKSTYLE Javadoc:9999
+
 package test.scanner;
 
 import org.junit.Assert;
@@ -35,11 +37,6 @@ import de.unkrig.commons.text.scanner.ScanException;
 import de.unkrig.commons.text.scanner.StringScanner;
 import de.unkrig.commons.text.scanner.XmlScanner;
 import de.unkrig.commons.text.scanner.XmlScanner.TokenType;
-
-//CHECKSTYLE JavadocMethod:OFF
-//CHECKSTYLE JavadocType:OFF
-//CHECKSTYLE WrapMethod:OFF
-//CHECKSTYLE LineLength:OFF
 
 public
 class XmlScannerTest {
@@ -59,7 +56,7 @@ class XmlScannerTest {
                 + "  <![CDATA[FOO]]BAR]]>]]>\n"
                 + "</outer>\n"
             ),
-            TokenType.XML_DECLARATION,           "<?xml version=\"1.0\"?>", "\"1.0\"", null, null,
+            TokenType.XML_DECLARATION,           "<?xml version=\"1.0\"?>", "\"1.0\"", null, null, // SUPPRESS CHECKSTYLE Wrap|LineLength:30
             TokenType.CHAR_DATA,                 "\n",
             TokenType.DOCUMENT_TYPE_DECLARATION, "<!DOCTYPE html>",
             TokenType.CHAR_DATA,                 "\n",
