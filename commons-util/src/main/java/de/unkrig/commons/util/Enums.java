@@ -28,6 +28,7 @@ package de.unkrig.commons.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 
 /**
  * Various enum-related utility methods.
@@ -47,5 +48,114 @@ class Enums {
         for (Enum<?> e : enumSet) result.add(e.ordinal());
 
         return result;
+    }
+
+    /**
+     * Creates an {@link EnumSet} from the given string. The string must have one of the following formats:
+     * <dl>
+     *   <dt>(Empty)</dt>
+     *   <dt><code>'[]'</code></dt>
+     *   <dd>Empty enum set</dd>
+     *
+     *   <dt><code>enum-constant</code></dt>
+     *   <dd>Enum set with one element</dd>
+     *
+     *   <dt><code>'[' enum-constant { ',' enum-constant } ']'</code></dt>
+     *   <dd>Enum set with one or more elements</dd>
+     * </dl>
+     * <p>
+     *   <code> enum-constant := java-identifier-start { java-identifier-part }</code>
+     * </p>
+     * @return A (mutable) {@link EnumSet}
+     */
+    public static <E extends Enum<E>> EnumSet<E>
+    enumSetFromString(String s, Class<E> elementType) {
+
+        int i = 0;
+
+        i = Enums.skipWhitespace(s, i);
+
+        if (i == s.length()) return EnumSet.noneOf(elementType); // Empty string => empty set
+
+        if (s.charAt(i) != '[') return EnumSet.of(Enums.valueOf(s, elementType));
+        i = Enums.skipWhitespace(s, i + 1);
+
+        if (s.charAt(i) == ']') {
+
+            // '[]' => empty set
+            i = Enums.skipWhitespace(s, i + 1);
+            if (i < s.length()) throw new IllegalArgumentException("Trailing garbage");
+            return EnumSet.noneOf(elementType);
+        }
+
+        // Now let's parse
+        //    enum-constant { ',' enum-constant } ']' end-of-input
+        for (EnumSet<E> result = EnumSet.noneOf(elementType);;) {
+
+            {
+                int j = Enums.scanIdentifier(s, i);
+                result.add(Enums.valueOf(s.substring(i, j), elementType));
+                i = Enums.skipWhitespace(s, j);
+            }
+
+            if (i == s.length()) throw new IllegalArgumentException("Unexpected end-of-input");
+
+            char c = s.charAt(i);
+
+            if (c == ']') {
+                i = Enums.skipWhitespace(s, i + 1);
+                if (i < s.length()) throw new IllegalArgumentException("Trailing garbage");
+                return result;
+            }
+
+            if (c != ',') throw new IllegalArgumentException("Unexpected character '" + c + "'");
+
+            i = Enums.skipWhitespace(s, i + 1);
+        }
+    }
+
+    /**
+     * Verifies that the character at position <var>index</var> is a valid Java identifier start character, and
+     * returns the position of the first non-Java identifier part character after the first char.
+     *
+     * @throws IllegalArgumentException <var>index</var> {@code ==} <var>s</var>{@code .length()}
+     * @throws IllegalArgumentException The character at position <var>index</var> is not a valid Java identifier start
+     *                                  character
+     */
+    private static int
+    scanIdentifier(String s, int index) {
+
+        if (index == s.length()) throw new IllegalArgumentException("Uxpected end-of-input");
+
+        if (!Character.isJavaIdentifierStart(s.charAt(index))) {
+            throw new IllegalArgumentException("Identifier expected");
+        }
+
+        for (index++; index < s.length() && Character.isJavaIdentifierPart(s.charAt(index)); index++);
+
+        return index;
+    }
+
+    private static int skipWhitespace(String s, int index) {
+        while (index < s.length() && Character.isWhitespace(s.charAt(index))) index++;
+        return index;
+    }
+
+    /**
+     * Returns the enum constant of the <var>enumType</var> with the specified <var>name</var>. The string must match
+     * exactly the identifier used to declare the enum constant in this type. Extraneous whitespace characters are not
+     * permitted.
+     *
+     * @return                          The enum constant with the specified name
+     * @throws IllegalArgumentException The <var>enumType</var> has no constant with the specified name
+     */
+    public static <E extends Enum<E>> E
+    valueOf(String name, Class<E> enumType) {
+
+        for (E e : enumType.getEnumConstants()) {
+            if (name.equals(e.name())) return e;
+        }
+
+        throw new IllegalArgumentException(name);
     }
 }
