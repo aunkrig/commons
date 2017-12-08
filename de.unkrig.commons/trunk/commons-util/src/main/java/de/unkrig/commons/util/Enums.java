@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 
+import de.unkrig.commons.nullanalysis.Nullable;
+
 /**
  * Various enum-related utility methods.
  */
@@ -152,10 +154,35 @@ class Enums {
     public static <E extends Enum<E>> E
     valueOf(String name, Class<E> enumType) {
 
-        for (E e : enumType.getEnumConstants()) {
+        for (E e : Enums.getEnumConstants(enumType)) {
             if (name.equals(e.name())) return e;
         }
 
         throw new IllegalArgumentException(name);
     }
+
+    /**
+     * Identical with {@link Class#getEnumConstants()}, but caches its result.
+     */
+    private static <E extends Enum<E>> E[]
+    getEnumConstants(Class<E> enumType) {
+
+        // Look up the cache.
+        {
+            Enum<?>[] cache = Enums.CACHE;
+            if (cache != null && cache[0].getClass() == enumType) {
+
+                @SuppressWarnings("unchecked") E[] result = (E[]) cache;
+
+                return result;
+            }
+        }
+
+        // Cache miss; call "Class.getEnumConstants()".
+        E[] result = enumType.getEnumConstants();
+        if (result.length > 0) Enums.CACHE = result; // Cannot cache zero-constant enums.
+
+        return result;
+    }
+    @Nullable private static Enum<?>[] CACHE;
 }
