@@ -287,7 +287,10 @@ class IterableUtil {
         };
     }
 
-    /** @deprecated Use {@link de.unkrig.commons.util.collections.ElementWithContext} instead */
+    /**
+     * @param <T>  The element type of the underlying container
+     * @deprecated Use {@link de.unkrig.commons.util.collections.ElementWithContext} instead
+     */
     @Deprecated public interface ElementWithContext<T> {}
 
     /**

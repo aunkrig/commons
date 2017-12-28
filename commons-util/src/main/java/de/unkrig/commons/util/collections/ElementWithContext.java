@@ -32,9 +32,10 @@ import de.unkrig.commons.nullanalysis.Nullable;
  * A helper interface which extends the "iterator" pattern with the possibility to access not only the current element
  * of a sequence, but also the previous and next element.
  *
- * @see #previous()
- * @see #current()
- * @see #next()
+ * @param <T> The element type of the underlying container
+ * @see       #previous()
+ * @see       #current()
+ * @see       #next()
  */
 public
 interface ElementWithContext<T> {
@@ -45,7 +46,7 @@ interface ElementWithContext<T> {
     @Nullable T previous();
 
     /**
-     * @return The current element (always non-{@code null}
+     * @return The current element (always non-{@code null})
      */
     T current();
 
