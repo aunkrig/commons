@@ -85,7 +85,7 @@ class ExpressionEvaluator {
      */
     public
     ExpressionEvaluator(PredicateWhichThrows<? super String, ? extends RuntimeException> isValidVariableName) {
-    	this.isValidVariableName = isValidVariableName;
+        this.isValidVariableName = isValidVariableName;
     }
 
     /**
