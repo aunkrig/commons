@@ -37,7 +37,6 @@ import java.util.logging.Logger;
 
 import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.protocol.Mappings;
-import de.unkrig.commons.lang.protocol.PredicateUtil;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.expression.EvaluationException;
 import de.unkrig.commons.text.expression.ExpressionEvaluator;
@@ -227,11 +226,7 @@ class SimpleLogging {
     public static void
     setFormatter(String spec) throws ParseException, EvaluationException {
 
-        Formatter formatter = SimpleLogging.FORMATTER_INSTANTIATOR.evaluateTo(
-            spec,
-            Mappings.<String, Object>none(),
-            Formatter.class
-        );
+        Formatter formatter = SimpleLogging.FORMATTER_INSTANTIATOR.evaluateTo(spec, Formatter.class);
 
         if (formatter == null) {
             SimpleLogging.DEBUG_HANDLER.setFormatter(SimpleLogging.DEFAULT_DEBUG_FORMATTER);
@@ -356,13 +351,13 @@ class SimpleLogging {
     }
 
     private static final ExpressionEvaluator
-    HANDLER_INSTANTIATOR = new ExpressionEvaluator(PredicateUtil.<String>never()).setImports(new String[] {
+    HANDLER_INSTANTIATOR = new ExpressionEvaluator().setImports(new String[] {
         "java.util.logging",
         "de.unkrig.commons.util.logging.handler",
     });
 
     private static final ExpressionEvaluator
-    FORMATTER_INSTANTIATOR = new ExpressionEvaluator(PredicateUtil.<String>never()).setImports(new String[] {
+    FORMATTER_INSTANTIATOR = new ExpressionEvaluator().setImports(new String[] {
         "java.util.logging",
         "de.unkrig.commons.util.logging.formatter",
     });
@@ -471,11 +466,7 @@ class SimpleLogging {
         if (args[2] != null) {
             String handlerSpec = args[2];
             try {
-                handler = SimpleLogging.HANDLER_INSTANTIATOR.evaluateTo(
-                    handlerSpec,
-                    Mappings.<String, Object>none(),
-                    Handler.class
-                );
+                handler = SimpleLogging.HANDLER_INSTANTIATOR.evaluateTo(handlerSpec, Handler.class);
             } catch (Exception e) {
                 throw ExceptionUtil.wrap(handlerSpec + ": " + e.getMessage(), e, RuntimeException.class);
             }
@@ -486,11 +477,7 @@ class SimpleLogging {
         if (args[3] != null) {
             String formatterSpec = args[3];
             try {
-                formatter = SimpleLogging.FORMATTER_INSTANTIATOR.evaluateTo(
-                    formatterSpec,
-                    Mappings.<String, Object>none(),
-                    Formatter.class
-                );
+                formatter = SimpleLogging.FORMATTER_INSTANTIATOR.evaluateTo(formatterSpec, Formatter.class);
             } catch (Exception e) {
                 throw ExceptionUtil.wrap(
                     "Evaluating formatter spec \"" + formatterSpec + "\": " + e.getMessage(),
