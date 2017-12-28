@@ -138,7 +138,8 @@ class Enums {
         return index;
     }
 
-    private static int skipWhitespace(String s, int index) {
+    private static int
+    skipWhitespace(String s, int index) {
         while (index < s.length() && Character.isWhitespace(s.charAt(index))) index++;
         return index;
     }
