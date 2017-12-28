@@ -42,6 +42,7 @@ import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.ObjectUtil;
 import de.unkrig.commons.lang.StringUtil;
 import de.unkrig.commons.lang.protocol.Mapping;
+import de.unkrig.commons.lang.protocol.Mappings;
 import de.unkrig.commons.lang.protocol.Predicate;
 import de.unkrig.commons.lang.protocol.PredicateUtil;
 import de.unkrig.commons.lang.protocol.PredicateWhichThrows;
@@ -65,7 +66,7 @@ import de.unkrig.commons.text.scanner.StringScanner;
  *   <li>Scans, parses and evaluates an expression immediately (see {@link #evaluate(String, Mapping)})</li>
  *   <li>
  *     Scans and parses an expression (see {@link #parse(String)}) into an {@link Expression} object for repeated
- *     evaluation (see {@link Expression#evaluate(Mapping)}).
+ *     evaluation (see {@link Expression#evaluate(Object...)}).
  *   </li>
  * </ul>
  */
@@ -84,7 +85,7 @@ class ExpressionEvaluator {
      */
     public
     ExpressionEvaluator(PredicateWhichThrows<? super String, ? extends RuntimeException> isValidVariableName) {
-        this.isValidVariableName = isValidVariableName;
+    	this.isValidVariableName = isValidVariableName;
     }
 
     /**
@@ -402,8 +403,8 @@ class ExpressionEvaluator {
                         for (int i = 0; i < n; i++) {
                             dimensionValues[i] = ExpressionUtil.evaluateTo(
                                 dimensions.get(i),
-                                variables,
-                                Integer.class
+                                Integer.class,
+                                variables
                             );
                         }
 
@@ -482,6 +483,18 @@ class ExpressionEvaluator {
                 };
             }
         }.setImports(this.imports);
+    }
+
+    /**
+     * Scans, parses and evaluates an expression.
+     *
+     * @throws ParseException <var>spec</var> refers to a variable which is not contained in <var>variables</var>
+     * @throws ParseException Any other parse error
+     * @see Parser            The expression syntax
+     */
+    @SuppressWarnings("null") @Nullable public Object
+    evaluate(String spec, Object... variableNamesAndValues) throws ParseException, EvaluationException {
+        return this.evaluate(spec, Mappings.<String, Object>mapping(variableNamesAndValues));
     }
 
     /**
@@ -1090,7 +1103,20 @@ class ExpressionEvaluator {
      * @see Parser                 The expression syntax
      */
     @Nullable public <T> T
-    evaluateTo(String spec, Mapping<String, ?> variables, Class<T> targetType)
+    evaluateTo(String spec, Class<T> targetType, Object... variableNamesAndValues)
+    throws ParseException, EvaluationException {
+        return this.evaluateTo(spec, targetType, Mappings.<String, Object>mapping(variableNamesAndValues));
+    }
+
+    /**
+     * Scans, parses, evaluates and returns an expression.
+     *
+     * @return                     An object of type {@code T}, or {@code null}
+     * @throws EvaluationException The value is not assignable to {@code T}
+     * @see Parser                 The expression syntax
+     */
+    @Nullable public <T> T
+    evaluateTo(String spec, Class<T> targetType, Mapping<String, ?> variables)
     throws ParseException, EvaluationException {
 
         Object o = this.evaluate(spec, variables);
@@ -1114,10 +1140,36 @@ class ExpressionEvaluator {
      * @see Parser                 The expression syntax
      */
     public Object
-    evaluateToPrimitive(String spec, Mapping<String, ?> variables, Class<?> targetType)
+    evaluateToPrimitive(String spec, Class<?> targetType, Object... variableNamesAndValues)
+    throws ParseException, EvaluationException {
+        return this.evaluateToPrimitive(spec, targetType, Mappings.<String, Object>mapping(variableNamesAndValues));
+    }
+
+    /**
+     * Scans, parses and evaluates an expression.
+     *
+     * @throws EvaluationException The expression evaluates to {@code null} (and the targetType is not boolean.class)
+     * @throws EvaluationException The expression value cannot be converted to the given targetType
+     * @return                     The (wrapped) expression value
+     * @see Parser                 The expression syntax
+     */
+    public Object
+    evaluateToPrimitive(String spec, Class<?> targetType, Mapping<String, ?> variables)
     throws ParseException, EvaluationException {
 
         return ExpressionEvaluator.toPrimitive(this.evaluate(spec, variables), targetType);
+    }
+
+    /**
+     * Scans, parses and evaluates an expression.
+     *
+     * @return     {@code null} iff the <var>spec</var> is {@code null}; otherwise the expresasion value
+     * @see Parser The expression syntax
+     */
+    public boolean
+    evaluateToBoolean(@Nullable String spec, Object... variableNamesAndValues)
+    throws ParseException, EvaluationException {
+        return this.evaluateToBoolean(spec, Mappings.<String, Object>mapping(variableNamesAndValues));
     }
 
     /**
