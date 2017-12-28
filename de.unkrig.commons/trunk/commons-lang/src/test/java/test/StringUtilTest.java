@@ -513,14 +513,14 @@ class StringUtilTest {
                 StringUtil.naiveIndexOf("ABCDE"),
                 StringUtil.boyerMooreHorspoolIndexOf("ABCDE"),
             }) {
-                long start = System.nanoTime();
+//                long start = System.nanoTime();
                 for (int j = 0; j < 1000; j++) {
                     for (int k = Integer.MAX_VALUE;; k--) {
                         k = io.lastIndexOf(subject, k);
                         if (k == -1) break;
                     }
                 }
-                long end = System.nanoTime();
+//                long end = System.nanoTime();
 //                System.out.printf(Locale.US, "%-45s %,d ns%n", io + ".lastIndexOf()", end - start);
             }
         }
