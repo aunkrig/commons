@@ -27,6 +27,7 @@
 package de.unkrig.commons.text.expression;
 
 import de.unkrig.commons.lang.protocol.Mapping;
+import de.unkrig.commons.lang.protocol.Mappings;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -34,6 +35,11 @@ import de.unkrig.commons.nullanalysis.Nullable;
  */
 public abstract
 class AbstractExpression implements Expression {
+
+    @Override @Nullable public Object
+    evaluate(Object... variableNamesAndValues) throws EvaluationException {
+        return this.evaluate(Mappings.<String, Object>mapping(variableNamesAndValues));
+    }
 
     /**
      * @see #evaluate(Mapping)
@@ -45,6 +51,15 @@ class AbstractExpression implements Expression {
     }
 
     /**
+     * @see #evaluate(Object...)
+     * @see ExpressionEvaluator#to(Object, Class)
+     */
+    @Override @Nullable public final <T> T
+    evaluateTo(Class<T> targetType, Object... variableNamesAndValues) throws EvaluationException {
+        return ExpressionEvaluator.to(this.evaluate(variableNamesAndValues), targetType);
+    }
+
+    /**
      * @see ExpressionEvaluator#toPrimitive(Object, Class)
      */
     @Override public final <T> T
@@ -53,10 +68,26 @@ class AbstractExpression implements Expression {
     }
 
     /**
+     * @see ExpressionEvaluator#toPrimitive(Object, Class)
+     */
+    @Override public final <T> T
+    evaluateToPrimitive(Class<T> targetType, Object... variableNamesAndValues) throws EvaluationException {
+        return ExpressionEvaluator.toPrimitive(this.evaluate(variableNamesAndValues), targetType);
+    }
+
+    /**
      * @see ExpressionEvaluator#toBoolean(Object)
      */
     @Override public final boolean
     evaluateToBoolean(Mapping<String, ?> variables) throws EvaluationException {
         return ExpressionEvaluator.toBoolean(this.evaluate(variables));
+    }
+
+    /**
+     * @see ExpressionEvaluator#toBoolean(Object)
+     */
+    @Override public final boolean
+    evaluateToBoolean(Object... variableNamesAndValues) throws EvaluationException {
+        return ExpressionEvaluator.toBoolean(this.evaluate(variableNamesAndValues));
     }
 }
