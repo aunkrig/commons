@@ -422,14 +422,14 @@ class StringUtilTest {
                 StringUtil.naiveIndexOf("ABCDE"),
                 StringUtil.boyerMooreHorspoolIndexOf("ABCDE"),
             }) {
-                long start = System.nanoTime();
+//                long start = System.nanoTime();
                 for (int j = 0; j < 1000; j++) {
                     for (int k = 0;; k++) {
                         k = io.indexOf(subject, k);
                         if (k == -1) break;
                     }
                 }
-                long end = System.nanoTime();
+//                long end = System.nanoTime();
 //                System.out.printf(Locale.US, "%-37s %,d ns%n", io + ".indexOf()", end - start);
             }
         }
