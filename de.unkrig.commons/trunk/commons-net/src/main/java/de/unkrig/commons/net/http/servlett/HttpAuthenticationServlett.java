@@ -27,6 +27,8 @@
 package de.unkrig.commons.net.http.servlett;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
 import de.unkrig.commons.net.http.HttpRequest;
@@ -38,23 +40,53 @@ import de.unkrig.commons.util.Base64;
 /**
  * A {@link Servlett} that processes the AUTHENTICATION information in the HTTp request, and passes control to the
  * next servlett iff authentication is successfully completed.
+ *
+ * @param <EX> See {@link #HttpAuthenticationServlett(String, UserNamePasswordPredicate)}
  */
 public
-class HttpAuthenticationServlett extends AbstractServlett {
+class HttpAuthenticationServlett<EX extends Exception> extends AbstractServlett {
 
-    private final String realm;
-    private final String userName;
-    private final String password;
-
+    /**
+     * @see HttpAuthenticationServlett#HttpAuthenticationServlett(String, UserNamePasswordPredicate)
+     */
     public
-    HttpAuthenticationServlett(String realm, String userName, String password) {
-        this.realm    = realm;
-        this.userName = userName;
-        this.password = password;
+    interface UserNamePasswordPredicate<EX extends Throwable> {
+
+        /**
+         * @return Whether the given tuple of {@link HttpRequest}, <var>userName</var> and <var>password</var> is
+         *         acceptable or not
+         */
+        boolean evaluate(HttpRequest httpRequest, String userName, char[] password) throws EX;
+    }
+
+    private final String                        realm;
+    private final UserNamePasswordPredicate<EX> userNamePasswordPredicate;
+
+    /**
+     * @param userNamePasswordPredicate Determines whether any given tuple of {@link HttpRequest}, user name and
+     *                                  password is allowed or not
+     */
+    public
+    HttpAuthenticationServlett(String realm, UserNamePasswordPredicate<EX> userNamePasswordPredicate) {
+        this.realm                     = realm;
+        this.userNamePasswordPredicate = userNamePasswordPredicate;
     }
 
     @Override @Nullable public HttpResponse
     handleRequest(HttpRequest httpRequest, ConsumerWhichThrows<HttpResponse, IOException> sendProvisionalResponse) {
+        try {
+            return this.handleRequest2(httpRequest, sendProvisionalResponse);
+        } catch (Exception e) {
+
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            return HttpResponse.response(Status.INTERNAL_SERVER_ERROR, sw.toString());
+        }
+    }
+
+    @Nullable private HttpResponse
+    handleRequest2(HttpRequest httpRequest, ConsumerWhichThrows<HttpResponse, IOException> sendProvisionalResponse)
+    throws EX {
 
         // Get the "Authorization:" header.
         String s = httpRequest.getHeader("Authorization");
@@ -67,7 +99,8 @@ class HttpAuthenticationServlett extends AbstractServlett {
         }
 
         // Parse the "Authorization:" header.
-        String userName, password;
+        String userName;
+        char[] password;
         {
             if (!s.startsWith("Basic ")) {
                 return HttpResponse.response(Status.BAD_REQUEST, "Unexpected authentication scheme");
@@ -83,10 +116,14 @@ class HttpAuthenticationServlett extends AbstractServlett {
             int idx = userPass.indexOf(':');
             if (idx == -1) return HttpResponse.response(Status.BAD_REQUEST, "Basic-credentials lack a colon");
             userName = userPass.substring(0, idx);
-            password = userPass.substring(idx + 1);
+            password = userPass.substring(idx + 1).toCharArray();
         }
 
-        if (!userName.equals(this.userName) || !password.equals(this.password)) {
+        boolean authenticated = this.userNamePasswordPredicate.evaluate(httpRequest, userName, password);
+
+        if (!authenticated) {
+
+            // Authentication failed.
             HttpResponse httpResponse = HttpResponse.response(Status.UNAUTHORIZED, "Invalid user name or password");
             httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + this.realm + "\"");
             return httpResponse;
