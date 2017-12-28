@@ -33,7 +33,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import de.unkrig.commons.lang.protocol.Function;
-import de.unkrig.commons.lang.protocol.Mappings;
 import de.unkrig.commons.text.expression.Expression;
 import de.unkrig.commons.text.expression.ExpressionEvaluator;
 import de.unkrig.commons.text.parser.ParseException;
@@ -71,8 +70,7 @@ class ExpressionMatchReplacerTest {
 
         Function<Matcher, String> matchReplacer = ExpressionMatchReplacer.parse(
             "prefix + new StringBuilder(m.group).reverse()",
-            Mappings.<String, Object>mapping("prefix", "pre-"),
-            "prefix"
+            "prefix", "pre-" // SUPPRESS CHECKSTYLE Wrap
         );
 
         Pattern p = Pattern.compile("\\w+");
@@ -93,7 +91,7 @@ class ExpressionMatchReplacerTest {
 
         Function<Matcher, String> matchReplacer = ExpressionMatchReplacer.get(
             expression,
-            Mappings.<String, Object>mapping("prefix", "pre-")
+            "prefix", "pre-" // SUPPRESS CHECKSTYLE Wrap
         );
 
         Pattern p = Pattern.compile("\\w+");
