@@ -145,7 +145,7 @@ class ExpressionEvaluator {
      */
     public Expression
     parse(String spec) throws ParseException {
-        return this.<RuntimeException>parser(Scanner.stringScanner().setInput(spec)).parse();
+        return this.parser(Scanner.stringScanner().setInput(spec)).parse();
     }
 
     /**
@@ -164,7 +164,7 @@ class ExpressionEvaluator {
 
         StringScanner<TokenType> scanner = Scanner.stringScanner().setInput(spec);
 
-        Expression result = this.<RuntimeException>parser(scanner).parsePart();
+        Expression result = this.parser(scanner).parsePart();
 
         offset[0] = scanner.getPreviousTokenOffset();
 
@@ -180,30 +180,28 @@ class ExpressionEvaluator {
     parse(ProducerWhichThrows<? extends Token<TokenType>, ? extends ScanException> tokenProducer)
     throws ParseException {
 
-        return this.<RuntimeException>parser(tokenProducer).parse();
+        return this.parser(tokenProducer).parse();
     }
 
     /**
      * @param spec The text to be parsed
-     * @param <EX> Irrelevant
      * @return     A {@link Parser} for expression parsing
      * @see Parser The expression syntax
      */
-    public <EX extends Exception> Parser<Expression, EX>
+    public Parser<Expression, RuntimeException>
     parser(String spec) {
         return this.parser(Scanner.stringScanner().setInput(spec));
     }
 
     /**
      * @param tokenProducer The source of tokens to be parsed, e.g. {@link Scanner#stringScanner()}
-     * @param <EX>          Irrelevant
      * @return              A {@link Parser} for expression parsing
      * @see Parser          The expression syntax
      */
-    @SuppressWarnings("null") public <EX extends Throwable> Parser<Expression, EX>
+    @SuppressWarnings("null") public Parser<Expression, RuntimeException>
     parser(ProducerWhichThrows<? extends Token<TokenType>, ? extends ScanException> tokenProducer) {
 
-        return new Parser<Expression, EX>(tokenProducer) {
+        return new Parser<Expression, RuntimeException>(tokenProducer) {
 
             @Override protected Expression
             conditional(final Expression lhs, final Expression mhs, final Expression rhs) {

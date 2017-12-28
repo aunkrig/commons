@@ -391,7 +391,7 @@ class ExpressionEvaluatorTest {
 
         for (Set<Extension> es : ExpressionEvaluatorTest.allSubsets(extensions)) {
 
-            Parser<Expression, RuntimeException> parser = ee.<RuntimeException>parser(expression);
+            Parser<Expression, RuntimeException> parser = ee.parser(expression);
             parser.setExtensions(es);
 
             if (es.containsAll(extensions)) {
