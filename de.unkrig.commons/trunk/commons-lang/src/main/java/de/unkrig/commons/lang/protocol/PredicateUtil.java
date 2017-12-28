@@ -175,6 +175,34 @@ class PredicateUtil {
     }
 
     /**
+     * Returns {@link Predicate} which evaluates to {@code true} if <var>lhs</var>, or <var>rhs</var>, or both evaluate
+     * to {@code true}.
+     * <p>
+     *   Notice that iff either of the <var>lhs</var> and the <var>rhs</var> is {@link #always()}, then none of the
+     *   two will ever be evaluated.
+     * </p>
+     */
+    @SuppressWarnings("unchecked") public static <T, EX extends Throwable> PredicateWhichThrows<? super T, ? extends EX>
+    or(
+        final PredicateWhichThrows<? super T, ? extends EX> lhs,
+        final PredicateWhichThrows<? super T, ? extends EX> rhs
+    ) {
+
+        if (lhs == PredicateUtil.ALWAYS || rhs == PredicateUtil.ALWAYS) return PredicateUtil.ALWAYS;
+        if (lhs == PredicateUtil.NEVER) return rhs;
+        if (rhs == PredicateUtil.NEVER) return lhs;
+
+        return new PredicateWhichThrows<T, EX>() {
+
+            @Override public boolean
+            evaluate(T subject) throws EX { return lhs.evaluate(subject) || rhs.evaluate(subject); }
+
+            @Override public String
+            toString() { return lhs + " || " + rhs; }
+        };
+    }
+
+    /**
      * Returns a {@link Predicate} which evaluates to {@code true} the <var>lhs</var> evaluates to {@code true}, or the
      * <var>rhs</var> is {@code true}, or both.
      * <p>
