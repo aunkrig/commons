@@ -38,11 +38,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -50,7 +48,6 @@ import org.junit.ComparisonFailure;
 import org.junit.Test;
 
 import de.unkrig.commons.lang.ExceptionUtil;
-import de.unkrig.commons.lang.protocol.Mappings;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.expression.EvaluationException;
 import de.unkrig.commons.text.expression.Expression;
@@ -63,7 +60,7 @@ import de.unkrig.commons.text.parser.ParseException;
 public
 class ExpressionEvaluatorTest {
 
-    private static final Map<String, Object> VARIABLES = ExpressionEvaluatorTest.map(
+    private static final Object[] VARIABLES = {
         "bo", false,                           // SUPPRESS CHECKSTYLE WrapMethod:11
         "by", (byte) 1,
         "sh", (short) 2,
@@ -76,7 +73,14 @@ class ExpressionEvaluatorTest {
         "da", new Date(9),
         "ia", new int[] { 1, 2, 3 },
         "sa", new String[] { "alpha", "beta", "gamma" }
-    );
+    };
+    private static final String[] VARIABLE_NAMES;
+    static {
+        VARIABLE_NAMES = new String[ExpressionEvaluatorTest.VARIABLES.length / 2];
+        for (int i = 0; i < ExpressionEvaluatorTest.VARIABLE_NAMES.length; i++) {
+            ExpressionEvaluatorTest.VARIABLE_NAMES[i] = (String) ExpressionEvaluatorTest.VARIABLES[2 * i];
+        }
+    }
 
     @Test public void
     testStringLiterals() throws EvaluationException, ParseException {
@@ -305,7 +309,7 @@ class ExpressionEvaluatorTest {
     @Test public void
     testSample() throws Exception {
         Expression e = new ExpressionEvaluator(new String[] { "a", "b" }).parse("a + b");
-        Assert.assertEquals(7, e.evaluate(Mappings.<String, Object>mapping("a", 3, "b", 4)));
+        Assert.assertEquals(7, e.evaluate("a", 3, "b", 4));
     }
 
     @Test public void
@@ -387,7 +391,7 @@ class ExpressionEvaluatorTest {
             : EnumSet.copyOf(Arrays.asList(extensionsVarargs))
         );
 
-        ExpressionEvaluator ee = new ExpressionEvaluator(ExpressionEvaluatorTest.VARIABLES.keySet());
+        ExpressionEvaluator ee = new ExpressionEvaluator(ExpressionEvaluatorTest.VARIABLE_NAMES);
 
         for (Set<Extension> es : ExpressionEvaluatorTest.allSubsets(extensions)) {
 
@@ -399,7 +403,7 @@ class ExpressionEvaluatorTest {
                 // Expect NO parse exception iff the given extensions are enabled (plus any number of unrelated
                 // extensions).
                 try {
-                    ExpressionEvaluatorTest.assertEquals2(expected, parser.parse().evaluate(Mappings.fromMap(ExpressionEvaluatorTest.VARIABLES)));
+                    ExpressionEvaluatorTest.assertEquals2(expected, parser.parse().evaluate(ExpressionEvaluatorTest.VARIABLES));
                 } catch (ParseException pe) {
                     throw ExceptionUtil.wrap("Parsing with extensions " + extensions, pe);
                 }
@@ -421,14 +425,14 @@ class ExpressionEvaluatorTest {
     throws EvaluationException {
 
         try {
-            new ExpressionEvaluator(ExpressionEvaluatorTest.VARIABLES.keySet()).parse(expression);
+            new ExpressionEvaluator(ExpressionEvaluatorTest.VARIABLE_NAMES).parse(expression);
             Assert.fail("ParseException expected");
         } catch (ParseException pe) {
             ExpressionEvaluatorTest.assertEndsWith(expectedExceptionMessageSuffix, pe.getMessage());
         }
 
         try {
-            new ExpressionEvaluator(ExpressionEvaluatorTest.VARIABLES.keySet()).evaluate(expression, Mappings.fromMap(ExpressionEvaluatorTest.VARIABLES));
+            new ExpressionEvaluator(ExpressionEvaluatorTest.VARIABLE_NAMES).evaluate(expression, ExpressionEvaluatorTest.VARIABLES);
             Assert.fail("ParseException expected");
         } catch (ParseException pe) {
             ExpressionEvaluatorTest.assertEndsWith(expectedExceptionMessageSuffix, pe.getMessage());
@@ -439,16 +443,16 @@ class ExpressionEvaluatorTest {
     assertExpressionEvaluationFails(String expectedExceptionMessageSuffix, String expression)
     throws ParseException {
 
-        Expression parsedExpression = new ExpressionEvaluator(ExpressionEvaluatorTest.VARIABLES.keySet()).parse(expression);
+        Expression parsedExpression = new ExpressionEvaluator(ExpressionEvaluatorTest.VARIABLE_NAMES).parse(expression);
         try {
-            parsedExpression.evaluate(Mappings.fromMap(ExpressionEvaluatorTest.VARIABLES));
+            parsedExpression.evaluate(ExpressionEvaluatorTest.VARIABLES);
             Assert.fail("Exception expected on evaluation");
         } catch (Exception e) {
             ExpressionEvaluatorTest.assertEndsWith(expectedExceptionMessageSuffix, e.getMessage());
         }
 
         try {
-            new ExpressionEvaluator(ExpressionEvaluatorTest.VARIABLES.keySet()).evaluate(expression, Mappings.fromMap(ExpressionEvaluatorTest.VARIABLES));
+            new ExpressionEvaluator(ExpressionEvaluatorTest.VARIABLE_NAMES).evaluate(expression, ExpressionEvaluatorTest.VARIABLES);
             Assert.fail("Exception expected on evaluation");
         } catch (Exception e) {
             ExpressionEvaluatorTest.assertEndsWith(expectedExceptionMessageSuffix, e.getMessage());
@@ -459,14 +463,14 @@ class ExpressionEvaluatorTest {
 
     private static void
     assertExpandedEquals(String expected, String s) throws Exception {
-        Expression expression = ExpressionUtil.expand(s, ExpressionEvaluatorTest.VARIABLES.keySet());
-        Assert.assertEquals(expected, ExpressionUtil.evaluateLeniently(expression, Mappings.fromMap(ExpressionEvaluatorTest.VARIABLES)));
+        Expression expression = ExpressionUtil.expand(s, ExpressionEvaluatorTest.VARIABLE_NAMES);
+        Assert.assertEquals(expected, ExpressionUtil.evaluateLeniently(expression, ExpressionEvaluatorTest.VARIABLES));
     }
 
     private static void
     assertExpandingParseException(String expectedExceptionMessageSuffix, String s) {
         try {
-            ExpressionUtil.expand(s, ExpressionEvaluatorTest.VARIABLES.keySet());
+            ExpressionUtil.expand(s, ExpressionEvaluatorTest.VARIABLE_NAMES);
             Assert.fail("ParseException expected");
         } catch (ParseException pe) {
             ExpressionEvaluatorTest.assertEndsWith(expectedExceptionMessageSuffix, pe.getMessage());
@@ -492,22 +496,6 @@ class ExpressionEvaluatorTest {
     private static void
     assertEndsWith(String suffix, String actual) {
         if (!actual.endsWith(suffix)) throw new ComparisonFailure("", suffix, actual);
-    }
-
-    @SuppressWarnings("unchecked") private static <K, V> Map<K, V>
-    map(Object... keyValuePairs) {
-
-        int n = keyValuePairs.length;
-
-        Map<K, V> result = new HashMap<K, V>(n);
-
-        for (int i = 0; i < n;) {
-            if (result.put((K) keyValuePairs[i++], (V) keyValuePairs[i++]) != null) {
-                throw new IllegalArgumentException("Duplicate key '" + keyValuePairs[i - 2]);
-            }
-        }
-
-        return Collections.unmodifiableMap(result);
     }
 
     /**
