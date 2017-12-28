@@ -30,7 +30,7 @@ import de.unkrig.commons.lang.protocol.Mapping;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
- * An expression evaluates to a value each time it is {@link #evaluate(Mapping) evaluated}.
+ * An expression evaluates to a value each time it is {@link #evaluate(Object...) evaluated}.
  * If you want to evaluate an expression only once, you better use {@link
  * de.unkrig.commons.text.expression.ExpressionEvaluator#evaluate(String, Mapping)}.
  *
@@ -56,10 +56,33 @@ interface Expression {
     evaluate(Mapping<String, ?> variables) throws EvaluationException;
 
     /**
+     * Computes the value of the expression. This method typically verifies that all required parameters exist in
+     * <var>variableNamesAndValues</var> before evaluating it.
+     *
+     * @param variableNamesAndValues Pairs of variable names and values; the even elements' type must be {@link
+     *                               String}, the odd elements' type must be {@link String}, {@link Integer}, {@link
+     *                               Boolean}, any other {@code Object}, or {@code null}.
+     * @return                       A {@link String}, {@link Integer}, {@link Boolean}, any other {link Object}, or
+     *                               {@code null}
+     * @throws EvaluationException   A problem occurred during evaluation, e.g. any array element access was attempted
+     *                               and the index value could not be converted to {@code int}
+     * @throws RuntimeException      Any other runtime exception that occurred while evaluating the expression, e.g. an
+     *                               {@link IllegalArgumentException} when accessing an element of a non-array
+     */
+    @Nullable Object
+    evaluate(Object... variableNamesAndValues) throws EvaluationException;
+
+    /**
      * @see AbstractExpression#evaluateTo(Mapping, Class)
      */
     @Nullable <T> T
     evaluateTo(Mapping<String, ?> variables, Class<T> targetType) throws EvaluationException;
+
+    /**
+     * @see AbstractExpression#evaluateTo(Class, Object...)
+     */
+    @Nullable <T> T
+    evaluateTo(Class<T> targetType, Object... variableNamesAndValues) throws EvaluationException;
 
     /**
      * @see AbstractExpression#evaluateToPrimitive(Mapping, Class)
@@ -68,23 +91,35 @@ interface Expression {
     evaluateToPrimitive(Mapping<String, ?> variables, Class<T> targetType) throws EvaluationException;
 
     /**
+     * @see AbstractExpression#evaluateToPrimitive(Class, Object...)
+     */
+    <T> T
+    evaluateToPrimitive(Class<T> targetType, Object... variableNamesAndValues) throws EvaluationException;
+
+    /**
      * @see AbstractExpression#evaluateToBoolean(Mapping)
      */
     boolean
     evaluateToBoolean(Mapping<String, ?> variables) throws EvaluationException;
 
     /**
+     * @see AbstractExpression#evaluateToBoolean(Object...)
+     */
+    boolean
+    evaluateToBoolean(Object... variableNamesAndValues) throws EvaluationException;
+
+    /**
      * An expression which always evaluates to {@code true}.
      */
-    Expression TRUE = ExpressionUtil.constantExpression(true);
+    Expression TRUE = ExpressionUtil.constantExpression2(true);
 
     /**
      * An expression which always evaluates to {@code false}.
      * */
-    Expression FALSE = ExpressionUtil.constantExpression(false);
+    Expression FALSE = ExpressionUtil.constantExpression2(false);
 
     /**
      * An expression which always evaluates to {@code null}.
      */
-    Expression NULL = ExpressionUtil.constantExpression(null);
+    Expression NULL = ExpressionUtil.constantExpression2(null);
 }
