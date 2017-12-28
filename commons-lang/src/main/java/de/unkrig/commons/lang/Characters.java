@@ -407,7 +407,8 @@ class Characters {
     public static final Predicate<Integer> IS_UNICODE_FINAL_QUOTE_PUNCTUATION   = Characters.unicodeGeneralCategoryPredicate("unicodeFinalQuotePunctuation",   Character.FINAL_QUOTE_PUNCTUATION);
 
     /**
-     * @throws UnsupportedOperationException The JRE is pre-1.7
+     * Wrapper for {@link Characters#isAlphabetic(Integer)}; {@link IntegerPredicate#evaluate(Integer)} throws an
+     * {@link UnsupportedOperationException} iff the JRE is pre-1.7.
      */
     public static final Predicate<Integer>
     IS_UNICODE_ALPHA = new IntegerPredicate("unicodeAlpha") {
