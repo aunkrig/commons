@@ -29,10 +29,6 @@ package de.unkrig.commons.util.logging.filter;
 import java.util.logging.Filter;
 import java.util.logging.LogRecord;
 
-import de.unkrig.commons.lang.ExceptionUtil;
-import de.unkrig.commons.lang.protocol.Mapping;
-import de.unkrig.commons.lang.protocol.Predicate;
-import de.unkrig.commons.nullanalysis.NotNull;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.expression.EvaluationException;
@@ -62,21 +58,6 @@ import de.unkrig.commons.util.logging.LogUtil;
 public
 class ByExpressionFilter implements Filter {
 
-    private static final Predicate<? super String> IS_VALID_VARIABLE_NAME = new Predicate<String>() {
-
-        @Override public boolean
-        evaluate(@NotNull String variableName) {
-            return (
-                "name".equals(variableName)
-                || "level".equals(variableName)
-                || "class".equals(variableName)
-                || "method".equals(variableName)
-                || "message".equals(variableName)
-                || "params".equals(variableName)
-            );
-        }
-    };
-
     private Expression condition;
 
     /**
@@ -101,7 +82,7 @@ class ByExpressionFilter implements Filter {
         try {
             this.condition = LogUtil.parseLoggingProperty(
                 propertyNamePrefix + ".condition",
-                ByExpressionFilter.IS_VALID_VARIABLE_NAME
+                "name", "level", "class", "method", "message", "params" // SUPPRESS CHECKSTYLE Wrap
             );
         } catch (ParseException pe) {
             pe.printStackTrace();
@@ -125,29 +106,15 @@ class ByExpressionFilter implements Filter {
     @NotNullByDefault(false) @Override public boolean
     isLoggable(final LogRecord record) {
 
-        Mapping<String, Object> variables = new Mapping<String, Object>() {
-
-            @Override public boolean
-            containsKey(@Nullable Object key) {
-                return key instanceof String && ByExpressionFilter.IS_VALID_VARIABLE_NAME.evaluate((String) key);
-            }
-
-            @Override public Object
-            get(@Nullable Object key) {
-                return (
-                    "name".equals(key)    ? record.getLoggerName() :
-                    "level".equals(key)   ? record.getLevel().getName() :
-                    "class".equals(key)   ? record.getSourceClassName() :
-                    "method".equals(key)  ? record.getSourceMethodName() :
-                    "message".equals(key) ? record.getMessage() :
-                    "params".equals(key)  ? record.getParameters() :
-                    ExceptionUtil.throW(new IllegalStateException("Value of variable '" + key + "' missing"))
-                );
-            }
-        };
-
         try {
-            return ExpressionEvaluator.toBoolean(this.condition.evaluate(variables));
+            return ExpressionEvaluator.toBoolean(this.condition.evaluate(
+                "name",    record.getLoggerName(), // SUPPRESS CHECKSTYLE Wrap:5
+                "level",   record.getLevel().getName(),
+                "class",   record.getSourceClassName(),
+                "method",  record.getSourceMethodName(),
+                "message", record.getMessage(),
+                "params",  record.getParameters()
+            ));
         } catch (EvaluationException e) {
             return false;
         }
