@@ -138,6 +138,9 @@ class ExpressionEvaluator {
      * Parses an expression.
      *
      * @param spec The text to be parsed
+     * @return     {@link Expression#TRUE} iff the <var>expression</var> is constant and evaluates to {@code true};
+     *             {@link Expression#FALSE} iff the <var>expression</var> is constant and evaluates to {@code false};
+     *             {@link Expression#NULL} iff the <var>expression</var> is constant and evaluates to {@code null}
      * @see Parser The expression syntax
      */
     public Expression
@@ -147,7 +150,7 @@ class ExpressionEvaluator {
 
     /**
      * Parses an expression from the <var>spec</var>, but only as far as it is possible without a parse error.
-     * E.g. {@code "a + b)"} is parsed up to and including "b". 
+     * E.g. {@code "a + b)"} is parsed up to and including "b".
      *
      * @param spec            The text to be parsed
      * @param offset          Returns the position of the first character within the <var>space</var> that could not be
