@@ -242,6 +242,27 @@ class ExpressionUtil {
     }
 
     /**
+     * Scans, parses and evaluates an expression, and converts the result to {@code <T>}.
+     *
+     * @param variables The variables that the expression can use
+     * @return          The evaluated value
+     */
+    @Nullable public static <T> T
+    evaluateExpressionTo(
+        @Nullable String[] imports,
+        String             input,
+        Class<T>           targetType,
+        Mapping<String, ?> variables
+    ) throws ParseException, EvaluationException {
+
+        ExpressionEvaluator ee = new ExpressionEvaluator(PredicateUtil.containsKey(variables));
+
+        if (imports != null) ee.setImports(imports);
+
+        return ee.evaluateTo(input, targetType, variables);
+    }
+
+    /**
      * @param <T>           The type of the predicate's subject
      * @param parameterName The name under which the predicate subject is accessible for the <var>expression</var>
      * @return              A {@link Predicate} which evaluates to the value of the given <var>expression</var>;
