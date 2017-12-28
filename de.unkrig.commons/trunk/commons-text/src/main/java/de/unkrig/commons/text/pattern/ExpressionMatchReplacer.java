@@ -26,7 +26,6 @@
 
 package de.unkrig.commons.text.pattern;
 
-import java.util.Arrays;
 import java.util.regex.Matcher;
 
 import de.unkrig.commons.lang.ExceptionUtil;
@@ -97,19 +96,31 @@ class ExpressionMatchReplacer {
      *   System.out.println(PatternUtil.replaceSome(matcher, matchReplacer));
      * </pre>
      * <p>
-     *   If you want to use more variables than just the matcher, use {@link #parse(String, Mapping, String...)}
+     *   If you want to use more variables than just the matcher, use {@link #parse(String, Mapping, Predicate)}
      *   instead.
      * </var>
      *
      * @param spec            The text to be parsed
      * @throws ParseException A problem occurred when the <var>spec</var> was parsed
      * @see Parser            The expression syntax
-     * @see                   #parse(String, Mapping, String...)
+     * @see                   #parse(String, Mapping, Predicate)
      * @see                   #get(Expression, Mapping)
      */
     public static Function<Matcher, String>
     parse(final String spec) throws ParseException {
-        return ExpressionMatchReplacer.parse(spec, Mappings.<String,  Object>none());
+        return ExpressionMatchReplacer.parse(spec, Mappings.<String, Object>none(), PredicateUtil.<String>never());
+    }
+
+    /**
+     * @see #parse(String, Mapping, Predicate)
+     */
+    public static Function<Matcher, String>
+    parse(final String spec, Object... variableNamesAndValues) throws ParseException {
+
+        Mapping<String, Object> variables           = Mappings.mapping(variableNamesAndValues);
+        Predicate<String>       isValidVariableName = Mappings.containsKeyPredicate(variables);
+
+        return ExpressionMatchReplacer.parse(spec, variables, isValidVariableName);
     }
 
     /**
@@ -137,24 +148,30 @@ class ExpressionMatchReplacer {
      *   #get(Expression, Mapping)} instead.
      * </p>
      *
-     * @param spec            The expression that will later be used for all substitutions
-     * @param variableNames   The names of all variables that the expression can use
-     * @param variables       The variables' values that will take effect when the expression is evaluated for each
-     *                        match
-     * @throws ParseException A problem occurred when the <var>spec</var> was parsed
-     * @see Parser            The expression syntax
+     * @param spec                The expression that will later be used for all substitutions
+     * @param isValidVariableName Defines the names of all variables that the expression can use
+     * @param variables           The variables' values that will take effect when the expression is evaluated for each
+     *                            match
+     * @throws ParseException     A problem occurred when the <var>spec</var> was parsed
+     * @see Parser                The expression syntax
      */
     public static Function<Matcher, String>
-    parse(final String spec, final Mapping<String, Object> variables, String... variableNames) throws ParseException {
+    parse(final String spec, final Mapping<String, ?> variables, Predicate<String> isValidVariableName)
+    throws ParseException {
 
-        Predicate<String> variableNamePredicate = PredicateUtil.or(
-            PredicateUtil.contains(Arrays.asList(variableNames)),
-            PredicateUtil.equal("m")
-        );
+        Predicate<String> variableNamePredicate = PredicateUtil.or(isValidVariableName, PredicateUtil.equal("m"));
 
         final Expression expression = new ExpressionEvaluator(variableNamePredicate).parse(spec);
 
         return ExpressionMatchReplacer.get(expression, variables);
+    }
+
+    /**
+     * @see #get(Expression, Mapping)
+     */
+    public static Function<Matcher, String>
+    get(final Expression expression, Object... variableNamesAndValues) {
+        return ExpressionMatchReplacer.get(expression, Mappings.<String, Object>mapping(variableNamesAndValues));
     }
 
     /**
@@ -194,7 +211,7 @@ class ExpressionMatchReplacer {
      * @see Parser            The expression syntax
      */
     public static Function<Matcher, String>
-    get(final Expression expression, final Mapping<String, Object> variables) {
+    get(final Expression expression, final Mapping<String, ?> variables) {
 
         return new Function<Matcher, String>() {
 
@@ -202,8 +219,13 @@ class ExpressionMatchReplacer {
             call(@Nullable Matcher matcher) {
                 assert matcher != null;
 
+                Mapping<String, ?> v2 = Mappings.augment(
+                    variables,
+                    "m", matcher // SUPPRESS CHECKSTYLE Wrap
+                );
+
                 try {
-                    return expression.evaluateTo(Mappings.augment(variables, "m", matcher), String.class);
+                    return expression.evaluateTo(v2, String.class);
                 } catch (EvaluationException e) {
                     throw ExceptionUtil.wrap("Evaluating \"" + expression + "\"", e, IllegalArgumentException.class);
                 }
