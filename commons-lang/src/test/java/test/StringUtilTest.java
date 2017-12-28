@@ -28,7 +28,6 @@
 
 package test;
 
-import java.util.Locale;
 import java.util.Random;
 
 import org.junit.Assert;
@@ -431,7 +430,7 @@ class StringUtilTest {
                     }
                 }
                 long end = System.nanoTime();
-                System.out.printf(Locale.US, "%-37s %,d ns%n", io + ".indexOf()", end - start);
+//                System.out.printf(Locale.US, "%-37s %,d ns%n", io + ".indexOf()", end - start);
             }
         }
     }
@@ -522,7 +521,7 @@ class StringUtilTest {
                     }
                 }
                 long end = System.nanoTime();
-                System.out.printf(Locale.US, "%-45s %,d ns%n", io + ".lastIndexOf()", end - start);
+//                System.out.printf(Locale.US, "%-45s %,d ns%n", io + ".lastIndexOf()", end - start);
             }
         }
     }
