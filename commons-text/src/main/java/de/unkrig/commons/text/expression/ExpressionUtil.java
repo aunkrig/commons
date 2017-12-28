@@ -33,6 +33,7 @@ import java.util.Set;
 import de.unkrig.commons.lang.protocol.Mapping;
 import de.unkrig.commons.lang.protocol.Mappings;
 import de.unkrig.commons.lang.protocol.Predicate;
+import de.unkrig.commons.lang.protocol.PredicateUtil;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.expression.Scanner.TokenType;
@@ -51,10 +52,17 @@ class ExpressionUtil {
     ExpressionUtil() {}
 
     /**
-     * @return An {@link Expression} that evaluates to a constant value.
+     * @return An {@link Expression} that evaluates to a constant value;
+     *         {@link Expression#TRUE} iff the <var>expression</var> is constant and evaluates to {@code true};
+     *         {@link Expression#FALSE} iff the <var>expression</var> is constant and evaluates to {@code false};
+     *         {@link Expression#NULL} iff the <var>expression</var> is constant and evaluates to {@code null}
      */
     public static Expression
     constantExpression(@Nullable final Object value) {
+
+        if (value == Boolean.TRUE)  return Expression.TRUE;
+        if (value == Boolean.FALSE) return Expression.FALSE;
+        if (value == null)          return Expression.NULL;
 
         return new AbstractExpression() {
 
@@ -197,10 +205,17 @@ class ExpressionUtil {
 
     /**
      * @param parameterName The name under which the predicate subject is accessible for the <var>expression</var>
-     * @return              A {@link Predicate} which evaluates to the value of the given <var>expression</var>
+     * @return              A {@link Predicate} which evaluates to the value of the given <var>expression</var>;
+     *                      {@link Expression#TRUE} iff the <var>expression</var> is constant and evaluates to
+     *                      {@code true};
+     *                      {@link Expression#FALSE} iff the <var>expression</var> is constant and evaluates to
+     *                      {@code false}
      */
     public static <T> Predicate<T>
     toPredicate(final Expression expression, final String parameterName) {
+
+        if (expression == Expression.TRUE)  return PredicateUtil.always();
+        if (expression == Expression.FALSE) return PredicateUtil.never();
 
         return new Predicate<T>() {
 
