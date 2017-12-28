@@ -370,8 +370,18 @@ class Mappings {
     /**
      * @return A predicate that indicates whether a given key exists in the <var>delegate</var> mapping.
      */
-    public static <K, V, EX extends Throwable> PredicateWhichThrows<K, EX>
+    public static <K, V> Predicate<K>
     containsKeyPredicate(final Mapping<K, V> delegate) {
+        return new Predicate<K>() {
+            @Override public boolean evaluate(K key) { return delegate.containsKey(key); }
+        };
+    }
+
+    /**
+     * @return A predicate that indicates whether a given key exists in the <var>delegate</var> mapping.
+     */
+    public static <K, V, EX extends Throwable> PredicateWhichThrows<K, EX>
+    containsKeyPredicateWhichThrows(final Mapping<K, V> delegate) {
         return new PredicateWhichThrows<K, EX>() {
             @Override public boolean evaluate(K key) { return delegate.containsKey(key); }
         };
