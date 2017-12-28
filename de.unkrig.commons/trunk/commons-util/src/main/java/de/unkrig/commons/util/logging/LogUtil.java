@@ -41,7 +41,6 @@ import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.protocol.Consumer;
 import de.unkrig.commons.lang.protocol.ConsumerUtil;
 import de.unkrig.commons.lang.protocol.Mappings;
-import de.unkrig.commons.lang.protocol.Predicate;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.expression.EvaluationException;
@@ -185,8 +184,8 @@ class LogUtil {
 
         return new ExpressionEvaluator(variables.keySet()).setImports(LogUtil.LOGGING_IMPORTS).evaluateTo(
             propertyValue,
-            Mappings.fromMap(variables),
-            type
+            type,
+            Mappings.fromMap(variables)
         );
     }
 
@@ -207,8 +206,8 @@ class LogUtil {
 
         T result = new ExpressionEvaluator(variables.keySet()).setImports(LogUtil.LOGGING_IMPORTS).evaluateTo(
             spec,
-            Mappings.fromMap(variables),
-            type
+            type,
+            Mappings.fromMap(variables)
         );
 
         if (result == null) return defaulT;
@@ -230,8 +229,8 @@ class LogUtil {
 
         T result = new ExpressionEvaluator(variables.keySet()).setImports(LogUtil.LOGGING_IMPORTS).evaluateTo(
             LogUtil.requireLoggingProperty(propertyName),
-            Mappings.fromMap(variables),
-            type
+            type,
+            Mappings.fromMap(variables)
         );
 
         if (result == null) throw new EvaluationException("Evaluates to null");
@@ -319,10 +318,10 @@ class LogUtil {
      * @throws IllegalArgumentException The named logging property is not defined
      */
     public static Expression
-    parseLoggingProperty(String propertyName, Predicate<? super String> isValidVariableNames) throws ParseException {
+    parseLoggingProperty(String propertyName, String... validVariableNames) throws ParseException {
 
         return (
-            new ExpressionEvaluator(isValidVariableNames)
+            new ExpressionEvaluator(validVariableNames)
             .setImports(LogUtil.LOGGING_IMPORTS)
             .parse(LogUtil.requireLoggingProperty(propertyName))
         );
