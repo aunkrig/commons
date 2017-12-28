@@ -108,7 +108,7 @@ class PrettyPrinter {
      *
      * @see #toJavaStringLiteral(CharSequence)
      * @see #toJavaCharLiteral(char)
-     * @see #toJavaInitializer(Object)
+     * @see #toJavaArrayInitializer(Object)
      */
     @Nullable public static String
     toString(@Nullable Object o) {
