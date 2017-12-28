@@ -27,6 +27,8 @@
 package de.unkrig.commons.text.expression;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -60,13 +62,19 @@ class ExpressionUtil {
     public static Expression
     constantExpression(@Nullable final Object value) {
 
-        if (value == Boolean.TRUE)  return Expression.TRUE;
-        if (value == Boolean.FALSE) return Expression.FALSE;
-        if (value == null)          return Expression.NULL;
+        if (Boolean.TRUE.equals(value))  return Expression.TRUE;
+        if (Boolean.FALSE.equals(value)) return Expression.FALSE;
+        if (value == null)               return Expression.NULL;
+
+        return ExpressionUtil.constantExpression2(value);
+    }
+
+    static Expression
+    constantExpression2(@Nullable final Object value) {
 
         return new AbstractExpression() {
 
-            @Nullable @Override public Object
+            @Override @Nullable public Object
             evaluate(Mapping<String, ?> variables) { return value; }
 
             @Override public String
@@ -117,18 +125,28 @@ class ExpressionUtil {
      * @return              The expanded string
      */
     public static Expression
-    expand(String s, final Set<String> variableNames) throws ParseException {
-
-        return ExpressionUtil.expand(s, new Predicate<String>() {
-            @Override public boolean evaluate(String subject) { return variableNames.contains(subject); }
-        });
+    expand(String s, String... variableNames) throws ParseException {
+        return ExpressionUtil.expand(s, new HashSet<String>(Arrays.asList(variableNames)));
     }
 
     /**
      * Turns the given string into an expression. If the string contains '#' characters, then the text between two
      * '#' characters is parsed as an expression.
      *
-     * @param s                   The string to expand
+     * @param s             The string to expand
+     * @param variableNames All contained variable names can be used in the expression
+     * @return              The expanded string
+     */
+    public static Expression
+    expand(String s, Set<String> variableNames) throws ParseException {
+        return ExpressionUtil.expand(s, PredicateUtil.contains(variableNames));
+    }
+
+    /**
+     * Turns the given string into an expression. If the string contains '#' characters, then the text between two
+     * '#' characters is parsed as an expression.
+     *
+     * @param s             The string to expand
      * @param isValidVariableName Evalutaes to whether the <var>subject</var> is a valid variable name
      * @return                    The expanded string
      */
@@ -193,17 +211,38 @@ class ExpressionUtil {
     }
 
     /**
+     * @return The result of the evaluation, or a verbose HTML comment reporting the error
+     */
+    public static String
+    evaluateLeniently(Expression expression, Object... variableNamesAndValues) {
+        return ExpressionUtil.evaluateLeniently(expression, Mappings.<String, Object>mapping(variableNamesAndValues));
+    }
+
+    /**
      * @return                     The evaluated value
      * @throws EvaluationException The expression evaluates to {@code null}
      * @throws EvaluationException A problem occurred during evaluation, e.g. a class could not be loaded, or a type
      *                             cast could not be performed
      */
     @Nullable public static <T> T
-    evaluateTo(Expression expression, Mapping<String, ?> variables, Class<T> targetClass) throws EvaluationException {
+    evaluateTo(Expression expression, Class<T> targetClass, Mapping<String, ?> variables) throws EvaluationException {
         return ExpressionEvaluator.to(expression.evaluate(variables), targetClass);
     }
 
     /**
+     * @return                     The evaluated value
+     * @throws EvaluationException The expression evaluates to {@code null}
+     * @throws EvaluationException A problem occurred during evaluation, e.g. a class could not be loaded, or a type
+     *                             cast could not be performed
+     */
+    @Nullable public static <T> T
+    evaluateTo(Expression expression, Class<T> targetClass, Object... variableNamesAndValues)
+    throws EvaluationException {
+        return ExpressionEvaluator.to(expression.evaluate(variableNamesAndValues), targetClass);
+    }
+
+    /**
+     * @param <T>           The type of the predicate's subject
      * @param parameterName The name under which the predicate subject is accessible for the <var>expression</var>
      * @return              A {@link Predicate} which evaluates to the value of the given <var>expression</var>;
      *                      {@link Expression#TRUE} iff the <var>expression</var> is constant and evaluates to
@@ -224,7 +263,7 @@ class ExpressionUtil {
 
                 Object result;
                 try {
-                    result = expression.evaluate(Mappings.<String, Object>mapping(parameterName, subject));
+                    result = expression.evaluate(parameterName, subject);
                 } catch (EvaluationException ee) {
                     throw new RuntimeException(ee);
                 }
@@ -310,7 +349,7 @@ class ExpressionUtil {
             evaluate(Mapping<String, ?> variables) throws EvaluationException {
 
                 return (
-                    ExpressionUtil.evaluateTo(operand1, variables, boolean.class)
+                    ExpressionUtil.evaluateTo(operand1, boolean.class, variables)
                     ? true
                     : operand2.evaluate(variables)
                 );
