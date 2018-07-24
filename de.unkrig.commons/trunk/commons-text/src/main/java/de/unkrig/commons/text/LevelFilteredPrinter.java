@@ -35,6 +35,7 @@ import de.unkrig.commons.nullanalysis.Nullable;
 public
 class LevelFilteredPrinter extends AbstractPrinter {
 
+    private boolean printErrors   = true;
     private boolean printWarnings = true;
     private boolean printInfos    = true;
     private boolean printVerbose;
@@ -56,9 +57,20 @@ class LevelFilteredPrinter extends AbstractPrinter {
     public
     LevelFilteredPrinter(Printer delegate) { this.delegate = delegate;  }
 
+    /** Suppress all messages. */
+    public void
+    setNoError() {
+        this.printErrors   = false;
+        this.printWarnings = false;
+        this.printInfos    = false;
+        this.printVerbose  = false;
+        this.printDebug    = false;
+    }
+
     /** Suppress all messages but errors. */
     public void
     setNoWarn() {
+        this.printErrors   = true;
         this.printWarnings = false;
         this.printInfos    = false;
         this.printVerbose  = false;
@@ -68,6 +80,7 @@ class LevelFilteredPrinter extends AbstractPrinter {
     /** Suppress "normal" output; print only errors and warnings. */
     public void
     setQuiet() {
+        this.printErrors   = true;
         this.printWarnings = true;
         this.printInfos    = false;
         this.printVerbose  = false;
@@ -77,6 +90,7 @@ class LevelFilteredPrinter extends AbstractPrinter {
     /** Revert to default settings. */
     public void
     setNormal() {
+        this.printErrors   = true;
         this.printWarnings = true;
         this.printInfos    = true;
         this.printVerbose  = false;
@@ -86,6 +100,7 @@ class LevelFilteredPrinter extends AbstractPrinter {
     /** Print all messages (errors, warnings, infos and verbose) except debug. */
     public void
     setVerbose() {
+        this.printErrors   = true;
         this.printWarnings = true;
         this.printInfos    = true;
         this.printVerbose  = true;
@@ -95,6 +110,7 @@ class LevelFilteredPrinter extends AbstractPrinter {
     /** Print all messages (errors, warnings, info, verbose and debug). */
     public void
     setDebug() {
+        this.printErrors   = true;
         this.printWarnings = true;
         this.printInfos    = true;
         this.printVerbose  = true;
@@ -102,7 +118,7 @@ class LevelFilteredPrinter extends AbstractPrinter {
     }
 
     @Override public void
-    error(@Nullable String message) { this.delegate.error(message); }
+    error(@Nullable String message) { if (this.printErrors) this.delegate.error(message); }
 
     @Override public void
     warn(@Nullable String message) { if (this.printWarnings) this.delegate.warn(message); }
