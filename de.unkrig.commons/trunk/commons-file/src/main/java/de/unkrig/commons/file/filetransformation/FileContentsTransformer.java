@@ -202,7 +202,8 @@ class FileContentsTransformer implements FileTransformer {
     }
 
     /**
-     * Consumes the <var>inputStream</var> and feeds it through the <var>contentsTransformer</var>.
+     * Consumes the <var>inputStream</var>, feeds it through the <var>contentsTransformer</var>, and checks whether
+     * the output is identical with the input.
      *
      * @throws RuntimeException {@link FileTransformer#NOT_IDENTICAL} iff the transformer contents differs from the
      *                          original contents
