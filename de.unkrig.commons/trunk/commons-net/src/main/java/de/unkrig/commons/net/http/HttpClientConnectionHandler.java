@@ -85,10 +85,14 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
         this(Collections.<Servlett>emptyList(), readRequestLogginPrefix, writeResponseLoggingPrefix);
     }
 
+    /**
+     * @param servlett See {@link #setServlett(Servlett)}
+     */
     public
     HttpClientConnectionHandler(Servlett servlett) { this(servlett, ">>> ", "<<< "); }
 
     /**
+     * @param servlett                   See {@link #setServlett(Servlett)}
      * @param readRequestLogginPrefix    E.g. {@code ">>> "}
      * @param writeResponseLoggingPrefix E.g. {@code "<<< "}
      */
@@ -97,12 +101,16 @@ class HttpClientConnectionHandler implements TcpServer.ConnectionHandler, Stoppa
         this(Collections.singletonList(servlett), readRequestLogginPrefix, writeResponseLoggingPrefix);
     }
 
+    /**
+     * @param servletts See {@link #setServletts(Iterable)}
+     */
     public
     HttpClientConnectionHandler(Iterable<Servlett> servletts) {
         this(servletts, ">>> ", "<<< ");
     }
 
     /**
+     * @param servletts                  See {@link #setServletts(Iterable)}
      * @param readRequestLogginPrefix    E.g. {@code ">>> "}
      * @param writeResponseLoggingPrefix E.g. {@code "<<< "}
      */
