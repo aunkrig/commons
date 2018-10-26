@@ -195,7 +195,7 @@ class HttpResponse extends HttpMessage {
         this.reasonPhrase = status.getReasonPhrase();
         this.setBody(body);
     }
-    
+
     /**
      * Constructor for incoming responses.
      * <p>
@@ -224,7 +224,7 @@ class HttpResponse extends HttpMessage {
         this.status       = status;
         this.reasonPhrase = reasonPhrase;
     }
-    
+
     /**
      * Constructor for incoming responses.
      * <p>
@@ -266,7 +266,7 @@ class HttpResponse extends HttpMessage {
             // Read and parse status line.
             {
                 String statusLine = HttpMessage.readLine(in);
-                if (LOGGER.isLoggable(Level.FINE)) LOGGER.fine(loggingPrefix + statusLine);
+                if (LOGGER.isLoggable(Level.FINE)) LOGGER.fine(loggingPrefix + "Received status line \"" + statusLine + "\"");
 
                 Matcher m = HttpResponse.STATUS_LINE_PATTERN.matcher(statusLine);
                 if (!m.matches()) throw new InvalidHttpMessageException("Invalid status line");
@@ -286,7 +286,7 @@ class HttpResponse extends HttpMessage {
 
         return new HttpResponse(httpVersion, status, reasonPhrase, in, isResponseToHEAD, loggingPrefix);
     }
-    
+
     /**
      * Writes this HTTP response to the given {@link OutputStream}.
      */
