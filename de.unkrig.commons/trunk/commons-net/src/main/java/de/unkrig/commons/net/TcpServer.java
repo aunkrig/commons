@@ -117,10 +117,11 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
      *   than 0, then the default value will be assumed.
      * </p>
      *
-     * @param endpoint The {@link InetAddress} and local port the server will bind to; {@link
-     *                 InetSocketAddress#InetSocketAddress(int)} will accept connections on any/all local addresses;
-     *                 port number zero will pick an ephemeral port
-     * @param backlog  The listen backlog
+     * @param endpoint                The {@link InetAddress} and local port the server will bind to; {@link
+     *                                InetSocketAddress#InetSocketAddress(int)} will accept connections on any/all
+     *                                local addresses; port number zero will pick an ephemeral port
+     * @param backlog                 The listen backlog
+     * @param clientConnectionHandler Is called exactly once for each accepted connection
      */
     public
     TcpServer(InetSocketAddress endpoint, int backlog, ConnectionHandler clientConnectionHandler) throws IOException {
@@ -143,9 +144,11 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
      *   than 0, then the default value will be assumed.
      * </p>
      *
-     * @param endpoint The local port and {@link InetAddress} the server will bind to. If {@code null}, then the
-     *                 system will pick up an ephemeral port and a valid local address to bind the socket.
-     * @param backlog  The listen backlog
+     * @param endpoint                The local port and {@link InetAddress} the server will bind to. If {@code null},
+     *                                then the system will pick up an ephemeral port and a valid local address to bind
+     *                                the socket.
+     * @param backlog                 The listen backlog
+     * @param clientConnectionHandler Is called exactly once for each accepted connection
      */
     public
     TcpServer(
@@ -376,6 +379,7 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
                                     String m = se.getMessage();
                                     if (
                                         "socket closed".equals(m)
+                                        || "Socket closed".equals(m)
                                         || m.contains("Connection reset")
                                         || "Broken pipe".equals(m)
                                         || "Software caused connection abort: recv failed".equals(m)
