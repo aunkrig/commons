@@ -4,7 +4,7 @@
 
   <groupId>de.unkrig.commons</groupId>
   <artifactId>commons-parent</artifactId>
-  <version>1.2.12-SNAPSHOT</version>
+  <version>1.2.12</version>
   <packaging>pom</packaging>
 
   <name>commons-parent</name>
@@ -85,7 +85,7 @@
         <configuration>
            <serverId>ossrh</serverId>
            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-           <autoReleaseAfterClose>true</autoReleaseAfterClose>
+           <autoReleaseAfterClose>false</autoReleaseAfterClose>
         </configuration>
       </plugin>
 

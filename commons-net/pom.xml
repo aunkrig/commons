@@ -21,17 +21,17 @@
 		<dependency>
 			<groupId>de.unkrig.commons</groupId>
 			<artifactId>commons-nullanalysis</artifactId>
-			<version>1.2.12-SNAPSHOT</version>
+			<version>1.2.12</version>
 		</dependency>
 		<dependency>
 			<groupId>de.unkrig.commons</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>1.2.12-SNAPSHOT</version>
+			<version>1.2.12</version>
 		</dependency>
 		<dependency>
 			<groupId>de.unkrig.commons</groupId>
 			<artifactId>commons-util</artifactId>
-			<version>1.2.12-SNAPSHOT</version>
+			<version>1.2.12</version>
 		</dependency>
 	</dependencies>
 	<description>de.unkrig.commons - A general-purpose Java class library</description>
@@ -45,7 +45,7 @@
 	<parent>
 		<groupId>de.unkrig.commons</groupId>
 		<artifactId>commons-parent</artifactId>
-		<version>1.2.12-SNAPSHOT</version>
+		<version>1.2.12</version>
 		<relativePath>../commons-parent</relativePath>
 	</parent>
 	<url>http://commons.unkrig.de/commons-net</url>
