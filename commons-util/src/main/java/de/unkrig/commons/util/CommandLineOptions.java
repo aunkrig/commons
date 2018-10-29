@@ -38,6 +38,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -234,6 +236,15 @@ class CommandLineOptions {
      *   The default value for the command line option group cardinality is {@link
      *   de.unkrig.commons.util.annotation.CommandLineOptionGroup.Cardinality#ZERO_OR_ONE ZERO_OR_ONE}.
      * </p>
+     *
+     * <h3>Argument conversion</h3>
+     *
+     * <p>
+     *   <var>args</var> strings are converted to match the parameter types of the methods as follows:
+     * </p>
+     * <ul>
+     *   <li>
+     * </ul>
      *
      * @return                            The <var>args</var>, less the elements that were parsed as command line
      *                                    options
@@ -652,8 +663,22 @@ class CommandLineOptions {
          *     For an array target type, <em>all</em> remaining tokens from <var>ss</var> are parsed as array elements.
          *   </li>
          *   <li>
+         *     For {@code Pattern} target type, the next token from <var>ss</var> is converted through {@link
+         *     Pattern2#compile(String, int)}, with the flags as configured by the {@link RegexFlags} annotation of
+         *     the method.
+         *   </li>
+         *   <li>
+         *     For {@code Glob} target type, the next token from <var>ss</var> is converted through {@link
+         *     Glob#compile(String, int)}, with the flags as configured by the {@link RegexFlags} annotation of
+         *     the method.
+         *   </li>
+         *   <li>
          *     For a bean target type (a class that has only the zero-arg constructor), the bean is instantiated and as
          *     many tokens from <var>ss</var> as possible are parsed as options of the bean.
+         *   </li>
+         *   <li>
+         *     For {@code InetAddress} target type, the next token from <var>ss</var> is converted through {@link
+         *     InetAddress#getByName(String)}.
          *   </li>
          *   <li>
          *     For any other target type, the <em>next</em> token from <var>ss</var> is converted to the target type, as
@@ -721,6 +746,16 @@ class CommandLineOptions {
                 new Parser<EX>(targetType).parseOptions(ss, bean);
 
                 return bean;
+            }
+
+            // Special case: Target type "java.net.InetAddress".
+            if (targetType == InetAddress.class) {
+            	String host = ss.read();
+                try {
+					return InetAddress.getByName(host);
+				} catch (UnknownHostException uhe) {
+					throw new ArgumentConversionFailed(host, InetAddress.class, uhe);
+				}
             }
 
             // Fall back to "ObjectUtil.fromString()".
