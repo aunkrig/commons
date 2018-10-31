@@ -91,6 +91,9 @@ class HttpMessage {
 
     private static final Logger LOGGER = Logger.getLogger(HttpMessage.class.getName());
 
+    public static
+    enum HasBody { FALSE, TRUE, IF_CONTENT_LENGTH_OR_TRANSFER_ENCODING }
+
     private static final Pattern
     HEADER_PATTERN = Pattern.compile("([ -~&&[^()<>@,;:\\\\/\\[\\]?={} \\t]]+)\\s*:\\s*(.*?)\\s*");
 
@@ -232,7 +235,7 @@ class HttpMessage {
      * </p>
      */
     protected
-    HttpMessage(InputStream in, boolean hasHeaders, boolean hasBody) throws IOException {
+    HttpMessage(InputStream in, boolean hasHeaders, HasBody hasBody) throws IOException {
         this(in, hasHeaders, hasBody, ">>> ");
     }
 
@@ -246,7 +249,7 @@ class HttpMessage {
      * @param loggingPrefix E.g. {@code ">>> "}
      */
     protected
-    HttpMessage(InputStream in, boolean hasHeaders, boolean hasBody, final String loggingPrefix) throws IOException {
+    HttpMessage(InputStream in, boolean hasHeaders, HasBody hasBody, final String loggingPrefix) throws IOException {
 
         // Read the headers.
         if (hasHeaders) {
@@ -266,7 +269,13 @@ class HttpMessage {
         }
 
         // Read the body.
-        if (hasBody) {
+        if (
+    		hasBody == HasBody.TRUE
+    		|| (
+				hasBody == HasBody.IF_CONTENT_LENGTH_OR_TRANSFER_ENCODING
+				&& (this.getHeader("Content-Length") != null || this.getHeader("Transfer-Encoding") != null)
+			)
+		) {
 
             final Produmer<Long, Long> rawByteCount     = ConsumerUtil.store(0L);
             final Produmer<Long, Long> decodedByteCount = ConsumerUtil.store(0L);
@@ -968,6 +977,8 @@ class HttpMessage {
 
     /**
      * @return the line read, excluding the trailing CRLF
+     *
+     * @throws EOFException
      */
     public static String
     readLine(InputStream in) throws IOException {
