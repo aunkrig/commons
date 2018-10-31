@@ -169,7 +169,7 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
         //this.serverSocket.setReuseAddress(true);
         //this.serverSocket.setSoTimeout(20 * 1000); // Causes periodic exceptions.
 
-        if (LOGGER.isLoggable(FINE)) LOGGER.log(FINE, "{0} created", this.serverSocket);
+        LOGGER.log(FINE, "{0} created", this.serverSocket);
     }
 
     /**
@@ -292,21 +292,17 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
 
         // Accept connection requests from clients until the end of time.
         for (;;) {
-            if (LOGGER.isLoggable(FINE)) LOGGER.log(FINE, "Accepting connections on {0}", this.serverSocket);
+            LOGGER.log(FINE, "Accepting connections on {0}", this.serverSocket);
 
             final Socket clientSocket;
             try {
                 clientSocket = this.serverSocket.accept();
             } catch (SocketTimeoutException ste) {
-                if (LOGGER.isLoggable(FINE)) LOGGER.log(FINE, "{0}: {1}", new Object[] { this.serverSocket, ste });
+                LOGGER.log(FINE, "{0}: {1}", new Object[] { this.serverSocket, ste });
                 continue;
             } catch (SocketException se) {
-                if (
-                    "socket closed".equals(se.getMessage())
-                    || "Socket closed".equals(se.getMessage())
-                    || "Socket is closed".equals(se.getMessage())
-                ) {
-                    if (LOGGER.isLoggable(FINE)) LOGGER.log(FINE, "{0}: {1}", new Object[] { this.serverSocket, se });
+                if (TcpServer.isSocketClosedException(se)) {
+                    LOGGER.log(FINE, "{0}: {1}", new Object[] { this.serverSocket, se });
                     return;
                 }
                 throw se;
@@ -318,7 +314,7 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
 
                 final int connectionNumber = CONNECTION_COUNT.incrementAndGet();
 
-                if (LOGGER.isLoggable(FINE)) LOGGER.log(
+                LOGGER.log(
                     FINE,
                     "Client connection #{0} accepted: {1}",
                     new Object[] { connectionNumber, clientSocket }
@@ -371,20 +367,12 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
                                     );
                                 } catch (javax.net.ssl.SSLHandshakeException she) {
                                     if ("Received fatal alert: bad_certificate".equals(she.getMessage())) {
-                                        if (LOGGER.isLoggable(FINER)) LOGGER.log(FINER, "Client does not like our server certificate", she); // SUPPRESS CHECKSTYLE LineLength
+                                        LOGGER.log(FINER, "Client does not like our server certificate", she);
                                         return;
                                     }
                                     throw she;
                                 } catch (SocketException se) {
-                                    String m = se.getMessage();
-                                    if (
-                                        "socket closed".equals(m)
-                                        || "Socket closed".equals(m)
-                                        || m.contains("Connection reset")
-                                        || "Broken pipe".equals(m)
-                                        || "Software caused connection abort: recv failed".equals(m)
-                                        || "Software caused connection abort: socket write error".equals(m)
-                                    ) {
+                                    if (TcpServer.isSocketClosedException(se)) {
                                         LOGGER.log(FINEST, "Connection closed by client", se);
                                         return;
                                     }
@@ -417,4 +405,24 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
     stop() {
         try { this.serverSocket.close(); } catch (Exception e) {}
     }
+
+    /**
+     * Unfortunately, the "socket closed exception" is not a class of its own, but a special case of the
+     * SocketException. Have to parse the message to tell the difference.
+     */
+	private static boolean
+	isSocketClosedException(SocketException se) {
+
+		String m = se.getMessage();
+
+		return (
+			m.endsWith("socket closed")
+			|| m.endsWith("Socket closed")
+			|| m.endsWith("Socket is closed")
+			|| m.contains("Connection reset")
+			|| m.endsWith("Broken pipe")
+			|| m.endsWith("Software caused connection abort: recv failed")
+			|| "Software caused connection abort: socket write error".equals(m)
+		);
+	}
 }
