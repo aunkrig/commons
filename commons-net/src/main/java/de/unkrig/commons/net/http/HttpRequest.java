@@ -85,15 +85,21 @@ class HttpRequest extends HttpMessage {
      */
     public
     enum Method {
-        GET(false), POST(true), HEAD(false), PUT(true), CONNECT(true);
+        GET(HasBody.FALSE),
+        POST(HasBody.TRUE),
+        HEAD(HasBody.FALSE),
+        PUT(HasBody.TRUE),
+        CONNECT(HasBody.TRUE),
+        OPTIONS(HasBody.IF_CONTENT_LENGTH_OR_TRANSFER_ENCODING),
+        ;
 
-        private boolean hasBody;
+        private HasBody hasBody;
 
-        Method(boolean hasBody) { this.hasBody = hasBody; }
+        Method(HasBody hasBody) { this.hasBody = hasBody; }
 
-        public boolean hasBody() { return this.hasBody; }
+        public HasBody hasBody() { return this.hasBody; }
     }
-    
+
     /**
      * Parses and returns one HTTP request from the given {@link InputStream}.
      */
@@ -136,12 +142,12 @@ class HttpRequest extends HttpMessage {
 
         return new HttpRequest(method, uri, httpVersion, in, loggingPrefix);
     }
-    
+
     public
     HttpRequest(Method method, URI uri, String httpVersion, InputStream in) throws IOException {
         this(method, uri, httpVersion, in, ">>> ");
     }
-    
+
     /**
      * @param loggingPrefix E.g. {@code ">>> "}
      */
@@ -160,7 +166,7 @@ class HttpRequest extends HttpMessage {
 
     public
     HttpRequest(Method method, URI uri, String httpVersion) {
-        super(method.hasBody());
+        super(method.hasBody() == HasBody.TRUE);
         this.method        = method;
         this.httpVersion   = httpVersion;
         this.uri           = uri;
@@ -511,7 +517,7 @@ class HttpRequest extends HttpMessage {
     /** Changes the HTTP version of this request. */
     public void
     setHttpVersion(String httpVersion) { this.httpVersion = httpVersion; }
-    
+
     /**
      * Writes this HTTP request to the given {@link OutputStream}.
      */
@@ -538,7 +544,7 @@ class HttpRequest extends HttpMessage {
 
         this.writeHeadersAndBody(loggingPrefix, out);
     }
-    
+
     /**
      * Reads one HTTP request from <var>in</var> through the <var>multiplexer</var> and passes it to the
      * <var>requestConsumer</var>.

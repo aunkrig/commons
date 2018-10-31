@@ -215,10 +215,10 @@ class HttpResponse extends HttpMessage {
         String      loggingPrefix
     ) throws IOException {
         super(
-            in,                                    // in
-            !"0.9".equals(httpVersion),            // hasHeaders
-            !isResponseToHEAD && status.hasBody(), // hasBody
-            loggingPrefix
+            in,                                                                   // in
+            !"0.9".equals(httpVersion),                                           // hasHeaders
+            !isResponseToHEAD && status.hasBody() ? HasBody.TRUE : HasBody.FALSE, // hasBody
+            loggingPrefix                                                         // loggingPrefix
         );
         this.httpVersion  = httpVersion;
         this.status       = status;
