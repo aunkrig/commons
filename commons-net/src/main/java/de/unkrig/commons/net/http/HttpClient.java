@@ -32,7 +32,6 @@ import java.net.InetAddress;
 import java.util.logging.Logger;
 
 import de.unkrig.commons.net.TcpClient;
-import de.unkrig.commons.net.http.HttpRequest.Method;
 
 /**
  * Implementation of an HTTP client.
@@ -61,7 +60,7 @@ class HttpClient implements Closeable {
     HttpClient(InetAddress address, int port) throws IOException {
         this.tcpClient = new TcpClient(address, port);
     }
-    
+
     /**
      * Sends the given <var>httpRequest</var> to the server, waits for the response from the server.
      *
@@ -89,10 +88,10 @@ class HttpClient implements Closeable {
         httpRequest.write(this.tcpClient.getOutputStream(), writeRequestLoggingPrefix);
 
         return HttpResponse.read(
-            this.tcpClient.getInputStream(),        // in
-            httpRequest.getHttpVersion(),           // httpVersion
-            httpRequest.getMethod() == Method.HEAD, // isResponseToHEAD
-            readResponseLoggingPrefix               // loggingPrefix
+            this.tcpClient.getInputStream(), // in
+            httpRequest.getHttpVersion(),    // httpVersion
+            httpRequest.getMethod(),         // requestMethod
+            readResponseLoggingPrefix        // loggingPrefix
         );
     }
 

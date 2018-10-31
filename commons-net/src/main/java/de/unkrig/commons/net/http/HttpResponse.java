@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.unkrig.commons.net.http.HttpRequest.Method;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -211,14 +212,14 @@ class HttpResponse extends HttpMessage {
         Status      status,
         String      reasonPhrase,
         InputStream in,
-        boolean     isResponseToHEAD, // SUPPRESS CHECKSTYLE Abbreviation
+        Method      requestMethod,
         String      loggingPrefix
     ) throws IOException {
         super(
-            in,                                                                   // in
-            !"0.9".equals(httpVersion),                                           // hasHeaders
-            !isResponseToHEAD && status.hasBody() ? HasBody.TRUE : HasBody.FALSE, // hasBody
-            loggingPrefix                                                         // loggingPrefix
+            in,                                                                              // in
+            !"0.9".equals(httpVersion),                                                      // hasHeaders
+            requestMethod != Method.HEAD && status.hasBody() ? HasBody.TRUE : HasBody.FALSE, // hasBody
+            loggingPrefix                                                                    // loggingPrefix
         );
         this.httpVersion  = httpVersion;
         this.status       = status;
@@ -233,11 +234,9 @@ class HttpResponse extends HttpMessage {
      * </p>
      */
     public static HttpResponse
-    read(
-        InputStream in,
-        String      httpVersion,
-        boolean     isResponseToHEAD // SUPPRESS CHECKSTYLE Abbreviation
-    ) throws IOException { return HttpResponse.read(in, httpVersion, isResponseToHEAD, ">>> "); }
+    read(InputStream in, String httpVersion, Method requestMethod) throws IOException {
+    	return HttpResponse.read(in, httpVersion, requestMethod, ">>> ");
+    }
 
     /**
      * Constructor for incoming responses.
@@ -249,12 +248,7 @@ class HttpResponse extends HttpMessage {
      * @param loggingPrefix E.g. {@code ">>> "}
      */
     public static HttpResponse
-    read(
-        InputStream in,
-        String      httpVersion,
-        boolean     isResponseToHEAD, // SUPPRESS CHECKSTYLE Abbreviation
-        String      loggingPrefix
-    ) throws IOException {
+    read(InputStream in, String httpVersion, Method requestMethod, String loggingPrefix) throws IOException {
 
         Status status;
         String reasonPhrase;
@@ -284,7 +278,7 @@ class HttpResponse extends HttpMessage {
             }
         }
 
-        return new HttpResponse(httpVersion, status, reasonPhrase, in, isResponseToHEAD, loggingPrefix);
+        return new HttpResponse(httpVersion, status, reasonPhrase, in, requestMethod, loggingPrefix);
     }
 
     /**
