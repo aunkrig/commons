@@ -134,7 +134,7 @@ class ExpressionMatchReplacer {
      *   Example:
      * </p>
      * <pre>
-     *   Function<Matcher, String> matchReplacer = ExpressionMatchReplacer.parse(
+     *   Function&lt;Matcher, String> matchReplacer = ExpressionMatchReplacer.parse(
      *       "prefix + new StringBuilder(m.group).reverse()",
      *       Mappings.mapping("prefix", "pre-"),
      *       "prefix"
