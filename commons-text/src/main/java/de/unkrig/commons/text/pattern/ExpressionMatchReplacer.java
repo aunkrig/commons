@@ -176,7 +176,7 @@ class ExpressionMatchReplacer {
 
     /**
      * Creates and returns a "match replacer" that is suitable for {@link PatternUtil#replaceSome(Matcher,
-     * FunctionWhichThrows)} and implements the substitution through the given <var>expression</ver>.
+     * FunctionWhichThrows)} and implements the substitution through the given <var>expression</var>.
      * <p>
      *   When the expression is evaluated, it gets an additional variable {@code "m"}, which is the {@link Matcher} of
      *   the current match.
