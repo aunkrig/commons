@@ -98,9 +98,9 @@ class Searcher<EX extends Throwable> implements ConsumerWhichThrows<CharSequence
     public
     Searcher(
         Pattern                                                pattern,
-        ConsumerWhichThrows<? super MatchResult, ? extends EX> matchhandler
+        ConsumerWhichThrows<? super MatchResult, ? extends EX> matchHandler
     ) {
-        this(pattern, matchhandler, Searcher.DEFAULT_LOOKBEHIND_LIMIT);
+        this(pattern, matchHandler, Searcher.DEFAULT_LOOKBEHIND_LIMIT);
     }
 
     public
@@ -113,7 +113,6 @@ class Searcher<EX extends Throwable> implements ConsumerWhichThrows<CharSequence
         this.matchHandler    = matchHandler;
         this.lookBehindLimit = lookBehindLimit;
     }
-
 
     /**
      * Invokes the "match handler" for each match in the <var>in</var>. If there is a "partial match" at the
@@ -128,6 +127,18 @@ class Searcher<EX extends Throwable> implements ConsumerWhichThrows<CharSequence
         m.useTransparentBounds(true);
         m.useAnchoringBounds(false);
 
+        final MatchResult matchResult = new MatchResult() {
+
+            // SUPPRESS CHECKSTYLE LineLength:7
+            @Override public int    start(int group) { return m.start(group) + Searcher.this.offsetDelta; }
+            @Override public int    start()          { return m.start()      + Searcher.this.offsetDelta; }
+            @Override public int    groupCount()     { return m.groupCount();                             }
+            @Override public String group(int group) { return m.group(group);                             }
+            @Override public String group()          { return m.group();                                  }
+            @Override public int    end(int group)   { return m.end(group)   + Searcher.this.offsetDelta; }
+            @Override public int    end()            { return m.end()        + Searcher.this.offsetDelta; }
+        };
+
         for (;;) {
             m.region(this.start, this.buffer.length());
             if (m.lookingAt()) {
@@ -138,18 +149,7 @@ class Searcher<EX extends Throwable> implements ConsumerWhichThrows<CharSequence
                 }
 
                 // E.g. "A" => "Axxx"
-                final int offsetDelta2 = this.offsetDelta;
-                this.matchHandler.consume(new MatchResult() {
-
-                    // SUPPRESS CHECKSTYLE LineLength:7
-                    @Override public int    start(int group) { return m.start(group) + offsetDelta2; }
-                    @Override public int    start()          { return m.start()      + offsetDelta2; }
-                    @Override public int    groupCount()     { return m.groupCount();                }
-                    @Override public String group(int group) { return m.group(group);                }
-                    @Override public String group()          { return m.group();                     }
-                    @Override public int    end(int group)   { return m.end(group)   + offsetDelta2; }
-                    @Override public int    end()            { return m.end()        + offsetDelta2; }
-                });
+                this.matchHandler.consume(matchResult);
                 this.matchCount++;
 
                 if (m.end() == m.start()) {
@@ -183,8 +183,7 @@ class Searcher<EX extends Throwable> implements ConsumerWhichThrows<CharSequence
     }
 
     /**
-     * @return The number of matches so far, i.e. the number of invocations of the
-     *         <var>matchhandler</var>
+     * @return The number of matches so far, i.e. the number of invocations of the <var>matchHandler</var>
      */
     public int
     matchCount() { return this.matchCount; }
