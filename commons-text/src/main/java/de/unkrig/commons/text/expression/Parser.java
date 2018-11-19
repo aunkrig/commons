@@ -253,13 +253,15 @@ class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
     Parser(String expression) { this(Scanner.stringScanner().setInput(expression)); }
 
     /**
-     * @return The currently configured imports
+     * @return The currently configured imports (fully qualified package names)
      */
     public String[]
     getImports() { return this.imports.clone(); }
 
     /**
      * By default, there is only one import: "java.lang".
+     *
+     * @param imports Fully qualified package names
      */
     public Parser<T, EX>
     setImports(String[] imports) {
@@ -452,7 +454,11 @@ class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
         OPERATOR_REGEX,
     }
 
+    /**
+     * The currently configured imports (fully qualified package names).
+     */
     private String[]           imports     = new String[] { "java.lang" };
+
     private ClassLoader        classLoader = this.getClass().getClassLoader();
     private EnumSet<Extension> extensions  = EnumSet.allOf(Extension.class);
 
