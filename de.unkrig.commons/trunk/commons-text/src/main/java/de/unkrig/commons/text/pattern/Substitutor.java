@@ -26,12 +26,14 @@
 
 package de.unkrig.commons.text.pattern;
 
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.unkrig.commons.lang.protocol.FunctionWhichThrows;
 import de.unkrig.commons.lang.protocol.NoException;
 import de.unkrig.commons.lang.protocol.TransformerWhichThrows;
+import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * Replaces pattern matches in a stream of strings ("chunks"). Matches are allowed across chunks; thus, this
@@ -95,7 +97,13 @@ class Substitutor<EX extends Throwable> implements TransformerWhichThrows<CharSe
      */
     private int substitutionCount;
 
-    public
+    private int offsetDelta;
+
+    /**
+     * @deprecated The {@link Matcher} that is fed to the <var>matchReplacer</var> has incorrect offsets; use {@link
+     *             #create(Pattern, FunctionWhichThrows)} instead
+     */
+    @Deprecated public
     Substitutor(
         Pattern                                                                    pattern,
         FunctionWhichThrows<? super Matcher, ? extends CharSequence, ? extends EX> matchReplacer
@@ -103,7 +111,11 @@ class Substitutor<EX extends Throwable> implements TransformerWhichThrows<CharSe
         this(pattern, matchReplacer, Substitutor.DEFAULT_LOOKBEHIND_LIMIT);
     }
 
-    public
+    /**
+     * @deprecated The {@link Matcher} that is fed to the <var>matchReplacer</var> has incorrect offsets; use {@link
+     *             #create(Pattern, FunctionWhichThrows, int)} instead
+     */
+    @Deprecated public
     Substitutor(
         Pattern                                                                    pattern,
         FunctionWhichThrows<? super Matcher, ? extends CharSequence, ? extends EX> matchReplacer,
@@ -112,6 +124,52 @@ class Substitutor<EX extends Throwable> implements TransformerWhichThrows<CharSe
         this.pattern         = pattern;
         this.matchReplacer   = matchReplacer;
         this.lookBehindLimit = lookBehindLimit;
+    }
+
+    /**
+     * Equivalent with {@link #create(Pattern, FunctionWhichThrows, int) create}{@code (}<var>pattern</var>{@code ,}
+     * <var>matchReplacer</var>{@code ,} {@link #DEFAULT_LOOKBEHIND_LIMIT}{@code )}.
+     */
+    public static <EX extends Throwable> Substitutor<EX>
+    create(
+        Pattern                                                                        pattern,
+        FunctionWhichThrows<? super MatchResult, ? extends CharSequence, ? extends EX> matchReplacer
+    ) {
+        return Substitutor.create(pattern, matchReplacer, Substitutor.DEFAULT_LOOKBEHIND_LIMIT);
+    }
+
+    /**
+     * @return A {@link Substitutor} that substitutes all matches of the <var>pattern</var> through the
+     *         <var>matchReplacer</var>
+     */
+    public static <EX extends Throwable> Substitutor<EX>
+    create(
+        Pattern                                                                              pattern,
+        final FunctionWhichThrows<? super MatchResult, ? extends CharSequence, ? extends EX> matchReplacer,
+        int                                                                                  lookBehindLimit
+    ) {
+        final Substitutor<?>[] s = new Substitutor<?>[1];
+
+        Substitutor<EX> result = new Substitutor<EX>(pattern, new FunctionWhichThrows<Matcher, CharSequence, EX>() {
+
+            @Override @Nullable public CharSequence
+            call(final @Nullable Matcher m) throws EX {
+                assert m != null;
+                return matchReplacer.call(new MatchResult() {
+
+                    // SUPPRESS CHECKSTYLE LineLength:7
+                    @Override public int    start(int group) { return m.start(group) + s[0].offsetDelta; }
+                    @Override public int    start()          { return m.start()      + s[0].offsetDelta; }
+                    @Override public int    groupCount()     { return m.groupCount();                    }
+                    @Override public String group(int group) { return m.group(group);                    }
+                    @Override public String group()          { return m.group();                         }
+                    @Override public int    end(int group)   { return m.end(group)   + s[0].offsetDelta; }
+                    @Override public int    end()            { return m.end()        + s[0].offsetDelta; }
+                });
+            }
+        }, lookBehindLimit);
+        s[0] = result;
+        return result;
     }
 
     /**
@@ -146,6 +204,7 @@ class Substitutor<EX extends Throwable> implements TransformerWhichThrows<CharSe
                 if (replacement == null) {
                     result.append(this.buffer.charAt(this.start++));
                 } else {
+                    this.substitutionCount++;
                     result.append(replacement);
                     if (m.end() == m.start()) {
                         result.append(this.buffer.charAt(this.start++));

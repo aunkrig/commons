@@ -26,6 +26,7 @@
 
 package test.pattern;
 
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,6 +39,8 @@ import de.unkrig.commons.text.expression.ExpressionEvaluator;
 import de.unkrig.commons.text.parser.ParseException;
 import de.unkrig.commons.text.pattern.ExpressionMatchReplacer;
 import de.unkrig.commons.text.pattern.PatternUtil;
+
+// SUPPRESS CHECKSTYLE Javadoc:9999
 
 public
 class ExpressionMatchReplacerTest {
@@ -57,7 +60,7 @@ class ExpressionMatchReplacerTest {
     @Test public void
     testParse1() throws ParseException {
 
-        Function<Matcher, String> matchReplacer = ExpressionMatchReplacer.parse("m.group.toUpperCase()");
+        Function<MatchResult, String> matchReplacer = ExpressionMatchReplacer.parse("m.group.toUpperCase()");
 
         Pattern p = Pattern.compile("\\w");
 
@@ -68,7 +71,7 @@ class ExpressionMatchReplacerTest {
     @Test public void
     testParse2() throws ParseException {
 
-        Function<Matcher, String> matchReplacer = ExpressionMatchReplacer.parse(
+        Function<MatchResult, String> matchReplacer = ExpressionMatchReplacer.parse(
             "prefix + new StringBuilder(m.group).reverse()",
             "prefix", "pre-" // SUPPRESS CHECKSTYLE Wrap
         );
@@ -89,7 +92,7 @@ class ExpressionMatchReplacerTest {
         Expression
         expression = new ExpressionEvaluator("prefix", "m").parse("prefix + new StringBuilder(m.group).reverse()");
 
-        Function<Matcher, String> matchReplacer = ExpressionMatchReplacer.get(
+        Function<MatchResult, String> matchReplacer = ExpressionMatchReplacer.get(
             expression,
             "prefix", "pre-" // SUPPRESS CHECKSTYLE Wrap
         );
