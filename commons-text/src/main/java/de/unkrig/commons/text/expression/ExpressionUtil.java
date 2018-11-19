@@ -69,6 +69,9 @@ class ExpressionUtil {
         return ExpressionUtil.constantExpression2(value);
     }
 
+    /**
+     * Internal implementation of {@link #constantExpression(Object)}; does not optimize special <var>value</var>s
+     */
     static Expression
     constantExpression2(@Nullable final Object value) {
 
