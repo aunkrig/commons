@@ -250,6 +250,10 @@ class Substitutor<EX extends Throwable> implements TransformerWhichThrows<CharSe
         if (this.buffer.length() == 0) return "";
 
         Matcher m = this.pattern.matcher(this.buffer);
+        m.useTransparentBounds(true);
+        m.useAnchoringBounds(false);
+        m.region(this.start, this.buffer.length());
+
         if (!m.find(this.start)) {
 
             // No match in "the rest" - just return "the rest".
