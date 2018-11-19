@@ -73,7 +73,11 @@ import de.unkrig.commons.text.scanner.StringScanner;
 public
 class ExpressionEvaluator {
 
+    /**
+     * The currently configured imports (fully qualified package names).
+     */
     private String[]    imports     = new String[] { "java.lang" };
+
     private ClassLoader classLoader = this.getClass().getClassLoader();
 
     private final PredicateWhichThrows<? super String, ? extends RuntimeException>
@@ -105,13 +109,13 @@ class ExpressionEvaluator {
     }
 
     /**
-     * @return The currently configured imports
+     * @return The currently configured imports (fully qualified package names)
      */
     public String[]
     getImports() { return this.imports.clone(); }
 
     /**
-     * @param imports Names of imported packages
+     * @param imports Fully qualified names of packages to import
      */
     public ExpressionEvaluator
     setImports(String[] imports) {
