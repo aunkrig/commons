@@ -29,6 +29,7 @@ package de.unkrig.commons.text.pattern;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,7 +49,7 @@ class PatternUtil {
     private PatternUtil() {}
 
     /** @deprecated Use {@link #constantMatchReplacer(String)} instead */
-    @Deprecated public static Function<Matcher, String>
+    @Deprecated public static Function<MatchResult, String>
     constantReplacer(@Nullable final String string) { return PatternUtil.constantMatchReplacer(string); }
 
     /**
@@ -61,16 +62,16 @@ class PatternUtil {
      * @see #replacementStringMatchReplacer(String)
      * @see #SYSTEM_PROPERTY_MATCH_REPLACER
      */
-    public static Function<Matcher, String>
+    public static Function<MatchResult, String>
     constantMatchReplacer(@Nullable final String string) {
 
-        return new Function<Matcher, String>() {
-            @Override @Nullable public String call(@Nullable Matcher match) { return string; }
+        return new Function<MatchResult, String>() {
+            @Override @Nullable public String call(@Nullable MatchResult matchResult) { return string; }
         };
     }
 
     /** @deprecated Use {@link #replacementStringMatchReplacer(String)} instead */
-    @Deprecated public static <EX extends Throwable> FunctionWhichThrows<Matcher, String, ? extends EX>
+    @Deprecated public static <EX extends Throwable> FunctionWhichThrows<MatchResult, String, ? extends EX>
     replacementStringReplacer(final String replacementString) {
         return PatternUtil.replacementStringMatchReplacer(replacementString);
     }
@@ -82,14 +83,14 @@ class PatternUtil {
      * @see                     #constantMatchReplacer(String)
      * @see                     #SYSTEM_PROPERTY_MATCH_REPLACER
      */
-    public static <EX extends Throwable> FunctionWhichThrows<Matcher, String, ? extends EX>
+    public static <EX extends Throwable> FunctionWhichThrows<MatchResult, String, ? extends EX>
     replacementStringMatchReplacer(final String replacementString) {
 
-        return new FunctionWhichThrows<Matcher, String, EX>() {
+        return new FunctionWhichThrows<MatchResult, String, EX>() {
 
             @Override @Nullable public String
-            call(@Nullable Matcher matcher) {
-                assert matcher != null;
+            call(@Nullable MatchResult matchResult) {
+                assert matchResult != null;
 
                 // Process replacement string to replace group references with groups.
                 StringBuffer result = new StringBuffer();
@@ -118,13 +119,13 @@ class PatternUtil {
                             if (nextDigit < 0 || nextDigit > 9) break;
 
                             int newRefNum = (referenceNumber * 10) + nextDigit;
-                            if (matcher.groupCount() < newRefNum) break;
+                            if (matchResult.groupCount() < newRefNum) break;
                             referenceNumber = newRefNum;
                             idx++;
                         }
 
                         // Append group.
-                        String group = matcher.group(referenceNumber);
+                        String group = matchResult.group(referenceNumber);
                         if (group != null) result.append(group);
                     } else {
                         result.append(c);
@@ -138,7 +139,7 @@ class PatternUtil {
     }
 
     /** @deprecated Use {@link #SYSTEM_PROPERTY_MATCH_REPLACER} instead */
-    @Deprecated public static Function<Matcher, String>
+    @Deprecated public static Function<MatchResult, String>
     systemPropertyReplacer() { return PatternUtil.SYSTEM_PROPERTY_MATCH_REPLACER; }
 
     /**
@@ -156,13 +157,13 @@ class PatternUtil {
      * @see #constantMatchReplacer(String)
      * @see #replacementStringMatchReplacer(String)
      */
-    public static final Function<Matcher, String>
-    SYSTEM_PROPERTY_MATCH_REPLACER = new Function<Matcher, String>() {
+    public static final Function<MatchResult, String>
+    SYSTEM_PROPERTY_MATCH_REPLACER = new Function<MatchResult, String>() {
 
         @Override @Nullable public String
-        call(@Nullable Matcher matcher) {
-            assert matcher != null;
-            return System.getProperty(matcher.group(1));
+        call(@Nullable MatchResult matchResult) {
+            assert matchResult != null;
+            return System.getProperty(matchResult.group(1));
         }
     };
 
@@ -215,8 +216,8 @@ class PatternUtil {
      */
     public static <EX extends Throwable> String
     replaceSome(
-        Matcher                                                                    matcher,
-        FunctionWhichThrows<? super Matcher, ? extends CharSequence, ? extends EX> matchReplacer
+        Matcher                                                                        matcher,
+        FunctionWhichThrows<? super MatchResult, ? extends CharSequence, ? extends EX> matchReplacer
     ) throws EX {
 
         matcher.reset();
@@ -258,14 +259,14 @@ class PatternUtil {
      */
     public static <EX extends Throwable> int
     replaceSome(
-        Reader                                                                     in,
-        Pattern                                                                    pattern,
-        FunctionWhichThrows<? super Matcher, ? extends CharSequence, ? extends EX> matchReplacer,
-        Appendable                                                                 out,
-        int                                                                        bufferCapacity
+        Reader                                                                         in,
+        Pattern                                                                        pattern,
+        FunctionWhichThrows<? super MatchResult, ? extends CharSequence, ? extends EX> matchReplacer,
+        Appendable                                                                     out,
+        int                                                                            bufferCapacity
     ) throws IOException, EX {
 
-        Substitutor<EX> substitutor = new Substitutor<EX>(pattern, matchReplacer);
+        Substitutor<EX> substitutor = Substitutor.create(pattern, matchReplacer);
 
         IoUtil.copyAndTransform(in, substitutor, out, bufferCapacity);
 
@@ -278,10 +279,10 @@ class PatternUtil {
      */
     public static Reader
     replaceAllFilterReader(
-        Reader                                                                                    delegate,
-        final Pattern                                                                             pattern,
-        final FunctionWhichThrows<? super Matcher, ? extends CharSequence, ? extends IOException> matchReplacer
-    ) { return TransformingFilterReader.create(delegate, new Substitutor<IOException>(pattern, matchReplacer)); }
+        Reader                                                                                        delegate,
+        final Pattern                                                                                 pattern,
+        final FunctionWhichThrows<? super MatchResult, ? extends CharSequence, ? extends IOException> matchReplacer
+    ) { return TransformingFilterReader.create(delegate, Substitutor.create(pattern, matchReplacer)); }
 
     /**
      * Creates and returns a filter {@link Writer} which replaces matches of the <var>pattern</var> within the
@@ -289,10 +290,10 @@ class PatternUtil {
      */
     public static Writer
     replaceAllFilterWriter(
-        final Pattern                                                                             pattern,
-        final FunctionWhichThrows<? super Matcher, ? extends CharSequence, ? extends IOException> matchReplacer,
-        final Appendable                                                                          delegate
-    ) { return TransformingFilterWriter.create(new Substitutor<IOException>(pattern, matchReplacer), delegate); }
+        final Pattern                                                                                 pattern,
+        final FunctionWhichThrows<? super MatchResult, ? extends CharSequence, ? extends IOException> matchReplacer,
+        final Appendable                                                                              delegate
+    ) { return TransformingFilterWriter.create(Substitutor.create(pattern, matchReplacer), delegate); }
 
     /**
      * Creates and returns a {@link Substitutor} which replaces {@link Pattern} matches in a stream of strings through
@@ -311,6 +312,6 @@ class PatternUtil {
      */
     public static <EX extends Throwable> Substitutor<EX>
     substitutor(Pattern pattern, String replacementString) {
-        return new Substitutor<EX>(pattern, PatternUtil.<EX>replacementStringMatchReplacer(replacementString));
+        return Substitutor.create(pattern, PatternUtil.<EX>replacementStringMatchReplacer(replacementString));
     }
 }

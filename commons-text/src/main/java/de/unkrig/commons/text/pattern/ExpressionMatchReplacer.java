@@ -26,6 +26,7 @@
 
 package de.unkrig.commons.text.pattern;
 
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 
 import de.unkrig.commons.lang.ExceptionUtil;
@@ -106,7 +107,7 @@ class ExpressionMatchReplacer {
      * @see                   #parse(String, Mapping, Predicate)
      * @see                   #get(Expression, Mapping)
      */
-    public static Function<Matcher, String>
+    public static Function<MatchResult, String>
     parse(final String spec) throws ParseException {
         return ExpressionMatchReplacer.parse(spec, Mappings.<String, Object>none(), PredicateUtil.<String>never());
     }
@@ -114,7 +115,7 @@ class ExpressionMatchReplacer {
     /**
      * @see #parse(String, Mapping, Predicate)
      */
-    public static Function<Matcher, String>
+    public static Function<MatchResult, String>
     parse(final String spec, Object... variableNamesAndValues) throws ParseException {
 
         Mapping<String, Object> variables           = Mappings.mapping(variableNamesAndValues);
@@ -155,7 +156,7 @@ class ExpressionMatchReplacer {
      * @throws ParseException     A problem occurred when the <var>spec</var> was parsed
      * @see Parser                The expression syntax
      */
-    public static Function<Matcher, String>
+    public static Function<MatchResult, String>
     parse(final String spec, final Mapping<String, ?> variables, Predicate<String> isValidVariableName)
     throws ParseException {
 
@@ -169,7 +170,7 @@ class ExpressionMatchReplacer {
     /**
      * @see #get(Expression, Mapping)
      */
-    public static Function<Matcher, String>
+    public static Function<MatchResult, String>
     get(final Expression expression, Object... variableNamesAndValues) {
         return ExpressionMatchReplacer.get(expression, Mappings.<String, Object>mapping(variableNamesAndValues));
     }
@@ -210,18 +211,18 @@ class ExpressionMatchReplacer {
      * @param variables       The variables' values for the <var>expression</var>
      * @see Parser            The expression syntax
      */
-    public static Function<Matcher, String>
+    public static Function<MatchResult, String>
     get(final Expression expression, final Mapping<String, ?> variables) {
 
-        return new Function<Matcher, String>() {
+        return new Function<MatchResult, String>() {
 
             @Override @Nullable public String
-            call(@Nullable Matcher matcher) {
-                assert matcher != null;
+            call(@Nullable MatchResult matchResult) {
+                assert matchResult != null;
 
                 Mapping<String, ?> v2 = Mappings.augment(
                     variables,
-                    "m", matcher // SUPPRESS CHECKSTYLE Wrap
+                    "m", matchResult // SUPPRESS CHECKSTYLE Wrap
                 );
 
                 try {

@@ -46,8 +46,7 @@ class SubstitutorTest {
     @Test public void
     testSubstitutor() {
 
-        Substitutor<NoException>
-        s = new Substitutor<NoException>(
+        Substitutor<NoException> s = Substitutor.create(
             Pattern.compile("A..B"),
             PatternUtil.<NoException>replacementStringMatchReplacer("x")
         );

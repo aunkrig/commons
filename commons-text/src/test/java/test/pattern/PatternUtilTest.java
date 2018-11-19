@@ -37,7 +37,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.regex.Matcher;
+import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 
 import javax.swing.text.Segment;
@@ -294,8 +294,8 @@ class PatternUtilTest extends TestCase {
     assertReplaceNoneEquals(String expected, String subject, String regex) {
         Assert.assertEquals(expected, PatternUtil.replaceSome(
             Pattern.compile(regex).matcher(subject),
-            new Function<Matcher, CharSequence>() {
-                @Override @Nullable public CharSequence call(@Nullable Matcher argument) { return null; }
+            new Function<MatchResult, CharSequence>() {
+                @Override @Nullable public CharSequence call(@Nullable MatchResult matchResult) { return null; }
             }
         ));
     }
