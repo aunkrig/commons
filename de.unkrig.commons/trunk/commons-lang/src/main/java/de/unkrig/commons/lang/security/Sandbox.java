@@ -104,11 +104,21 @@ class Sandbox {
         }
         System.setSecurityManager(new SecurityManager() {
 
+            final Class me = this.getClass();
+
             @Override public void
             checkPermission(@Nullable Permission perm) {
                 assert perm != null;
 
-                for (Class<?> clasS : this.getClassContext()) {
+                Class<?>[] classContext = this.getClassContext();
+
+                // Ignore the first execution frame, because that is THIS class.
+                for (int i = 1; i < classContext.length; i++) {
+                    Class<?> clasS = classContext[i];
+
+                    // Prevent endless recursion when we call "getClassLoader()", below, which in turn (indirectly)
+                    // calls "checkPermission()".
+                    if (clasS == this.me) return;
 
                     // Check if an ACC was set for the class.
                     {
