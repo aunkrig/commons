@@ -26,19 +26,19 @@
 		<dependency>
 			<groupId>de.unkrig.commons</groupId>
 			<artifactId>commons-lang</artifactId>
-			<version>1.2.13</version>
+			<version>1.2.14-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>de.unkrig.commons</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>1.2.13</version>
+			<version>1.2.14-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
 	<parent>
 		<groupId>de.unkrig.commons</groupId>
 		<artifactId>commons-parent</artifactId>
-		<version>1.2.13</version>
+		<version>1.2.14-SNAPSHOT</version>
 		<relativePath>../commons-parent</relativePath>
 	</parent>
 	<url>http://commons.unkrig.de/commons-doclet</url>
