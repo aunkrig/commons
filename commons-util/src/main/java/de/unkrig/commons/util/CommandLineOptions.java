@@ -663,12 +663,12 @@ class CommandLineOptions {
          *     For an array target type, <em>all</em> remaining tokens from <var>ss</var> are parsed as array elements.
          *   </li>
          *   <li>
-         *     For {@code Pattern} target type, the next token from <var>ss</var> is converted through {@link
+         *     For {@link Pattern} target type, the next token from <var>ss</var> is converted through {@link
          *     Pattern2#compile(String, int)}, with the flags as configured by the {@link RegexFlags} annotation of
          *     the method.
          *   </li>
          *   <li>
-         *     For {@code Glob} target type, the next token from <var>ss</var> is converted through {@link
+         *     For {@link Glob} target type, the next token from <var>ss</var> is converted through {@link
          *     Glob#compile(String, int)}, with the flags as configured by the {@link RegexFlags} annotation of
          *     the method.
          *   </li>
@@ -677,8 +677,8 @@ class CommandLineOptions {
          *     many tokens from <var>ss</var> as possible are parsed as options of the bean.
          *   </li>
          *   <li>
-         *     For {@code InetAddress} target type, the next token from <var>ss</var> is converted through {@link
-         *     InetAddress#getByName(String)}.
+         *     For {@link InetAddress} target type, the next token from <var>ss</var> is converted through {@link
+         *     InetAddress#getByName(String)}, except "any", which maps to {@code null} (the "wildcard address").
          *   </li>
          *   <li>
          *     For any other target type, the <em>next</em> token from <var>ss</var> is converted to the target type, as
@@ -691,7 +691,7 @@ class CommandLineOptions {
          * @throws EX                         The <var>ss</var> threw an exception
          * @throws AssertionError             Bean creation failed
          */
-        private Object
+        @Nullable private Object
         getArgument(StringStream<EX> ss, Annotation[] annotations, Class<?> targetType)
         throws CommandLineOptionException, UnexpectedElementException, EX {
 
@@ -752,7 +752,7 @@ class CommandLineOptions {
             if (targetType == InetAddress.class) {
             	String host = ss.read();
                 try {
-					return InetAddress.getByName(host);
+					return "any".equals(host) ? null : InetAddress.getByName(host);
 				} catch (UnknownHostException uhe) {
 					throw new ArgumentConversionFailed(host, InetAddress.class, uhe);
 				}
