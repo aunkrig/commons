@@ -422,7 +422,7 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
 			|| m.contains("Connection reset")
 			|| m.endsWith("Broken pipe")
 			|| m.endsWith("Software caused connection abort: recv failed")
-			|| "Software caused connection abort: socket write error".equals(m)
+			|| m.endsWith("Software caused connection abort: socket write error")
 		);
 	}
 }
