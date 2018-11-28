@@ -287,10 +287,17 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
         return (InetSocketAddress) this.serverSocket.getLocalSocketAddress();
     }
 
+    /**
+     * Accepts connection requests from clients until the end of time.
+     * For each accepted connection it creates a deamon thread which invokes the {@link #clientConnectionHandler}.
+     * When that returns, it closes the client socket and the thread dies.
+     * <p>
+     *   This method completes normally only when {@link #stop()} is invoked by another thread.
+     * </p>
+     */
     @Override public void
     run() throws IOException {
 
-        // Accept connection requests from clients until the end of time.
         for (;;) {
             LOGGER.log(FINE, "Accepting connections on {0}", this.serverSocket);
 
