@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.CharBuffer;
 
+import de.unkrig.commons.io.LineUtil.LineAndColumnTracker;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
@@ -148,6 +149,83 @@ class Readers {
                 target.put((char) c);
                 return 1;
             }
+        };
+    }
+
+    /**
+     * @return {@link FilterReader} that runs the <var>runnable</var> right before the first character is read
+     */
+    public static Reader
+    onFirstChar(Reader in, final Runnable runnable) {
+
+        return new FilterReader(in) {
+
+            private boolean hadChars;
+
+            @Override public int
+            read() throws IOException {
+                this.aboutToRead();
+                return super.read();
+            }
+
+            @Override @NotNullByDefault(false) public int
+            read(char[] cbuf, int off, int len) throws IOException {
+                this.aboutToRead();
+                return super.read(cbuf, off, len);
+            }
+
+            @Override public long
+            skip(long n) throws IOException {
+                this.aboutToRead();
+                return super.skip(n);
+            }
+
+            private void
+            aboutToRead() {
+                if (!this.hadChars) {
+                    runnable.run();
+                    this.hadChars = true;
+                }
+            }
+        };
+    }
+
+    /**
+     * @return A {@link FilterReader} that tracks line and column numbers while characters are being read
+     * @see    LineUtil#lineAndColumnTracker()
+     */
+    public static Reader
+    trackLineAndColumn(Reader in, final LineAndColumnTracker tracker) {
+
+        return new FilterReader(in) {
+
+            @Override public int
+            read() throws IOException {
+                int c = super.read();
+                if (c >= 0) tracker.consume((char) c);
+                return c;
+            }
+
+            @Override @NotNullByDefault(false) public int
+            read(char[] cbuf, final int off, int len) throws IOException {
+                if (len <= 0) return 0;
+                int c = this.read();
+                if (c < 0) return -1;
+                cbuf[off] = (char) c;
+                return 1;
+            }
+
+            @Override public long
+            skip(final long n) throws IOException {
+                if (n <= 0) return 0;
+                int c = this.read();
+                if (c < 0) return 0;
+                return 1;
+            }
+
+            @Override public boolean markSupported()                             { return false; }
+            @Override public void    mark(int readAheadLimit) throws IOException { throw new IOException(); }
+            @Override public void    reset() throws IOException                  { throw new IOException(); }
         };
     }
 }
