@@ -39,6 +39,7 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import de.unkrig.commons.lang.protocol.Consumer;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
@@ -307,5 +308,109 @@ class LineUtil {
                 try { r.close(); } catch (Exception e) {}
             }
         }
+    }
+
+    /**
+     * Keeps track of "line numbers" and "column numbers" while it {@link #consume(char) consumes} a stream of {@code
+     * char}s.
+     */
+    public
+    interface LineAndColumnTracker {
+
+        /**
+         * The TAB width that takes effect initially.
+         */
+        int DEFAULT_TAB_WIDTH = 8;
+
+        /**
+         * Reconfigures the TAB width. Value {@code 1} will treat TAB characters just like any other (non-line-break)
+         * character. The initial TAB width is {@link #DEFAULT_TAB_WIDTH}.
+         */
+        void setTabWidth(int tabWidth);
+
+        /**
+         * Changes the tracker's state according to the given next character.
+         */
+        void consume(char c);
+
+        // SUPPRESS CHECKSTYLE JavadocMethod:4
+        int  getLineNumber();
+        void setLineNumber(int lineNumber);
+        int  getColumnNumber();
+        void setColumnNumber(int columnNumber);
+
+        /**
+         * Resets the tracker's state (line and column number), but not its configuration (TAB width).
+         */
+        void reset();
+    }
+
+    /**
+     * Creates a {@link LineAndColumnTracker} which implements line and column counting.
+     * <p>
+     *   Line breaks are identified as defined by the {@code \R} pattern of {@link Pattern}.
+     * </p>
+     * <p>
+     *   Initially, line number and column number are both 1. Line breaks increment the line and reset the column to 1.
+     *   TAB characters increase the column to the nearest multiple of the {@link LineAndColumnTracker#setTabWidth(int)
+     *   TAB width}. All other characters increment the column.
+     * </p>
+     */
+    public static LineAndColumnTracker
+    lineAndColumnTracker() {
+
+        return new LineAndColumnTracker() {
+
+            // Configuration.
+            private int tabWidth = LineAndColumnTracker.DEFAULT_TAB_WIDTH;
+
+            // State.
+            private int     line = 1, column = 1;
+            private boolean crPending;
+
+            @Override public void
+            consume(char c) {
+
+                if (this.crPending) {
+                    this.crPending = false;
+                    if (c == '\n') return; // Discard the '\n' after the '\r'.
+                }
+
+                switch (c) {
+                case '\r':     // "carriage-return character"
+                    this.line++;
+                    this.column    = 1;
+                    this.crPending = true;
+                    break;
+                case '\n':     // "new-line character"
+                case '\u0085': // "next-line character"
+                case '\u2028': // "line-separator character"
+                case '\u2029': // "paragraph-separator character"
+                    this.line++;
+                    this.column = 1;
+                    break;
+                case '\t':     // "TAB character"
+                    this.column = this.column - ((this.column - 1) % this.tabWidth) + this.tabWidth;
+                    break;
+                default:
+                    this.column++;
+                    break;
+                }
+            }
+
+            @Override public int  getLineNumber()                   { return this.line; }
+            @Override public void setLineNumber(int lineNumber)     { this.line = lineNumber; }
+            @Override public int  getColumnNumber()                 { return this.column; }
+            @Override public void setColumnNumber(int columnNumber) { this.column = columnNumber; }
+
+            @Override public void setTabWidth(int tabWidth) { this.tabWidth = tabWidth; }
+
+            @Override public void
+            reset() {
+                this.line      = 1;
+                this.column    = 1;
+                this.crPending = false;
+            }
+        };
     }
 }

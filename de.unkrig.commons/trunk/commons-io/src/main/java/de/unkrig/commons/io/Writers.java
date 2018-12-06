@@ -26,11 +26,13 @@
 
 package de.unkrig.commons.io;
 
+import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.Writer;
 
 import javax.swing.text.Segment;
 
+import de.unkrig.commons.io.LineUtil.LineAndColumnTracker;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 
 /**
@@ -73,6 +75,71 @@ class Writers {
             @Override public Writer append(char c)                               throws IOException { delegate.append(c);                    return this; }
             @Override public void   flush()                                                         {}
             @Override public void   close()                                                         {}
+        };
+    }
+
+    /**
+     * @return A {@link FilterWriter} that runs the <var>runnable</var> right before the first character is written
+     */
+    public static Writer
+    onFirstChar(Writer out, final Runnable runnable) {
+
+        return new FilterWriter(out) {
+
+            private boolean hadChars;
+
+            @Override public void
+            write(int c) throws IOException {
+                this.aboutToWrite();
+                super.write(c);
+            }
+
+            @Override @NotNullByDefault(false) public void
+            write(char[] cbuf, int off, int len) throws IOException {
+                this.aboutToWrite();
+                super.write(cbuf, off, len);
+            }
+
+            @Override @NotNullByDefault(false) public void
+            write(String str, int off, int len) throws IOException {
+                this.aboutToWrite();
+                super.write(str, off, len);
+            }
+
+            private void
+            aboutToWrite() {
+                if (!this.hadChars) {
+                    runnable.run();
+                    this.hadChars = true;
+                }
+            }
+        };
+    }
+
+    /**
+     * @return A {@link FilterWriter} that tracks line and column numbers while characters are written
+     * @see    LineUtil#lineAndColumnTracker()
+     */
+    public static Writer
+    trackLineAndColumn(Writer out, final LineAndColumnTracker tracker) {
+
+        return new FilterWriter(out) {
+
+            @Override public void
+            write(int c) throws IOException {
+                super.write(c);
+                tracker.consume((char) c);
+            }
+
+            @Override @NotNullByDefault(false) public void
+            write(char[] cbuf, int off, int len) throws IOException {
+                for (; len > 0; len--) this.write(cbuf[off++]);
+            }
+
+            @Override @NotNullByDefault(false) public void
+            write(String str, int off, int len) throws IOException {
+                for (; len > 0; len--) this.write(str.charAt(off++));
+            }
         };
     }
 }
