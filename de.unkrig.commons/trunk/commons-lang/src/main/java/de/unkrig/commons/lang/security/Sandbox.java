@@ -104,7 +104,7 @@ class Sandbox {
         }
         System.setSecurityManager(new SecurityManager() {
 
-            final Class me = this.getClass();
+            final Class<?> me = this.getClass();
 
             @Override public void
             checkPermission(@Nullable Permission perm) {
