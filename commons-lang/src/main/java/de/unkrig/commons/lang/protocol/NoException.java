@@ -26,6 +26,11 @@
 
 package de.unkrig.commons.lang.protocol;
 
+/**
+ * A non-instantiable exception that is useful to declare the various "protocol" interfaces ({@code Consumer}, {@code
+ * Function}, {@code Predicate}, {@code Producer}, {@code Transformer}, ...) to extend their {@code ...WhichThrows}
+ * sibling with {@link NoException} as the argument for the {@code <EX>} type parameter.
+ */
 public final
 class NoException extends RuntimeException {
     private static final long serialVersionUID = 1L;

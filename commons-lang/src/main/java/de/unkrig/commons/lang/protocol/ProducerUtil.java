@@ -405,6 +405,9 @@ class ProducerUtil {
         };
     }
 
+    /**
+     * Wraps the <var>delegate</var> such that products that do not qualify for the <var>predicate</var> are skipped.
+     */
     public static <T, EX extends Throwable> ProducerWhichThrows<T, EX>
     filter(
         final ProducerWhichThrows<? extends T, ? extends EX> delegate,
@@ -998,8 +1001,15 @@ class ProducerUtil {
         };
     }
 
+    /**
+     * An optimized producer that produces an infinite sequence of primitive {@code boolean}s.
+     */
     public
     interface BooleanProducer {
+
+        /**
+         * Produces the next {@code boolean} value.
+         */
         boolean produce();
     }
 
