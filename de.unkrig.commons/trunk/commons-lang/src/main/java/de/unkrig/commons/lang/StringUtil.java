@@ -434,9 +434,9 @@ class StringUtil {
         }
     }
 
-    public abstract static
+    private abstract static
     class AbstractIndexOf implements IndexOf {
-        @Override public int indexOf(CharSequence haystack)                   { return this.indexOf(haystack, 0, Integer.MAX_VALUE);        } // SUPPRESS CHECKSTYLE LineLength:3
+        @Override public int indexOf(CharSequence haystack)                   { return this.indexOf(haystack, 0, Integer.MAX_VALUE);        } // SUPPRESS CHECKSTYLE LineLength|Align:3
         @Override public int indexOf(CharSequence haystack, int minIndex)     { return this.indexOf(haystack, minIndex, Integer.MAX_VALUE); }
         @Override public int lastIndexOf(CharSequence haystack)               { return this.lastIndexOf(haystack, 0, Integer.MAX_VALUE);    }
         @Override public int lastIndexOf(CharSequence haystack, int maxIndex) { return this.lastIndexOf(haystack, 0, maxIndex);             }
