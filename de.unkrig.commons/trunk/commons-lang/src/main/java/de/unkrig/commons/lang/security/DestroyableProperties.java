@@ -28,6 +28,7 @@ package de.unkrig.commons.lang.security;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.security.auth.Destroyable;
@@ -44,25 +45,58 @@ import de.unkrig.commons.nullanalysis.Nullable;
 public
 interface DestroyableProperties extends Destroyable {
 
+    /**
+     * @see Properties#setProperty(String, String)
+     */
     void setProperty(String key, char[] value);
 
+    /**
+     * @see Properties#getProperty(String)
+     */
     @Nullable char[] getProperty(String key);
 
+    /**
+     * @see Properties#getProperty(String, String)
+     */
     Set<String> propertyNames();
 
+    /**
+     * @see Properties#size()
+     */
     int size();
 
+    /**
+     * @see Properties#isEmpty()
+     */
     boolean isEmpty();
 
+    /**
+     * @see Properties#containsKey(Object)
+     */
     boolean containsName(String name);
 
+    /**
+     * @see Properties#put(Object, Object)
+     */
     void put(String name, CharSequence value);
 
+    /**
+     * @see Properties#remove(Object)
+     */
     void removeProperty(String name);
 
+    /**
+     * @see Properties#putAll(Map)
+     */
     void putAll(Map<? extends String, ? extends CharSequence> t);
 
+    /**
+     * @see Properties#clear()
+     */
     void clear();
 
+    /**
+     * Stores these properties somewhere.
+     */
     void store() throws IOException;
 }
