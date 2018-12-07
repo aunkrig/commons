@@ -41,6 +41,9 @@ class ClassWithAssertionsEnabled {
 
     private boolean result;
 
+    /**
+     * @return Whether assertions are enabled for this CU.
+     */
     public static boolean
     isAssertionsEnabled() {
         ClassWithAssertionsEnabled cwane = new ClassWithAssertionsEnabled();
