@@ -249,6 +249,10 @@ class Characters {
         }
     };
 
+    /**
+     * @return A predicate-of-int that implements the given "simple java character type".
+     * @see    Pattern
+     */
     @Nullable public static Predicate<Integer>
     javaCharacterClassFromName(String name) {
         return (
@@ -340,6 +344,10 @@ class Characters {
         @Override public boolean evaluate(Integer subject) { return Characters.isHorizontalWhitespace(subject); }
     };
 
+    /**
+     * @return Whether the given <var>codePoint</var> is a "horizontal whitespace character" (which matches pattern
+     *         {@code "\h"})
+     */
     public static boolean
     isHorizontalWhitespace(int codePoint) {
         return (
@@ -435,6 +443,11 @@ class Characters {
         NoException.class // checkedException
     );
 
+    /**
+     * A predicate that implements the "ideographic" Unicode binary property.
+     *
+     * @see Pattern
+     */
     public static final Predicate<Integer>
     IS_UNICODE_IDEOGRAPHIC = new IntegerPredicate("unicodeIdeographic") {
 
@@ -450,6 +463,11 @@ class Characters {
         NoException.class // checkedException
     );
 
+    /**
+     * A predicate that implements the "White_space" Unicode binary property.
+     *
+     * @see Pattern
+     */
     public static final Predicate<Integer>
     IS_UNICODE_WHITE_SPACE = new IntegerPredicate("unicodeWhiteSpace") {
 
@@ -471,9 +489,19 @@ class Characters {
         toString() { return "unicodeWhiteSpace"; }
     };
 
+    /**
+     * A predicate that implements the Unicode "control character" class.
+     *
+     * @see Pattern
+     */
     public static final Predicate<Integer>
     IS_UNICODE_CNTRL = Characters.unicodeGeneralCategoryPredicate("unicodeCntrl", Character.CONTROL);
 
+    /**
+     * A predicate that implements the Unicode "punctuation character" class.
+     *
+     * @see Pattern
+     */
     public static final Predicate<Integer>
     IS_UNICODE_PUNCT = new IntegerPredicate("unicodePunct") {
 
@@ -495,6 +523,11 @@ class Characters {
         }
     };
 
+    /**
+     * A predicate that implements the Unicode "hexadecimal digit" class.
+     *
+     * @see Pattern
+     */
     public static final Predicate<Integer>
     IS_UNICODE_HEX_DIGIT = new IntegerPredicate("unicodeHexDigit") {
 
@@ -515,6 +548,11 @@ class Characters {
         }
     };
 
+    /**
+     * A predicate that implements the Unicode "Assigned" binary property.
+     *
+     * @see Pattern
+     */
     public static final Predicate<Integer>
     IS_UNICODE_ASSIGNED = new IntegerPredicate("unicodeAssigned") {
 
@@ -522,6 +560,11 @@ class Characters {
         evaluate(Integer subject) { return Character.getType(subject) != Character.UNASSIGNED; }
     };
 
+    /**
+     * A predicate that implements the Unicode "Noncharacter_Code_Point" binary property.
+     *
+     * @see Pattern
+     */
     public static final Predicate<Integer>
     IS_UNICODE_NONCHARACTER = new IntegerPredicate("unicodeNoncharacter") {
 
@@ -532,11 +575,21 @@ class Characters {
         }
     };
 
+    /**
+     * A predicate that implements the Unicode "Digit" binary property.
+     *
+     * @see Pattern
+     */
     public static final Predicate<Integer>
     IS_UNICODE_DIGIT = new IntegerPredicate("unicodeDigit") {
         @Override public boolean evaluate(Integer subject) { return Character.isDigit(subject); }
     };
 
+    /**
+     * A predicate that implements the Unicode "alphanumeric character" character class.
+     *
+     * @see Pattern
+     */
     public static final Predicate<Integer>
     IS_UNICODE_ALNUM = new IntegerPredicate("unicodeAlnum") {
 
@@ -547,6 +600,11 @@ class Characters {
         }
     };
 
+    /**
+     * A predicate that implements the Unicode "space or tab" character class.
+     *
+     * @see Pattern
+     */
     public static final Predicate<Integer>
     IS_UNICODE_BLANK = new IntegerPredicate("unicodeBlank") {
 
@@ -557,6 +615,11 @@ class Characters {
         }
     };
 
+    /**
+     * A predicate that implements the Unicode "Graph" character class.
+     *
+     * @see Pattern
+     */
     public static final Predicate<Integer>
     IS_UNICODE_GRAPH = new IntegerPredicate("unicodeGraph") {
 
@@ -577,6 +640,11 @@ class Characters {
         }
     };
 
+    /**
+     * A predicate that implements the Unicode "Print" character class.
+     *
+     * @see Pattern
+     */
     public static final Predicate<Integer>
     IS_UNICODE_PRINT = new IntegerPredicate("unicodePrint") {
 
@@ -592,11 +660,21 @@ class Characters {
         }
     };
 
+    /**
+     * A predicate that implements the Unicode "word character" class.
+     *
+     * @see Pattern
+     */
     public static final Predicate<Integer>
     IS_UNICODE_WORD = new IntegerPredicate("unicodeWord") {
         @Override public boolean evaluate(Integer subject) { return Characters.isUnicodeWord(subject); }
     };
 
+    /**
+     * A predicate that implements the Unicode "Join_Control" character class.
+     *
+     * @see Pattern
+     */
     public static final Predicate<Integer>
     IS_UNICODE_JOIN_CONTROL = new IntegerPredicate("unicodeJoinControl") {
 
@@ -607,6 +685,10 @@ class Characters {
         }
     };
 
+    /**
+     * A predicate that implements the union of the "non-spacing mark", "enclosing mark" and "combining spacing mark"
+     * general categories.
+     */
     public static final Predicate<Integer>
     IS_UNICODE_MARK = Characters.unicodeGeneralCategoryPredicate(
         "unicodeMark",
@@ -615,6 +697,10 @@ class Characters {
         Character.COMBINING_SPACING_MARK
     );
 
+    /**
+     * A predicate that implements the union of the "decimal digit number", "letter number" and "other number" general
+     * categories.
+     */
     public static final Predicate<Integer>
     IS_UNICODE_NUMBER = Characters.unicodeGeneralCategoryPredicate(
         "unicodeNumber",
@@ -623,6 +709,10 @@ class Characters {
         Character.OTHER_NUMBER
     );
 
+    /**
+     * A predicate that implements the union of the "space separator", "line separator" and "paragraph separator"
+     * general categories.
+     */
     public static final Predicate<Integer>
     IS_UNICODE_SEPARATOR = Characters.unicodeGeneralCategoryPredicate(
         "unicodeSeparator",
@@ -631,6 +721,10 @@ class Characters {
         Character.PARAGRAPH_SEPARATOR
     );
 
+    /**
+     * A predicate that implements the union of the "control", "format", "private use" and "surrogate" general
+     * categories.
+     */
     public static final Predicate<Integer>
     IS_UNICODE_SPECIAL = Characters.unicodeGeneralCategoryPredicate(
         "unicodeSpecial",
@@ -640,6 +734,10 @@ class Characters {
         Character.SURROGATE
     );
 
+    /**
+     * A predicate that implements the union of the "math symbol", "currency symbol", "modifier symbol" and "other
+     * symbol" general categories.
+     */
     public static final Predicate<Integer>
     IS_UNICODE_SYMBOL = Characters.unicodeGeneralCategoryPredicate(
         "unicodeSymbol",
@@ -649,6 +747,12 @@ class Characters {
         Character.OTHER_SYMBOL
     );
 
+    /**
+     * A predicate that implements the union of the "uppercase letter", "lowercase letter" and "titlecase letter"
+     * binary Unicode property.
+     *
+     * @see Pattern
+     */
     public static final Predicate<Integer>
     IS_UNICODE_UPPER_LOWER_TITLE = Characters.unicodeGeneralCategoryPredicate(
         "unicodeUpperLowerTitle",
@@ -657,6 +761,12 @@ class Characters {
         Character.TITLECASE_LETTER
     );
 
+    /**
+     * A predicate that implements the union of the "uppercase letter", "lowercase letter", "titlecase letter",
+     * "modifier letter", "other letter" and "decimal digit number" Unicode character classes.
+     *
+     * @see Pattern
+     */
     public static final Predicate<Integer>
     IS_UNICODE_ALPHA2 = Characters.unicodeGeneralCategoryPredicate(
         "unicodeAlpha2",
@@ -668,6 +778,9 @@ class Characters {
         Character.DECIMAL_DIGIT_NUMBER
     );
 
+    /**
+     * A predicate for the ISO Latin 1 character range (0...255).
+     */
     public static final Predicate<Integer>
     IS_UNICODE_LATIN1 = Characters.rangePredicate("unicodeAlpha2", 0, 0xff);
 
@@ -782,6 +895,11 @@ class Characters {
         UNICODE_CATEGORIES = Collections.unmodifiableMap(m);
     }
 
+    /**
+     * A predicate that implements the named "Unicode binary property".
+     *
+     * @see Pattern
+     */
     @Nullable public static Predicate<Integer>
     unicodeBinaryPropertyFromName(String name) {
         return Characters.UNICODE_PROPERTIES.get(name.toUpperCase(Locale.US));
@@ -872,6 +990,10 @@ class Characters {
         };
     }
 
+    /**
+     * @return A predicate that implements the named "Unicode predefined character class"
+     * @see    Pattern
+     */
     @Nullable public static Predicate<Integer>
     unicodePredefinedCharacterClassFromName(String name) {
         return Characters.UNICODE_PREDEFINED_CHARACTER_CLASSES.get(name.toUpperCase(Locale.US));
@@ -897,6 +1019,10 @@ class Characters {
         UNICODE_PREDEFINED_CHARACTER_CLASSES = Collections.unmodifiableMap(m);
     }
 
+    /**
+     * @return A predicate that implements the named "POSIX character class"
+     * @see    Pattern
+     */
     @Nullable public static Predicate<Integer>
     posixCharacterClassFromName(String name) {
         return Characters.POSIX_CHARACTER_CLASSES.get(name.toUpperCase(Locale.US));
@@ -922,6 +1048,10 @@ class Characters {
         POSIX_CHARACTER_CLASSES = Collections.unmodifiableMap(m);
     }
 
+    /**
+     * @return A predicate that implements the named "Unicode block"
+     * @see    Pattern
+     */
     @Nullable public static Predicate<Integer>
     unicodeBlockFromName(String name) {
 
@@ -938,7 +1068,7 @@ class Characters {
         };
     }
 
-    static final MethodWrapper1<?, Object, String, NoException>
+    private static final MethodWrapper1<?, Object, String, NoException>
     UNICODE_SCRIPT_FOR_NAME = OptionalMethods.get1(
         null,                                // classLoader
         "java.lang.Character$UnicodeScript", // declaringClassName
@@ -946,7 +1076,7 @@ class Characters {
         String.class,                        // parameterType
         null                                 // checkedException
     );
-    static final MethodWrapper1<?, Object, Integer, NoException>
+    private static final MethodWrapper1<?, Object, Integer, NoException>
     UNICODE_SCRIPT_OF = OptionalMethods.get1(
         null,                                // classLoader
         "java.lang.Character$UnicodeScript", // declaringClassName
@@ -954,22 +1084,22 @@ class Characters {
         int.class,                           // parameterType
         null                                 // checkedException
     );
-    static final boolean
+    private static final boolean
     UNICODE_SCRIPT_AVAILABLE = (
         Characters.UNICODE_SCRIPT_FOR_NAME.isAvailable()
         && Characters.UNICODE_SCRIPT_OF.isAvailable()
     );
 
     /**
-     * @return Whether this JRE supports unicode scripts (because it is 1.7 or later)
+     * @return Whether this JRE supports Unicode scripts (because it is 1.7 or later)
      */
     public static boolean
     unicodeScriptAvailable() { return Characters.UNICODE_SCRIPT_AVAILABLE; }
 
     /**
      * @return                               A predicate that tests if a given code point is in the named script;
-     *                                       {@code null} iff a UNICODE script with the <var>name</name> is unknown
-     * @throws UnsupportedOperationException This JRE does not support unicode scripts (because it is pre-1.7)
+     *                                       {@code null} iff a Unicode script with the <var>name</name> is unknown
+     * @throws UnsupportedOperationException This JRE does not support Unicode scripts (because it is pre-1.7)
      * @see                                  #unicodeScriptAvailable()
      */
     @Nullable public static Predicate<Integer>
