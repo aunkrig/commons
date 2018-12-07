@@ -34,6 +34,9 @@ import java.security.NoSuchAlgorithmException;
 
 import de.unkrig.commons.lang.AssertionUtil;
 
+/**
+ * Helper methods for the "MD5" {@link MessageDigest}.
+ */
 public final
 class MD5 {
 
