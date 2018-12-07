@@ -41,6 +41,9 @@ import java.util.jar.JarFile;
 
 import de.unkrig.commons.nullanalysis.Nullable;
 
+/**
+ * Helper methods related to class loaders.
+ */
 public final
 class ClassLoaders {
 
