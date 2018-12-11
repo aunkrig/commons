@@ -114,7 +114,7 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
      *</p>
      * <p>
      *   The <var>backlog</var> argument must be a positive value greater than 0. If the value passed if equal or less
-     *   than 0, then the default value will be assumed.
+     *   than 0, then the default value (as of Java 6, 7 and 8: 50) will be assumed.
      * </p>
      *
      * @param endpoint                The {@link InetAddress} and local port the server will bind to; {@link
