@@ -29,6 +29,7 @@ package de.unkrig.commons.io;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -135,6 +136,10 @@ class WriterOutputStream extends OutputStream {
         if (this.out.position() == 0) return;
 
         this.delegate.write(this.out.array(), 0, this.out.position());
-        this.out.rewind();
+
+        // Java 9 added "@Override public final CharBuffer CharBuffer.rewind() { ..." -- leads easily to a
+        //     java.lang.NoSuchMethodError: java.nio.CharBuffer.rewind()Ljava/nio/CharBuffer;
+        // Cast to "Buffer" is the workaround:
+        ((Buffer) this.out).rewind();
     }
 }
