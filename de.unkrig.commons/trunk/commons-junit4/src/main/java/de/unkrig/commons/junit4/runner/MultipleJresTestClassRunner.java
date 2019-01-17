@@ -26,6 +26,8 @@
 
 package de.unkrig.commons.junit4.runner;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,8 +35,10 @@ import org.junit.runner.Description;
 import org.junit.runner.Runner;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
+import org.junit.runners.model.InitializationError;
 
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
+import de.unkrig.commons.nullanalysis.Nullable;
 
 public
 class MultipleJresTestClassRunner extends ParentRunner<Runner> {
@@ -46,7 +50,7 @@ class MultipleJresTestClassRunner extends ParentRunner<Runner> {
     public static final String JAVA10_HOME = "c:/Program Files/Java/jdk-10.0.2";
     public static final String JAVA11_HOME = "c:/Program Files/Java/jdk-11.0.1";
 
-    public static final String[] JAVA_HOMES = {
+    private String[] javaHomes = {
         JAVA6_HOME,
         JAVA7_HOME,
         JAVA8_HOME,
@@ -56,7 +60,14 @@ class MultipleJresTestClassRunner extends ParentRunner<Runner> {
     };
     
     public
-    MultipleJresTestClassRunner(Class<?> clasS) throws Exception { super(clasS); }
+    MultipleJresTestClassRunner(Class<?> clasS) throws Exception {
+        super(clasS);
+        
+        JavaHomes javaHomes = clasS.getAnnotation(JavaHomes.class);
+        if (javaHomes != null) {
+            this.javaHomes = javaHomes.value();
+        }
+    }
 
     @Override @NotNullByDefault(false) protected void
     runChild(final Runner child, final RunNotifier notifier) {
@@ -65,15 +76,53 @@ class MultipleJresTestClassRunner extends ParentRunner<Runner> {
 
     @Override protected List<Runner>
     getChildren() {
+        
+        Class<?>        clasS   = this.getTestClass().getJavaClass();
+        ParentRunner<?> runWith = null;
         try {
+            
+            TestClass testClassAnnotation = clasS.getAnnotation(TestClass.class);
+            if (testClassAnnotation != null) {
+                
+                clasS = testClassAnnotation.value();
+                
+                Class<? extends ParentRunner<?>> runWithClass = testClassAnnotation.runWith();
+                if (runWithClass != null) {
+                    runWith = runWithClass.getConstructor(Class.class).newInstance(clasS);
+                }
+            }
+
             List<Runner> result = new ArrayList<Runner>();
-            for (String javaHome : JAVA_HOMES) {
-                result.add(new JreTestClassRunner(this.getTestClass().getJavaClass(), javaHome));
+            for (String javaHome : this.javaHomes) {
+                result.add(new JreTestClassRunner(clasS, runWith, javaHome));
             }
             return result;
         } catch (Exception e) {
-            throw new AssertionError(e);
+            throw newAssertionError("clasS=" + clasS.getName() + ", runWith=" + runWith, e);
         }
+    }
+    
+    public static AssertionError
+    newAssertionError(@Nullable Throwable t) { return newAssertionError(null, t); }
+
+    public static AssertionError
+    newAssertionError(@Nullable String message, @Nullable Throwable t) {
+
+        if (t instanceof InitializationError) {
+            InitializationError ie = (InitializationError) t;
+            
+            StringWriter sw = new StringWriter();
+            PrintWriter  pw = new PrintWriter(sw);
+            pw.println("Causes are:");
+            for (Throwable cause : ie.getCauses()) cause.printStackTrace(pw);
+            pw.flush();
+
+            t = new Exception(sw.toString(), t);
+        }
+        
+        AssertionError ae = new AssertionError(message);
+        ae.initCause(t);
+        return ae;
     }
 
     @Override @NotNullByDefault(false) protected Description

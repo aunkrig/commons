@@ -24,29 +24,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package de.unkrig.commons.junit4.runner.test;
+package de.unkrig.commons.junit4.runner;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import de.unkrig.commons.junit4.runner.JavaHomes;
-import de.unkrig.commons.junit4.runner.MultipleJresTestClassRunner;
+import org.junit.runners.ParentRunner;
 
-@RunWith(MultipleJresTestClassRunner.class)
-@JavaHomes({
-    "c:/Program Files/Java/jdk1.6.0_43",
-    "c:/Program Files/Java/jdk1.7.0_17",
-    "c:/Program Files/Java/jdk1.8.0_192",
-    "c:/Program Files/Java/jdk-9.0.4",
-    "c:/Program Files/Java/jdk-10.0.2",
-    "c:/Program Files/Java/jdk-11.0.1",
-})
-public
-class MultipleJresTestClassRunnerTest {
+import de.unkrig.commons.nullanalysis.Nullable;
 
-    @Test public void
-    test1() {
-        Assert.assertEquals("11", System.getProperty("java.specification.version"));
-    }
+@Retention(RetentionPolicy.RUNTIME) @Target(ElementType.TYPE) @Inherited public
+@interface TestClass {
+
+    Class<?>                                   value();
+    @Nullable Class<? extends ParentRunner<?>> runWith();
 }

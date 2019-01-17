@@ -28,26 +28,29 @@ package de.unkrig.commons.junit4.runner;
 
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.runner.Description;
+import org.junit.runner.Runner;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
-import org.junit.runners.model.FrameworkMethod;
 
 import de.unkrig.commons.junit4.runner.internal.RemoteTestClassRunner;
 import de.unkrig.commons.junit4.runner.internal.RemoteTestClassRunnerClient;
-import de.unkrig.commons.junit4.runner.internal.RemoteTestClassRunner.FrameworkMethodDto;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
+import de.unkrig.commons.nullanalysis.Nullable;
 
 public
-class PipeTestClassRunner extends ParentRunner<FrameworkMethod> {
+class PipeTestClassRunner extends ParentRunner<Runner> {
 
-    private RemoteTestClassRunner<FrameworkMethodDto> delegate;
+    private RemoteTestClassRunner delegate;
     
     public
-    PipeTestClassRunner(Class<?> clasS) throws Exception {
+    PipeTestClassRunner(Class<?> clasS) throws Exception { this(clasS, null); }
+    
+    public
+    PipeTestClassRunner(Class<?> clasS, @Nullable Runner runner) throws Exception {
         super(clasS);
         
         final PipedOutputStream toSlave    = new PipedOutputStream();
@@ -63,7 +66,7 @@ class PipeTestClassRunner extends ParentRunner<FrameworkMethod> {
             @Override public void
             run() {
                 try {
-                    RemoteTestClassRunnerClient.run(fromMaster, toMaster, "(piped)");
+                    RemoteTestClassRunnerClient.run(fromMaster, toMaster);
                 } catch (Exception e) {
                     throw new AssertionError(e);
                 }
@@ -71,24 +74,29 @@ class PipeTestClassRunner extends ParentRunner<FrameworkMethod> {
             
         }.start();
         
-        this.delegate = new RemoteTestClassRunner<FrameworkMethodDto>(clasS, toSlave, fromSlave);
+        this.delegate = new RemoteTestClassRunner(
+            clasS,
+            runner,
+            "(piped)", // nameSuffix
+            toSlave,
+            fromSlave
+        );
     }
 
     @Override @NotNullByDefault(false) protected void
-    runChild(final FrameworkMethod child, final RunNotifier notifier) {
-        this.delegate.runChild(new FrameworkMethodDto(child), notifier);
+    runChild(final Runner child, final RunNotifier notifier) {
+        assert child == this.delegate;
+        child.run(notifier);
     }
 
-    @Override protected List<FrameworkMethod>
+    @Override protected List<Runner>
     getChildren() {
-        List<FrameworkMethodDto> sfms   = this.delegate.getChildren();
-        List<FrameworkMethod>    result = new ArrayList<FrameworkMethod>(sfms.size());
-        for (FrameworkMethodDto sfm : sfms) result.add(sfm.toFrameworkMethod());
-        return result;
+        return Collections.<Runner>singletonList(this.delegate);
     }
     
     @Override @NotNullByDefault(false) protected Description
-    describeChild(FrameworkMethod child) {
-        return this.delegate.describeChild(new FrameworkMethodDto(child));
+    describeChild(Runner child) {
+        assert child == this.delegate;
+        return child.getDescription();
     }
 }
