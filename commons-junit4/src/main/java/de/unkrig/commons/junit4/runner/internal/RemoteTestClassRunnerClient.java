@@ -30,20 +30,21 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 
 import org.junit.runner.Description;
+import org.junit.runner.Result;
+import org.junit.runner.Runner;
+import org.junit.runner.notification.Failure;
+import org.junit.runner.notification.RunListener;
 import org.junit.runner.notification.RunNotifier;
-import org.junit.runners.BlockJUnit4ClassRunner;
-import org.junit.runners.model.FrameworkMethod;
+import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
 
-import de.unkrig.commons.junit4.runner.internal.RemoteTestClassRunner.BackCaller;
-import de.unkrig.commons.junit4.runner.internal.RemoteTestClassRunner.BackCallingFunction;
-import de.unkrig.commons.junit4.runner.internal.RemoteTestClassRunner.ParentRunnerInterface;
-import de.unkrig.commons.junit4.runner.internal.RemoteTestClassRunner.FrameworkMethodDto;
-import de.unkrig.commons.junit4.runner.internal.RemoteTestClassRunner.FunctionDto;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 
 public final
@@ -54,17 +55,17 @@ class RemoteTestClassRunnerClient {
     public static void
     main(String[] args) throws Exception {
         
-        RemoteTestClassRunnerClient.run(System.in, System.out, args.length == 1 ? args[0] : "");
+        RemoteTestClassRunnerClient.run(System.in, System.out);
     }
     
     public static void
-    run(InputStream fromMaster, OutputStream toMaster, String nameSuffix) throws Exception {
+    run(InputStream fromMaster, OutputStream toMaster) throws Exception {
         
         ObjectInputStream  ois = new ObjectInputStream(fromMaster);
         ObjectOutputStream oos = new ObjectOutputStream(toMaster);
         
         try {
-            run(ois, oos, nameSuffix);
+            run(ois, oos);
         } catch (Exception e) {
             oos.writeObject(e);
         }
@@ -73,73 +74,98 @@ class RemoteTestClassRunnerClient {
     }
         
     public static void
-    run(final ObjectInputStream ois, final ObjectOutputStream oos, final String nameSuffix) throws Exception {
+    run(final ObjectInputStream ois, final ObjectOutputStream oos) throws Exception {
         
-        String   testClassName = (String) ois.readObject();
-        Class<?> clasS         = ClassLoader.getSystemClassLoader().loadClass(testClassName);
+        String       testClassName   = (String) ois.readObject();
+        String       runnerClassName = (String) ois.readObject();
+        final String nameSuffix      = (String) ois.readObject();
         
-        @NotNullByDefault(false)
-        class BlockJUnit4ClassRunner2 extends BlockJUnit4ClassRunner {
+        ClassLoader scl = ClassLoader.getSystemClassLoader();
 
-            @SuppressWarnings("unused") private static final long serialVersionUID = 1L;
+        Class<?> clasS = scl.loadClass(testClassName);
 
-            BlockJUnit4ClassRunner2(Class<?> clasS) throws InitializationError { super(clasS); }
-
-            // SUPPRESS CHECKSTYLE LineLength:3
-            @Override public List<FrameworkMethod> getChildren()                                                      { return super.getChildren();        }
-            @Override public Description           describeChild(FrameworkMethod child)                               { return super.describeChild(child); }
-            @Override public void                  runChild(FrameworkMethod child, RunNotifier notifier)              { super.runChild(child, notifier);   }
-
-            @Override protected String
-            testName(FrameworkMethod method) {
-                return super.testName(method) + nameSuffix;
+        Runner runner;
+        try {
+            try {
+                runner = (ParentRunner<?>) (
+                    scl
+                    .loadClass(runnerClassName)
+                    .getConstructor(Class.class)
+                    .newInstance(clasS)
+                );
+            } catch (InvocationTargetException ite) {
+                Throwable tt = ite.getTargetException();
+                if (tt instanceof Exception) throw (Exception) tt;
+                throw ite;
             }
+        } catch (InitializationError ie) {
+            StringWriter sw = new StringWriter();
+            PrintWriter  pw = new PrintWriter(sw);
+            pw.println("clasS=" + clasS.getName());
+            pw.println("Causes are:");
+            for (Throwable cause : ie.getCauses()) cause.printStackTrace(pw);
+            pw.flush();
+            throw new Exception(sw.toString(), ie);
+        } catch (Exception e) {
+            throw new Exception("clasS=" + clasS.getName(), e);
         }
 
-        final BlockJUnit4ClassRunner2 bju4cr2 = new BlockJUnit4ClassRunner2(clasS);
-        
-        ParentRunnerInterface<FrameworkMethodDto>
-        pri = new ParentRunnerInterface<FrameworkMethodDto>() {
+        @NotNullByDefault(false)
+        class MyRunListener extends RunListener {
+
+            // SUPPRESS CHECKSTYLE LineLength:7
+            @Override public void testRunStarted(Description description) throws Exception { this.callBack("fireTestRunStarted",  Description.class, fixDescription(description)); }
+            @Override public void testRunFinished(Result result)          throws Exception { this.callBack("fireTestRunFinished", Result.class,      result);                      }
+            @Override public void testStarted(Description description)    throws Exception { this.callBack("fireTestStarted",     Description.class, fixDescription(description)); }
+            @Override public void testFinished(Description description)   throws Exception { this.callBack("fireTestFinished",    Description.class, fixDescription(description)); }
+            @Override public void testFailure(Failure failure)            throws Exception { this.callBack("fireTestFailure",     Failure.class,     fixFailure(failure));         }
+            @Override public void testIgnored(Description description)    throws Exception { this.callBack("fireTestIgnored",     Description.class, fixDescription(description)); }
+
+            private Failure
+            fixFailure(Failure failure) {
+                return new Failure(fixDescription(failure.getDescription()), failure.getException());
+            }
             
-            private static final long serialVersionUID = 1L;
+            private Description
+            fixDescription(Description desc) {
 
-            // SUPPRESS CHECKSTYLE LineLength:3
-            @Override public List<FrameworkMethodDto> getChildren()                                             { return toSfmList(bju4cr2.getChildren());                  }
-            @Override public Description              describeChild(FrameworkMethodDto method)                  { return bju4cr2.describeChild(method.toFrameworkMethod()); }
-            @Override public void                     runChild(FrameworkMethodDto method, RunNotifier notifier) { bju4cr2.runChild(method.toFrameworkMethod(), notifier);   }
+                Collection<Annotation> ac = desc.getAnnotations();
 
-            private List<FrameworkMethodDto>
-            toSfmList(List<FrameworkMethod> fmList) {
-                List<FrameworkMethodDto> result = new ArrayList<FrameworkMethodDto>(fmList.size());
-                for (FrameworkMethod fm : fmList) result.add(new FrameworkMethodDto(fm));
+                Description result = Description.createSuiteDescription(
+                    desc.getDisplayName() + nameSuffix,                       // name
+                    desc.getDisplayName() + nameSuffix,                       // uniqueId
+                    ac == null ? null : ac.toArray(new Annotation[ac.size()]) // annotations
+                );
+                
                 return result;
             }
-        };
+            @Override public void
+            testAssumptionFailure(Failure failure) {
+                try {
+                    this.callBack("fireTestAssumptionFailure", Failure.class, failure);
+                } catch (Exception e) {
+                    throw new AssertionError(e);
+                }
+            }
+
+            private void
+            callBack(String methodName, Class<?> parameterType, Object argument) throws Exception {
+                oos.writeObject(methodName);
+                oos.writeObject(new Class<?>[] { parameterType });
+                oos.writeObject(new Object[]   { argument      });
+                oos.flush();
+            }
+        }
+        RunNotifier runNotifier = new RunNotifier();
+        runNotifier.addListener(new MyRunListener());
+
         for (;;) {
             
-            @SuppressWarnings("unchecked") FunctionDto<ParentRunnerInterface<FrameworkMethodDto>, ?>
-            function = (FunctionDto<ParentRunnerInterface<FrameworkMethodDto>, ?>) ois.readObject();
-            
-            if (function instanceof BackCallingFunction) {
-                ((BackCallingFunction<?, ?>) function).setBackCaller(
-                    new BackCaller() {
-                        private static final long serialVersionUID = 1L;
+            ois.readObject(); // Wait until the Runner is run.
 
-                        @Override public Object
-                        callBack(String methodName, Class<?>[] parameterTypes, Object[] arguments) throws Exception {
-                            oos.writeObject(methodName);
-                            oos.writeObject(parameterTypes);
-                            oos.writeObject(arguments);
-                            oos.flush();
-                            return ois.readObject();
-                        }
-                    }
-                );
-            }
-            Object result = function.apply(pri);
+            runner.run(runNotifier);
             
             oos.writeObject(null);
-            oos.writeObject(result);
             oos.flush();
         }
     }

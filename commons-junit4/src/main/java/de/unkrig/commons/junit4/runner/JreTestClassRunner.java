@@ -26,36 +26,37 @@
 
 package de.unkrig.commons.junit4.runner;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.runner.Description;
+import org.junit.runner.Runner;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
-import org.junit.runners.model.FrameworkMethod;
 
 import de.unkrig.commons.junit4.runner.internal.RemoteTestClassRunner;
 import de.unkrig.commons.junit4.runner.internal.RemoteTestClassRunnerClient;
-import de.unkrig.commons.junit4.runner.internal.RemoteTestClassRunner.FrameworkMethodDto;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
+import de.unkrig.commons.nullanalysis.Nullable;
 
 public
-class JreTestClassRunner extends ParentRunner<FrameworkMethod> {
+class JreTestClassRunner extends ParentRunner<Runner> {
 
-    private final RemoteTestClassRunner<FrameworkMethodDto> delegate;
-    private final String                                    name;
+    private final ParentRunner<?> delegate;
+    private final String          name;
     
     public
     JreTestClassRunner(Class<?> clasS) throws Exception {
-        this(clasS, clasS.getAnnotation(JavaHome.class).value()/*"c:/Program Files/Java/jdk-11.0.1"*/);
+        this(clasS, null, clasS.getAnnotation(JavaHome.class).value()/*"c:/Program Files/Java/jdk-11.0.1"*/);
     }
 
     public
-    JreTestClassRunner(Class<?> clasS, String javaHome) throws Exception {
+    JreTestClassRunner(Class<?> clasS, @Nullable ParentRunner<?> runWith, String javaHome) throws Exception {
         super(clasS);
-        
         String classpath = System.getProperty("java.class.path");
         assert classpath != null;
+        
+        this.name = "[JAVA_HOME=" + javaHome + "]";
         
         ProcessBuilder pb = new ProcessBuilder(
             javaHome + "/bin/java.exe",
@@ -67,35 +68,32 @@ class JreTestClassRunner extends ParentRunner<FrameworkMethod> {
 
         Process p = pb.start();
         
-        this.delegate = new RemoteTestClassRunner<FrameworkMethodDto>(
-            clasS,
+        this.delegate = new RemoteTestClassRunner(
+            clasS,               // clasS
+            runWith,             // delegate
+            this.name,           // nameSuffix
             p.getOutputStream(), // toSlave
             p.getInputStream()   // fromSlave
         );
-        
-        this.name = "[JAVA_HOME=" + javaHome + "]";
     }
 
     @Override protected String
     getName() { return this.name; }
 
-    @Override @NotNullByDefault(false) protected void
-    runChild(final FrameworkMethod child, final RunNotifier notifier) {
-        this.delegate.runChild(new FrameworkMethodDto(child), notifier);
-    }
-
-    @Override protected List<FrameworkMethod>
-    getChildren() {
-        
-        List<FrameworkMethodDto> sfms = this.delegate.getChildren();
-
-        List<FrameworkMethod> result = new ArrayList<FrameworkMethod>(sfms.size());
-        for (FrameworkMethodDto sfm : sfms) result.add(sfm.toFrameworkMethod());
-        return result;
-    }
-    
     @Override @NotNullByDefault(false) protected Description
-    describeChild(FrameworkMethod child) {
-        return this.delegate.describeChild(new FrameworkMethodDto(child));
+    describeChild(Runner child) {
+        assert child == this.delegate;
+        return child.getDescription();
+    }
+
+    @Override @NotNullByDefault(false) protected void
+    runChild(Runner child, RunNotifier notifier) {
+        assert child == this.delegate;
+        child.run(notifier);
+    }
+
+    @Override protected List<Runner>
+    getChildren() {
+        return Collections.<Runner>singletonList(this.delegate);
     }
 }
