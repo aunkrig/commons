@@ -623,7 +623,7 @@ class FileTransformations {
                 FileOutputStream os = new FileOutputStream(out);
                 try {
                     contentsTransformer.transform(
-                        path + '!',
+                        path + '%',
                         compressorInputStream,
                         compressorFormat.compressorOutputStream(os)
                     );

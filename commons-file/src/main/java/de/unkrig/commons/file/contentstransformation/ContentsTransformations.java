@@ -367,7 +367,7 @@ class ContentsTransformations {
                     throw new IOException(ce);
                 }
 
-                contentsTransformer.transform(path + '!', compressorInputStream, cos);
+                contentsTransformer.transform(path + '%', compressorInputStream, cos);
 
                 cos.flush();
                 return null;
