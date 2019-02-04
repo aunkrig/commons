@@ -36,9 +36,12 @@ class XmlScanner {
 
     // PUBLIC INTERFACE
 
-    public
+    private
     enum State { TAG }
 
+    /**
+     * The token types that form an XML document.
+     */
     public
     enum TokenType {
 
@@ -148,6 +151,9 @@ class XmlScanner {
         CDATA_SECTION,
     }
 
+    /**
+     * Creates a {@link StringScanner} that scans XML documents.
+     */
     public static StringScanner<TokenType>
     stringScanner() {
         StatefulScanner<TokenType, State> scanner = new StatefulScanner<TokenType, State>(State.class);

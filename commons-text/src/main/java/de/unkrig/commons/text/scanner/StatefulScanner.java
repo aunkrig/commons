@@ -265,12 +265,15 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
 
     // IMPLEMENTATION
 
+    /**
+     * The return type of the various {@code addRule(...)} methods, which is not really useful.
+     */
     public
     class Rule {
-        final TT             tokenType;
-        final Pattern        regex;
-        @Nullable List<Rule> nextStateRules;
-        private boolean      pushState, popState;
+        private final TT             tokenType;
+        private final Pattern        regex;
+        @Nullable private List<Rule> nextStateRules;
+        private boolean              pushState, popState;
 
         /**
          * @param nextStateRules {@code null} means remain in current state
