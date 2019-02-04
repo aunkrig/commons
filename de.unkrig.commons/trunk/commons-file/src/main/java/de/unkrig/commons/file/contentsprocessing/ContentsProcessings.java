@@ -375,7 +375,7 @@ class ContentsProcessings {
                 size = CompressionFormatFactory.getUncompressedSize(compressorInputStream);
 
                 return contentsProcessor.process(
-                    path + '!',                                           // path
+                    path + '%',                                           // path
                     compressorInputStream,                                // inputStream
                     size,                                                 // size
                     -1L,                                                  // crc32
