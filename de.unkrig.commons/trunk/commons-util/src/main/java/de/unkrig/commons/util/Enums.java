@@ -170,7 +170,7 @@ class Enums {
 
         // Look up the cache.
         {
-            Enum<?>[] cache = Enums.CACHE;
+            Enum<?>[] cache = Enums.cache;
             if (cache != null && cache[0].getClass() == enumType) {
 
                 @SuppressWarnings("unchecked") E[] result = (E[]) cache;
@@ -181,9 +181,9 @@ class Enums {
 
         // Cache miss; call "Class.getEnumConstants()".
         E[] result = enumType.getEnumConstants();
-        if (result.length > 0) Enums.CACHE = result; // Cannot cache zero-constant enums.
+        if (result.length > 0) Enums.cache = result; // Cannot cache zero-constant enums.
 
         return result;
     }
-    @Nullable private static Enum<?>[] CACHE;
+    @Nullable private static Enum<?>[] cache;
 }
