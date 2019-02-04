@@ -602,6 +602,9 @@ class Html {
         return "{" + tagName + (argument == null ? "" : " " + argument) + "}";
     }
 
+    /**
+     * @return A {@link MemberDoc}, {@link ClassDoc}, {@link PackageDoc}, or {@code null}
+     */
     @Nullable public static Doc
     targetOfSeeTag(SeeTag seeTag) {
         Doc target = seeTag.referencedMember();

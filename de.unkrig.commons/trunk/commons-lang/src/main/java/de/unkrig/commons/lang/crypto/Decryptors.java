@@ -41,6 +41,9 @@ import de.unkrig.commons.lang.java6.Base64;
 import de.unkrig.commons.lang.security.SecureCharsets;
 import de.unkrig.commons.nullanalysis.Nullable;
 
+/**
+ * Utility methods related to {@link Decryptor}s.
+ */
 public final
 class Decryptors {
 

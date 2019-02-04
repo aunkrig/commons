@@ -41,6 +41,9 @@ import de.unkrig.commons.nullanalysis.NotNullByDefault;
 public abstract
 class FilterAppendable implements Appendable {
 
+    /**
+     * The delegate to which all {@code append(...)} calls are forwarded (or not).
+     */
     protected final Appendable delegate;
 
     public
