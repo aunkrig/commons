@@ -63,6 +63,10 @@ class ArrayUtil {
         return result;
     }
 
+    /**
+     * @param cas All elements must have equal length
+     * @return    The mirrored two-dimensional {@code char} array <var>cas</var>
+     */
     public static char[][]
     mirror(char[]... cas) {
 
