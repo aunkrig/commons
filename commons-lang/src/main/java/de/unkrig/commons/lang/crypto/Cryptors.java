@@ -41,6 +41,9 @@ class Cryptors {
 
     private Cryptors() {}
 
+    /**
+     * Creates an encryptor-decryptor pair for a given <var>secretKey</var>.
+     */
     public static Cryptor
     fromSecretKey(SecretKey secretKey) {
 
@@ -50,6 +53,9 @@ class Cryptors {
         );
     }
 
+    /**
+     * Combines the given <var>encryptor</var> and <var>decryptor</var> in one {@link Cryptor} object.
+     */
     public static Cryptor
     from(final Encryptor encryptor, final Decryptor decryptor) {
 
@@ -72,6 +78,13 @@ class Cryptors {
         };
     }
 
+    /**
+     * Wraps the <var>delegate</var> such that any change in the encrypted data is guaranteed to be detected and raised
+     * as a {@link WrongKeyException}.
+     *
+     * @see Encryptors#addChecksum(Encryptor)
+     * @see Decryptors#addChecksum(Decryptor)
+     */
     public static Cryptor
     addChecksum(Cryptor delegate) {
 

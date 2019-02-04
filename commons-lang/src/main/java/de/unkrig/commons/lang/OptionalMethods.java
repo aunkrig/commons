@@ -91,6 +91,9 @@ class OptionalMethods {
     public
     interface MethodWrapper0<DC, R, EX extends Throwable> {
 
+        /**
+         * @return Whether the wrapped method exists
+         */
         boolean isAvailable();
 
         /**
@@ -249,6 +252,9 @@ class OptionalMethods {
     public
     interface MethodWrapper1<DC, R, P, EX extends Throwable> {
 
+        /**
+         * @return Whether the wrapped method exists
+         */
         boolean isAvailable();
 
         /**
@@ -415,6 +421,9 @@ class OptionalMethods {
     public
     interface MethodWrapper2<DC, R, P1, P2, EX extends Throwable> {
 
+        /**
+         * @return Whether the wrapped method exists
+         */
         boolean isAvailable();
 
         /**
