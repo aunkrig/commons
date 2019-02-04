@@ -26,10 +26,10 @@
 
 package de.unkrig.commons.junit4.runner.test;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import de.unkrig.commons.junit4.AssertRegex;
 import de.unkrig.commons.junit4.runner.JavaHomes;
 import de.unkrig.commons.junit4.runner.MultipleJresTestClassRunner;
 
@@ -47,6 +47,6 @@ class MultipleJresTestClassRunnerTest {
 
     @Test public void
     test1() {
-        Assert.assertEquals("11", System.getProperty("java.specification.version"));
+        AssertRegex.assertMatches("1\\.6|1\\.7|1\\.8|9|10|11", System.getProperty("java.specification.version"));
     }
 }
