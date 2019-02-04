@@ -750,13 +750,13 @@ class CommandLineOptions {
 
             // Special case: Target type "java.net.InetAddress".
             if (targetType == InetAddress.class) {
-            	String host = ss.read();
-            	if ("any".equals(host)) return null;
+                String host = ss.read();
+                if ("any".equals(host)) return null;
                 try {
-					return InetAddress.getByName(host);
-				} catch (UnknownHostException uhe) {
-					throw new ArgumentConversionFailed(host, InetAddress.class, uhe);
-				}
+                    return InetAddress.getByName(host);
+                } catch (UnknownHostException uhe) {
+                    throw new ArgumentConversionFailed(host, InetAddress.class, uhe);
+                }
             }
 
             // Fall back to "ObjectUtil.fromString()".
