@@ -247,6 +247,15 @@ class SimpleLogging {
     }
 
     /**
+     * Shorthand for {@code setLevel(Level.SEVERE + 1)}: Messages of levels {@code INFO}, {@code WARNING} and {@code
+     * SEVERE} are suppressed.
+     */
+    public static void
+    setNoError() {
+        SimpleLogging.setLevel(LogUtil.SEVERE_PLUS_1);
+    }
+
+    /**
      * Shorthand for {@code setLevel(Level.WARNING + 1)}: Messages of levels {@code INFO} and {@code WARNING} are
      * suppressed.
      */
