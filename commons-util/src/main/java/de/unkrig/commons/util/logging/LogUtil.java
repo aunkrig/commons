@@ -78,14 +78,19 @@ class LogUtil {
     public static final Logger ROOT_LOGGER = Logger.getLogger("");
 
     /**
+     * A {@link Level} one higher (towards {@link Level#OFF}) than {@link Level#SEVERE}.
+     */
+    public static final Level SEVERE_PLUS_1 = Level.parse(Integer.toString(1 + Level.SEVERE.intValue()));
+
+    /**
      * A {@link Level} one higher (towards {@link Level#SEVERE}) than {@link Level#WARNING}.
      */
-    public static final Level  WARNING_PLUS_1 = Level.parse(Integer.toString(1 + Level.WARNING.intValue()));
+    public static final Level WARNING_PLUS_1 = Level.parse(Integer.toString(1 + Level.WARNING.intValue()));
 
     /**
      * A {@link Level} one higher (towards {@link Level#WARNING}) than {@link Level#INFO}.
      */
-    public static final Level  INFO_PLUS_1 = Level.parse(Integer.toString(1 + Level.INFO.intValue()));
+    public static final Level INFO_PLUS_1 = Level.parse(Integer.toString(1 + Level.INFO.intValue()));
 
     /**
      * Strings passed to the returned {@link Consumer} are logged to the given logger at the given level.
