@@ -60,6 +60,7 @@ import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.protocol.HardReference;
 import de.unkrig.commons.lang.protocol.Predicate;
+import de.unkrig.commons.lang.protocol.PredicateUtil;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.util.concurrent.ConcurrentUtil;
@@ -338,6 +339,30 @@ class FileProcessings {
     };
 
     /**
+     * @deprecated Was renamed to {@link #compressedAndArchiveFileProcessor(Predicate, Predicate, ContentsProcessor,
+     *             ArchiveCombiner, ContentsProcessor, ContentsProcessor, ExceptionHandler)
+     */
+    @Deprecated public static <T> FileProcessor<T>
+    archiveCompressedAndNormalFileProcessor(
+        final Predicate<? super String>     lookIntoFormat,
+        final ContentsProcessor<T>          archiveContentsProcessor,
+        final ArchiveCombiner<T>            archiveEntryCombiner,
+        final ContentsProcessor<T>          compressedContentsProcessor,
+        final ContentsProcessor<T>          normalContentsProcessor,
+        final ExceptionHandler<IOException> exceptionHandler
+    ) {
+        return FileProcessings.compressedAndArchiveFileProcessor(
+            lookIntoFormat,
+            PredicateUtil.<String>always(), // pathPredicate
+            archiveContentsProcessor,
+            archiveEntryCombiner,
+            compressedContentsProcessor,
+            normalContentsProcessor,
+            exceptionHandler
+        );
+    }
+
+    /**
      * Returns a {@link FileProcessor} which processes files by feeding their contents either to the {@code
      * archiveContentsProcessor}, the <var>compressedContentsProcessor</var> or the <var>normalContentsProcessor</var>.
      * <p>
@@ -349,8 +374,9 @@ class FileProcessings {
      *                         CompressorHandler, NormalContentsHandler)}
      */
     public static <T> FileProcessor<T>
-    archiveCompressedAndNormalFileProcessor(
+    compressedAndArchiveFileProcessor(
         final Predicate<? super String>     lookIntoFormat,
+        Predicate<? super String>           pathPredicate,
         final ContentsProcessor<T>          archiveContentsProcessor,
         final ArchiveCombiner<T>            archiveEntryCombiner,
         final ContentsProcessor<T>          compressedContentsProcessor,
@@ -358,7 +384,7 @@ class FileProcessings {
         final ExceptionHandler<IOException> exceptionHandler
     ) {
 
-        return new FileProcessor<T>() {
+        return FileProcessings.select(pathPredicate, new FileProcessor<T>() {
 
             @Override @Nullable public T
             process(final String path, final File file) throws FileNotFoundException, IOException {
@@ -389,7 +415,29 @@ class FileProcessings {
 
             @Override public String
             toString() { return "compressedAndArchiveFileProcessor"; }
-        };
+        });
+    }
+
+    /**
+     * Wraps the <var>delegate</var> in a {@link SelectiveFileProcessor}.
+     */
+    public static <T> FileProcessor<T>
+    select(Predicate<? super String> pathPredicate, FileProcessor<T> delegate) {
+        return FileProcessings.select(pathPredicate, delegate, null);
+    }
+
+    /**
+     * Wraps the <var>delegate</var> in a {@link SelectiveFileProcessor}.
+     */
+    public static <T> FileProcessor<T>
+    select(Predicate<? super String> pathPredicate, FileProcessor<T> trueFp, @Nullable FileProcessor<T> falseFp) {
+
+        if (falseFp == null) falseFp = FileProcessings.nop();
+
+        if (pathPredicate == PredicateUtil.always()) return trueFp;
+        if (pathPredicate == PredicateUtil.never())  return falseFp;
+
+        return new SelectiveFileProcessor<T>(pathPredicate, trueFp, falseFp);
     }
 
     /**
