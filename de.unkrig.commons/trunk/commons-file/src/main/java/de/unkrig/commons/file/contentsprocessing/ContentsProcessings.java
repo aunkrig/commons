@@ -49,6 +49,7 @@ import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.protocol.HardReference;
 import de.unkrig.commons.lang.protocol.Predicate;
+import de.unkrig.commons.lang.protocol.PredicateUtil;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.lang.protocol.TransformerWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
@@ -234,21 +235,33 @@ class ContentsProcessings {
             toString() { return "compressedAndArchiveContentsProcessor"; }
         };
 
+        return ContentsProcessings.select(pathPredicate, cp);
+    }
 
-        return new ContentsProcessor<T>() {
+    /**
+     * Wraps the <var>delegate</var> in a {@link SelectiveContentsProcessor}.
+     */
+    public static <T> ContentsProcessor<T>
+    select(Predicate<? super String> pathPredicate, ContentsProcessor<T> delegate) {
+        return ContentsProcessings.select(pathPredicate, delegate, null);
+    }
 
-            @Override @Nullable public T
-            process(
-                String                                                            path,
-                InputStream                                                       inputStream,
-                long                                                              size,
-                long                                                              crc32,
-                ProducerWhichThrows<? extends InputStream, ? extends IOException> opener
-            ) throws IOException {
+    /**
+     * Wraps the <var>delegate</var> in a {@link SelectiveContentsProcessor}.
+     */
+    public static <T> ContentsProcessor<T>
+    select(
+        Predicate<? super String>      pathPredicate,
+        ContentsProcessor<T>           trueCp,
+        @Nullable ContentsProcessor<T> falseCp
+    ) {
 
-                return pathPredicate.evaluate(path) ? cp.process(path, inputStream, size, crc32, opener) : null;
-            }
-        };
+        if (falseCp == null) falseCp = ContentsProcessings.nopContentsProcessor();
+
+        if (pathPredicate == PredicateUtil.always()) return trueCp;
+        if (pathPredicate == PredicateUtil.never())  return falseCp;
+
+        return new SelectiveContentsProcessor<T>(pathPredicate, trueCp, falseCp);
     }
 
     /**
