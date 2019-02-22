@@ -102,8 +102,8 @@ class ChunkedInputStream extends FilterInputStream {
 
             // Last chunk?
             if (this.available == 0) {
-            	line = this.readLine();
-            	if (!line.isEmpty()) throw new IOException("Line '" + line + "' after last chunk is not empty");
+                line = this.readLine();
+                if (!line.isEmpty()) throw new IOException("Line '" + line + "' after last chunk is not empty");
                 LOGGER.log(Level.FINER, "End-of-input");
                 this.available = -1;
                 return -1;

@@ -86,7 +86,7 @@ class FileProcessings {
     nop() { return (FileProcessor<T>) FileProcessings.NOP_FILE_PROCESSOR; }
 
     private static final FileProcessor<?> NOP_FILE_PROCESSOR = new FileProcessor<Object>() {
-        @Override @Nullable public Object process(String path, File in) { return null; }
+        @Override @Nullable public Object process(String path, File in) { return null;  }
         @Override public String           toString()                    { return "NOP"; }
     };
 
