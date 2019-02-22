@@ -91,7 +91,7 @@ class HttpMessage {
 
     private static final Logger LOGGER = Logger.getLogger(HttpMessage.class.getName());
 
-    public static
+    public
     enum HasBody { FALSE, TRUE, IF_CONTENT_LENGTH_OR_TRANSFER_ENCODING }
 
     private static final Pattern
@@ -270,12 +270,12 @@ class HttpMessage {
 
         // Read the body.
         if (
-    		hasBody == HasBody.TRUE
-    		|| (
-				hasBody == HasBody.IF_CONTENT_LENGTH_OR_TRANSFER_ENCODING
-				&& (this.getHeader("Content-Length") != null || this.getHeader("Transfer-Encoding") != null)
-			)
-		) {
+            hasBody == HasBody.TRUE
+            || (
+                hasBody == HasBody.IF_CONTENT_LENGTH_OR_TRANSFER_ENCODING
+                && (this.getHeader("Content-Length") != null || this.getHeader("Transfer-Encoding") != null)
+            )
+        ) {
 
             final Produmer<Long, Long> rawByteCount     = ConsumerUtil.store(0L);
             final Produmer<Long, Long> decodedByteCount = ConsumerUtil.store(0L);

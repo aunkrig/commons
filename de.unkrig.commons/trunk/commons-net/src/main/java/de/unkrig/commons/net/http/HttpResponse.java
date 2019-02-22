@@ -235,7 +235,7 @@ class HttpResponse extends HttpMessage {
      */
     public static HttpResponse
     read(InputStream in, String httpVersion, Method requestMethod) throws IOException {
-    	return HttpResponse.read(in, httpVersion, requestMethod, ">>> ");
+        return HttpResponse.read(in, httpVersion, requestMethod, ">>> ");
     }
 
     /**
@@ -260,7 +260,9 @@ class HttpResponse extends HttpMessage {
             // Read and parse status line.
             {
                 String statusLine = HttpMessage.readLine(in);
-                if (LOGGER.isLoggable(Level.FINE)) LOGGER.fine(loggingPrefix + "Received status line \"" + statusLine + "\"");
+                if (LOGGER.isLoggable(Level.FINE)) {
+                    LOGGER.fine(loggingPrefix + "Received status line \"" + statusLine + "\"");
+                }
 
                 Matcher m = HttpResponse.STATUS_LINE_PATTERN.matcher(statusLine);
                 if (!m.matches()) throw new InvalidHttpMessageException("Invalid status line");

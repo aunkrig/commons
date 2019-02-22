@@ -417,19 +417,19 @@ class TcpServer implements RunnableWhichThrows<IOException>, Stoppable {
      * Unfortunately, the "socket closed exception" is not a class of its own, but a special case of the
      * SocketException. Have to parse the message to tell the difference.
      */
-	private static boolean
-	isSocketClosedException(SocketException se) {
+    private static boolean
+    isSocketClosedException(SocketException se) {
 
-		String m = se.getMessage();
+        String m = se.getMessage();
 
-		return (
-			m.endsWith("socket closed")
-			|| m.endsWith("Socket closed")
-			|| m.endsWith("Socket is closed")
-			|| m.contains("Connection reset")
-			|| m.endsWith("Broken pipe")
-			|| m.endsWith("Software caused connection abort: recv failed")
-			|| m.endsWith("Software caused connection abort: socket write error")
-		);
-	}
+        return (
+            m.endsWith("socket closed")
+            || m.endsWith("Socket closed")
+            || m.endsWith("Socket is closed")
+            || m.contains("Connection reset")
+            || m.endsWith("Broken pipe")
+            || m.endsWith("Software caused connection abort: recv failed")
+            || m.endsWith("Software caused connection abort: socket write error")
+        );
+    }
 }
