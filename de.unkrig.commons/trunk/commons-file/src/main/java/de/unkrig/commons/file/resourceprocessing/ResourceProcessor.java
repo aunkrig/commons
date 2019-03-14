@@ -27,15 +27,13 @@
 package de.unkrig.commons.file.resourceprocessing;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 
-import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
- * @param <T> The type produced by {@link #process(String, InputStream, long, long, ProducerWhichThrows)}
- * @see       #process(String, InputStream, long, long, ProducerWhichThrows)
+ * @param <T> The type produced by {@link #process(String, URL)}
+ * @see       #process(String, URL)
  */
 public
 interface ResourceProcessor<T> {
