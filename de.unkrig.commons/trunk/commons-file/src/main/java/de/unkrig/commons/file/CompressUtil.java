@@ -227,8 +227,10 @@ class CompressUtil {
      *   compression-format-name}</i>{@code :}<i>{@code path}</i>".
      * </p>
      *
-     * @see ArchiveFormatFactory#allFormats()
-     * @see CompressionFormatFactory#allFormats()
+     * @param file Must be a "normal file"
+     * @see        ArchiveFormatFactory#allFormats()
+     * @see        CompressionFormatFactory#allFormats()
+     * @see        File#isFile()
      */
     @Nullable public static <T> T
     processFile(
@@ -253,6 +255,7 @@ class CompressUtil {
      * Invokes exactly <i>one</i> of <var>archiveHandler</var>, <var>compressorHandler</var> or
      * <var>normalContentsHandler</var>.
      *
+     * @param file               Must be a "normal file"
      * @param lookIntoArchive    An archive file is introspected iff <var>lookIntoArchive</var> evaluates to {@code
      *                           true} for the archive format
      * @param lookIntoCompressed A compressed file is introspected iff <var>lookIntoCompressed</var> evaluates to
