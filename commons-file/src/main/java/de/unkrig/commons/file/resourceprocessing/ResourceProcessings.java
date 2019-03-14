@@ -35,7 +35,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import de.unkrig.commons.file.ExceptionHandler;
@@ -43,6 +42,7 @@ import de.unkrig.commons.file.contentsprocessing.ContentsProcessings;
 import de.unkrig.commons.file.contentsprocessing.ContentsProcessings.ArchiveCombiner;
 import de.unkrig.commons.file.contentsprocessing.ContentsProcessor;
 import de.unkrig.commons.file.fileprocessing.FileProcessings;
+import de.unkrig.commons.file.fileprocessing.FileProcessings.DirectoryCombiner;
 import de.unkrig.commons.file.fileprocessing.FileProcessor;
 import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.protocol.Predicate;
@@ -131,6 +131,7 @@ class ResourceProcessings {
         final Predicate<? super String>    pathPredicate,
         @Nullable final Comparator<Object> directoryMemberNameComparator,
         boolean                            recurseSubdirectories,
+        final DirectoryCombiner<T>         directoryEntryCombiner,
         final ArchiveCombiner<T>           archiveEntryCombiner,
         final ContentsProcessor<T>         normalContentsProcessor,
         final SquadExecutor<T>             squadExecutor,
@@ -145,20 +146,12 @@ class ResourceProcessings {
             exceptionHandler
         );
 
-        FileProcessings.DirectoryCombiner<T> directoryCombiner = new FileProcessings.DirectoryCombiner<T>() {
-
-            @Override @Nullable public T
-            combine(String directoryPath, File directory, List<T> combinables) {
-                return archiveEntryCombiner.combine(directoryPath, combinables);
-            }
-        };
-
         if (recurseSubdirectories) {
             fp = FileProcessings.directoryTreeProcessor(
                 pathPredicate,
                 fp,                            // regularFileProcessor
                 directoryMemberNameComparator,
-                directoryCombiner,
+                directoryEntryCombiner,
                 squadExecutor,
                 exceptionHandler
             );
@@ -168,22 +161,21 @@ class ResourceProcessings {
                 fp,                            // regularFileProcessor
                 directoryMemberNameComparator,
                 fp,                            // directoryMemberProcessor
-                directoryCombiner,
+                directoryEntryCombiner,
                 squadExecutor,
                 exceptionHandler
             );
         }
 
-        return ResourceProcessings.fromContentsProcessorAndFileProcessor(
-            ContentsProcessings.recursiveCompressedAndArchiveContentsProcessor(
-                lookIntoFormat,
-                pathPredicate,
-                archiveEntryCombiner,
-                normalContentsProcessor,
-                exceptionHandler
-            ),
-            fp
+        ContentsProcessor<T> cp = ContentsProcessings.recursiveCompressedAndArchiveContentsProcessor(
+            lookIntoFormat,
+            pathPredicate,
+            archiveEntryCombiner,
+            normalContentsProcessor,
+            exceptionHandler
         );
+
+        return ResourceProcessings.fromContentsProcessorAndFileProcessor(cp, fp);
     }
 
     /**
@@ -267,7 +259,7 @@ class ResourceProcessings {
     /**
      * @return {@code null} iff the <var>location</var> does not designate a file
      */
-    @Nullable private static File
+    @Nullable public static File
     isFile(URL location) {
         return location.getProtocol().equalsIgnoreCase("file") ? new File(location.getFile()) : null;
     }
