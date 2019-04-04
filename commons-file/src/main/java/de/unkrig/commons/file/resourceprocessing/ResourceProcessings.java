@@ -122,8 +122,8 @@ class ResourceProcessings {
      *                                      {@link File#list()} returns them
      * @param squadExecutor                 Is used to process independent subtrees - could be {@link
      *                                      ConcurrentUtil#SEQUENTIAL_EXECUTOR_SERVICE}
-     * @see                                 ContentsProcessings#recursiveCompressedAndArchiveContentsProcessor(Predi
-     *cate, Predicate, ArchiveCombiner, ContentsProcessor, ExceptionHandler)
+     * @see                                 ContentsProcessings#recursiveCompressedAndArchiveContentsProcessor(
+     *                                      Predicate, Predicate, ArchiveCombiner, ContentsProcessor, ExceptionHandler)
      */
     public static <T> ResourceProcessor<T>
     recursiveCompressedAndArchiveResourceProcessor(
