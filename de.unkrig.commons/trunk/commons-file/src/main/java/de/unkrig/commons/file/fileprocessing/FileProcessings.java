@@ -338,9 +338,11 @@ class FileProcessings {
         combine(String directoryPath, File directory, List<Object> combinables) { return null; }
     };
 
+
+
+
     /**
-     * @deprecated Was renamed to {@link #compressedAndArchiveFileProcessor(Predicate, Predicate, ContentsProcessor,
-     *             ArchiveCombiner, ContentsProcessor, ContentsProcessor, ExceptionHandler)
+     * @deprecated Was renamed to {@link FileProcessings#compressedAndArchiveFileProcessor}
      */
     @Deprecated public static <T> FileProcessor<T>
     archiveCompressedAndNormalFileProcessor(
