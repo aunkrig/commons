@@ -149,7 +149,7 @@ class ExpressionUtil {
      * Turns the given string into an expression. If the string contains '#' characters, then the text between two
      * '#' characters is parsed as an expression.
      *
-     * @param s             The string to expand
+     * @param s                   The string to expand
      * @param isValidVariableName Evalutaes to whether the <var>subject</var> is a valid variable name
      * @return                    The expanded string
      */
@@ -247,12 +247,13 @@ class ExpressionUtil {
     /**
      * Scans, parses and evaluates an expression, and converts the result to {@code <T>}.
      *
-     * @param variables The variables that the expression can use
-     * @return          The evaluated value
+     * @param onDemandImports Fully qualified package names
+     * @param variables       The variables that the expression can use
+     * @return                The evaluated value
      */
     @Nullable public static <T> T
     evaluateExpressionTo(
-        @Nullable String[] imports,
+        @Nullable String[] onDemandImports,
         String             input,
         Class<T>           targetType,
         Mapping<String, ?> variables
@@ -260,7 +261,7 @@ class ExpressionUtil {
 
         ExpressionEvaluator ee = new ExpressionEvaluator(PredicateUtil.containsKey(variables));
 
-        if (imports != null) ee.setImports(imports);
+        if (onDemandImports != null) ee.addOnDemandImports(onDemandImports);
 
         return ee.evaluateTo(input, targetType, variables);
     }

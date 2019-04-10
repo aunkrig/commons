@@ -253,19 +253,34 @@ class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
     Parser(String expression) { this(Scanner.stringScanner().setInput(expression)); }
 
     /**
-     * @return The currently configured imports (fully qualified package names)
+     * @return The currently configured single imports (fully qualified class names)
      */
     public String[]
-    getImports() { return this.imports.clone(); }
+    getSingleImports() { return this.singleImports.toArray(new String[this.singleImports.size()]); }
 
     /**
-     * By default, there is only one import: "java.lang".
-     *
-     * @param imports Fully qualified package names
+     * @param singleImports Fully qualified class or interface names
      */
     public Parser<T, EX>
-    setImports(String[] imports) {
-        this.imports = imports.clone();
+    addSingleImports(String... singleImports) {
+        for (String si : singleImports) this.singleImports.add(si);
+        return this;
+    }
+
+    /**
+     * @return The currently configured on-demand imports (fully qualified package names)
+     */
+    public String[]
+    getOnDemandImports() { return this.onDemandImports.toArray(new String[this.onDemandImports.size()]); }
+
+    /**
+     * By default, there is only one on-demand import: "java.lang".
+     *
+     * @param onDemandImports Fully qualified package names
+     */
+    public Parser<T, EX>
+    addOnDemandImports(String... onDemandImports) {
+        for (String si : onDemandImports) this.onDemandImports.add(si);
         return this;
     }
 
@@ -325,7 +340,8 @@ class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
     public T
     parse() throws ParseException, EX {
         try {
-            final T result = this.parseExpression().toValue();
+            this.parseImports();
+            T result = this.parseExpression().toValue();
             this.eoi();
             return result;
         } catch (ParseException pe) {
@@ -339,11 +355,14 @@ class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
     }
 
     /**
+     * Parses exactly <em>one</em> expression and leaves the following tokens in the input untouched.
+     *
      * @return The parsed expression
      */
     public T
     parsePart() throws ParseException, EX {
         try {
+            this.parseImports();
             return this.parseExpression().toValue();
         } catch (ParseException pe) {
             throw ExceptionUtil.wrap("At " + this.scanner.toString(), pe);
@@ -457,7 +476,8 @@ class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
     /**
      * The currently configured imports (fully qualified package names).
      */
-    private String[]           imports     = new String[] { "java.lang" };
+    private final List<String>       singleImports   = new ArrayList<String>();
+    private final List<String>       onDemandImports = new ArrayList<String>(Collections.singleton("java.lang"));
 
     private ClassLoader        classLoader = this.getClass().getClassLoader();
     private EnumSet<Extension> extensions  = EnumSet.allOf(Extension.class);
@@ -538,6 +558,38 @@ class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
             @Override @Nullable public String
             toPackage() { return null; }
         };
+    }
+
+    /**
+     * <pre>
+     * imports := { import }
+     *
+     * import := 'import' identifier { '.' identifier } [ '.' '*' ] ';'
+     * </pre>
+     */
+    private void
+    parseImports() throws ParseException {
+
+        while (this.peekRead("import")) {
+            String qn = this.read(TokenType.IDENTIFIER);
+
+            QN:
+            for (;;) {
+                switch (this.read(";", ".")) {
+                case 0: // ';'
+                    this.singleImports.add(qn);
+                    break QN;
+                case 1: // '.'
+                    if (this.peekRead("*")) {
+                        this.read(";");
+                        this.onDemandImports.add(qn);
+                        break QN;
+                    }
+                    qn += "." + this.read(TokenType.IDENTIFIER);
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -1174,10 +1226,19 @@ class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
 
     @Nullable private Class<?>
     loadImportedClass(String simpleClassName) {
-        for (String imporT : this.imports) {
-            Class<?> clasS = this.loadClass(imporT + '.' + simpleClassName);
+
+        for (String si : this.singleImports) {
+            if (si.endsWith("." + simpleClassName)) {
+                Class<?> clasS = this.loadClass(si);
+                if (clasS != null) return clasS;
+            }
+        }
+
+        for (String iod : this.onDemandImports) {
+            Class<?> clasS = this.loadClass(iod + '.' + simpleClassName);
             if (clasS != null) return clasS;
         }
+
         return null;
     }
 

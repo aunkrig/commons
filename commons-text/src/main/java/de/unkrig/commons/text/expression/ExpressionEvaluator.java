@@ -45,8 +45,8 @@ import de.unkrig.commons.lang.protocol.Mapping;
 import de.unkrig.commons.lang.protocol.Mappings;
 import de.unkrig.commons.lang.protocol.Predicate;
 import de.unkrig.commons.lang.protocol.PredicateUtil;
-import de.unkrig.commons.lang.protocol.PredicateWhichThrows;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
+import de.unkrig.commons.lang.protocol.Transformer;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.reflect.ReflectUtil;
 import de.unkrig.commons.text.Notations;
@@ -74,21 +74,20 @@ public
 class ExpressionEvaluator {
 
     /**
-     * The currently configured imports (fully qualified package names).
+     * The currently configured on-demand imports (fully qualified package names).
      */
-    private String[]    imports     = new String[] { "java.lang" };
+    private final List<String> onDemandImports = new ArrayList<String>();
 
     private ClassLoader classLoader = this.getClass().getClassLoader();
 
-    private final PredicateWhichThrows<? super String, ? extends RuntimeException>
-    isValidVariableName;
+    private final Predicate<? super String> isValidVariableName;
 
     /**
      * @param isValidVariableName Evaluates whether a string is a valid variable name; if not, then the parser will
      *                            throw a {@link ParseException}
      */
     public
-    ExpressionEvaluator(PredicateWhichThrows<? super String, ? extends RuntimeException> isValidVariableName) {
+    ExpressionEvaluator(Predicate<? super String> isValidVariableName) {
         this.isValidVariableName = isValidVariableName;
     }
 
@@ -109,17 +108,20 @@ class ExpressionEvaluator {
     }
 
     /**
-     * @return The currently configured imports (fully qualified package names)
-     */
-    public String[]
-    getImports() { return this.imports.clone(); }
-
-    /**
-     * @param imports Fully qualified names of packages to import
+     * @param packageNames The fully qualified names of the packages to import
      */
     public ExpressionEvaluator
+    addOnDemandImports(String[] packageNames) {
+        this.onDemandImports.addAll(Arrays.asList(packageNames));
+        return this;
+    }
+
+    /**
+     * @deprecated Use {@link #addOnDemandImports(String[])} instead
+     */
+    @Deprecated public ExpressionEvaluator
     setImports(String[] imports) {
-        this.imports = imports.clone();
+        this.addOnDemandImports(imports);
         return this;
     }
 
@@ -174,6 +176,120 @@ class ExpressionEvaluator {
         offset[0] = scanner.getPreviousTokenOffset();
 
         return result;
+    }
+
+    /**
+     * Parses a string into an {@link Expression}.
+     * Semantically identical with {@link #parse(String, Predicate)}, but implements a different syntax:
+     * <dl>
+     *   <dt>$<var>xxx</var></dt>
+     *   <dd>The value of variable <var>xxx</var></dd>
+     *   <dt>${<var>expr</var>}</dt>
+     *   <dd>The value of the expression <var>expr</var></dd>
+     *   <dt><var>any-other-char</var></dt>
+     *   <dd>That char, literally</dd>
+     * </dl>
+     * <p>
+     *   Usage example:
+     * </p>
+     * <pre>
+     *     Expression e = (
+     *         new ExpressionEvaluator(PredicateUtil.equal("abc"))
+     *         .parseExt("FOO $abc ${abc} ${abc + \"XYZ\"} BAR")
+     *     );
+     *     Assert.assertEquals("FOO ABC ABC ABCXYZ BAR", e.evaluate("abc", "ABC"));
+     * </pre>
+     *
+     * @param spec The string to parse
+     * @see        #parse(String)
+     */
+    public Expression
+    parseExt(final String spec) throws ParseException {
+        int specLength = spec.length();
+
+        Predicate<String> variableNamePredicate = PredicateUtil.or(this.isValidVariableName, PredicateUtil.equal("m"));
+
+        // Parse the spec into a sequence of "segments".
+        final List<Transformer<Mapping<String, ?>, String>>
+        segments = new ArrayList<Transformer<Mapping<String, ?>, String>>();
+
+        for (int idx = 0; idx < specLength;) {
+            if (spec.charAt(idx) == '$' && idx <= specLength - 2) {
+                char c2 = spec.charAt(idx + 1);
+                if (Character.isJavaIdentifierStart(c2)) {
+
+                    // $xxx
+                    int to = idx + 2;
+                    while (to < specLength && Character.isJavaIdentifierPart(spec.charAt(to))) to++;
+                    final String variableName = spec.substring(idx + 1, to);
+
+                    segments.add(new Transformer<Mapping<String, ?>, String>() {
+
+                        @Override public String
+                        transform(Mapping<String, ?> variables) {
+                            Object variableValue = variables.get(variableName);
+                            assert variableValue != null : variableName;
+                            return variableValue.toString();
+                        }
+                    });
+                    idx = to;
+                    continue;
+                }
+                if (c2 == '{') {
+
+                    int[]               offset     = new int[1];
+                    final Expression    expression = this.parsePart(spec.substring(idx + 2), offset);
+                    int                 to         = idx + 2 + offset[0];
+
+                    if (to < specLength && spec.charAt(to) == '}') {
+
+                        // ${expr}
+                        segments.add(new Transformer<Mapping<String, ?>, String>() {
+
+                            @Override public String
+                            transform(Mapping<String, ?> variables) {
+                                try {
+//                                    return ObjectUtil.or(expression.evaluateTo(variables, String.class), "");
+                                    return expression.evaluateTo(variables, String.class);
+                                } catch (EvaluationException ee) {
+                                    throw ExceptionUtil.wrap(
+                                        "Evaluating \"" + expression + "\"",
+                                        ee,
+                                        IllegalArgumentException.class
+                                    );
+                                }
+                            }
+                        });
+                        idx = to + 1;
+                        continue;
+                    }
+                }
+            }
+
+            // xxx (literal text)
+            int to = idx + 1;
+            while (to < specLength && spec.charAt(to) != '$') to++;
+            final String s = spec.substring(idx, to);
+            segments.add(new Transformer<Mapping<String, ?>, String>() {
+
+                @Override public String
+                transform(Mapping<String, ?> in) { return s; }
+            });
+            idx = to;
+        }
+
+        return new AbstractExpression() {
+
+            @Override @Nullable public Object
+            evaluate(Mapping<String, ?> variables) throws EvaluationException {
+
+                StringBuilder sb = new StringBuilder();
+                for (Transformer<Mapping<String, ?>, String> segment : segments) {
+                    sb.append(segment.transform(variables));
+                }
+                return sb.toString();
+            }
+        };
     }
 
     /**
@@ -289,7 +405,7 @@ class ExpressionEvaluator {
 
                     @Override public String
                     toString() {
-                        return target + "." + methodName + '.' + '(' + StringUtil.join(arguments, ", ") + ')';
+                        return target + "." + methodName + '(' + StringUtil.join(arguments, ", ") + ')';
                     }
                 };
             }
@@ -456,12 +572,12 @@ class ExpressionEvaluator {
                 return new AbstractExpression() {
 
                     @Override public Object
-                    evaluate(Mapping<String, ?> variables) {
+                    evaluate(Mapping<String, ?> variables) throws EvaluationException {
 
                         Object value = variables.get(variableName);
 
                         if (value == null && !variables.containsKey(variableName)) {
-                            throw new IllegalStateException("Variable '" + variableName + "' missing");
+                            throw new EvaluationException("Unkown variable \"" + variableName + "\"");
                         }
 
                         return value;
@@ -486,7 +602,7 @@ class ExpressionEvaluator {
                     toString() { return lhs.toString() + '[' + rhs.toString() + ']'; }
                 };
             }
-        }.setImports(this.imports);
+        }.addOnDemandImports(this.onDemandImports.toArray(new String[this.onDemandImports.size()]));
     }
 
     /**
@@ -598,7 +714,7 @@ class ExpressionEvaluator {
             arrayAccess(Object lhs, Object rhs) throws EvaluationException {
                 return ExpressionEvaluator.arrayAccess(lhs, rhs);
             }
-        }.setImports(this.imports).parse();
+        }.addOnDemandImports(this.onDemandImports.toArray(new String[this.onDemandImports.size()])).parse();
     }
 
     private static Object
