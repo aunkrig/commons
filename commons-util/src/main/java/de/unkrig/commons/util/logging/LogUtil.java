@@ -187,7 +187,7 @@ class LogUtil {
 
         Map<String, Object> variables = MapUtil.map("propertyName", propertyName, "type", type);
 
-        return new ExpressionEvaluator(variables.keySet()).setImports(LogUtil.LOGGING_IMPORTS).evaluateTo(
+        return new ExpressionEvaluator(variables.keySet()).addOnDemandImports(LogUtil.LOGGING_IMPORTS).evaluateTo(
             propertyValue,
             type,
             Mappings.fromMap(variables)
@@ -209,7 +209,7 @@ class LogUtil {
 
         Map<String, Object> variables = MapUtil.map("propertyName", propertyName, "type", type);
 
-        T result = new ExpressionEvaluator(variables.keySet()).setImports(LogUtil.LOGGING_IMPORTS).evaluateTo(
+        T result = new ExpressionEvaluator(variables.keySet()).addOnDemandImports(LogUtil.LOGGING_IMPORTS).evaluateTo(
             spec,
             type,
             Mappings.fromMap(variables)
@@ -232,7 +232,7 @@ class LogUtil {
 
         Map<String, Object> variables = MapUtil.map("propertyName", propertyName, "type", type);
 
-        T result = new ExpressionEvaluator(variables.keySet()).setImports(LogUtil.LOGGING_IMPORTS).evaluateTo(
+        T result = new ExpressionEvaluator(variables.keySet()).addOnDemandImports(LogUtil.LOGGING_IMPORTS).evaluateTo(
             LogUtil.requireLoggingProperty(propertyName),
             type,
             Mappings.fromMap(variables)
@@ -327,7 +327,7 @@ class LogUtil {
 
         return (
             new ExpressionEvaluator(validVariableNames)
-            .setImports(LogUtil.LOGGING_IMPORTS)
+            .addOnDemandImports(LogUtil.LOGGING_IMPORTS)
             .parse(LogUtil.requireLoggingProperty(propertyName))
         );
     }
