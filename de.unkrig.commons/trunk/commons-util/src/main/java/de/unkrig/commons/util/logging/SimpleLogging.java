@@ -359,13 +359,13 @@ class SimpleLogging {
     }
 
     private static final ExpressionEvaluator
-    HANDLER_INSTANTIATOR = new ExpressionEvaluator().setImports(new String[] {
+    HANDLER_INSTANTIATOR = new ExpressionEvaluator().addOnDemandImports(new String[] {
         "java.util.logging",
         "de.unkrig.commons.util.logging.handler",
     });
 
     private static final ExpressionEvaluator
-    FORMATTER_INSTANTIATOR = new ExpressionEvaluator().setImports(new String[] {
+    FORMATTER_INSTANTIATOR = new ExpressionEvaluator().addOnDemandImports(new String[] {
         "java.util.logging",
         "de.unkrig.commons.util.logging.formatter",
     });
