@@ -46,7 +46,7 @@ import de.unkrig.commons.lang.protocol.Mappings;
 import de.unkrig.commons.lang.protocol.Predicate;
 import de.unkrig.commons.lang.protocol.PredicateUtil;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
-import de.unkrig.commons.lang.protocol.Transformer;
+import de.unkrig.commons.lang.protocol.TransformerWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.reflect.ReflectUtil;
 import de.unkrig.commons.text.Notations;
@@ -207,11 +207,9 @@ class ExpressionEvaluator {
     parseExt(final String spec) throws ParseException {
         int specLength = spec.length();
 
-        Predicate<String> variableNamePredicate = PredicateUtil.or(this.isValidVariableName, PredicateUtil.equal("m"));
-
         // Parse the spec into a sequence of "segments".
-        final List<Transformer<Mapping<String, ?>, String>>
-        segments = new ArrayList<Transformer<Mapping<String, ?>, String>>();
+        final List<TransformerWhichThrows<Mapping<String, ?>, String, EvaluationException>>
+        segments = new ArrayList<TransformerWhichThrows<Mapping<String, ?>, String, EvaluationException>>();
 
         for (int idx = 0; idx < specLength;) {
             if (spec.charAt(idx) == '$' && idx <= specLength - 2) {
@@ -223,7 +221,7 @@ class ExpressionEvaluator {
                     while (to < specLength && Character.isJavaIdentifierPart(spec.charAt(to))) to++;
                     final String variableName = spec.substring(idx + 1, to);
 
-                    segments.add(new Transformer<Mapping<String, ?>, String>() {
+                    segments.add(new TransformerWhichThrows<Mapping<String, ?>, String, EvaluationException>() {
 
                         @Override public String
                         transform(Mapping<String, ?> variables) {
@@ -244,20 +242,11 @@ class ExpressionEvaluator {
                     if (to < specLength && spec.charAt(to) == '}') {
 
                         // ${expr}
-                        segments.add(new Transformer<Mapping<String, ?>, String>() {
+                        segments.add(new TransformerWhichThrows<Mapping<String, ?>, String, EvaluationException>() {
 
                             @Override public String
-                            transform(Mapping<String, ?> variables) {
-                                try {
-//                                    return ObjectUtil.or(expression.evaluateTo(variables, String.class), "");
-                                    return expression.evaluateTo(variables, String.class);
-                                } catch (EvaluationException ee) {
-                                    throw ExceptionUtil.wrap(
-                                        "Evaluating \"" + expression + "\"",
-                                        ee,
-                                        IllegalArgumentException.class
-                                    );
-                                }
+                            transform(Mapping<String, ?> variables) throws EvaluationException {
+                                return ObjectUtil.or(expression.evaluateTo(variables, String.class), "");
                             }
                         });
                         idx = to + 1;
@@ -270,7 +259,7 @@ class ExpressionEvaluator {
             int to = idx + 1;
             while (to < specLength && spec.charAt(to) != '$') to++;
             final String s = spec.substring(idx, to);
-            segments.add(new Transformer<Mapping<String, ?>, String>() {
+            segments.add(new TransformerWhichThrows<Mapping<String, ?>, String, EvaluationException>() {
 
                 @Override public String
                 transform(Mapping<String, ?> in) { return s; }
@@ -284,7 +273,7 @@ class ExpressionEvaluator {
             evaluate(Mapping<String, ?> variables) throws EvaluationException {
 
                 StringBuilder sb = new StringBuilder();
-                for (Transformer<Mapping<String, ?>, String> segment : segments) {
+                for (TransformerWhichThrows<Mapping<String, ?>, String, EvaluationException> segment : segments) {
                     sb.append(segment.transform(variables));
                 }
                 return sb.toString();

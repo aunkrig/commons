@@ -32,6 +32,7 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 
 import de.unkrig.commons.lang.ExceptionUtil;
+import de.unkrig.commons.lang.ObjectUtil;
 import de.unkrig.commons.lang.protocol.Function;
 import de.unkrig.commons.lang.protocol.FunctionWhichThrows;
 import de.unkrig.commons.lang.protocol.Mapping;
@@ -291,8 +292,7 @@ class ExpressionMatchReplacer {
                             @Override public String
                             transform(Mapping<String, ?> variables) {
                                 try {
-//                                    return ObjectUtil.or(expression.evaluateTo(variables, String.class), "");
-                                    return expression.evaluateTo(variables, String.class);
+                                    return ObjectUtil.or(expression.evaluateTo(variables, String.class), "");
                                 } catch (EvaluationException ee) {
                                     throw ExceptionUtil.wrap(
                                         "Evaluating \"" + expression + "\"",
@@ -328,7 +328,7 @@ class ExpressionMatchReplacer {
                 return new Function<MatchResult, String>() {
 
                     @Override @Nullable public String
-                    call(MatchResult matchResult) throws NoException {
+                    call(@Nullable MatchResult matchResult) throws NoException {
                         final Mapping<String, ?> variables2 = Mappings.override(variables, "m", matchResult);
 
                         StringBuilder sb = new StringBuilder();
