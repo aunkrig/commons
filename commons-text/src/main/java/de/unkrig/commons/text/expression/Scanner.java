@@ -27,6 +27,7 @@
 package de.unkrig.commons.text.expression;
 
 import static de.unkrig.commons.text.expression.Scanner.TokenType.CHARACTER_LITERAL;
+import static de.unkrig.commons.text.expression.Scanner.TokenType.CPP_COMMENT;
 import static de.unkrig.commons.text.expression.Scanner.TokenType.C_COMMENT;
 import static de.unkrig.commons.text.expression.Scanner.TokenType.END_OF_IGNORABLES;
 import static de.unkrig.commons.text.expression.Scanner.TokenType.FLOATING_POINT_LITERAL;
@@ -61,7 +62,7 @@ class Scanner {
     enum TokenType {
 
         // SUPPRESS CHECKSTYLE JavadocVariable:11
-        SPACE, C_COMMENT,
+        SPACE, C_COMMENT, CPP_COMMENT,
 
         // Dummy enum constant which separates ignorable (above) from non-ignorable token types (below).
         END_OF_IGNORABLES,
@@ -81,8 +82,9 @@ class Scanner {
     stringScanner() {
         final StatelessScanner<TokenType> scanner = new StatelessScanner<TokenType>();
 
-        scanner.addRule("\\s+", SPACE);
-        scanner.addRule("/\\*.*?\\*/", C_COMMENT);
+        scanner.addRule("\\s+",            SPACE);
+        scanner.addRule("(?s)/\\*.*?\\*/", C_COMMENT);
+        scanner.addRule("//.*",            CPP_COMMENT);
 
         scanner.addRule(
             "(?:true|false|null|instanceof|new|boolean|byte|short|int|long|float|double|char)(?![\\p{L}\\p{Nd}_$])",
@@ -101,12 +103,12 @@ class Scanner {
             + "&|\\||\\^"                                   // & | ^
         ), OPERATOR);
 
-        scanner.addRule("\\d+\\.\\d*(?:[eE][+\\-]?\\d+)?[fFdD]?", FLOATING_POINT_LITERAL);  // 9.
-        scanner.addRule("\\.\\d+(?:[eE][+\\-]?\\d+)?[fFdD]?",     FLOATING_POINT_LITERAL);  // .9
-        scanner.addRule("\\d+[eE][+\\-]?\\d+[fFdD]?",             FLOATING_POINT_LITERAL);  // 9e1
-        scanner.addRule("\\d+([eE][+\\-]?\\d+)?[fFdD]",           FLOATING_POINT_LITERAL);  // 9f
-        scanner.addRule("0[Xx](?:[0-9a-fA-F]+)(L|l)?",                  INTEGER_LITERAL);
-        scanner.addRule("(?:0|[1-9]\\d*|0x\\p{XDigit}+|0[0-7]+)(L|l)?", INTEGER_LITERAL);
+        scanner.addRule("\\d+\\.\\d*(?:[eE][+\\-]?\\d+)?[fFdD]?", FLOATING_POINT_LITERAL);  // 9. 9.9 9.9e3 9.f
+        scanner.addRule("\\.\\d+(?:[eE][+\\-]?\\d+)?[fFdD]?",     FLOATING_POINT_LITERAL);  // .9 .9e3 .9f
+        scanner.addRule("\\d+[eE][+\\-]?\\d+[fFdD]?",             FLOATING_POINT_LITERAL);  // 9e3 9e3f
+        scanner.addRule("\\d+([eE][+\\-]?\\d+)?[fFdD]",           FLOATING_POINT_LITERAL);  // 9f 9e3f
+        scanner.addRule("0[Xx](?:[0-9a-fA-F]+)(L|l)?",                  INTEGER_LITERAL);   // 0x9 0x9l
+        scanner.addRule("(?:0|[1-9]\\d*|0x\\p{XDigit}+|0[0-7]+)(L|l)?", INTEGER_LITERAL);   // 0 99 0xaa | 077 0l
         scanner.addRule(
             "'(?:\\\\[btnfr\"'\\\\]|\\\\[0-3][0-7][0-7]|\\\\[0-7][0-7]|\\\\[0-7]|[^\\\\'])'",
             CHARACTER_LITERAL
