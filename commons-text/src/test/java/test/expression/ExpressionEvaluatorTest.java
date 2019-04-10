@@ -48,6 +48,7 @@ import org.junit.ComparisonFailure;
 import org.junit.Test;
 
 import de.unkrig.commons.lang.ExceptionUtil;
+import de.unkrig.commons.lang.protocol.PredicateUtil;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.expression.EvaluationException;
 import de.unkrig.commons.text.expression.Expression;
@@ -368,6 +369,15 @@ class ExpressionEvaluatorTest {
 
         ee.parsePart("1 + 3}xx", offset);
         Assert.assertEquals(5, offset[0]);
+    }
+
+    @Test public void
+    testParseExt() throws Exception {
+
+        Expression
+        e = new ExpressionEvaluator(PredicateUtil.equal("abc")).parseExt("FOO $abc ${abc} ${abc + \"XYZ\"} BAR");
+
+        Assert.assertEquals("FOO ABC ABC ABCXYZ BAR", e.evaluate("abc", "ABC"));
     }
 
     /**

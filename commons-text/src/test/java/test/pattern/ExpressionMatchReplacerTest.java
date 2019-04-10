@@ -26,6 +26,7 @@
 
 package test.pattern;
 
+import java.text.SimpleDateFormat;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,6 +35,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import de.unkrig.commons.lang.protocol.Function;
+import de.unkrig.commons.lang.protocol.Mapping;
+import de.unkrig.commons.lang.protocol.Mappings;
+import de.unkrig.commons.lang.protocol.Transformer;
 import de.unkrig.commons.text.expression.Expression;
 import de.unkrig.commons.text.expression.ExpressionEvaluator;
 import de.unkrig.commons.text.parser.ParseException;
@@ -104,6 +108,64 @@ class ExpressionMatchReplacerTest {
         Assert.assertEquals(
             "pre-sihT pre-si pre-a pre-dam, pre-dam pre-dlrow...",
             PatternUtil.replaceSome(m, matchReplacer)
+        );
+    }
+
+    @Test public void
+    testParseExt1() throws ParseException {
+
+        Mapping<String, Object> variables = Mappings.<String, Object>mapping("abc", "ABC");
+
+        Transformer<Mapping<String, ?>, Function<MatchResult, String>>
+        matchReplacer = ExpressionMatchReplacer.parseExt(
+            "FOO $1 $abc ${abc + \"\"} BAR",
+            Mappings.containsKeyPredicate(variables)
+        );
+
+        Matcher m = Pattern.compile("(.*)").matcher("ONE");
+        Assert.assertTrue(m.matches());
+
+        Assert.assertEquals("FOO ONE ABC ABC BAR", matchReplacer.transform(variables).call(m));
+    }
+
+    @Test public void
+    testParseExt2() throws ParseException {
+
+        Mapping<String, Object> variables = Mappings.<String, Object>mapping("map", Mappings.mapping(3, 3.0));
+
+        final Transformer<Mapping<String, ?>, Function<MatchResult, String>>
+        matchReplacer = ExpressionMatchReplacer.parseExt(
+            "${map.get(3)}",
+            Mappings.containsKeyPredicate(variables)
+        );
+
+        Matcher m = Pattern.compile("(.*)").matcher("ONE");
+        Assert.assertTrue(m.matches());
+
+        Assert.assertEquals("3.0", matchReplacer.transform(variables).call(m));
+    }
+
+    @Test public void
+    testParseExt3() throws ParseException {
+
+        // Real-world example: Replace milliseconds-since-1970 integer with the clear-text date.
+        String in  = "importlog-1550068207009.txt";
+        String out = "importlog-2019-02-13T03:30:07.009.txt";
+
+        Mapping<String, ?> variables = Mappings.mapping("df", new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS"));
+
+        final Transformer<Mapping<String, ?>, Function<MatchResult, String>>
+        matchReplacer = ExpressionMatchReplacer.parseExt(
+            "${df.format(new java.util.Date(Long.parseLong(m.group(1))))}",
+            Mappings.containsKeyPredicate(variables)
+        );
+
+        Assert.assertEquals(
+            out,
+            PatternUtil.replaceSome(
+                Pattern.compile("(155\\d{10})(?!\\d)").matcher(in), // matcher
+                matchReplacer.transform(variables)                  // matchReplacer
+            )
         );
     }
 }
