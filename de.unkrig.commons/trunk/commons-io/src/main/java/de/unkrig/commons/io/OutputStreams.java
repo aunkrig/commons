@@ -38,6 +38,7 @@ import de.unkrig.commons.lang.protocol.Consumer;
 import de.unkrig.commons.lang.protocol.ConsumerUtil;
 import de.unkrig.commons.lang.protocol.ConsumerUtil.Produmer;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
+import de.unkrig.commons.lang.protocol.NoException;
 import de.unkrig.commons.lang.protocol.Producer;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
@@ -416,7 +417,7 @@ class OutputStreams {
      * </p>
      */
     public static OutputStream
-    lengthWritten(final Consumer<? super Integer> delegate) {
+    lengthWritten(final ConsumerWhichThrows<? super Integer, NoException> delegate) {
 
         return new OutputStream() {
 
@@ -427,6 +428,4 @@ class OutputStreams {
             write(@Nullable byte[] b, int off, int len) { delegate.consume(len); }
         };
     }
-
-
 }
