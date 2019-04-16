@@ -54,7 +54,7 @@ class AssertString {
      */
     public static void
     assertContains(@Nullable String message, String expectedInfix, String actual) {
-        
+
         if (!actual.contains(expectedInfix)) {
 
             Assert.fail(
