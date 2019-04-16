@@ -43,6 +43,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
@@ -468,7 +470,12 @@ class ConsumerUtil {
      * @param <CT> The type that the {@link Produmer} <em>consumes</em>
      */
     public
-    interface Produmer<PT, CT> extends Producer<PT>, Consumer<CT> {}
+    interface Produmer<PT, CT>
+    extends ProdumerWhichThrows<PT, NoException, CT, NoException> {}
+
+    public
+    interface ProdumerWhichThrows<PT, PEX extends Throwable, CT, CEX extends Throwable>
+    extends ProducerWhichThrows<PT, PEX>, ConsumerWhichThrows<CT, CEX> {}
 
     /**
      * Equivalent with {@link #store(Object) store(null)}.
@@ -498,8 +505,8 @@ class ConsumerUtil {
     /**
      * Equivalent with {@link #cumulate(Consumer, long) cumulate(delegate)}.
      */
-    public static Consumer<Number>
-    cumulate(final Consumer<? super Long> delegate) { return ConsumerUtil.cumulate(delegate, 0); }
+    public static <EX extends Throwable> ConsumerWhichThrows<Number, EX>
+    cumulate(final ConsumerWhichThrows<? super Long, EX> delegate) { return ConsumerUtil.cumulate(delegate, 0); }
 
     /**
      * Creates and returns a {@link Consumer} which forwards the <i>cumulated</i> quantity to the given {@code
@@ -507,15 +514,15 @@ class ConsumerUtil {
      *
      * @param initialCount Initial value for the cumulated quantity, usually {@code 0L}
      */
-    public static Consumer<Number>
-    cumulate(final Consumer<? super Long> delegate, final long initialCount) {
+    public static <EX extends Throwable> ConsumerWhichThrows<Number, EX>
+    cumulate(final ConsumerWhichThrows<? super Long, EX> delegate, final long initialCount) {
 
-        return new Consumer<Number>() {
+        return new ConsumerWhichThrows<Number, EX>() {
 
             long count = initialCount;
 
             @Override public void
-            consume(Number n) { delegate.consume((this.count += n.longValue())); }
+            consume(Number n) throws EX { delegate.consume((this.count += n.longValue())); }
         };
     }
 
@@ -696,6 +703,20 @@ class ConsumerUtil {
         }
     }
 
+   public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>
+   head(final int n, final ConsumerWhichThrows<T, EX> delegate) {
+
+      return new ConsumerWhichThrows<T, EX>() {
+
+         private final AtomicInteger remaining = new AtomicInteger(n);
+
+         @Override public void
+         consume(T subject) throws EX {
+            if (this.remaining.getAndDecrement() > 0) delegate.consume(subject);
+         }
+      };
+   }
+
     /**
      * Passes the first <var>x - n</var> products of the <var>subject</var> to <var>delegate1</var>, and all
      * remaining products (if any) to <var>delegate2</var>, where <var>x</var> is the number of products of the
@@ -743,5 +764,95 @@ class ConsumerUtil {
         while (it.hasNext()) {
             delegate2.consume(it.next());
         }
+    }
+
+    /**
+     * @return Counts the number of subjects consumed so far
+     */
+    public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>
+    count(final AtomicInteger delegate) {
+
+       return new ConsumerWhichThrows<T, EX>() {
+          @Override public void consume(T subject) { delegate.incrementAndGet(); }
+       };
+    }
+
+    public static <T1, T2, EX extends Throwable> ConsumerWhichThrows<Tuple2<T1, T2>, EX>
+    getFirstOfTuple2(final ConsumerWhichThrows<T1, EX> delegate) {
+
+       return new ConsumerWhichThrows<Tuple2<T1, T2>, EX>() {
+
+          @Override public void
+          consume(Tuple2<T1, T2> subject) throws EX { delegate.consume(subject.first); }
+       };
+    }
+
+    public static <T1, T2, EX extends Throwable> ConsumerWhichThrows<Tuple2<T1, T2>, EX>
+    getSecondOfTuple2(final ConsumerWhichThrows<T2, EX> delegate) {
+
+       return new ConsumerWhichThrows<Tuple2<T1, T2>, EX>() {
+
+          @Override public void
+          consume(Tuple2<T1, T2> subject) throws EX { delegate.consume(subject.second); }
+       };
+    }
+
+    public static <T1, T2, T3, EX extends Throwable> ConsumerWhichThrows<Tuple3<T1, T2, T3>, EX>
+    getFirstOfTuple3(final ConsumerWhichThrows<T1, EX> delegate) {
+
+        return new ConsumerWhichThrows<Tuple3<T1, T2, T3>, EX>() {
+
+            @Override public void
+            consume(Tuple3<T1, T2, T3> subject) throws EX { delegate.consume(subject.first); }
+        };
+    }
+
+    public static <T1, T2, T3, EX extends Throwable> ConsumerWhichThrows<Tuple3<T1, T2, T3>, EX>
+    getSecondOfTuple3(final ConsumerWhichThrows<T2, EX> delegate) {
+
+        return new ConsumerWhichThrows<Tuple3<T1, T2, T3>, EX>() {
+
+            @Override public void
+            consume(Tuple3<T1, T2, T3> subject) throws EX { delegate.consume(subject.second); }
+        };
+    }
+
+    public static <T1, T2, T3, EX extends Throwable> ConsumerWhichThrows<Tuple3<T1, T2, T3>, EX>
+    getThirdOfTuple3(final ConsumerWhichThrows<T3, EX> delegate) {
+
+        return new ConsumerWhichThrows<Tuple3<T1, T2, T3>, EX>() {
+
+            @Override public void
+            consume(Tuple3<T1, T2, T3> subject) throws EX { delegate.consume(subject.third); }
+        };
+    }
+
+    public static <T1, T2, EX extends Throwable> ConsumerWhichThrows<Tuple2<T1, T2>, EX>
+    put(final Map<T1, T2> delegate) {
+
+        return new ConsumerWhichThrows<Tuple2<T1, T2>, EX>() {
+
+            @Override public void
+            consume(Tuple2<T1, T2> subject) { delegate.put(subject.first, subject.second); }
+        };
+    }
+
+    public static <T extends Number> Consumer<T>
+    add(final AtomicInteger delegate) {
+
+        return new Consumer<T>() {
+
+            @Override public void
+            consume(T subject) { delegate.addAndGet(subject.intValue()); }
+        };
+    }
+
+    public static <T extends Number> Consumer<T>
+    add(final AtomicLong delegate) {
+
+        return new Consumer<T>() {
+            @Override public void
+            consume(T subject) { delegate.addAndGet(subject.longValue()); }
+        };
     }
 }
