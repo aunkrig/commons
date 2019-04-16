@@ -55,9 +55,9 @@ class AuthenticateHeaderParser {
      */
     public static
     class Challenge {
-        
+
         public final String authScheme;
-        
+
         Challenge(String authScheme) {
             this.authScheme = authScheme;
         }
@@ -68,9 +68,9 @@ class AuthenticateHeaderParser {
      */
     public static final
     class Token68Challenge extends Challenge {
-        
+
         public final String token68;
-        
+
         private
         Token68Challenge(String authScheme, String token68) {
             super(authScheme);
@@ -83,9 +83,9 @@ class AuthenticateHeaderParser {
      */
     public static final
     class ChallengeWithAuthParams extends Challenge {
-        
+
         public final List<AuthParam> authParams;
-        
+
         private
         ChallengeWithAuthParams(String authScheme, List<AuthParam> authParams) {
             super(authScheme);
@@ -110,7 +110,7 @@ class AuthenticateHeaderParser {
 
         StatefulScanner<TokenType, State>
         ss = new StatefulScanner<TokenType, State>(AuthenticateHeaderParser.CHALLENGE_SCANNER);
-        
+
         ss.setInput(input);
 
         AbstractParser<TokenType>
@@ -183,10 +183,10 @@ class AuthenticateHeaderParser {
 
     private static final StatefulScanner<TokenType, State>
     CHALLENGE_SCANNER = new StatefulScanner<TokenType, State>(State.class);
-    
+
     static {
         String token = "[A-Za-z0-9!#$%&'*+\\-.^_`|~]+";
-        
+
         // space
         AuthenticateHeaderParser.CHALLENGE_SCANNER.addRule(
             AuthenticateHeaderParser.CHALLENGE_SCANNER.ANY_STATE,
