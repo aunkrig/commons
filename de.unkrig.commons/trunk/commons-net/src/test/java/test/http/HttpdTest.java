@@ -54,7 +54,7 @@ class HttpdTest {
     private static final File HTTP_ROOT_DIR = new File("src/test/resources/http_root");
     private static final File KEYSTORE_FILE = new File("src/test/resources/keystore");
 
-    
+
     @Test public void
     testGetFile() throws IOException {
 
