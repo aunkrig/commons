@@ -194,7 +194,7 @@ class UrlConnections {
 
     /**
      * The missing counterpart for {@link HttpURLConnection#setFixedLengthStreamingMode(int)}.
-     * 
+     *
      * @return The fixed content-length when using fixed-length streaming mode; {@code -1} means fixed-length streaming
      *         mode is disabled for output
      */
@@ -211,7 +211,7 @@ class UrlConnections {
 
     /**
      * The missing counterpart for {@link HttpURLConnection#setChunkedStreamingMode(int)}.
-     * 
+     *
      * @return The chunk-length when using chunked encoding streaming mode for output; {@code -1} means chunked
      *         encoding is disabled for output
      */
