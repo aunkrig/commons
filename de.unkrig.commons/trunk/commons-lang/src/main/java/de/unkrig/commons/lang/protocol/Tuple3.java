@@ -26,6 +26,9 @@
 
 package de.unkrig.commons.lang.protocol;
 
+import de.unkrig.commons.lang.ObjectUtil;
+import de.unkrig.commons.nullanalysis.Nullable;
+
 /**
  * A container for three elements
  *
@@ -33,7 +36,7 @@ package de.unkrig.commons.lang.protocol;
  * @param <T2> Type of the second element
  * @param <T3> Type of the third element
  */
-public
+public final
 class Tuple3<T1, T2, T3> {
 
     /**
@@ -57,6 +60,22 @@ class Tuple3<T1, T2, T3> {
         this.second = second;
         this.third  = third;
     }
+
+    @Override public boolean
+    equals(@Nullable Object obj) {
+    	if (!(obj instanceof Tuple3)) return false;
+    	@SuppressWarnings("unchecked") Tuple3<T1, T2, T3> that = (Tuple3<T1, T2, T3>) obj;
+    	return (
+			ObjectUtil.equals(this.first, that.first)
+			&& ObjectUtil.equals(this.second, that.second)
+			&& ObjectUtil.equals(this.third, that.third)
+		);
+    }
+
+    @Override public int
+    hashCode() {
+    	return ObjectUtil.hashCode(this.first) + ObjectUtil.hashCode(this.second) + ObjectUtil.hashCode(this.third);
+	}
 
     @Override public String
     toString() {

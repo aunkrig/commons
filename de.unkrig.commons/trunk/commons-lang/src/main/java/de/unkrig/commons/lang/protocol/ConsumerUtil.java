@@ -694,13 +694,34 @@ class ConsumerUtil {
         ConsumerWhichThrows<? super T, ? extends EX> delegate2
     ) throws EX {
 
-        for (int i = 0; i <= n && subject.hasNext(); i++) {
-            delegate1.consume(subject.next());
-        }
+    	ConsumerWhichThrows<? super T, ? extends EX> c = ConsumerUtil.head(n, delegate1, delegate2);
+    	while (subject.hasNext()) c.consume(subject.next());
+    }
 
-        while (subject.hasNext()) {
-            delegate2.consume(subject.next());
-        }
+    /**
+     * @return A consumer that forwards the first <var>n</var> consumed subjects to <var>delegate1</var>, and all
+     *         following consumed subjects to <var>delegate2</var>
+     */
+    public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>
+    head(
+		final int                                          n,
+		final ConsumerWhichThrows<? super T, ? extends EX> delegate1,
+		final ConsumerWhichThrows<? super T, ? extends EX> delegate2
+	) {
+
+    	return new ConsumerWhichThrows<T, EX>() {
+
+    		final AtomicInteger count = new AtomicInteger();
+
+			@Override public void
+			consume(T subject) throws EX {
+				if (this.count.getAndIncrement() >= n) {
+					delegate1.consume(subject);
+				} else {
+					delegate2.consume(subject);
+				}
+			}
+		};
     }
 
    public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>

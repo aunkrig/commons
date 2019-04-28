@@ -140,17 +140,43 @@ class ProducerUtil {
     }
 
     /**
-     * Creates and returns a {@link Producer} that produced the given <var>elements</var>.
+     * Creates and returns a {@link Producer} that produces the given <var>singleElement</var>, and after that an
+     * infinite sequence of {@code null}.
      *
      * <p>
      *   The returned producer is not synchronized and therefore not thread-safe; to get a thread-safe producer, use
      *   {@link ProducerUtil#synchronizedProducer(ProducerWhichThrows)}.
      * </p>
      */
-    public static <T> Producer<T>
+    public static <T, EX extends Throwable> ProducerWhichThrows<T, EX>
+    one(final T singleProduct) {
+    	return new ProducerWhichThrows<T, EX>() {
+
+    		boolean first = true;
+
+			@Override @Nullable public T
+			produce() {
+				if (this.first) {
+					this.first = false;
+					return singleProduct;
+				}
+				return null;
+			}
+		};
+    }
+
+    /**
+     * Creates and returns a {@link Producer} that produces the given <var>elements</var>.
+     *
+     * <p>
+     *   The returned producer is not synchronized and therefore not thread-safe; to get a thread-safe producer, use
+     *   {@link ProducerUtil#synchronizedProducer(ProducerWhichThrows)}.
+     * </p>
+     */
+    public static <T, EX extends Throwable> ProducerWhichThrows<T, EX>
     fromElements(final T... elements) {
 
-        return new Producer<T>() {
+        return new ProducerWhichThrows<T, EX>() {
 
             int idx;
 
@@ -541,15 +567,15 @@ class ProducerUtil {
      *   {@link ProducerUtil#synchronizedProducer(ProducerWhichThrows)}.
      * </p>
      */
-    public static <T> Producer<T>
-    concat(final Producer<? extends T> delegate1, final Producer<? extends T> delegate2) {
+    public static <T, EX extends Throwable> ProducerWhichThrows<T, EX>
+    concat(final ProducerWhichThrows<? extends T, EX> delegate1, final ProducerWhichThrows<? extends T, EX> delegate2) {
 
-        return new Producer<T>() {
+        return new ProducerWhichThrows<T, EX>() {
 
             boolean second;
 
             @Override @Nullable public T
-            produce() {
+            produce() throws EX {
                 if (this.second) return delegate2.produce();
                 T product = delegate1.produce();
                 if (product != null) return product;
@@ -557,6 +583,32 @@ class ProducerUtil {
                 return delegate2.produce();
             }
         };
+    }
+
+    /**
+     * Creates and returns a producer that produces <var>additionalElement</var>, and after that the products of
+     * <var>delegate</var>.
+     * <p>
+     *   The returned producer is not synchronized and therefore not thread-safe; to get a thread-safe producer, use
+     *   {@link ProducerUtil#synchronizedProducer(ProducerWhichThrows)}.
+     * </p>
+     */
+    public static <T, EX extends Throwable> ProducerWhichThrows<T, EX>
+    concat(T additionalElement, ProducerWhichThrows<? extends T, EX> delegate) {
+    	return ProducerUtil.concat(ProducerUtil.<T, EX>one(additionalElement), delegate);
+    }
+
+    /**
+     * Creates and returns a producer that produces the products of <var>delegate</var>, and, when that produces
+     * {@code null}, <var>additionalElement</var>, and after that an infinite sequence of {@code null}.
+     * <p>
+     *   The returned producer is not synchronized and therefore not thread-safe; to get a thread-safe producer, use
+     *   {@link ProducerUtil#synchronizedProducer(ProducerWhichThrows)}.
+     * </p>
+     */
+    public static <T, EX extends Throwable> ProducerWhichThrows<T, EX>
+    concat(ProducerWhichThrows<? extends T, EX> delegate, T additionalElement) {
+    	return ProducerUtil.concat(delegate, ProducerUtil.<T, EX>one(additionalElement));
     }
 
     /**
