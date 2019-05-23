@@ -715,7 +715,7 @@ class ConsumerUtil {
 
 			@Override public void
 			consume(T subject) throws EX {
-				if (this.count.getAndIncrement() >= n) {
+				if (this.count.getAndIncrement() < n) {
 					delegate1.consume(subject);
 				} else {
 					delegate2.consume(subject);
