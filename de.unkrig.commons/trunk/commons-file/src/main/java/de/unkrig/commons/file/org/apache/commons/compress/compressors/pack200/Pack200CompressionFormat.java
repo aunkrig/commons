@@ -26,6 +26,7 @@
 
 package de.unkrig.commons.file.org.apache.commons.compress.compressors.pack200;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -70,7 +71,7 @@ class Pack200CompressionFormat implements CompressionFormat {
 
     @Override public CompressorInputStream
     open(File compressedFile) throws IOException {
-        InputStream is = new FileInputStream(compressedFile);
+        InputStream is = new BufferedInputStream(new FileInputStream(compressedFile));
         try {
             return new Pack200CompressorInputStream(is);
         } catch (IOException ioe) {
