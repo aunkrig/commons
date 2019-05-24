@@ -42,6 +42,8 @@ import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveForma
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormatFactory;
 import de.unkrig.commons.file.org.apache.commons.compress.compressors.CompressionFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.compressors.CompressionFormatFactory;
+import de.unkrig.commons.io.EventCounter;
+import de.unkrig.commons.io.ExponentiallyLoggingEventCounter;
 import de.unkrig.commons.io.InputStreams;
 import de.unkrig.commons.io.MarkableFileInputStream;
 import de.unkrig.commons.lang.AssertionUtil;
@@ -55,7 +57,15 @@ class CompressUtil {
 
     static { AssertionUtil.enableAssertionsForThisClass(); }
 
-    private static final Logger LOGGER = Logger.getLogger(CompressUtil.class.getName());
+    private static final Logger LOGGER                         = Logger.getLogger(CompressUtil.class.getName());
+    private static final Logger LOGGER_INPUT_STREAM_STATISTICS = Logger.getLogger(CompressUtil.class.getName() + ".inputStreamStatistics"); // SUPPRESS CHECKSTYLE LineLength
+
+    private static final EventCounter
+    FILE_INPUT_STREAM_STATISTICS = new ExponentiallyLoggingEventCounter(
+        "fileInputStream",
+        CompressUtil.LOGGER_INPUT_STREAM_STATISTICS,
+        Level.FINE
+    );
 
     private CompressUtil() {}
 
@@ -272,7 +282,11 @@ class CompressUtil {
         NormalContentsHandler<? extends T>   normalContentsHandler
     ) throws IOException {
 
-        InputStream is = new MarkableFileInputStream(file);
+        InputStream is = InputStreams.statisticsInputStream(
+            new MarkableFileInputStream(file),
+            CompressUtil.FILE_INPUT_STREAM_STATISTICS
+        );
+
         try {
 
             ArchiveFormat archiveFormat = ArchiveFormatFactory.forContents(is);
@@ -299,7 +313,7 @@ class CompressUtil {
                     return normalContentsHandler.handleNormalContents(is);
                 }
 
-                CompressorInputStream cis = compressionFormat.compressorInputStream(is);
+                CompressorInputStream cis = compressionFormat.compressorInputStream(new BufferedInputStream(is));
 
                 T result = compressorHandler.handleCompressor(cis, compressionFormat);
 
