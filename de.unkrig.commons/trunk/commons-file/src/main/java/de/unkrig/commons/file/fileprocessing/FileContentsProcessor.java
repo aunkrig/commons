@@ -31,8 +31,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import de.unkrig.commons.file.contentsprocessing.ContentsProcessor;
+import de.unkrig.commons.io.EventCounter;
+import de.unkrig.commons.io.ExponentiallyLoggingEventCounter;
+import de.unkrig.commons.io.InputStreams;
 import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
@@ -45,6 +50,9 @@ import de.unkrig.commons.nullanalysis.Nullable;
  */
 public
 class FileContentsProcessor<T> implements FileProcessor<T> {
+
+    private static final Logger
+    LOGGER_INPUT_STREAM_STATISTICS = Logger.getLogger(FileContentsProcessor.class.getName() + ".inputStreamStatistics");
 
     /**
      * The {@link ContentsProcessor} that is used to process a file's contents when {@link #process(String, File)} is
@@ -68,7 +76,7 @@ class FileContentsProcessor<T> implements FileProcessor<T> {
      */
     @Override @Nullable public T
     process(String path, final File file) throws FileNotFoundException, IOException {
-        InputStream is = new FileInputStream(file);
+        InputStream is = FileContentsProcessor.fileInputStream(file);
         try {
             this.contentsProcessor.process(
                 file.getPath(),                                       // path
@@ -78,7 +86,7 @@ class FileContentsProcessor<T> implements FileProcessor<T> {
                 new ProducerWhichThrows<InputStream, IOException>() { // opener
 
                     @Override @Nullable public InputStream
-                    produce() throws IOException { return new FileInputStream(file); }
+                    produce() throws IOException { return FileContentsProcessor.fileInputStream(file); }
                 }
             );
             is.close();
@@ -91,4 +99,19 @@ class FileContentsProcessor<T> implements FileProcessor<T> {
             try { is.close(); } catch (IOException ioe) {}
         }
     }
+
+    private static InputStream
+    fileInputStream(final File file) throws FileNotFoundException {
+
+        InputStream is = new FileInputStream(file);
+
+        return InputStreams.statisticsInputStream(is, FileContentsProcessor.FILE_INPUT_STREAM_STATISTICS);
+    }
+
+    private static final EventCounter
+    FILE_INPUT_STREAM_STATISTICS = new ExponentiallyLoggingEventCounter(
+        "fileInputStream",
+        FileContentsProcessor.LOGGER_INPUT_STREAM_STATISTICS,
+        Level.FINE
+    );
 }
