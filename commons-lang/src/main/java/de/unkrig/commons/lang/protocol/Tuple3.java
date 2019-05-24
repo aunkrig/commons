@@ -63,19 +63,19 @@ class Tuple3<T1, T2, T3> {
 
     @Override public boolean
     equals(@Nullable Object obj) {
-    	if (!(obj instanceof Tuple3)) return false;
-    	@SuppressWarnings("unchecked") Tuple3<T1, T2, T3> that = (Tuple3<T1, T2, T3>) obj;
-    	return (
-			ObjectUtil.equals(this.first, that.first)
-			&& ObjectUtil.equals(this.second, that.second)
-			&& ObjectUtil.equals(this.third, that.third)
-		);
+        if (!(obj instanceof Tuple3)) return false;
+        @SuppressWarnings("unchecked") Tuple3<T1, T2, T3> that = (Tuple3<T1, T2, T3>) obj;
+        return (
+            ObjectUtil.equals(this.first, that.first)
+            && ObjectUtil.equals(this.second, that.second)
+            && ObjectUtil.equals(this.third, that.third)
+        );
     }
 
     @Override public int
     hashCode() {
-    	return ObjectUtil.hashCode(this.first) + ObjectUtil.hashCode(this.second) + ObjectUtil.hashCode(this.third);
-	}
+        return ObjectUtil.hashCode(this.first) + ObjectUtil.hashCode(this.second) + ObjectUtil.hashCode(this.third);
+    }
 
     @Override public String
     toString() {
