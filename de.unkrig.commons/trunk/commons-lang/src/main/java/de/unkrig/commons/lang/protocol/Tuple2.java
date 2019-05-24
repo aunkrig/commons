@@ -56,15 +56,15 @@ class Tuple2<T1, T2> {
 
     @Override public boolean
     equals(@Nullable Object obj) {
-    	if (!(obj instanceof Tuple2)) return false;
-    	@SuppressWarnings("unchecked") Tuple2<T1, T2> that = (Tuple2<T1, T2>) obj;
-    	return ObjectUtil.equals(this.first, that.first) && ObjectUtil.equals(this.second, that.second);
+        if (!(obj instanceof Tuple2)) return false;
+        @SuppressWarnings("unchecked") Tuple2<T1, T2> that = (Tuple2<T1, T2>) obj;
+        return ObjectUtil.equals(this.first, that.first) && ObjectUtil.equals(this.second, that.second);
     }
 
     @Override public int
     hashCode() { return ObjectUtil.hashCode(this.first) + ObjectUtil.hashCode(this.second); }
 
-	@Override public String
+    @Override public String
     toString() {
         return this.first + ":" + this.second;
     }

@@ -65,30 +65,30 @@ class Tuple4<T1, T2, T3, T4> {
         this.first  = first;
         this.second = second;
         this.third  = third;
-		this.fourth = fourth;
+        this.fourth = fourth;
     }
 
     @Override public boolean
     equals(@Nullable Object obj) {
-    	if (!(obj instanceof Tuple4)) return false;
-    	@SuppressWarnings("unchecked") Tuple4<T1, T2, T3, T4> that = (Tuple4<T1, T2, T3, T4>) obj;
-    	return (
-			ObjectUtil.equals(this.first, that.first)
-			&& ObjectUtil.equals(this.second, that.second)
-			&& ObjectUtil.equals(this.third, that.third)
-			&& ObjectUtil.equals(this.fourth, that.fourth)
-		);
+        if (!(obj instanceof Tuple4)) return false;
+        @SuppressWarnings("unchecked") Tuple4<T1, T2, T3, T4> that = (Tuple4<T1, T2, T3, T4>) obj;
+        return (
+            ObjectUtil.equals(this.first, that.first)
+            && ObjectUtil.equals(this.second, that.second)
+            && ObjectUtil.equals(this.third, that.third)
+            && ObjectUtil.equals(this.fourth, that.fourth)
+        );
     }
 
     @Override public int
     hashCode() {
-    	return (
-			ObjectUtil.hashCode(this.first)
-			+ ObjectUtil.hashCode(this.second)
-			+ ObjectUtil.hashCode(this.third)
-			+ ObjectUtil.hashCode(this.fourth)
-		);
-	}
+        return (
+            ObjectUtil.hashCode(this.first)
+            + ObjectUtil.hashCode(this.second)
+            + ObjectUtil.hashCode(this.third)
+            + ObjectUtil.hashCode(this.fourth)
+        );
+    }
 
     @Override public String
     toString() {

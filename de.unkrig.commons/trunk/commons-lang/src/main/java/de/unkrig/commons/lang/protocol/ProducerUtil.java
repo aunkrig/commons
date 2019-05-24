@@ -150,19 +150,19 @@ class ProducerUtil {
      */
     public static <T, EX extends Throwable> ProducerWhichThrows<T, EX>
     one(final T singleProduct) {
-    	return new ProducerWhichThrows<T, EX>() {
+        return new ProducerWhichThrows<T, EX>() {
 
-    		boolean first = true;
+            boolean first = true;
 
-			@Override @Nullable public T
-			produce() {
-				if (this.first) {
-					this.first = false;
-					return singleProduct;
-				}
-				return null;
-			}
-		};
+            @Override @Nullable public T
+            produce() {
+                if (this.first) {
+                    this.first = false;
+                    return singleProduct;
+                }
+                return null;
+            }
+        };
     }
 
     /**
@@ -595,7 +595,7 @@ class ProducerUtil {
      */
     public static <T, EX extends Throwable> ProducerWhichThrows<T, EX>
     concat(T additionalElement, ProducerWhichThrows<? extends T, EX> delegate) {
-    	return ProducerUtil.concat(ProducerUtil.<T, EX>one(additionalElement), delegate);
+        return ProducerUtil.concat(ProducerUtil.<T, EX>one(additionalElement), delegate);
     }
 
     /**
@@ -608,7 +608,7 @@ class ProducerUtil {
      */
     public static <T, EX extends Throwable> ProducerWhichThrows<T, EX>
     concat(ProducerWhichThrows<? extends T, EX> delegate, T additionalElement) {
-    	return ProducerUtil.concat(delegate, ProducerUtil.<T, EX>one(additionalElement));
+        return ProducerUtil.concat(delegate, ProducerUtil.<T, EX>one(additionalElement));
     }
 
     /**
