@@ -315,5 +315,66 @@ class InputStreams {
         };
     }
 
+    /**
+     * @return Counts all file operations in the given <var>eventCounter</var>
+     */
+    public static InputStream
+    statisticsInputStream(InputStream delegate, final EventCounter eventCounter) {
 
+        return new FilterInputStream(delegate) {
+
+            @Override public int
+            read() throws IOException {
+                int result = super.read();
+                eventCounter.countEvent("read", result == -1 ? -1 : 1);
+                return result;
+            }
+
+            @Override @NotNullByDefault(false) public int
+            read(byte[] b, int off, int len) throws IOException {
+                int result = super.read(b, off, len);
+                eventCounter.countEvent("read", result);
+                return result;
+            }
+
+            @Override public long
+            skip(long n) throws IOException {
+                long result = super.skip(n);
+                eventCounter.countEvent("skip", result);
+                return result;
+            }
+
+            @Override public int
+            available() throws IOException {
+                int result = super.available();
+                eventCounter.countEvent("available", result);
+                return result;
+            }
+
+            @Override public void
+            close() throws IOException {
+                super.close();
+                eventCounter.countEvent("close");
+            }
+
+            @Override public synchronized void
+            mark(int readlimit) {
+                super.mark(readlimit);
+                eventCounter.countEvent("mark", readlimit);
+            }
+
+            @Override public synchronized void
+            reset() throws IOException {
+                super.reset();
+                eventCounter.countEvent("reset");
+            }
+
+            @Override public boolean
+            markSupported() {
+                boolean result = super.markSupported();
+                eventCounter.countEvent("markSupported", result);
+                return result;
+            }
+        };
+    }
 }
