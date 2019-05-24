@@ -38,7 +38,7 @@ import de.unkrig.commons.nullanalysis.NotNullByDefault;
  * A {@link FilterInputStream} that counts the number of bytes read through it.
  *
  * @deprecated Use {@link InputStreams#wye(InputStream, java.io.OutputStream)}, {@link
- *             OutputStreams#lengthWritten(de.unkrig.commons.lang.protocol.Consumer)}, {@link
+ *             OutputStreams#lengthWritten(de.unkrig.commons.lang.protocol.ConsumerWhichThrows)}, {@link
  *             ConsumerUtil#cumulate(de.unkrig.commons.lang.protocol.Consumer, long)} and {@link ConsumerUtil#store()}
  *             instead.
  */
