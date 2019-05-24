@@ -41,8 +41,8 @@ import de.unkrig.commons.nullanalysis.Nullable;
  * Map#remove(Object) remove} and {@link Map#clear() clear}) are all missing, because a {@link Mapping} is not changed
  * by "putting" key-value-pairs into it.
  * <p>
- *   Actually {@link Map} should extend {@link Mapping}, but it doesn't - thus there are the {@link #asMap()} and
- *   {@link Mappings#fromMap(Map)} helper methods.
+ *   Actually {@link Map} should extend {@link Mapping}, but it doesn't - thus there are the {@link Mapping#asMap()}
+ *   and {@link Mappings#fromMap(Map)} helper methods.
  * </p>
  * <p>
  *   The relationship between {@link Mapping} and {@link Map} is very much like that between {@link Predicate} and
@@ -86,7 +86,7 @@ class Mapping<K, V> {
         return new Map<K, V>() {
 
             @Override public boolean containsKey(Object key) { return Mapping.this.containsKey(key); }
-            @Override public V       get(Object key)         { return Mapping.this.get(key); }
+            @Override public V       get(Object key)         { return Mapping.this.get(key);         }
 
             // SUPPRESS CHECKSTYLE LineLength:16
             @Override public int              size()                                  { throw new UnsupportedOperationException("size");          }
