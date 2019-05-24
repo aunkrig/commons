@@ -26,6 +26,7 @@
 
 package de.unkrig.commons.file.org.apache.commons.compress.compressors.z;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -79,7 +80,7 @@ class ZCompressionFormat implements CompressionFormat {
 
     @Override public CompressorInputStream
     open(File compressedFile) throws IOException {
-        InputStream is = new FileInputStream(compressedFile);
+        InputStream is = new BufferedInputStream(new FileInputStream(compressedFile));
         try {
             return new ZCompressorInputStream(is);
         } catch (IOException ioe) {

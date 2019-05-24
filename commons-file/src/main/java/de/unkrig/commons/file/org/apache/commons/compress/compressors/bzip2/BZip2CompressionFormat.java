@@ -26,6 +26,7 @@
 
 package de.unkrig.commons.file.org.apache.commons.compress.compressors.bzip2;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -71,7 +72,7 @@ class BZip2CompressionFormat implements CompressionFormat {
 
     @Override public CompressorInputStream
     open(File compressedFile) throws IOException {
-        InputStream is = new FileInputStream(compressedFile);
+        InputStream is = new BufferedInputStream(new FileInputStream(compressedFile));
         try {
             return new BZip2CompressorInputStream(is);
         } catch (IOException ioe) {

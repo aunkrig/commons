@@ -26,6 +26,7 @@
 
 package de.unkrig.commons.file.org.apache.commons.compress.archivers.cpio;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -84,7 +85,7 @@ class CpioArchiveFormat implements ArchiveFormat {
 
     @Override public ArchiveInputStream
     open(File archiveFile)
-    throws IOException { return new CpioArchiveInputStream(new FileInputStream(archiveFile)); }
+    throws IOException { return new CpioArchiveInputStream(new BufferedInputStream(new FileInputStream(archiveFile))); }
 
     @Override public ArchiveOutputStream
     archiveOutputStream(OutputStream os) { return new CpioArchiveOutputStream(os); }
