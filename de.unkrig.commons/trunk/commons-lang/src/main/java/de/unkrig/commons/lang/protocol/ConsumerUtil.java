@@ -694,8 +694,8 @@ class ConsumerUtil {
         ConsumerWhichThrows<? super T, ? extends EX> delegate2
     ) throws EX {
 
-    	ConsumerWhichThrows<? super T, ? extends EX> c = ConsumerUtil.head(n, delegate1, delegate2);
-    	while (subject.hasNext()) c.consume(subject.next());
+        ConsumerWhichThrows<? super T, ? extends EX> c = ConsumerUtil.head(n, delegate1, delegate2);
+        while (subject.hasNext()) c.consume(subject.next());
     }
 
     /**
@@ -704,24 +704,24 @@ class ConsumerUtil {
      */
     public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>
     head(
-		final int                                          n,
-		final ConsumerWhichThrows<? super T, ? extends EX> delegate1,
-		final ConsumerWhichThrows<? super T, ? extends EX> delegate2
-	) {
+        final int                                          n,
+        final ConsumerWhichThrows<? super T, ? extends EX> delegate1,
+        final ConsumerWhichThrows<? super T, ? extends EX> delegate2
+    ) {
 
-    	return new ConsumerWhichThrows<T, EX>() {
+        return new ConsumerWhichThrows<T, EX>() {
 
-    		final AtomicInteger count = new AtomicInteger();
+            final AtomicInteger count = new AtomicInteger();
 
-			@Override public void
-			consume(T subject) throws EX {
-				if (this.count.getAndIncrement() < n) {
-					delegate1.consume(subject);
-				} else {
-					delegate2.consume(subject);
-				}
-			}
-		};
+            @Override public void
+            consume(T subject) throws EX {
+                if (this.count.getAndIncrement() < n) {
+                    delegate1.consume(subject);
+                } else {
+                    delegate2.consume(subject);
+                }
+            }
+        };
     }
 
    public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>
