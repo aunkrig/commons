@@ -951,7 +951,7 @@ class IoUtil {
         return OutputStreams.compareOutput(n, whenIdentical, whenNotIdentical);
     }
 
-    /** @deprecated Use {@link OutputStreams#lengthWritten(Consumer)} instead */
+    /** @deprecated Use {@link OutputStreams#lengthWritten(ConsumerWhichThrows)} instead */
     @Deprecated public static OutputStream
     lengthWritten(final Consumer<? super Integer> delegate) { return OutputStreams.lengthWritten(delegate); }
 
