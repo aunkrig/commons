@@ -428,4 +428,44 @@ class OutputStreams {
             write(@Nullable byte[] b, int off, int len) { delegate.consume(len); }
         };
     }
+
+    /**
+     * @return Counts all file operations in the given <var>eventCounter</var>
+     */
+    public static OutputStream
+    statisticsOutputStream(OutputStream delegate, final EventCounter eventCounter) {
+
+        return new FilterOutputStream(delegate) {
+
+            @Override public void
+            write(int b) throws IOException {
+                super.write(b);
+                eventCounter.countEvent("write", 1);
+            }
+
+            @Override @NotNullByDefault(false) public void
+            write(byte[] b) throws IOException {
+                super.write(b);
+                eventCounter.countEvent("write", b.length);
+            }
+
+            @Override @NotNullByDefault(false) public void
+            write(byte[] b, int off, int len) throws IOException {
+                super.write(b, off, len);
+                eventCounter.countEvent("write", len);
+            }
+
+            @Override public void
+            flush() throws IOException {
+                super.flush();
+                eventCounter.countEvent("flush");
+            }
+
+            @Override public void
+            close() throws IOException {
+                eventCounter.countEvent("close");
+                super.close();
+            }
+        };
+    }
 }

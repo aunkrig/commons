@@ -360,7 +360,7 @@ class InputStreams {
             @Override public synchronized void
             mark(int readlimit) {
                 super.mark(readlimit);
-                eventCounter.countEvent("mark", readlimit);
+                eventCounter.countEvent("mark", Integer.toString(readlimit));
             }
 
             @Override public synchronized void

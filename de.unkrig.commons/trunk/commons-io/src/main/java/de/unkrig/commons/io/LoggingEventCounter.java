@@ -26,32 +26,65 @@
 
 package de.unkrig.commons.io;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Formatter;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Counts named (and optionally parameterized) events, and logs the current state after 100, 200, 400, 800 asf. events.
- */
-public final
-class ExponentiallyLoggingEventCounter extends LoggingEventCounter {
+import de.unkrig.commons.nullanalysis.Nullable;
 
-    private final AtomicInteger eventCount          = new AtomicInteger();
-    private int                 eventCountThreshold = 100;
+/**
+ * Counts named (and optionally parameterized) events, and logs the current state.
+ */
+public
+class LoggingEventCounter extends EventCounter {
+
+    private final String name;
+    private final Logger logger;
+    private final Level  level;
+
+    private final long start = System.currentTimeMillis();
 
     public
-    ExponentiallyLoggingEventCounter(String name, Logger logger, Level level) {
-        super(name, logger, level);
+    LoggingEventCounter(String name, Logger logger, Level level) {
+        this.name   = name;
+        this.logger = logger;
+        this.level  = level;
     }
 
-    @Override protected void
+    /**
+     * Counts each event and invokes {@link #log()}.
+     */
+    @Override public void
+    countEvent(String eventName, @Nullable Object arg) {
+
+        // Short circuit if/while the events are not loggable. Particularly, events are <em>not</em> counted, which
+        // may or may not be what you'd expect.
+        if (!this.logger.isLoggable(this.level)) return;
+
+        super.countEvent(eventName, arg);
+
+        this.log();
+    }
+
+    /**
+     * Logs the current state in a compact, human-readable format to the configured logger.
+     */
+    protected void
     log() {
 
-        if (this.eventCount.incrementAndGet() == this.eventCountThreshold) {
+        long interval = System.currentTimeMillis() - this.start;
 
-            this.eventCountThreshold <<= 1;
+        Formatter f = new Formatter();
+        f.format("%s statistics:", this.name);
+        for (Entry<String, AtomicLong> e : this.sortedEvents) {
+            String eventName = e.getKey();
+            long   arg       = e.getValue().get();
 
-            super.log();
+            f.format(" %s=%,d(%,d/sec)", eventName, arg, arg / interval);
         }
+
+        this.logger.log(this.level, f.toString());
     }
 }
