@@ -417,7 +417,8 @@ class SimpleLogging {
      *
      *   <dt><var>handler</var></dt>
      *   <dd>
-     *     {@link StdoutHandler}
+     *     No handler; only the parent loggers' handlers will be called (iff {@code user-parent-handlers} is {@code
+     *     true})
      *   </dd>
      *
      *   <dt><var>formatter</var></dt>
@@ -470,7 +471,7 @@ class SimpleLogging {
         }
 
         // Argument 3 == handler
-        Handler handler = null;
+        Handler handler;
         if (args[2] != null) {
             String handlerSpec = args[2];
             try {
@@ -478,6 +479,8 @@ class SimpleLogging {
             } catch (Exception e) {
                 throw ExceptionUtil.wrap(handlerSpec + ": " + e.getMessage(), e, RuntimeException.class);
             }
+        } else {
+            handler = null;
         }
 
         // Argument 4 == formatter
@@ -497,29 +500,24 @@ class SimpleLogging {
             formatter = PrintfFormatter.MESSAGE_AND_EXCEPTION;
         }
 
-        // Argument 5 == useParenthandlers
+        // Argument 5 == useParentHandlers
         boolean useParentHandlers = true;
         if (args[4] != null) {
             useParentHandlers = Boolean.parseBoolean(args[4]);
         }
 
-        if (handler == null) {
-
-            for (Logger logger : loggers) {
-                logger.setLevel(level);
-            }
-
-            handler = new StdoutHandler();
+        // Configure the handler.
+        if (handler != null) {
+            if (level != null) handler.setLevel(level);
+            handler.setFormatter(formatter);
         }
 
-        if (level != null) handler.setLevel(level);
-        handler.setFormatter(formatter);
-
+        // Configure the loggers.
         for (Logger logger : loggers) {
 
-            logger.addHandler(handler);
+            if (handler != null) logger.addHandler(handler);
 
-            if (level == null || !logger.isLoggable(level)) logger.setLevel(level);
+            if (level != null && !logger.isLoggable(level)) logger.setLevel(level);
 
             logger.setUseParentHandlers(useParentHandlers);
         }

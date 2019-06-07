@@ -28,6 +28,7 @@ package de.unkrig.commons.file;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
@@ -59,13 +60,6 @@ class CompressUtil {
 
     private static final Logger LOGGER                         = Logger.getLogger(CompressUtil.class.getName());
     private static final Logger LOGGER_INPUT_STREAM_STATISTICS = Logger.getLogger(CompressUtil.class.getName() + ".inputStreamStatistics"); // SUPPRESS CHECKSTYLE LineLength
-
-    private static final EventCounter
-    FILE_INPUT_STREAM_STATISTICS = new ExponentiallyLoggingEventCounter(
-        "fileInputStream",
-        CompressUtil.LOGGER_INPUT_STREAM_STATISTICS,
-        Level.FINE
-    );
 
     private CompressUtil() {}
 
@@ -282,10 +276,7 @@ class CompressUtil {
         NormalContentsHandler<? extends T>   normalContentsHandler
     ) throws IOException {
 
-        InputStream is = InputStreams.statisticsInputStream(
-            new MarkableFileInputStream(file),
-            CompressUtil.FILE_INPUT_STREAM_STATISTICS
-        );
+        InputStream is = CompressUtil.markableFileInputStream(file);
 
         try {
 
@@ -386,5 +377,20 @@ class CompressUtil {
                 return result;
             }
         };
+    }
+
+    private static final EventCounter
+    FILE_INPUT_STREAM_STATISTICS = new ExponentiallyLoggingEventCounter(
+        "fileInputStream",
+        CompressUtil.LOGGER_INPUT_STREAM_STATISTICS,
+        Level.FINE
+    );
+
+    private static InputStream
+    markableFileInputStream(final File file) throws FileNotFoundException {
+        return InputStreams.statisticsInputStream(
+            new MarkableFileInputStream(file),
+            CompressUtil.FILE_INPUT_STREAM_STATISTICS
+        );
     }
 }

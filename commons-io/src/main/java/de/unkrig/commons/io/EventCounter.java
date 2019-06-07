@@ -26,10 +26,15 @@
 
 package de.unkrig.commons.io;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
 
+import de.unkrig.commons.lang.Comparators;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -38,7 +43,8 @@ import de.unkrig.commons.nullanalysis.Nullable;
 public abstract
 class EventCounter {
 
-    protected final Map<String, Object> events = new HashMap<String, Object>();
+    protected final Map<String, AtomicLong>         events       = new HashMap<String, AtomicLong>();
+    protected final List<Entry<String, AtomicLong>> sortedEvents = new ArrayList<Map.Entry<String, AtomicLong>>();
 
     public void
     countEvent(String eventName) { this.countEvent(eventName, null); }
@@ -46,15 +52,21 @@ class EventCounter {
     public void
     countEvent(String eventName, @Nullable Object arg) {
 
-        this.increment(eventName, 1);
-
         if (arg == null) {
-            ;
+
+            // Argumentless events are solely COUNTED.
+            this.increment(eventName, 1);
         } else
         if (arg instanceof Number) {
+
+            // Numeric arguments are also SUMMED UP in a separate counter.
+            this.increment(eventName, 1);
             this.increment(eventName + "_", ((Number) arg).longValue());
         } else
         {
+
+            // Non-numeric arguments are also counter PER ARGUMENT VALUE.
+            this.increment(eventName, 1);
             this.increment(eventName + ":" + arg, 1);
         }
     }
@@ -62,9 +74,15 @@ class EventCounter {
     private void
     increment(String key, long delta) {
 
-        AtomicLong value = (AtomicLong) this.events.get(key);
+        AtomicLong value = this.events.get(key);
         if (value == null) {
             this.events.put(key, (value = new AtomicLong(delta)));
+            this.sortedEvents.clear();
+            this.sortedEvents.addAll(this.events.entrySet());
+            Collections.sort(
+                this.sortedEvents,
+                Comparators.keyComparator(Comparators.nullSafeComparator(Comparators.<String>naturalOrderComparator()))
+            );
         } else {
             value.addAndGet(delta);
         }

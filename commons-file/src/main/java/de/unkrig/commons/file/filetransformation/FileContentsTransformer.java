@@ -27,13 +27,18 @@
 package de.unkrig.commons.file.filetransformation;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import de.unkrig.commons.file.FileUtil;
 import de.unkrig.commons.file.contentstransformation.ContentsTransformer;
+import de.unkrig.commons.io.EventCounter;
+import de.unkrig.commons.io.ExponentiallyLoggingEventCounter;
 import de.unkrig.commons.io.InputStreams;
 import de.unkrig.commons.io.IoUtil;
 import de.unkrig.commons.io.MarkableFileInputStream;
@@ -47,6 +52,11 @@ import de.unkrig.commons.lang.protocol.RunnableUtil;
  */
 public
 class FileContentsTransformer implements FileTransformer {
+
+    @SuppressWarnings("unused")
+    private static final Logger LOGGER                          = Logger.getLogger(FileContentsTransformer.class.getName()); // SUPPRESS CHECKSTYLE LineLength:2
+    private static final Logger LOGGER_INPUT_STREAM_STATISTICS  = Logger.getLogger(FileContentsTransformer.class.getName() + ".inputStreamStatistics");
+    private static final Logger LOGGER_OUTPUT_STREAM_STATISTICS = Logger.getLogger(FileContentsTransformer.class.getName() + ".outputStreamStatistics");
 
     private final ContentsTransformer contentsTransformer;
     private final boolean             keepOriginals;
@@ -72,7 +82,7 @@ class FileContentsTransformer implements FileTransformer {
         case CHECK:
             FileContentsTransformer.checkIdentity(
                 path,
-                new MarkableFileInputStream(in),
+                FileContentsTransformer.markableFileInputStream(in),
                 this.contentsTransformer,
                 true                             // closeInputStream
             );
@@ -121,7 +131,6 @@ class FileContentsTransformer implements FileTransformer {
             throw AssertionUtil.<Error>fail("Unexpected mode '" + mode + "'");
         }
     }
-
 
     /**
      * Transforms the contents of the <var>file</var> and writes the results the same <var>file</var>.
@@ -178,10 +187,10 @@ class FileContentsTransformer implements FileTransformer {
     private void
     transformOutOfPlace(File inputFile, File outputFile) throws  IOException {
 
-        InputStream is = new MarkableFileInputStream(inputFile);
+        InputStream is = FileContentsTransformer.markableFileInputStream(inputFile);
         try {
 
-            OutputStream os = new FileOutputStream(outputFile);
+            OutputStream os = FileContentsTransformer.fileOutputStream(outputFile);
             try {
 
                 this.contentsTransformer.transform(inputFile.getPath(), is, os);
@@ -229,4 +238,34 @@ class FileContentsTransformer implements FileTransformer {
             if (closeInputStream) try { inputStream.close(); } catch (Exception e) {}
         }
     }
+
+    private static InputStream
+    markableFileInputStream(File file) throws FileNotFoundException {
+        return InputStreams.statisticsInputStream(
+            new MarkableFileInputStream(file),
+            FileContentsTransformer.FILE_INPUT_STREAM_STATISTICS
+        );
+    }
+
+    private static final EventCounter
+    FILE_INPUT_STREAM_STATISTICS = new ExponentiallyLoggingEventCounter(
+        "fileInputStream",
+        FileContentsTransformer.LOGGER_INPUT_STREAM_STATISTICS,
+        Level.FINE
+    );
+
+    private static OutputStream
+    fileOutputStream(File file) throws FileNotFoundException {
+        return OutputStreams.statisticsOutputStream(
+            new FileOutputStream(file),
+            FileContentsTransformer.FILE_OUTPUT_STREAM_STATISTICS
+        );
+    }
+
+    private static final EventCounter
+    FILE_OUTPUT_STREAM_STATISTICS = new ExponentiallyLoggingEventCounter(
+        "fileOutputStream",
+        FileContentsTransformer.LOGGER_OUTPUT_STREAM_STATISTICS,
+        Level.FINE
+    );
 }
