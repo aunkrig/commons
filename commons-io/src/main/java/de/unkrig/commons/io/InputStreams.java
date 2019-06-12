@@ -96,7 +96,6 @@ class InputStreams {
                 return count;
             }
 
-
             @Override public int
             available() throws IOException {
                 out.flush();

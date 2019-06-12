@@ -125,7 +125,6 @@ class AbstractParser<TT extends Enum<TT>> {
         return -1;
     }
 
-
     // PEEK READ METHODS
 
     /**

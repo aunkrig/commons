@@ -44,7 +44,6 @@ import de.unkrig.commons.net.http.servlett.Servlett;
 public final
 class NioHttpServer implements Stoppable {
 
-
     private final NioTcpServer nioTcpServer;
 
     /**

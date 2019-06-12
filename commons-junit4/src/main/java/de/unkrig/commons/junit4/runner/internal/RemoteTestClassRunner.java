@@ -88,7 +88,6 @@ class RemoteTestClassRunner extends ParentRunner<Runner> {
         return Collections.<Runner>singletonList(this.delegate);
     }
 
-
     @Override @NotNullByDefault(false) protected Description
     describeChild(Runner child) {
         assert child == this.delegate;

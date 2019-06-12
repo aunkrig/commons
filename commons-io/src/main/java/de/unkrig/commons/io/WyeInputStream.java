@@ -72,7 +72,6 @@ class WyeInputStream extends FilterInputStream {
         return count;
     }
 
-
     @Override public int
     available() throws IOException {
         this.out.flush();

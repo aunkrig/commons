@@ -159,7 +159,6 @@ class HttpProxy implements RunnableWhichThrows<IOException>, Stoppable {
                         return responseTransformer.transform(httpResponse);
                     }
 
-
                     @Override public void
                     close() throws IOException {
                         httpClient.close();

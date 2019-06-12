@@ -400,7 +400,6 @@ class FtpSession implements RunnableWhichThrows<IOException> {
     private TransmissionMode            transmissionMode = TransmissionMode.STREAM;
     @Nullable private String            renameFrom; // For RNFR / RNTO
 
-
     // IMPLEMENTATION
 
     /**

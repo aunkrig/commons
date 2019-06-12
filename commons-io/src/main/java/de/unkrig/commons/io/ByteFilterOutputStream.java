@@ -82,7 +82,6 @@ class ByteFilterOutputStream extends FilterOutputStream {
         this.worker.start();
     }
 
-
     @Override public void
     write(int b) throws IOException { this.write(new byte[] { (byte) b }, 0, 1); }
 

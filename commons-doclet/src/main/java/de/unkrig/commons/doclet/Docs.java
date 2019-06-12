@@ -291,7 +291,6 @@ class Docs {
 
         if (expected == null) return true;
 
-
         if (expected.size() != actual.length) return false;
 
         for (int i = 0; i < expected.size(); i++) {

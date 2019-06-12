@@ -287,7 +287,6 @@ class LineUtil {
     public static List<String>
     readAllLines(Reader r, boolean closeReader) throws IOException {
 
-
         try {
 
             BufferedReader br = r instanceof BufferedReader ? (BufferedReader) r : new BufferedReader(r);

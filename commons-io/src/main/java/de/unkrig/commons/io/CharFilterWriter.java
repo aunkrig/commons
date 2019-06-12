@@ -82,7 +82,6 @@ class CharFilterWriter extends FilterWriter {
         this.worker.start();
     }
 
-
     @Override public void
     write(int b) throws IOException { this.write(new char[] { (char) b }, 0, 1); }
 
