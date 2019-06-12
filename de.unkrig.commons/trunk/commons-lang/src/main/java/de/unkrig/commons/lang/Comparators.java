@@ -27,6 +27,7 @@
 package de.unkrig.commons.lang;
 
 import java.util.Comparator;
+import java.util.Map;
 
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
@@ -107,6 +108,32 @@ class Comparators {
                     delegate.compare(o1, o2)
                 );
             }
+        };
+    }
+
+    /**
+     * @return A {@code Comparator<Map.Entry>)} that compares {@link Entry}s by comparing their <em>keys</em>.
+     */
+    public static <T> Comparator<Map.Entry<T, ?>>
+    keyComparator(final Comparator<T> delegate) {
+
+        return new Comparator<Map.Entry<T, ?>>() {
+
+            @Override @NotNullByDefault(false) public int
+            compare(Map.Entry<T, ?> e1, Map.Entry<T, ?> e2) { return delegate.compare(e1.getKey(), e2.getKey()); }
+        };
+    }
+
+    /**
+     * @return A {@code Comparator<Map.Entry>)} that compares {@link Entry}s by comparing their <em>values</em>.
+     */
+    public static <T> Comparator<Map.Entry<?, T>>
+    valueComparator(final Comparator<T> delegate) {
+
+        return new Comparator<Map.Entry<?, T>>() {
+
+            @Override @NotNullByDefault(false) public int
+            compare(Map.Entry<?, T> e1, Map.Entry<?, T> e2) { return delegate.compare(e1.getValue(), e2.getValue()); }
         };
     }
 }
