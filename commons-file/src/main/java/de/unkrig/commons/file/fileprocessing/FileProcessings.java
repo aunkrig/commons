@@ -238,7 +238,7 @@ class FileProcessings {
         final ExceptionHandler<IOException>  exceptionHandler
     ) {
 
-        final FileProcessor<T> dp = new FileProcessor<T>() {
+        final FileProcessor<T> directoryProcessor = new FileProcessor<T>() {
 
             /**
              * @throws IOException <var>directory</var> is not a listable directory
@@ -306,9 +306,11 @@ class FileProcessings {
             process(String path, File file) throws IOException, InterruptedException {
 
                 if (file.isDirectory()) {
-                    return pathPredicate.evaluate(path + '/') ? dp.process(path, file)                   : null;
+                    return pathPredicate.evaluate(path + '/') ? directoryProcessor.process(path, file) : null;
                 } else {
-                    return pathPredicate.evaluate(path)       ? regularFileProcessor.process(path, file) : null;
+
+                    // As described in the method JAVADOC, the "pathPredicate" is *not* applied here!
+                    return regularFileProcessor.process(path, file);
                 }
             }
         };
@@ -337,9 +339,6 @@ class FileProcessings {
         @Override @Nullable public Object
         combine(String directoryPath, File directory, List<Object> combinables) { return null; }
     };
-
-
-
 
     /**
      * @deprecated Was renamed to {@link FileProcessings#compressedAndArchiveFileProcessor}
