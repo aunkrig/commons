@@ -26,7 +26,6 @@
 
 package de.unkrig.commons.io;
 
-
 /**
  * Implements <a href="http://en.wikipedia.org/wiki/Percent-encoding">Percent-Encoding</a>.
  */

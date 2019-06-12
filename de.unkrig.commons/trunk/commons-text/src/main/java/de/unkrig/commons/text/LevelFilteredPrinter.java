@@ -28,7 +28,6 @@ package de.unkrig.commons.text;
 
 import de.unkrig.commons.nullanalysis.Nullable;
 
-
 /**
  * Filters messages by their level; by default only {@link #info(String)} and higher are printed.
  */

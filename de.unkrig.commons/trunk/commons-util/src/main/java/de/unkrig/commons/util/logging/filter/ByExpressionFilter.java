@@ -102,7 +102,6 @@ class ByExpressionFilter implements Filter {
         this.condition = condition;
     }
 
-
     @NotNullByDefault(false) @Override public boolean
     isLoggable(final LogRecord record) {
 

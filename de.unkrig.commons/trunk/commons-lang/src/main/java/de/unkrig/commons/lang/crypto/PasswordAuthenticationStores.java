@@ -72,7 +72,6 @@ class PasswordAuthenticationStores {
             @Override @Nullable public char[]
             getPassword(String key, String userName) { return delegate.getProperty(key + ".password"); }
 
-
             @Override public void
             put(String key, String userName) throws IOException {
 

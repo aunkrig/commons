@@ -1178,7 +1178,6 @@ class HttpMessage {
 
         new RunnableWhichThrows<IOException>() {
 
-
             @Override public void
             run() throws IOException {
                 final RunnableWhichThrows<IOException> chunkReader = this;
