@@ -283,8 +283,8 @@ class SimpleLogging {
     }
 
     /**
-     * Shorthand for {@code setLevel(Level.CONFIG)}: Messages of level {@link Level#CONFIG CONFIG}, i.e. 'verbose
-     * output' are logged.
+     * Shorthand for {@link #setLevel(Level) setLevel}{@code (Level.CONFIG)}: Messages of level {@link Level#CONFIG
+     * CONFIG}, i.e. "verbose output" are logged.
      */
     public static void
     setVerbose() {
@@ -508,8 +508,8 @@ class SimpleLogging {
 
         // Configure the handler.
         if (handler != null) {
-            if (level != null) handler.setLevel(level);
-            handler.setFormatter(formatter);
+        if (level != null) handler.setLevel(level);
+        handler.setFormatter(formatter);
         }
 
         // Configure the loggers.
