@@ -38,7 +38,7 @@ class HardReference<T> {
 
     @Nullable private T referent;
 
-    public HardReference()           { this.referent = null; }
+    public HardReference()           { this.referent = null;     }
     public HardReference(T referent) { this.referent = referent; }
 
     /** @return The referent or {@code null} */

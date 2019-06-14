@@ -88,11 +88,11 @@ interface PasswordAuthenticationStore extends Destroyable {
     NOP = new PasswordAuthenticationStore() {
         @Override @Nullable public String getUserName(String key)                           { return null; }
         @Override @Nullable public char[] getPassword(String key, String userName)          { return null; }
-        @Override public void             put(String key, String userName)                  {}
-        @Override public void             put(String key, String userName, char[] password) {}
-        @Override public void             remove(String key)                                {}
+        @Override public void             put(String key, String userName)                  { ;            }
+        @Override public void             put(String key, String userName, char[] password) { ;            }
+        @Override public void             remove(String key)                                { ;            }
 
-        @Override public void             destroy()                                         {}
+        @Override public void             destroy()                                         { ;             }
         @Override public boolean          isDestroyed()                                     { return false; }
     };
 

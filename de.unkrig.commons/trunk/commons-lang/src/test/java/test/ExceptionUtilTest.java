@@ -56,9 +56,9 @@ class ExceptionUtilTest {
         }
     }
 
-    private void meth1() { this.meth2(); }
+    private void meth1() { this.meth2();                                                }
     private void meth2() { ExceptionUtil.throwUndeclared(new ClassNotFoundException()); }
 
-    private void meth3() throws IOException { this.meth4(); }
+    private void meth3() throws IOException { this.meth4();                                                }
     private void meth4() throws IOException { ExceptionUtil.throwUndeclared(new ClassNotFoundException()); }
 }

@@ -362,7 +362,7 @@ class Mappings {
     constant(final V constantValue) {
 
         return new Mapping<K, V>() {
-            @Override public boolean     containsKey(@Nullable Object key) { return true; }
+            @Override public boolean     containsKey(@Nullable Object key) { return true;          }
             @Override @Nullable public V get(@Nullable Object key)         { return constantValue; }
         };
     }

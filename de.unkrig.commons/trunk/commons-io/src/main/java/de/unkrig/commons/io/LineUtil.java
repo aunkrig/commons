@@ -397,9 +397,9 @@ class LineUtil {
                 }
             }
 
-            @Override public int  getLineNumber()                   { return this.line; }
-            @Override public void setLineNumber(int lineNumber)     { this.line = lineNumber; }
-            @Override public int  getColumnNumber()                 { return this.column; }
+            @Override public int  getLineNumber()                   { return this.line;           }
+            @Override public void setLineNumber(int lineNumber)     { this.line = lineNumber;     }
+            @Override public int  getColumnNumber()                 { return this.column;         }
             @Override public void setColumnNumber(int columnNumber) { this.column = columnNumber; }
 
             @Override public void setTabWidth(int tabWidth) { this.tabWidth = tabWidth; }

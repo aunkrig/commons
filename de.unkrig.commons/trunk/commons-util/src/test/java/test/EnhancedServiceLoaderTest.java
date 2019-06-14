@@ -45,17 +45,21 @@ class EnhancedServiceLoaderTest {
 
     public static final
     class MyService1 implements MyService {
+
         public static MyService INSTANCE = new MyService1(); // SUPPRESS CHECKSTYLE StaticVariableName
-        private                 MyService1() {}
-        @Override public int    getValue()   { return 1; }
+
+        private MyService1() {}
+
+        @Override public int getValue() { return 1; }
     }
 
     public static final
     class MyService2 implements MyService {
 
-        private                 MyService2()  {}
+        private MyService2() {}
+
         public static MyService getInstance() { return new MyService2(); }
-        @Override public int    getValue()    { return 2; }
+        @Override public int    getValue()    { return 2;                }
     }
 
     public static

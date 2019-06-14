@@ -50,7 +50,7 @@ class Readers {
     EMPTY_READER = new Reader() {
         @Override public int  read()                                       { return -1; }
         @Override public int  read(@Nullable char[] buf, int off, int len) { return -1; }
-        @Override public void close()                                      {}
+        @Override public void close()                                      { ;          }
     };
 
     /**
@@ -223,7 +223,7 @@ class Readers {
                 return 1;
             }
 
-            @Override public boolean markSupported()                             { return false; }
+            @Override public boolean markSupported()                             { return false;            }
             @Override public void    mark(int readAheadLimit) throws IOException { throw new IOException(); }
             @Override public void    reset() throws IOException                  { throw new IOException(); }
         };

@@ -182,24 +182,24 @@ class Json {
     /** Representation of a JSON '{@code true}' literal. */
     public static
     class True implements Value {
-        @Override public void    accept(ValueVisitor visitor) { visitor.visit(this); }
-        @Override public int     hashCode()                   { return 723688273; }
+        @Override public void    accept(ValueVisitor visitor) { visitor.visit(this);        }
+        @Override public int     hashCode()                   { return 723688273;           }
         @Override public boolean equals(@Nullable Object obj) { return obj instanceof True; }
     }
 
     /** Representation of a JSON '{@code false}' literal. */
     public static
     class False implements Value {
-        @Override public void    accept(ValueVisitor visitor) { visitor.visit(this); }
-        @Override public int     hashCode()                   { return 238545234; }
+        @Override public void    accept(ValueVisitor visitor) { visitor.visit(this);         }
+        @Override public int     hashCode()                   { return 238545234;            }
         @Override public boolean equals(@Nullable Object obj) { return obj instanceof False; }
     }
 
     /** Representation of a JSON '{@code null}' literal. */
     public static
     class Null implements Value {
-        @Override public void    accept(ValueVisitor visitor) { visitor.visit(this); }
-        @Override public int     hashCode()                   { return 61278954; }
+        @Override public void    accept(ValueVisitor visitor) { visitor.visit(this);        }
+        @Override public int     hashCode()                   { return 61278954;            }
         @Override public boolean equals(@Nullable Object obj) { return obj instanceof Null; }
     }
 
