@@ -108,18 +108,18 @@ class Sets {
 
         private static final long serialVersionUID = 1L;
 
-        @Override public Iterator   iterator()                     { return IteratorUtil.AT_END; }
-        @Override public int        size()                         { return 0; }
-        @Override public boolean    isEmpty()                      { return true; }
-        @Override public boolean    contains(Object obj)           { return false; }
-        @Override public Comparator comparator()                   { return null; }
-        @Override public SortedSet  subSet(Object from, Object to) { return Sets.EMPTY_SORTED_SET; }
-        @Override public SortedSet  headSet(Object toElement)      { return Sets.EMPTY_SORTED_SET; }
-        @Override public SortedSet  tailSet(Object fromElement)    { return Sets.EMPTY_SORTED_SET; }
-        @Override public Object     first()                        { throw new NoSuchElementException(); }
-        @Override public Object     last()                         { throw new NoSuchElementException(); }
-        @Override public boolean    equals(Object o)               { return (o instanceof SortedSet) && ((SortedSet) o).size() == 0; } // SUPPRESS CHECKSTYLE LineLength
-        @Override public int        hashCode()                     { return 0; }
+        @Override public Iterator   iterator()                     { return IteratorUtil.AT_END;                                     } // SUPPRESS CHECKSTYLE LineLength:11
+        @Override public int        size()                         { return 0;                                                       }
+        @Override public boolean    isEmpty()                      { return true;                                                    }
+        @Override public boolean    contains(Object obj)           { return false;                                                   }
+        @Override public Comparator comparator()                   { return null;                                                    }
+        @Override public SortedSet  subSet(Object from, Object to) { return Sets.EMPTY_SORTED_SET;                                   }
+        @Override public SortedSet  headSet(Object toElement)      { return Sets.EMPTY_SORTED_SET;                                   }
+        @Override public SortedSet  tailSet(Object fromElement)    { return Sets.EMPTY_SORTED_SET;                                   }
+        @Override public Object     first()                        { throw new NoSuchElementException();                             }
+        @Override public Object     last()                         { throw new NoSuchElementException();                             }
+        @Override public boolean    equals(Object o)               { return (o instanceof SortedSet) && ((SortedSet) o).size() == 0; }
+        @Override public int        hashCode()                     { return 0;                                                       }
     }
 
     /**

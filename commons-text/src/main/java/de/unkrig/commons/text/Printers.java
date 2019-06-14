@@ -131,8 +131,8 @@ class Printers {
         @Override public void error(@Nullable String message)   { System.err.println(message); }
         @Override public void warn(@Nullable String message)    { System.err.println(message); }
         @Override public void info(@Nullable String message)    { System.out.println(message); }
-        @Override public void verbose(@Nullable String message) {}
-        @Override public void debug(@Nullable String message)   {}
+        @Override public void verbose(@Nullable String message) { ;                            }
+        @Override public void debug(@Nullable String message)   { ;                            }
     };
 
     /**

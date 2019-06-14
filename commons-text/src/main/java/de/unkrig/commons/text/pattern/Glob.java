@@ -154,7 +154,7 @@ class Glob implements Predicate<String> {
      * with itself).
      */
     public static final Glob ANY = new Glob() {
-        @Override public boolean matches(String subject) { return true; }
+        @Override public boolean matches(String subject) { return true;  }
         @Override public String  toString()              { return "ANY"; }
     };
 
@@ -162,7 +162,7 @@ class Glob implements Predicate<String> {
      * A {@link Glob} that {@link #matches(String) matches} no string.
      */
     public static final Glob NONE = new Glob() {
-        @Override public boolean matches(String subject) { return false; }
+        @Override public boolean matches(String subject) { return false;  }
         @Override public String  toString()              { return "NONE"; }
     };
 

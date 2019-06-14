@@ -110,7 +110,7 @@ class AssertExit {
         class NoExitSecurityManager extends SecurityManager {
 
             @Override public void checkExit(int status)            { throw new ExitError(status); }
-            @Override public void checkPermission(Permission perm) {}
+            @Override public void checkPermission(Permission perm) { ;                            }
         }
 
         SecurityManager oldSecurityManager = System.getSecurityManager();

@@ -248,22 +248,22 @@ class MapUtil {
 
         private static final long serialVersionUID = 1;
 
-        @Override public Comparator comparator()                         { return null; }
-        @Override public SortedMap  subMap(Object fromKey, Object toKey) { return MapUtil.EMPTY_SORTED_MAP; }
-        @Override public SortedMap  headMap(Object toKey)                { return MapUtil.EMPTY_SORTED_MAP; }
-        @Override public SortedMap  tailMap(Object fromKey)              { return MapUtil.EMPTY_SORTED_MAP; }
-        @Override public Object     firstKey()                           { throw new NoSuchElementException(); }
-        @Override public Object     lastKey()                            { throw new NoSuchElementException(); }
-        @Override public int        size()                               { return 0; }
-        @Override public boolean    isEmpty()                            { return true; }
-        @Override public boolean    containsKey(Object key)              { return false; }
-        @Override public boolean    containsValue(Object value)          { return false; }
-        @Override public Object     get(Object key)                      { return null; }
-        @Override public Set        keySet()                             { return Collections.EMPTY_SET; }
-        @Override public Collection values()                             { return Collections.EMPTY_SET; }
-        @Override public Set        entrySet()                           { return Collections.EMPTY_SET; }
-        @Override public boolean    equals(Object o)                     { return (o instanceof SortedMap) && ((SortedMap) o).size() == 0; } // SUPPRESS CHECKSTYLE LineLength
-        @Override public int        hashCode()                           { return 0; }
+        @Override public Comparator comparator()                         { return null;                                                    } // SUPPRESS CHECKSTYLE LineLength:15
+        @Override public SortedMap  subMap(Object fromKey, Object toKey) { return MapUtil.EMPTY_SORTED_MAP;                                }
+        @Override public SortedMap  headMap(Object toKey)                { return MapUtil.EMPTY_SORTED_MAP;                                }
+        @Override public SortedMap  tailMap(Object fromKey)              { return MapUtil.EMPTY_SORTED_MAP;                                }
+        @Override public Object     firstKey()                           { throw new NoSuchElementException();                             }
+        @Override public Object     lastKey()                            { throw new NoSuchElementException();                             }
+        @Override public int        size()                               { return 0;                                                       }
+        @Override public boolean    isEmpty()                            { return true;                                                    }
+        @Override public boolean    containsKey(Object key)              { return false;                                                   }
+        @Override public boolean    containsValue(Object value)          { return false;                                                   }
+        @Override public Object     get(Object key)                      { return null;                                                    }
+        @Override public Set        keySet()                             { return Collections.EMPTY_SET;                                   }
+        @Override public Collection values()                             { return Collections.EMPTY_SET;                                   }
+        @Override public Set        entrySet()                           { return Collections.EMPTY_SET;                                   }
+        @Override public boolean    equals(Object o)                     { return (o instanceof SortedMap) && ((SortedMap) o).size() == 0; }
+        @Override public int        hashCode()                           { return 0;                                                       }
     }
 
     /**

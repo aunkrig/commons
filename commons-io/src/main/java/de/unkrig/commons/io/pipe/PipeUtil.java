@@ -228,11 +228,10 @@ class PipeUtil {
 
         return new AbstractPipe() {
 
-            // SUPPRESS CHECKSTYLE LineLength:4
-            @Override public int     read(byte[] buf, int off, int len) throws IOException  { return delegate.read(buf, off, len); }
+            @Override public int     read(byte[] buf, int off, int len) throws IOException  { return delegate.read(buf, off, len);  } // SUPPRESS CHECKSTYLE LineLength:3
             @Override public int     write(byte[] buf, int off, int len) throws IOException { return delegate.write(buf, off, len); }
-            @Override public boolean isEmpty()                                              { return delegate.isEmpty(); }
-            @Override public boolean isFull()                                               { return delegate.isFull(); }
+            @Override public boolean isEmpty()                                              { return delegate.isEmpty();            }
+            @Override public boolean isFull()                                               { return delegate.isFull();             }
 
             @Override public void
             close() throws IOException {

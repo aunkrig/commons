@@ -69,7 +69,7 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
      *
      * @see #addRule(EnumSet, String, Enum, Enum)
      */
-    @Nullable public final S REMAIN = null; // SUPPRESS CHECKSTYLE MemberName
+    @Nullable public final S REMAIN = null; // SUPPRESS CHECKSTYLE MemberName|Align
 
     private final List<List<Rule>> stateStack = new ArrayList<List<Rule>>();
 

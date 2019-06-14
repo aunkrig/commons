@@ -54,8 +54,8 @@ class IteratorUtil {
      */
     @SuppressWarnings("rawtypes") public static final Iterator
     AT_END = new Iterator() {
-        @Override public boolean hasNext() { return false; }
-        @Override public Object  next()    { throw new NoSuchElementException(); }
+        @Override public boolean hasNext() { return false;                              }
+        @Override public Object  next()    { throw new NoSuchElementException();        }
         @Override public void    remove()  { throw new UnsupportedOperationException(); }
     };
 
@@ -117,9 +117,9 @@ class IteratorUtil {
 
         return new Iterator<O>() {
 
-            @Override public boolean hasNext() { return delegate.hasNext(); }
+            @Override public boolean hasNext() { return delegate.hasNext();                   }
             @Override public O       next()    { return transform.transform(delegate.next()); }
-            @Override public void    remove()  { delegate.remove(); }
+            @Override public void    remove()  { delegate.remove();                           }
         };
     }
 
@@ -129,8 +129,8 @@ class IteratorUtil {
     public static <T> Iterator<T>
     repeat(final T value) {
         return new Iterator<T>() {
-            @Override public boolean hasNext() { return true; }
-            @Override public T       next()    { return value; }
+            @Override public boolean hasNext() { return true;                               }
+            @Override public T       next()    { return value;                              }
             @Override public void    remove()  { throw new UnsupportedOperationException(); }
         };
     }
@@ -160,7 +160,7 @@ class IteratorUtil {
             @Override @NotNullByDefault(false) public void add(E e)      { delegate.set(e);               }
             @Override public void                          remove()      { delegate.remove();             }
 
-            @Override public int nextIndex()     { throw new UnsupportedOperationException("nextIndex"); }
+            @Override public int nextIndex()     { throw new UnsupportedOperationException("nextIndex");     }
             @Override public int previousIndex() { throw new UnsupportedOperationException("previousIndex"); }
         };
     }

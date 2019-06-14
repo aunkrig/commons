@@ -47,13 +47,13 @@ class Writers {
      * A writer that ignores any data written to it.
      */
     public static final Writer DISCARD = new Writer() {
-        @Override public void                            write(int c)                                 {}
-        @NotNullByDefault(false) @Override public void   write(String str, int off, int len)          {}
+        @Override public void                            write(int c)                                 { ;            }
+        @NotNullByDefault(false) @Override public void   write(String str, int off, int len)          { ;            }
         @NotNullByDefault(false) @Override public Writer append(CharSequence csq)                     { return this; }
         @NotNullByDefault(false) @Override public Writer append(CharSequence csq, int start, int end) { return this; }
-        @NotNullByDefault(false) @Override public void   write(char[] cbuf, int off, int len)         {}
-        @Override public void                            flush()                                      {}
-        @Override public void                            close()                                      {}
+        @NotNullByDefault(false) @Override public void   write(char[] cbuf, int off, int len)         { ;            }
+        @Override public void                            flush()                                      { ;            }
+        @Override public void                            close()                                      { ;            }
     };
 
     /**
@@ -64,8 +64,7 @@ class Writers {
         if (delegate instanceof Writer) return (Writer) delegate;
         return new Writer() {
 
-            // SUPPRESS CHECKSTYLE LineLength:8
-            @Override public void   write(int c)                                 throws IOException { delegate.append((char) c);                          }
+            @Override public void   write(int c)                                 throws IOException { delegate.append((char) c);                          } // SUPPRESS CHECKSTYLE LineLength:9
             @Override public void   write(char[] cbuf)                           throws IOException { delegate.append(new Segment(cbuf, 0, cbuf.length)); }
             @Override public void   write(char[] cbuf, int off, int len)         throws IOException { delegate.append(new Segment(cbuf, off, len));       }
             @Override public void   write(String str)                            throws IOException { delegate.append(str);                               }
@@ -73,8 +72,8 @@ class Writers {
             @Override public Writer append(CharSequence csq)                     throws IOException { delegate.append(csq);                  return this; }
             @Override public Writer append(CharSequence csq, int start, int end) throws IOException { delegate.append(csq, start, end);      return this; }
             @Override public Writer append(char c)                               throws IOException { delegate.append(c);                    return this; }
-            @Override public void   flush()                                                         {}
-            @Override public void   close()                                                         {}
+            @Override public void   flush()                                                         { ;                                                   }
+            @Override public void   close()                                                         { ;                                                   }
         };
     }
 
