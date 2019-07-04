@@ -32,6 +32,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Comparator;
@@ -261,6 +263,13 @@ class ResourceProcessings {
      */
     @Nullable public static File
     isFile(URL location) {
-        return location.getProtocol().equalsIgnoreCase("file") ? new File(location.getFile()) : null;
+
+        if (!location.getProtocol().equalsIgnoreCase("file")) return null;
+
+        // NOTICE: Only the java.net.URI decodes %xx escape sequences (the java.net.URL does NOT!).
+        URI uri;
+        try { uri = location.toURI(); } catch (URISyntaxException e) { throw new AssertionError(e); }
+
+        return new File(uri);
     }
 }
