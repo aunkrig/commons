@@ -292,15 +292,26 @@ class Html {
     private static String
     parameterListForFragmentIdentifier(ExecutableMemberDoc executableMemberDoc) {
 
-        StringBuilder result = new StringBuilder().append('(');
+        // Up to and including Java 7, JAVADOC encoded methods as fragments like this:
+        //    #arraycopy(java.lang.Object[], int, java.lang.Object, int, int)
+        // Starting with Java 8, JAVADOC encoded methods as fragments like this:
+        //    #arraycopy-java.lang.Object:A-int-java.lang.Object-int-int-
+        // It is next to impossible to guess which flavor is desired (e.g. for external links to JRE API docs),
+        // but since Java 12 is out it should be safe to assume that the Java 8+ flavor is what users want.
+        StringBuilder result = new StringBuilder().append('-');
         for (int i = 0; i < executableMemberDoc.parameters().length; i++) {
             Parameter parameter = executableMemberDoc.parameters()[i];
 
-            if (i > 0) result.append(", ");
+            if (i > 0) result.append("-");
 
-            result.append(parameter.type().qualifiedTypeName());
+            result.append(Html.typeForFragmentIdentifier(parameter.type()));
         }
-        return result.append(')').toString();
+        return result.append('-').toString();
+    }
+
+    private static String
+    typeForFragmentIdentifier(Type type) {
+        return type.qualifiedTypeName() + type.dimension().replace("[]", ":A");
     }
 
     /**
