@@ -180,7 +180,7 @@ class ExpressionEvaluator {
 
     /**
      * Parses a string into an {@link Expression}.
-     * Semantically identical with {@link #parse(String, Predicate)}, but implements a different syntax:
+     * Semantically identical with {@link #parse(String)}, but implements a different syntax:
      * <dl>
      *   <dt>$<var>xxx</var></dt>
      *   <dd>The value of variable <var>xxx</var></dd>

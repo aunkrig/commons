@@ -344,7 +344,7 @@ class ExpressionMatchReplacer {
     }
 
     /**
-     * Simplified version of {@link #parseExt(String, Predicate))} for expressions that do not use varaibles.
+     * Simplified version of {@link #parseExt(String, Predicate)} for expressions that do not use variables.
      */
     public static Function<MatchResult, String>
     parseExt(final String spec) throws ParseException {
