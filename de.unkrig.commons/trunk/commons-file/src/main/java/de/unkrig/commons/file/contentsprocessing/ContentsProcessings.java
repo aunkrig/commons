@@ -26,6 +26,7 @@
 
 package de.unkrig.commons.file.contentsprocessing;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.compressors.CompressorInputStream;
+import org.apache.commons.compress.compressors.CompressorStreamFactory;
 
 import de.unkrig.commons.file.CompressUtil;
 import de.unkrig.commons.file.CompressUtil.ArchiveHandler;
@@ -364,8 +366,8 @@ class ContentsProcessings {
     }
 
     /**
-     * Creates and returns a {@link CompressorHandler} which processes an {@link ArchiveInputStream} by feeding its
-     * entries to the given <var>contentsProcessor</var>.
+     * Creates and returns a {@link CompressorHandler} which processes an {@link CompressorInputStream} by feeding its
+     * contents to the given <var>contentsProcessor</var>.
      *
      * @param opener Re-produces the input stream
      */
@@ -387,19 +389,32 @@ class ContentsProcessings {
                 @SuppressWarnings("deprecation") long
                 size = CompressionFormatFactory.getUncompressedSize(compressorInputStream);
 
-                return contentsProcessor.process(
-                    path + '%',                                           // path
-                    compressorInputStream,                                // inputStream
-                    size,                                                 // size
-                    -1L,                                                  // crc32
-                    new ProducerWhichThrows<InputStream, IOException>() { // opener
+                try {
+                    return contentsProcessor.process(
+                        path + '%',                                           // path
+                        compressorInputStream,                                // inputStream
+                        size,                                                 // size
+                        -1L,                                                  // crc32
+                        new ProducerWhichThrows<InputStream, IOException>() { // opener
 
-                        @Override @Nullable public InputStream
-                        produce() throws IOException {
-                            return compressionFormat.compressorInputStream(AssertionUtil.notNull(opener.produce()));
+                            @Override @Nullable public InputStream
+                            produce() throws IOException {
+                                return compressionFormat.compressorInputStream(AssertionUtil.notNull(opener.produce()));
+                            }
                         }
+                    );
+                } catch (EOFException eofe) {
+                    if (CompressorStreamFactory.GZIP.equals(compressionFormat.getName())) {
+                        eofe = ExceptionUtil.wrap(
+                            (
+                                "Maybe a \"normal\" file was accidentially detected as gzip-compressed; "
+                                + "consider using \"--look-into '~gz:***'\""
+                            ),
+                            eofe
+                        );
                     }
-                );
+                    throw eofe;
+                }
             }
         };
     }
