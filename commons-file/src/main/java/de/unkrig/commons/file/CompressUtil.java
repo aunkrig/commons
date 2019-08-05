@@ -152,14 +152,32 @@ class CompressUtil {
         NormalContentsHandler<? extends T> normalContentsHandler
     ) throws IOException {
 
-        return CompressUtil.processStream(
-            inputStream,                                           // inputStream
-            CompressUtil.lookIntoArchive(path, lookIntoFormat),    // lookIntoArchive
-            archiveHandler,                                        // archiveHandler
-            CompressUtil.lookIntoCompressed(path, lookIntoFormat), // lookIntoCompressed
-            compressorHandler,                                     // compressorHandler
-            normalContentsHandler                                  // normalContentsHandler
-        );
+        try {
+
+            return CompressUtil.processStream(
+                inputStream,                                           // inputStream
+                CompressUtil.lookIntoArchive(path, lookIntoFormat),    // lookIntoArchive
+                archiveHandler,                                        // archiveHandler
+                CompressUtil.lookIntoCompressed(path, lookIntoFormat), // lookIntoCompressed
+                compressorHandler,                                     // compressorHandler
+                normalContentsHandler                                  // normalContentsHandler
+            );
+        } catch (UnsupportedZipFeatureException uzfe) {
+
+            // Cannot use "ExceptionUtil.wrap(prefix, cause)" here, because this exception has none of the "usual"
+            // constructors.
+            throw new IOException(
+                path + ": Unsupported ZIP feature \"" + uzfe.getFeature() +  "\"",
+                uzfe
+            );
+        } catch (IOException ioe) {
+            throw ExceptionUtil.wrap(path, ioe);
+        } catch (RuntimeException re) {
+            throw ExceptionUtil.wrap(path, re);
+        } catch (Error e) { // SUPPRESS CHECKSTYLE IllegalCatch
+            throw ExceptionUtil.wrap(path, e);
+        }
+
     }
 
     /**
