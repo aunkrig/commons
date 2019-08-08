@@ -50,7 +50,9 @@ import de.unkrig.commons.io.OutputStreams;
 import de.unkrig.commons.io.pipe.PipeFactory;
 import de.unkrig.commons.io.pipe.PipeUtil;
 import de.unkrig.commons.io.pipe.PipeUtil.InputOutputStreams;
+import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
+import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.util.collections.MapUtil;
 
@@ -80,7 +82,37 @@ class ArArchiveFormat implements ArchiveFormat {
     getArchiveFileName(String fileName) { return ArArchiveFormat.FILE_NAME_UTIL.getCompressedFilename(fileName); }
 
     @Override public ArchiveInputStream
-    archiveInputStream(InputStream is) { return new ArArchiveInputStream(is); }
+    archiveInputStream(InputStream is) {
+
+        final ArArchiveInputStream aais = new ArArchiveInputStream(is);
+
+        return new ArchiveInputStream() {
+
+            @Override public ArchiveEntry
+            getNextEntry() throws IOException {
+                try {
+                    return aais.getNextArEntry();
+                } catch (NumberFormatException nfe) {
+
+                    // A corrupt AR entry may cause this RTE:
+                    if (
+                        nfe
+                        .getStackTrace()[2]
+                        .getClassName()
+                        .equals("org.apache.commons.compress.archivers.ar.ArArchiveInputStream")
+                    ) throw ExceptionUtil.wrap("Corrupt AR entry", nfe, IOException.class);
+
+                    throw nfe;
+                }
+            }
+
+            @Override public void
+            close() throws IOException { aais.close(); }
+
+            @Override @NotNullByDefault(false) public int
+            read(byte[] b, final int off, final int len) throws IOException { return aais.read(b, off, len); }
+        };
+    }
 
     @Override public ArchiveInputStream
     open(File archiveFile)
