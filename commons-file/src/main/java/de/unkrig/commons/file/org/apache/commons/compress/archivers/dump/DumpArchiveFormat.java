@@ -78,7 +78,7 @@ class DumpArchiveFormat implements ArchiveFormat {
     @Override public ArchiveInputStream
     open(File archiveFile)
     throws IOException, ArchiveException {
-        return new DumpArchiveInputStream(new BufferedInputStream(new FileInputStream(archiveFile)));
+        return this.archiveInputStream(new BufferedInputStream(new FileInputStream(archiveFile)));
     }
 
     @Override public ArchiveOutputStream

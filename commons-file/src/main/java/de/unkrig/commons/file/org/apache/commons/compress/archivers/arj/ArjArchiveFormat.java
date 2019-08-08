@@ -77,7 +77,7 @@ class ArjArchiveFormat implements ArchiveFormat {
     @Override public ArchiveInputStream
     open(File archiveFile)
     throws IOException, ArchiveException {
-        return new ArjArchiveInputStream(new BufferedInputStream(new FileInputStream(archiveFile)));
+        return this.archiveInputStream(new BufferedInputStream(new FileInputStream(archiveFile)));
     }
 
     @Override public ArchiveOutputStream

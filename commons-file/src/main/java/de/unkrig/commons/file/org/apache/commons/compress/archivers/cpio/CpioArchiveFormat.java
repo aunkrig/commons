@@ -85,7 +85,7 @@ class CpioArchiveFormat implements ArchiveFormat {
 
     @Override public ArchiveInputStream
     open(File archiveFile)
-    throws IOException { return new CpioArchiveInputStream(new BufferedInputStream(new FileInputStream(archiveFile))); }
+    throws IOException { return this.archiveInputStream(new BufferedInputStream(new FileInputStream(archiveFile))); }
 
     @Override public ArchiveOutputStream
     archiveOutputStream(OutputStream os) { return new CpioArchiveOutputStream(os); }
