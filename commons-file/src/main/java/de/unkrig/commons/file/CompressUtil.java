@@ -166,10 +166,7 @@ class CompressUtil {
 
             // Cannot use "ExceptionUtil.wrap(prefix, cause)" here, because this exception has none of the "usual"
             // constructors.
-            throw new IOException(
-                path + ": Unsupported ZIP feature \"" + uzfe.getFeature() +  "\"",
-                uzfe
-            );
+            throw new IOException(path, uzfe);
         } catch (IOException ioe) {
             throw ExceptionUtil.wrap(path, ioe);
         } catch (RuntimeException re) {
