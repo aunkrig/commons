@@ -91,7 +91,7 @@ class ArArchiveFormat implements ArchiveFormat {
             @Override public ArchiveEntry
             getNextEntry() throws IOException {
                 try {
-                    return aais.getNextArEntry();
+                    return aais.getNextEntry();
                 } catch (NumberFormatException nfe) {
 
                     // A corrupt AR entry may cause this RTE:
@@ -106,6 +106,7 @@ class ArArchiveFormat implements ArchiveFormat {
                 }
             }
 
+
             @Override public void
             close() throws IOException { aais.close(); }
 
@@ -116,7 +117,7 @@ class ArArchiveFormat implements ArchiveFormat {
 
     @Override public ArchiveInputStream
     open(File archiveFile)
-    throws IOException { return new ArArchiveInputStream(new BufferedInputStream(new FileInputStream(archiveFile))); }
+    throws IOException { return this.archiveInputStream(new BufferedInputStream(new FileInputStream(archiveFile))); }
 
     @Override public ArchiveOutputStream
     archiveOutputStream(OutputStream os) { return new ArArchiveOutputStream(os); }
