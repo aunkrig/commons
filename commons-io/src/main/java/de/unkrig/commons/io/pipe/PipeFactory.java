@@ -127,7 +127,7 @@ class PipeFactory {
     private PipeFactory() {}
 
     /**
-     * @return A pipe which is backed by an (internal) byte array of size {@code capacity}
+     * @return A pipe which is backed by an (internal) byte array of size <var>capacity</var>
      */
     public static Pipe
     byteArrayRingBuffer(final int capacity) {
