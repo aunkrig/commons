@@ -94,7 +94,7 @@ class SelectiveContentsTransformer implements ContentsTransformer {
      * If the <var>pathPredicate</var> does not match the <var>path</var>, then the <var>delegate</var> is called with
      * arguments <var>is</var> and <var>os</var>.
      * Otherwise the <var>delegate</var> is called with argument <var>is</var>, and its output is piped through the
-     * {@code transformer} before it is written to <var>os</var>.
+     * transformer before it is written to <var>os</var>.
      */
     @Override public void
     transform(final String path, InputStream is, OutputStream os) throws IOException {
