@@ -7,15 +7,9 @@
 	<property file="local_build.properties" />
 	<property file="build.properties" />
 
-	<taskdef
-		classpath="${maven.repo}/de/unkrig/antology/2.0.3/antology-2.0.3-jar-with-dependencies.jar"
-		resource="de/unkrig/antology/ant.xml"
-	/>
+	<taskdef classpath="lib/antology-2.0.7-SNAPSHOT-antlib.jar" resource="de/unkrig/antology/ant.xml" />
 
-	<taskdef
-		classpath="${maven.repo}/ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.jar"
-		resource="net/sf/antcontrib/antlib.xml"
-	/>
+	<taskdef classpath="lib/ant-contrib-1.0b3.jar" resource="net/sf/antcontrib/antlib.xml" />
 
 	<target name="publish.javadoc" description="Uploads '../de.unkrig.commons.*/target/apidocs' to a web site">
 
