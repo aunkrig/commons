@@ -179,7 +179,7 @@ class Json {
         equals(@Nullable Object obj) { return obj instanceof Array && ((Array) obj).elements.equals(this.elements); }
     }
 
-    /** Representation of a JSON '{@code true}' literal. */
+    /** Representation of a JSON "{@code true}" literal. */
     public static
     class True implements Value {
         @Override public void    accept(ValueVisitor visitor) { visitor.visit(this);        }
@@ -187,7 +187,7 @@ class Json {
         @Override public boolean equals(@Nullable Object obj) { return obj instanceof True; }
     }
 
-    /** Representation of a JSON '{@code false}' literal. */
+    /** Representation of a JSON "{@code false}" literal. */
     public static
     class False implements Value {
         @Override public void    accept(ValueVisitor visitor) { visitor.visit(this);         }
@@ -195,7 +195,7 @@ class Json {
         @Override public boolean equals(@Nullable Object obj) { return obj instanceof False; }
     }
 
-    /** Representation of a JSON '{@code null}' literal. */
+    /** Representation of a JSON "{@code null}" literal. */
     public static
     class Null implements Value {
         @Override public void    accept(ValueVisitor visitor) { visitor.visit(this);        }

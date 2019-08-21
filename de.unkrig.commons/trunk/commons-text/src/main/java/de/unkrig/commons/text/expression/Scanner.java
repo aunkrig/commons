@@ -135,7 +135,7 @@ class Scanner {
     }
 
     /**
-     * @return E.g. a single quote if the {@code text} is single quote, backslash, single quote, single quote
+     * @return E.g. a single quote if the <var>text</var> is single quote, backslash, single quote, single quote
      */
     public static Character
     decodeCharacterLiteral(String text) throws ScanException {
@@ -236,8 +236,8 @@ class Scanner {
     }
 
     /**
-     * Unescapes the character at the given {@code offset} in the {@code text}. On return, the {@code offset} points
-     * to the next character in the {@code text}.
+     * Unescapes the character at the given <var>offset</var> in the <var>text</var>. On return, the <var>offset</var>
+     * points to the next character in the <var>text</var>.
      */
     private static char
     unescape(String text, int[] offset) throws ScanException {
