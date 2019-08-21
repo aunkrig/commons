@@ -240,7 +240,7 @@ class ResourceProcessings {
      * Converts a string into a {@link URL}.
      * <ul>
      *   <li>Iff <var>filePathnameOrUrl</var> appears to be a URL, use it to construct that {@link URL}</li>
-     *   <li>Otherwise, construct a {@code file} URL that designates the file with that pathname</li>
+     *   <li>Otherwise, construct a {@code file:} URL that designates the file with that pathname</li>
      * </ul>
      */
     public static URL

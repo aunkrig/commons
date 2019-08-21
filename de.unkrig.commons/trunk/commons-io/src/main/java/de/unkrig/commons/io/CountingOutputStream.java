@@ -35,8 +35,8 @@ import de.unkrig.commons.nullanalysis.NotNullByDefault;
 /**
  * An {@link OutputStream} that counts the number of bytes written to it.
  *
- * @deprecated Use {@link OutputStreams#lengthWritten(de.unkrig.commons.lang.protocol.Consumer)} and {@link
- *             ConsumerUtil#cumulate(de.unkrig.commons.lang.protocol.Consumer, long)} instead.
+ * @deprecated Use {@link OutputStreams#lengthWritten(de.unkrig.commons.lang.protocol.ConsumerWhichThrows)} and {@link
+ *             ConsumerUtil#cumulate(de.unkrig.commons.lang.protocol.ConsumerWhichThrows, long)} instead.
  */
 @Deprecated @NotNullByDefault(false) public
 class CountingOutputStream extends OutputStream {
