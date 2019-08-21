@@ -145,7 +145,7 @@ class ZipArchiveFormat implements ArchiveFormat {
         }
 
         // Work around
-        //    Caused by: java.util.zip.ZipException: uncompressed size is required for STORED method when not writing to a file
+        //    Caused by: java.util.zip.ZipException: uncompressed size is required for STORED method when not writing to a file    // SUPPRESS CHECKSTYLE LineLength:4
         //        at org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream.validateSizeInformation(ZipArchiveOutputStream.java:652)
         //        at org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream.putArchiveEntry(ZipArchiveOutputStream.java:601)
         //        at de.unkrig.commons.file.org.apache.commons.compress.archivers.zip.ZipArchiveFormat.writeEntry(ZipArchiveFormat.java:147)
