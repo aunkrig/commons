@@ -503,7 +503,7 @@ class ConsumerUtil {
     }
 
     /**
-     * Equivalent with {@link #cumulate(Consumer, long) cumulate(delegate)}.
+     * Equivalent with {@link #cumulate(ConsumerWhichThrows, long) cumulate(delegate)}.
      */
     public static <EX extends Throwable> ConsumerWhichThrows<Number, EX>
     cumulate(final ConsumerWhichThrows<? super Long, EX> delegate) { return ConsumerUtil.cumulate(delegate, 0); }
