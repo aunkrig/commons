@@ -644,7 +644,7 @@ class StringUtil {
      * Creates a highly optimized {@link IndexOf} object that searches for "multivalent" <var>needle</var>.
      * Multivalent means that a character in the haystack equals <em>any of</em> {@code needle[offset]}.
      * <p>
-     *   E.g. a case-insensitive search for {@code "abc"} in the {@code haystack} string could be implemented like
+     *   E.g. a case-insensitive search for {@code "abc"} in a {@code haystack} string could be implemented like
      *   this:
      * </p>
      * <pre>

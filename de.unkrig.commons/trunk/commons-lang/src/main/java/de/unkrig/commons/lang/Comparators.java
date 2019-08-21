@@ -112,7 +112,8 @@ class Comparators {
     }
 
     /**
-     * @return A {@code Comparator<Map.Entry>)} that compares {@link Entry}s by comparing their <em>keys</em>.
+     * @return A {@code Comparator<Map.Entry>)} that compares {@link java.util.Map.Entry}s by comparing their
+     *         <em>keys</em>
      */
     public static <T> Comparator<Map.Entry<T, ?>>
     keyComparator(final Comparator<T> delegate) {
@@ -125,7 +126,8 @@ class Comparators {
     }
 
     /**
-     * @return A {@code Comparator<Map.Entry>)} that compares {@link Entry}s by comparing their <em>values</em>.
+     * @return A {@code Comparator<Map.Entry>)} that compares {@link java.util.Map.Entry}s by comparing their
+     *         <em>values</em>
      */
     public static <T> Comparator<Map.Entry<?, T>>
     valueComparator(final Comparator<T> delegate) {
