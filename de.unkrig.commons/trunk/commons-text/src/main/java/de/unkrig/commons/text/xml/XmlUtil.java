@@ -27,7 +27,9 @@
 package de.unkrig.commons.text.xml;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -90,10 +92,36 @@ class XmlUtil {
     parse(DocumentBuilder documentBuilder, File inputFile, @Nullable String encoding)
     throws ParserConfigurationException, SAXException, TransformerException, IOException {
 
-        InputSource inputSource = new InputSource("file:" + inputFile.getAbsolutePath());
+        InputStream is = new FileInputStream(inputFile);
+        try {
+            Document result = XmlUtil.parse(documentBuilder, is, inputFile.getAbsolutePath(), encoding);
+            is.close();
+            return result;
+        } finally {
+            try { is.close(); } catch (Exception e) {}
+        }
+    }
 
-        if (encoding != null) inputSource.setEncoding(encoding);
-        inputSource.setPublicId(inputFile.getPath());
+    /**
+     * Similar with {@link DocumentBuilder#parse(InputStream, String)}, plus each node of the parsed DOM contains
+     * location information.
+     *
+     * @see #getLocation(Node)
+     * @see InputSource#setPublicId(String)
+     * @see InputSource#setEncoding(String)
+     */
+    public static Document
+    parse(
+        DocumentBuilder  documentBuilder,
+        InputStream      inputStream,
+        @Nullable String publicId,
+        @Nullable String encoding
+    ) throws ParserConfigurationException, SAXException, TransformerException, IOException {
+
+        InputSource inputSource = new InputSource(inputStream);
+
+        inputSource.setEncoding(encoding);
+        inputSource.setPublicId(publicId);
 
         return XmlUtil.parse(documentBuilder, inputSource);
     }
