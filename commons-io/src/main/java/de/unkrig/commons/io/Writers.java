@@ -28,6 +28,7 @@ package de.unkrig.commons.io;
 
 import java.io.FilterWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 
 import javax.swing.text.Segment;
@@ -138,6 +139,63 @@ class Writers {
             @Override @NotNullByDefault(false) public void
             write(String str, int off, int len) throws IOException {
                 for (; len > 0; len--) this.write(str.charAt(off++));
+            }
+        };
+    }
+
+    /**
+     * Creates and returns a {@link Writer} that delegates all work to the given <var>delegates</var>:
+     * <ul>
+     *   <li>
+     *     The {@link Writer#write(char[], int, int) write()} methods write the given data to all the delegates;
+     *     if any of these throw an {@link IOException}, it is rethrown, and it is undefined whether all the data was
+     *     written to all the delegates.
+     *   </li>
+     *   <li>
+     *     {@link Writer#flush() flush()} flushes the delegates; throws the first {@link IOException} that any
+     *     of the delegates throws.
+     *   </li>
+     *   <li>
+     *     {@link Writer#close() close()} attempts to close <i>all</i> the <var>delegates</var>; if any of these
+     *     throw {@link IOException}s, one of them is rethrown.
+     *   </li>
+     * </ul>
+     */
+    public static Writer
+    tee(final Writer... delegates) {
+
+        return new Writer() {
+
+            @Override public void
+            close() throws IOException {
+                IOException caughtIOException = null;
+                for (Writer delegate : delegates) {
+                    try {
+                        delegate.close();
+                    } catch (IOException ioe) {
+                        caughtIOException = ioe;
+                    }
+                }
+                if (caughtIOException != null) throw caughtIOException;
+            }
+
+            @Override public void
+            flush() throws IOException {
+                for (Writer delegate : delegates) delegate.flush();
+            }
+
+            @Override @NotNullByDefault(false) public void
+            write(char[] b, int off, int len) throws IOException {
+                // Overriding this method is not strictly necessary, because "Writer.write(char[], int, int)"
+                // calls "Writer.write(int)", but "delegate.write(char[], int, int)" is probably more
+                // efficient. However, the behavior is different when one of the delegates throws an exception
+                // while being written to.
+                for (Writer delegate : delegates) delegate.write(b, off, len);
+            }
+
+            @Override public void
+            write(int b) throws IOException {
+                for (Writer delegate : delegates) delegate.write(b);
             }
         };
     }
