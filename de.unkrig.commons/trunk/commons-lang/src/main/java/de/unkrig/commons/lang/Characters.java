@@ -437,10 +437,11 @@ class Characters {
 
     private static final MethodWrapper1<Character, Boolean, Integer, NoException>
     CHARACTER_IS_ALPHABETIC = OptionalMethods.get1(
-        Character.class,  // declaringClass
-        "isAlphabetic",   // methodName
-        int.class,        // parameterType
-        NoException.class // checkedException
+        "IsAlphabetic only available in JRE 7+", // message
+        Character.class,                         // declaringClass
+        "isAlphabetic",                          // methodName
+        int.class,                               // parameterType
+        NoException.class                        // checkedException
     );
 
     /**
@@ -457,10 +458,11 @@ class Characters {
 
     private static final MethodWrapper1<Character, Boolean, Integer, NoException>
     CHARACTER_IS_IDEOGRAPHIC = OptionalMethods.get1(
-        Character.class,  // declaringClass
-        "isIdeographic",  // methodName
-        int.class,        // parameterType
-        NoException.class // checkedException
+        "IsIdeographic only available in JRE 7+", // message
+        Character.class,                          // declaringClass
+        "isIdeographic",                          // methodName
+        int.class,                                // parameterType
+        NoException.class                         // checkedException
     );
 
     /**
@@ -1070,19 +1072,21 @@ class Characters {
 
     private static final MethodWrapper1<?, Object, String, NoException>
     UNICODE_SCRIPT_FOR_NAME = OptionalMethods.get1(
-        null,                                // classLoader
-        "java.lang.Character$UnicodeScript", // declaringClassName
-        "forName",                           // methodName
-        String.class,                        // parameterType
-        null                                 // checkedException
+        "Unicode scripts only available in JRE 7+", // message
+        null,                                       // classLoader
+        "java.lang.Character$UnicodeScript",        // declaringClassName
+        "forName",                                  // methodName
+        String.class,                               // parameterType
+        null                                        // checkedException
     );
     private static final MethodWrapper1<?, Object, Integer, NoException>
     UNICODE_SCRIPT_OF = OptionalMethods.get1(
-        null,                                // classLoader
-        "java.lang.Character$UnicodeScript", // declaringClassName
-        "of",                                // methodName
-        int.class,                           // parameterType
-        null                                 // checkedException
+        "Unicode scripts only available in JRE 7+", // message
+        null,                                       // classLoader
+        "java.lang.Character$UnicodeScript",        // declaringClassName
+        "of",                                       // methodName
+        int.class,                                  // parameterType
+        null                                        // checkedException
     );
     private static final boolean
     UNICODE_SCRIPT_AVAILABLE = (

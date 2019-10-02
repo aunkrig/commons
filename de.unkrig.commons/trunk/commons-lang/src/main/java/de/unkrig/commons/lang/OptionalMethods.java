@@ -28,6 +28,7 @@ package de.unkrig.commons.lang;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import de.unkrig.commons.nullanalysis.Nullable;
 
@@ -110,19 +111,23 @@ class OptionalMethods {
      * <var>methodName</var>. If that method does not exist, a wrapper is returned that will throw an {@link
      * UnsupportedOperationException} when invoked.
      *
-     * @param <R> The return type of the method
+     * @param <R>     The return type of the method
+     * @param message The message for the {@link UnsupportedOperationException}; if {@code null}, then the method
+     *                signature is used
      */
     public static <R> MethodWrapper0<Object, R, RuntimeException>
     get0(
+        @Nullable String      message,
         @Nullable ClassLoader declaringClassLoader,
         final String          declaringClassName,
         final String          methodName
     ) {
         return OptionalMethods.get0(
+            message,
             declaringClassLoader,
             declaringClassName,
             methodName,
-            RuntimeException.class
+            null // checkedException
         );
     }
 
@@ -131,11 +136,14 @@ class OptionalMethods {
      * <var>methodName</var>. If that method does not exist, a wrapper is returned that will throw an {@link
      * UnsupportedOperationException} when invoked.
      *
-     * @param <R>  The return type of the method
-     * @param <EX> The (single) checked exception declared for the method
+     * @param <R>     The return type of the method
+     * @param <EX>    The (single) checked exception declared for the method
+     * @param message The message for the {@link UnsupportedOperationException}; if {@code null}, then the method
+     *                signature is used
      */
-    public static <R, EX extends Throwable> MethodWrapper0<Object, R, EX>
+    @SuppressWarnings("unchecked") public static <R, EX extends Throwable> MethodWrapper0<Object, R, EX>
     get0(
+        @Nullable final String    message,
         @Nullable ClassLoader     declaringClassLoader,
         final String              declaringClassName,
         final String              methodName,
@@ -145,27 +153,16 @@ class OptionalMethods {
         if (declaringClassLoader == null) declaringClassLoader = Thread.currentThread().getContextClassLoader();
         assert declaringClassLoader != null;
 
-        Class<?> declaringClass;
         try {
-            declaringClass = declaringClassLoader.loadClass(declaringClassName);
+            return (MethodWrapper0<Object, R, EX>) OptionalMethods.get0(
+                message,
+                declaringClassLoader.loadClass(declaringClassName),
+                methodName,
+                checkedException
+            );
         } catch (ClassNotFoundException e) {
-
-            return new MethodWrapper0<Object, R, EX>() {
-
-                @Override public boolean
-                isAvailable() { return false; }
-
-                @Override @Nullable public R
-                invoke(@Nullable Object target) {
-                    throw new UnsupportedOperationException(declaringClassName);
-                }
-            };
+            return OptionalMethods.missingMethod0(message, declaringClassName, methodName);
         }
-
-        @SuppressWarnings("unchecked") MethodWrapper0<Object, R, EX>
-        result = (MethodWrapper0<Object, R, EX>) OptionalMethods.get0(declaringClass, methodName, checkedException);
-
-        return result;
     }
 
     /**
@@ -173,12 +170,19 @@ class OptionalMethods {
      * <var>methodName</var>. If that method does not exist, a wrapper is returned that will throw an {@link
      * UnsupportedOperationException} when invoked.
      *
-     * @param <DC> The class that declares the method
-     * @param <R>  The return type of the method
+     * @param <DC>    The class that declares the method
+     * @param <R>     The return type of the method
+     * @param message The message for the {@link UnsupportedOperationException}; if {@code null}, then the method
+     *                signature is used
      */
     public static <DC, R> MethodWrapper0<DC, R, RuntimeException>
-    get0(final Class<DC> declaringClass, final String methodName) {
-        return OptionalMethods.get0(declaringClass, methodName, RuntimeException.class);
+    get0(@Nullable String message, Class<DC> declaringClass, final String methodName) {
+        return OptionalMethods.get0(
+            message,
+            declaringClass,
+            methodName,
+            null // checkedException
+        );
     }
 
     /**
@@ -186,56 +190,36 @@ class OptionalMethods {
      * <var>methodName</var>. If that method does not exist, a wrapper is returned that will throw an {@link
      * UnsupportedOperationException} when invoked.
      *
-     * @param <DC> The class that declares the method
-     * @param <R>  The return type of the method
-     * @param <EX> The (single) checked exception declared for the method
+     * @param <DC>    The class that declares the method
+     * @param <R>     The return type of the method
+     * @param <EX>    The (single) checked exception declared for the method
+     * @param message The message for the {@link UnsupportedOperationException}; if {@code null}, then the method
+     *                signature is used
      */
     public static <DC, R, EX extends Throwable> MethodWrapper0<DC, R, EX>
     get0(
+        @Nullable final String    message,
         final Class<DC>           declaringClass,
         final String              methodName,
         @Nullable final Class<EX> checkedException
     ) {
 
-        Method method;
         try {
-            method = declaringClass.getMethod(methodName);
+            final Method method = declaringClass.getMethod(methodName);
+
+            return new MethodWrapper0<DC, R, EX>() {
+
+                @Override public boolean
+                isAvailable() { return true; }
+
+                @Override @Nullable public R
+                invoke(@Nullable DC target) throws EX {
+                    return OptionalMethods.invoke(method, target, checkedException);
+                }
+            };
         } catch (NoSuchMethodException e) {
-            method = null;
+            return OptionalMethods.missingMethod0(message, declaringClass.getName(), methodName);
         }
-
-        final Method finalMethod = method;
-        return new MethodWrapper0<DC, R, EX>() {
-
-            @Override public boolean
-            isAvailable() { return finalMethod != null; }
-
-            @Override @Nullable public @SuppressWarnings("unchecked") R
-            invoke(@Nullable DC target) throws EX {
-
-                if (finalMethod == null) {
-                    throw new UnsupportedOperationException(
-                        declaringClass.getName()
-                        + "."
-                        + methodName
-                        + "()"
-                    );
-                }
-
-                try {
-                    return (R) finalMethod.invoke(target);
-                } catch (InvocationTargetException e) {
-                    Throwable te = e.getTargetException();
-                    if (te instanceof RuntimeException) throw (RuntimeException) te;
-                    if (te instanceof Error)            throw (Error) te;
-                    assert checkedException != null : "Caught undeclared checked exception " + te;
-                    assert checkedException.isAssignableFrom(te.getClass());
-                    throw (EX) te;
-                } catch (Exception e) {
-                    throw new AssertionError(e);
-                }
-            }
-        };
     }
 
     // ================================== METHOD WITH ONE PARAMETER ==================================
@@ -263,7 +247,7 @@ class OptionalMethods {
          * @param target Ignored iff the wrapped method is STATIC
          */
         @Nullable R
-        invoke(@Nullable DC target, @Nullable P parameter) throws EX;
+        invoke(@Nullable DC target, @Nullable P argument) throws EX;
     }
 
     /**
@@ -271,22 +255,26 @@ class OptionalMethods {
      * <var>methodName</var> and <var>parameterType</var>. If that method does not exist, a wrapper is returned that
      * will throw an {@link UnsupportedOperationException} when invoked.
      *
-     * @param <R> The return type of the wrapped method
-     * @param <P> The type of the single parameter of the wrapped method
+     * @param <R>     The return type of the wrapped method
+     * @param <P>     The type of the single parameter of the wrapped method
+     * @param message The message for the {@link UnsupportedOperationException}; if {@code null}, then the method
+     *                signature is used
      */
     public static <R, P> MethodWrapper1<?, R, P, RuntimeException>
     get1(
+        @Nullable String      message,
         @Nullable ClassLoader declaringClassLoader,
-        final String          declaringClassName,
-        final String          methodName,
+        String                declaringClassName,
+        String                methodName,
         Class<P>              parameterType
     ) {
         return OptionalMethods.get1(
+            message,
             declaringClassLoader,
             declaringClassName,
             methodName,
             parameterType,
-            RuntimeException.class
+            null // checkedException
         );
     }
 
@@ -295,40 +283,36 @@ class OptionalMethods {
      * <var>methodName</var> and <var>parameterType</var>. If that method does not exist, a wrapper is returned that
      * will throw an {@link UnsupportedOperationException} when invoked.
      *
-     * @param <R>  The return type of the wrapped method
-     * @param <P>  The type of the single parameter of the wrapped method
-     * @param <EX> The (single) checked exception declared for the method
+     * @param <R>     The return type of the wrapped method
+     * @param <P>     The type of the single parameter of the wrapped method
+     * @param <EX>    The (single) checked exception declared for the method
+     * @param message The message for the {@link UnsupportedOperationException}; if {@code null}, then the method
+     *                signature is used
      */
     public static <R, P, EX extends Throwable> MethodWrapper1<?, R, P, EX>
     get1(
+        @Nullable final String    message,
         @Nullable ClassLoader     declaringClassLoader,
         final String              declaringClassName,
         final String              methodName,
-        Class<P>                  parameterType,
+        final Class<P>            parameterType,
         @Nullable final Class<EX> checkedException
     ) {
 
         if (declaringClassLoader == null) declaringClassLoader = Thread.currentThread().getContextClassLoader();
         assert declaringClassLoader != null;
 
-        Class<?> declaringClass;
         try {
-            declaringClass = declaringClassLoader.loadClass(declaringClassName);
-        } catch (ClassNotFoundException e) {
-
-            return new MethodWrapper1<Object, R, P, EX>() {
-
-                @Override public boolean
-                isAvailable() { return false; }
-
-                @Override @Nullable public R
-                invoke(@Nullable Object target, @Nullable P parameter) {
-                    throw new UnsupportedOperationException(declaringClassName);
-                }
-            };
+            return OptionalMethods.get1(
+                message,
+                declaringClassLoader.loadClass(declaringClassName),
+                methodName,
+                parameterType,
+                checkedException
+            );
+        } catch (ClassNotFoundException cnfe) {
+            return OptionalMethods.missingMethod1(message, declaringClassName, methodName, parameterType);
         }
-
-        return OptionalMethods.get1(declaringClass, methodName, parameterType, checkedException);
     }
 
     /**
@@ -336,13 +320,21 @@ class OptionalMethods {
      * <var>methodName</var> and <var>parameterType</var>. If that method does not exist, a wrapper is returned that
      * will throw an {@link UnsupportedOperationException} when invoked.
      *
-     * @param <DC> The class that declares the wrapped method
-     * @param <R>  The return type of the wrapped method
-     * @param <P>  The type of the single parameter of the wrapped method
+     * @param <DC>    The class that declares the wrapped method
+     * @param <R>     The return type of the wrapped method
+     * @param <P>     The type of the single parameter of the wrapped method
+     * @param message The message for the {@link UnsupportedOperationException}; if {@code null}, then the method
+     *                signature is used
      */
     public static <DC, R, P> MethodWrapper1<DC, R, P, RuntimeException>
-    get1(final Class<DC> declaringClass, final String methodName, Class<P> parameterType) {
-        return OptionalMethods.get1(declaringClass, methodName, parameterType, RuntimeException.class);
+    get1(@Nullable String message, Class<DC> declaringClass, String methodName, Class<P> parameterType) {
+        return OptionalMethods.get1(
+            message,
+            declaringClass,
+            methodName,
+            parameterType,
+            null // checkedException
+        );
     }
 
     /**
@@ -350,60 +342,43 @@ class OptionalMethods {
      * <var>methodName</var> and <var>parameterType</var>. If that method does not exist, a wrapper is returned that
      * will throw an {@link UnsupportedOperationException} when invoked.
      *
-     * @param <DC> The class that declares the wrapped method
-     * @param <R>  The return type of the wrapped method
-     * @param <P>  The type of the single parameter of the wrapped method
-     * @param <EX> The (single) checked exception declared for the method
+     * @param <DC>    The class that declares the wrapped method
+     * @param <R>     The return type of the wrapped method
+     * @param <P>     The type of the single parameter of the wrapped method
+     * @param <EX>    The (single) checked exception declared for the method
+     * @param message The message for the {@link UnsupportedOperationException}; if {@code null}, then the method
+     *                signature is used
      */
     public static <DC, R, P, EX extends Throwable> MethodWrapper1<DC, R, P, EX>
     get1(
+        @Nullable final String    message,
         final Class<DC>           declaringClass,
         final String              methodName,
         final Class<P>            parameterType,
         @Nullable final Class<EX> checkedException
     ) {
 
-        Method method;
         try {
-            method = declaringClass.getMethod(methodName, parameterType);
+            final Method method = declaringClass.getMethod(methodName, parameterType);
+
+            return new MethodWrapper1<DC, R, P, EX>() {
+
+                @Override public boolean
+                isAvailable() { return true; }
+
+                @Override @Nullable public R
+                invoke(@Nullable DC target, @Nullable P argument) throws EX {
+                    return OptionalMethods.invoke(method, target, checkedException, argument);
+                }
+            };
         } catch (NoSuchMethodException e) {
-            method = null;
+            return OptionalMethods.<DC, R, P, EX>missingMethod1(
+                message,
+                declaringClass.getName(),
+                methodName,
+                parameterType
+            );
         }
-
-        final Method finalMethod = method;
-        return new MethodWrapper1<DC, R, P, EX>() {
-
-            @Override public boolean
-            isAvailable() { return finalMethod != null; }
-
-            @Override @Nullable public @SuppressWarnings("unchecked") R
-            invoke(@Nullable DC target, @Nullable P parameter) throws EX {
-
-                if (finalMethod == null) {
-                    throw new UnsupportedOperationException(
-                        declaringClass.getName()
-                        + "."
-                        + methodName
-                        + "("
-                        + parameterType.getName()
-                        + ")"
-                    );
-                }
-
-                try {
-                    return (R) finalMethod.invoke(target, parameter);
-                } catch (InvocationTargetException e) {
-                    Throwable te = e.getTargetException();
-                    if (te instanceof RuntimeException) throw (RuntimeException) te;
-                    if (te instanceof Error)            throw (Error) te;
-                    assert checkedException != null : "Caught undeclared checked exception " + te;
-                    assert checkedException.isAssignableFrom(te.getClass());
-                    throw (EX) te;
-                } catch (Exception e) {
-                    throw new AssertionError(e);
-                }
-            }
-        };
     }
 
     // ================================== METHOD WITH TWO PARAMETERS ==================================
@@ -432,7 +407,7 @@ class OptionalMethods {
          * @param target Ignored iff the wrapped method is STATIC
          */
         @Nullable R
-        invoke(@Nullable DC target, @Nullable P1 parameter1, @Nullable P2 parameter2) throws EX;
+        invoke(@Nullable DC target, @Nullable P1 argument1, @Nullable P2 argument2) throws EX;
     }
 
     /**
@@ -440,12 +415,15 @@ class OptionalMethods {
      * <var>methodName</var>, <var>parameterType1</var> and <var>parameterType2</var>. If that method does not exist,
      * a wrapper is returned that will throw an {@link UnsupportedOperationException} when invoked.
      *
-     * @param <R>  The return type of the wrapped method
-     * @param <P1> The type of the first parameter of the wrapped method
-     * @param <P2> The type of the second parameter of the wrapped method
+     * @param <R>     The return type of the wrapped method
+     * @param <P1>    The type of the first parameter of the wrapped method
+     * @param <P2>    The type of the second parameter of the wrapped method
+     * @param message The message for the {@link UnsupportedOperationException}; if {@code null}, then the method
+     *                signature is used
      */
     public static <R, P1, P2> MethodWrapper2<?, R, P1, P2, RuntimeException>
     get2(
+        @Nullable String      message,
         @Nullable ClassLoader declaringClassLoader,
         final String          declaringClassName,
         final String          methodName,
@@ -453,12 +431,13 @@ class OptionalMethods {
         Class<P2>             parameterType2
     ) {
         return OptionalMethods.get2(
+            message,
             declaringClassLoader,
             declaringClassName,
             methodName,
             parameterType1,
             parameterType2,
-            RuntimeException.class
+            null // checkedException
         );
     }
 
@@ -467,13 +446,16 @@ class OptionalMethods {
      * <var>methodName</var>, <var>parameterType1</var> and <var>parameterType2</var>. If that method does not exist,
      * a wrapper is returned that will throw an {@link UnsupportedOperationException} when invoked.
      *
-     * @param <R>  The return type of the wrapped method
-     * @param <P1> The type of the first parameter of the wrapped method
-     * @param <P2> The type of the second parameter of the wrapped method
-     * @param <EX> The (single) checked exception declared for the method
+     * @param <R>     The return type of the wrapped method
+     * @param <P1>    The type of the first parameter of the wrapped method
+     * @param <P2>    The type of the second parameter of the wrapped method
+     * @param <EX>    The (single) checked exception declared for the method
+     * @param message The message for the {@link UnsupportedOperationException}; if {@code null}, then the method
+     *                signature is used
      */
     public static <R, P1, P2, EX extends Throwable> MethodWrapper2<?, R, P1, P2, EX>
     get2(
+        @Nullable final String    message,
         @Nullable ClassLoader     declaringClassLoader,
         final String              declaringClassName,
         final String              methodName,
@@ -485,24 +467,24 @@ class OptionalMethods {
         if (declaringClassLoader == null) declaringClassLoader = Thread.currentThread().getContextClassLoader();
         assert declaringClassLoader != null;
 
-        Class<?> declaringClass;
         try {
-            declaringClass = declaringClassLoader.loadClass(declaringClassName);
+            return OptionalMethods.get2(
+                message,
+                declaringClassLoader.loadClass(declaringClassName),
+                methodName,
+                parameterType1,
+                parameterType2,
+                checkedException
+            );
         } catch (ClassNotFoundException e) {
-
-            return new MethodWrapper2<Object, R, P1, P2, EX>() {
-
-                @Override public boolean
-                isAvailable() { return false; }
-
-                @Override @Nullable public R
-                invoke(@Nullable Object target, @Nullable P1 parameter1, @Nullable P2 parameter2) {
-                    throw new UnsupportedOperationException(declaringClassName);
-                }
-            };
+            return OptionalMethods.missingMethod2(
+                message,
+                declaringClassName,
+                methodName,
+                parameterType1,
+                parameterType2
+            );
         }
-
-        return OptionalMethods.get2(declaringClass, methodName, parameterType1, parameterType2, checkedException);
     }
 
     /**
@@ -510,14 +492,29 @@ class OptionalMethods {
      * <var>methodName</var>, <var>parameterType1</var> and <var>parameterType2</var>. If that method does not exist,
      * a wrapper is returned that will throw an {@link UnsupportedOperationException} when invoked.
      *
-     * @param <DC> The class that declares the wrapped method
-     * @param <R>  The return type of the wrapped method
-     * @param <P1> The type of the first parameter of the wrapped method
-     * @param <P2> The type of the second parameter of the wrapped method
+     * @param <DC>    The class that declares the wrapped method
+     * @param <R>     The return type of the wrapped method
+     * @param <P1>    The type of the first parameter of the wrapped method
+     * @param <P2>    The type of the second parameter of the wrapped method
+     * @param message The message for the {@link UnsupportedOperationException}; if {@code null}, then the method
+     *                signature is used
      */
     public static <DC, R, P1, P2> MethodWrapper2<DC, R, P1, P2, RuntimeException>
-    get2(final Class<DC> declaringClass, final String methodName, Class<P1> parameterType1, Class<P2> parameterType2) {
-        return OptionalMethods.get2(declaringClass, methodName, parameterType1, parameterType2, RuntimeException.class);
+    get2(
+        @Nullable final String message,
+        final Class<DC>        declaringClass,
+        final String           methodName,
+        Class<P1>              parameterType1,
+        Class<P2>              parameterType2
+    ) {
+        return OptionalMethods.get2(
+            message,
+            declaringClass,
+            methodName,
+            parameterType1,
+            parameterType2,
+            null // checkedException
+        );
     }
 
     /**
@@ -525,14 +522,17 @@ class OptionalMethods {
      * <var>methodName</var>, <var>parameterType1</var> and <var>parameterType2</var>. If that method does not exist,
      * a wrapper is returned that will throw an {@link UnsupportedOperationException} when invoked.
      *
-     * @param <DC> The class that declares the wrapped method
-     * @param <R>  The return type of the wrapped method
-     * @param <P1> The type of the first parameter of the wrapped method
-     * @param <P2> The type of the second parameter of the wrapped method
-     * @param <EX> The (single) checked exception declared for the method
+     * @param <DC>    The class that declares the wrapped method
+     * @param <R>     The return type of the wrapped method
+     * @param <P1>    The type of the first parameter of the wrapped method
+     * @param <P2>    The type of the second parameter of the wrapped method
+     * @param <EX>    The (single) checked exception declared for the method
+     * @param message The message for the {@link UnsupportedOperationException}; if {@code null}, then the method
+     *                signature is used
      */
     public static <DC, R, P1, P2, EX extends Throwable> MethodWrapper2<DC, R, P1, P2, EX>
     get2(
+        @Nullable final String    message,
         final Class<DC>           declaringClass,
         final String              methodName,
         Class<P1>                 parameterType1,
@@ -543,45 +543,140 @@ class OptionalMethods {
         Method method;
         try {
             method = declaringClass.getMethod(methodName, parameterType1, parameterType2);
-        } catch (NoSuchMethodException e) {
-            method = null;
+        } catch (NoSuchMethodException nsme) {
+            try {
+                method = declaringClass.getDeclaredMethod(methodName, parameterType1, parameterType2);
+                if (!Modifier.isPublic(method.getModifiers())) method.setAccessible(true);
+            } catch (NoSuchMethodException nsme2) {
+                return OptionalMethods.missingMethod2(
+                    message,
+                    declaringClass.getName(),
+                    methodName,
+                    parameterType1,
+                    parameterType2
+                );
+            }
         }
 
         final Method finalMethod = method;
         return new MethodWrapper2<DC, R, P1, P2, EX>() {
 
             @Override public boolean
-            isAvailable() { return finalMethod != null; }
+            isAvailable() { return true; }
 
-            @Override @Nullable public @SuppressWarnings("unchecked") R
-            invoke(@Nullable DC target, @Nullable P1 parameter1, @Nullable P2 parameter2) throws EX {
-
-                if (finalMethod == null) {
-                    throw new UnsupportedOperationException(
-                        declaringClass.getName()
-                        + "."
-                        + methodName
-                        + "("
-                        + parameter1
-                        + ", "
-                        + parameter2
-                        + ")"
-                    );
-                }
-
-                try {
-                    return (R) finalMethod.invoke(target, parameter1, parameter2);
-                } catch (InvocationTargetException e) {
-                    Throwable te = e.getTargetException();
-                    if (te instanceof RuntimeException) throw (RuntimeException) te;
-                    if (te instanceof Error)            throw (Error) te;
-                    assert checkedException != null : "Caught undeclared checked exception " + te;
-                    assert checkedException.isAssignableFrom(te.getClass());
-                    throw (EX) te;
-                } catch (Exception e) {
-                    throw new AssertionError(e);
-                }
+            @Override @Nullable public R
+            invoke(@Nullable DC target, @Nullable P1 argument1, @Nullable P2 argument2) throws EX {
+                return OptionalMethods.invoke(finalMethod, target, checkedException, argument1, argument2);
             }
         };
+    }
+
+    private static <DC, R, EX extends Throwable> MethodWrapper0<DC, R, EX>
+    missingMethod0(
+        @Nullable final String explicitMessage,
+        final String           declaringClassName,
+        final String           methodName
+    ) {
+
+        return new MethodWrapper0<DC, R, EX>() {
+
+            @Override public boolean
+            isAvailable() { return false; }
+
+            @Override @Nullable public R
+            invoke(@Nullable Object target) {
+                throw new UnsupportedOperationException(
+                    OptionalMethods.cookMessage(explicitMessage, declaringClassName, methodName)
+                );
+            }
+        };
+    }
+
+    private static <DC, R, P, EX extends Throwable> MethodWrapper1<DC, R, P, EX>
+    missingMethod1(
+        @Nullable final String explicitMessage,
+        final String           declaringClassName,
+        final String           methodName,
+        final Class<P>         parameterType
+    ) {
+
+        return new MethodWrapper1<DC, R, P, EX>() {
+
+            @Override public boolean
+            isAvailable() { return false; }
+
+            @Override @Nullable public R
+            invoke(@Nullable DC target, @Nullable P argument) {
+                throw new UnsupportedOperationException(
+                    OptionalMethods.cookMessage(explicitMessage, declaringClassName, methodName, parameterType)
+                );
+            }
+        };
+    }
+
+    private static <DC, R, P1, P2, EX extends Throwable> MethodWrapper2<DC, R, P1, P2, EX>
+    missingMethod2(
+        @Nullable final String explicitMessage,
+        final String           declaringClassName,
+        final String           methodName,
+        final Class<P1>        parameterType1,
+        final Class<P2>        parameterType2
+    ) {
+
+        return new MethodWrapper2<DC, R, P1, P2, EX>() {
+
+            @Override public boolean
+            isAvailable() { return false; }
+
+            @Override @Nullable public R
+            invoke(@Nullable DC target, @Nullable P1 argument1, @Nullable P2 argument2) {
+                throw new UnsupportedOperationException(
+                    OptionalMethods.cookMessage(
+                        explicitMessage,
+                        declaringClassName,
+                        methodName,
+                        parameterType1,
+                        parameterType2
+                    )
+                );
+            }
+        };
+    }
+
+    private static String
+    cookMessage(
+        @Nullable String explicitMessage,
+        String           declaringClassName,
+        String           methodName,
+        Class<?>...      parameterTypes
+    ) {
+
+        if (explicitMessage != null) return explicitMessage;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(declaringClassName).append('.').append(methodName).append('(');
+        if (parameterTypes.length >= 1) {
+            sb.append(parameterTypes[0]);
+            for (int i = 1; i < parameterTypes.length; i++) sb.append(", ").append(parameterTypes[i]);
+        }
+        return sb.append(')').toString();
+    }
+
+    @SuppressWarnings("unchecked") private static <DC, R, EX extends Throwable> R
+    invoke(final Method method, @Nullable DC target, @Nullable Class<EX> checkedException, Object... arguments)
+    throws EX {
+
+        try {
+            return (R) method.invoke(target, arguments);
+        } catch (InvocationTargetException e) {
+            Throwable te = e.getTargetException();
+            if (te instanceof RuntimeException) throw (RuntimeException) te;
+            if (te instanceof Error)            throw (Error) te;
+            assert checkedException != null : "Caught undeclared checked exception " + te;
+            assert checkedException.isAssignableFrom(te.getClass());
+            throw (EX) te;
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
     }
 }
