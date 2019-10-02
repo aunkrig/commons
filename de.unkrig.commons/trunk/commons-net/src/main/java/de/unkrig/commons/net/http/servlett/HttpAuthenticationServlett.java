@@ -47,7 +47,8 @@ public
 class HttpAuthenticationServlett<EX extends Exception> extends AbstractServlett {
 
     /**
-     * @see HttpAuthenticationServlett#HttpAuthenticationServlett(String, UserNamePasswordPredicate)
+     * @param <EX> The exception that {@link #evaluate(HttpRequest, String, char[])} may throw
+     * @see        HttpAuthenticationServlett#HttpAuthenticationServlett(String, UserNamePasswordPredicate)
      */
     public
     interface UserNamePasswordPredicate<EX extends Throwable> {
