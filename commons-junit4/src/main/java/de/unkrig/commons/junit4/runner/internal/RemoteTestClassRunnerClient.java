@@ -51,35 +51,35 @@ public final
 class RemoteTestClassRunnerClient {
 
     private RemoteTestClassRunnerClient() {}
-    
+
     public static void
     main(String[] args) throws Exception {
-        
+
         RemoteTestClassRunnerClient.run(System.in, System.out);
     }
-    
+
     public static void
     run(InputStream fromMaster, OutputStream toMaster) throws Exception {
-        
+
         ObjectInputStream  ois = new ObjectInputStream(fromMaster);
         ObjectOutputStream oos = new ObjectOutputStream(toMaster);
-        
+
         try {
             run(ois, oos);
         } catch (Exception e) {
             oos.writeObject(e);
         }
-        
+
         oos.flush();
     }
-        
+
     public static void
     run(final ObjectInputStream ois, final ObjectOutputStream oos) throws Exception {
-        
+
         String       testClassName   = (String) ois.readObject();
         String       runnerClassName = (String) ois.readObject();
         final String nameSuffix      = (String) ois.readObject();
-        
+
         ClassLoader scl = ClassLoader.getSystemClassLoader();
 
         Class<?> clasS = scl.loadClass(testClassName);
@@ -125,7 +125,7 @@ class RemoteTestClassRunnerClient {
             fixFailure(Failure failure) {
                 return new Failure(fixDescription(failure.getDescription()), failure.getException());
             }
-            
+
             private Description
             fixDescription(Description desc) {
 
@@ -136,7 +136,7 @@ class RemoteTestClassRunnerClient {
                     desc.getDisplayName() + nameSuffix,                       // uniqueId
                     ac == null ? null : ac.toArray(new Annotation[ac.size()]) // annotations
                 );
-                
+
                 return result;
             }
             @Override public void
@@ -160,11 +160,11 @@ class RemoteTestClassRunnerClient {
         runNotifier.addListener(new MyRunListener());
 
         for (;;) {
-            
+
             ois.readObject(); // Wait until the Runner is run.
 
             runner.run(runNotifier);
-            
+
             oos.writeObject(null);
             oos.flush();
         }

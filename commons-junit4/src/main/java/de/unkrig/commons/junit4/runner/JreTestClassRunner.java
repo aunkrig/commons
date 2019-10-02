@@ -44,7 +44,7 @@ class JreTestClassRunner extends ParentRunner<Runner> {
 
     private final ParentRunner<?> delegate;
     private final String          name;
-    
+
     public
     JreTestClassRunner(Class<?> clasS) throws Exception {
         this(clasS, null, clasS.getAnnotation(JavaHome.class).value()/*"c:/Program Files/Java/jdk-11.0.1"*/);
@@ -55,9 +55,9 @@ class JreTestClassRunner extends ParentRunner<Runner> {
         super(clasS);
         String classpath = System.getProperty("java.class.path");
         assert classpath != null;
-        
+
         this.name = "[JAVA_HOME=" + javaHome + "]";
-        
+
         ProcessBuilder pb = new ProcessBuilder(
             javaHome + "/bin/java.exe",
             "-classpath",
@@ -67,7 +67,7 @@ class JreTestClassRunner extends ParentRunner<Runner> {
         );
 
         Process p = pb.start();
-        
+
         this.delegate = new RemoteTestClassRunner(
             clasS,               // clasS
             runWith,             // delegate
