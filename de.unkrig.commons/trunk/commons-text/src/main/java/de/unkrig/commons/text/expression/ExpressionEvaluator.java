@@ -43,8 +43,10 @@ import de.unkrig.commons.lang.ObjectUtil;
 import de.unkrig.commons.lang.StringUtil;
 import de.unkrig.commons.lang.protocol.Mapping;
 import de.unkrig.commons.lang.protocol.Mappings;
+import de.unkrig.commons.lang.protocol.NoException;
 import de.unkrig.commons.lang.protocol.Predicate;
 import de.unkrig.commons.lang.protocol.PredicateUtil;
+import de.unkrig.commons.lang.protocol.PredicateWhichThrows;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.lang.protocol.TransformerWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
@@ -80,14 +82,14 @@ class ExpressionEvaluator {
 
     private ClassLoader classLoader = this.getClass().getClassLoader();
 
-    private final Predicate<? super String> isValidVariableName;
+    private final PredicateWhichThrows<? super String, NoException> isValidVariableName;
 
     /**
      * @param isValidVariableName Evaluates whether a string is a valid variable name; if not, then the parser will
      *                            throw a {@link ParseException}
      */
-    public
-    ExpressionEvaluator(Predicate<? super String> isValidVariableName) {
+    public <EX extends Throwable>
+    ExpressionEvaluator(PredicateWhichThrows<? super String, NoException> isValidVariableName) {
         this.isValidVariableName = isValidVariableName;
     }
 
