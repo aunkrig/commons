@@ -45,14 +45,14 @@ public
 class PipeTestClassRunner extends ParentRunner<Runner> {
 
     private RemoteTestClassRunner delegate;
-    
+
     public
     PipeTestClassRunner(Class<?> clasS) throws Exception { this(clasS, null); }
-    
+
     public
     PipeTestClassRunner(Class<?> clasS, @Nullable Runner runner) throws Exception {
         super(clasS);
-        
+
         final PipedOutputStream toSlave    = new PipedOutputStream();
         final PipedInputStream  fromMaster = new PipedInputStream();
         fromMaster.connect(toSlave);
@@ -60,7 +60,7 @@ class PipeTestClassRunner extends ParentRunner<Runner> {
         final PipedOutputStream toMaster  = new PipedOutputStream();
         final PipedInputStream  fromSlave = new PipedInputStream();
         fromSlave.connect(toMaster);
-        
+
         new Thread() {
 
             @Override public void
@@ -71,9 +71,9 @@ class PipeTestClassRunner extends ParentRunner<Runner> {
                     throw new AssertionError(e);
                 }
             }
-            
+
         }.start();
-        
+
         this.delegate = new RemoteTestClassRunner(
             clasS,
             runner,
@@ -93,7 +93,7 @@ class PipeTestClassRunner extends ParentRunner<Runner> {
     getChildren() {
         return Collections.<Runner>singletonList(this.delegate);
     }
-    
+
     @Override @NotNullByDefault(false) protected Description
     describeChild(Runner child) {
         assert child == this.delegate;

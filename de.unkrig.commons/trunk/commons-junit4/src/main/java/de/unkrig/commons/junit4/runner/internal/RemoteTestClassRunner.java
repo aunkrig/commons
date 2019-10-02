@@ -51,7 +51,7 @@ class RemoteTestClassRunner extends ParentRunner<Runner> {
     private ObjectInputStream  fromSlave;
     private Runner             delegate;
     private String             nameSuffix;
-    
+
     public
     RemoteTestClassRunner(
         Class<?>         clasS,
@@ -61,20 +61,20 @@ class RemoteTestClassRunner extends ParentRunner<Runner> {
         InputStream      fromSlave
     ) throws Exception {
         super(clasS);
-        
+
         final Class<? extends Runner> runWithClass = (
             runWith != null ? runWith.getClass() : BlockJUnit4ClassRunner.class
         );
-        
+
         this.toSlave = new ObjectOutputStream(toSlave);
         this.toSlave.writeObject(clasS.getName());
         this.toSlave.writeObject(runWithClass.getName());
         this.toSlave.writeObject(nameSuffix);
         this.toSlave.flush();
-        
+
         this.nameSuffix = nameSuffix;
         this.fromSlave  = new ObjectInputStream(fromSlave);
-        
+
 
         try {
             this.delegate = runWith != null ? runWith : new BlockJUnit4ClassRunner(clasS);
@@ -96,7 +96,7 @@ class RemoteTestClassRunner extends ParentRunner<Runner> {
 
     public Description
     fixDescription(Description desc) {
-        
+
         Collection<Annotation> ac = desc.getAnnotations();
 
         Description result = Description.createSuiteDescription(
@@ -104,11 +104,11 @@ class RemoteTestClassRunner extends ParentRunner<Runner> {
             desc.getDisplayName() + this.nameSuffix,                  // uniqueId
             ac == null ? null : ac.toArray(new Annotation[ac.size()]) // annotations
         );
-        
+
         for (Description d : desc.getChildren()) {
             result.addChild(fixDescription(d));
         }
-        
+
         return result;
     }
 
@@ -128,16 +128,16 @@ class RemoteTestClassRunner extends ParentRunner<Runner> {
 
             this.toSlave.writeObject(null);
             this.toSlave.flush();
-            
+
             for (;;) {
                 Object o = this.fromSlave.readObject();
                 if (o == null) break;
                 if (o instanceof Exception) throw (Exception) o;
-                
+
                 String     notifierMethodName = (String) o;
                 Class<?>[] parameterTypes     = (Class<?>[]) this.fromSlave.readObject();
                 Object[]   arguments          = (Object[])   this.fromSlave.readObject();
-                
+
                 RunNotifier.class.getMethod(notifierMethodName, parameterTypes).invoke(notifier, arguments);
             }
         } catch (Exception e) {

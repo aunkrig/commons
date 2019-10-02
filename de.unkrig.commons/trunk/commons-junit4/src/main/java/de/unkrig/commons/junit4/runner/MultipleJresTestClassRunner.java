@@ -56,13 +56,13 @@ class MultipleJresTestClassRunner extends ParentRunner<Runner> {
         JAVA8_HOME,
         JAVA9_HOME,
         JAVA10_HOME,
-        JAVA11_HOME,    
+        JAVA11_HOME,
     };
-    
+
     public
     MultipleJresTestClassRunner(Class<?> clasS) throws Exception {
         super(clasS);
-        
+
         JavaHomes javaHomes = clasS.getAnnotation(JavaHomes.class);
         if (javaHomes != null) {
             this.javaHomes = javaHomes.value();
@@ -76,16 +76,16 @@ class MultipleJresTestClassRunner extends ParentRunner<Runner> {
 
     @Override protected List<Runner>
     getChildren() {
-        
+
         Class<?>        clasS   = this.getTestClass().getJavaClass();
         ParentRunner<?> runWith = null;
         try {
-            
+
             TestClass testClassAnnotation = clasS.getAnnotation(TestClass.class);
             if (testClassAnnotation != null) {
-                
+
                 clasS = testClassAnnotation.value();
-                
+
                 Class<? extends ParentRunner<?>> runWithClass = testClassAnnotation.runWith();
                 if (runWithClass != null) {
                     runWith = runWithClass.getConstructor(Class.class).newInstance(clasS);
@@ -101,7 +101,7 @@ class MultipleJresTestClassRunner extends ParentRunner<Runner> {
             throw newAssertionError("clasS=" + clasS.getName() + ", runWith=" + runWith, e);
         }
     }
-    
+
     public static AssertionError
     newAssertionError(@Nullable Throwable t) { return newAssertionError(null, t); }
 
@@ -110,7 +110,7 @@ class MultipleJresTestClassRunner extends ParentRunner<Runner> {
 
         if (t instanceof InitializationError) {
             InitializationError ie = (InitializationError) t;
-            
+
             StringWriter sw = new StringWriter();
             PrintWriter  pw = new PrintWriter(sw);
             pw.println("Causes are:");
@@ -119,7 +119,7 @@ class MultipleJresTestClassRunner extends ParentRunner<Runner> {
 
             t = new Exception(sw.toString(), t);
         }
-        
+
         AssertionError ae = new AssertionError(message);
         ae.initCause(t);
         return ae;
