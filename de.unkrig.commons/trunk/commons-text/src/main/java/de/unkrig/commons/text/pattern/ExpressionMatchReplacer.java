@@ -358,7 +358,9 @@ class ExpressionMatchReplacer {
     }
 
     /**
-     * @see #get(Expression, Mapping)
+     * @param expression             See {@link #get(Expression, Mapping)}
+     * @param variableNamesAndValues An alternating sequence of keys and values; even elements must be {@link String}s,
+     *                               odd elements can be any {@link Object}
      */
     public static Function<MatchResult, String>
     get(final Expression expression, Object... variableNamesAndValues) {
