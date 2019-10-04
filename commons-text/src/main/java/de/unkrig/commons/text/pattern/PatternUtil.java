@@ -79,9 +79,10 @@ class PatternUtil {
     /**
      * @param replacementString See {@link Matcher#appendReplacement(StringBuffer, String)}
      * @return                  A match replacer which forms the replacement from the match and the given
-     *                          <var>replacementString</var>
+     *                          ({@link Matcher#replaceAll(String)}-compatible) <var>replacementString</var>
      * @see                     #constantMatchReplacer(String)
      * @see                     #SYSTEM_PROPERTY_MATCH_REPLACER
+     * @see                     Matcher#replaceAll(String)
      */
     public static <EX extends Throwable> FunctionWhichThrows<MatchResult, String, ? extends EX>
     replacementStringMatchReplacer(final String replacementString) {
