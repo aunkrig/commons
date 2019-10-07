@@ -509,11 +509,7 @@ class CommandLineOptions {
 
                     // Only now that we have verified that the first letter can be interpreted as a single-letter
                     // option, we consume the token.
-                    try {
-                        ss.read();
-                    } catch (UnexpectedElementException e) {
-                        throw new AssertionError();
-                    }
+                    ss.consume();
 
                     this.applyCommandLineOption(firstOptionName, firstOption, ss, target);
                 }
@@ -545,23 +541,41 @@ class CommandLineOptions {
         private boolean
         parseNextVerboseOption(StringStream<EX> ss, Object target) throws CommandLineOptionException, EX {
 
-            if (ss.atEnd()) return false;
+            String s = ss.next();
 
-            String optionName;
-            try {
-                optionName = ss.peek();
-            } catch (UnexpectedElementException uee) {
-                throw new AssertionError(uee);
+            if (s == null) return false;
+
+            // Special handling for verbose option syntax "--regex=abc".
+            ALTERNATE_VERBOSE_SYNTAX: {
+            	int ioeq = s.indexOf('=');
+            	if (ioeq == -1) break ALTERNATE_VERBOSE_SYNTAX;
+
+            	String optionName     = s.substring(0, ioeq);
+            	String singleArgument = s.substring(ioeq + 1);
+
+            	Method option = this.getOptionByName(optionName);
+                if (option == null) return false;
+
+                if (option.getParameterCount() != 1) throw new UnrecognizedOption(s);
+
+                ss.consume();
+
+                this.applyCommandLineOption(
+                    optionName,                                                                  // optionName
+                    option,                                                                      // option
+                    new StringStream<EX>(ProducerUtil.<String, EX>fromElements(singleArgument)), // stringStream
+                    target                                                                       // target
+                );
+
+                return true;
             }
 
+            // Parse syntax "-foo arg1 arg2 arg3".
+            String optionName = s;
             Method option = this.getOptionByName(optionName);
             if (option == null) return false;
 
-            try {
-                ss.read();
-            } catch (UnexpectedElementException uee) {
-                throw new AssertionError(uee);
-            }
+            ss.consume();
 
             this.applyCommandLineOption(
                 optionName, // optionName
