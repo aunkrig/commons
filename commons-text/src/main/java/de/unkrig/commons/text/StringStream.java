@@ -256,14 +256,19 @@ class StringStream<EX extends Throwable> {
         return m.group(group);
     }
 
-    /** @return The next string on the stream, without consuming it */
-    @Nullable private String
+    /**
+     * @return The next string on the stream, without consuming it, or {@code null} iff the stream is at end-of-input
+     */
+    @Nullable public String
     next() throws EX {
         if (this.current == StringStream.NONE) this.current = this.producer.produce();
         return this.current;
     }
 
-    private void
+    /**
+     * @throws AssertionError There is no "next token" on the stream
+     */
+    public void
     consume() {
         assert this.current != StringStream.NONE;
         this.current = StringStream.NONE;
