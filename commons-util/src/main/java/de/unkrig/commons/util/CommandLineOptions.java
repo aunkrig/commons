@@ -547,16 +547,17 @@ class CommandLineOptions {
 
             // Special handling for verbose option syntax "--regex=abc".
             ALTERNATE_VERBOSE_SYNTAX: {
-            	int ioeq = s.indexOf('=');
-            	if (ioeq == -1) break ALTERNATE_VERBOSE_SYNTAX;
+                int ioeq = s.indexOf('=');
+                if (ioeq == -1) break ALTERNATE_VERBOSE_SYNTAX;
 
-            	String optionName     = s.substring(0, ioeq);
-            	String singleArgument = s.substring(ioeq + 1);
+                final String optionName     = s.substring(0, ioeq);
+                final String singleArgument = s.substring(ioeq + 1);
 
-            	Method option = this.getOptionByName(optionName);
+                Method option = this.getOptionByName(optionName);
                 if (option == null) return false;
 
-                if (option.getParameterCount() != 1) throw new UnrecognizedOption(s);
+                // Notice: "Method.getParameterCount()" is only available in Java 8+.
+                if (option.getParameterTypes().length != 1) throw new UnrecognizedOption(s);
 
                 ss.consume();
 
@@ -572,7 +573,7 @@ class CommandLineOptions {
 
             // Parse syntax "-foo arg1 arg2 arg3".
             String optionName = s;
-            Method option = this.getOptionByName(optionName);
+            Method option     = this.getOptionByName(optionName);
             if (option == null) return false;
 
             ss.consume();
