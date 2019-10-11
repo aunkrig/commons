@@ -115,6 +115,9 @@ class Pattern2 {
             return Pattern.compile(pattern, flags);
         }
 
+        // Important: JRE 11+ implements a check for "unknown flags" - thus we need to clear the "WILDCARD" flag.
+        flags &= ~Pattern2.WILDCARD;
+
         String metaCharacters = "*?./{";
         for (
             int idx = Pattern2.findMeta(metaCharacters, pattern, 0);
