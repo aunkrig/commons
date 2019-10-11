@@ -184,7 +184,8 @@ class Glob implements Predicate<String> {
             replacement = null;
         }
 
-        final Glob glob = Glob.compileRegex(Pattern2.compile(pattern, flags), replacement);
+        // Important: JRE 11+ implements a check for "unknown flags" - thus we need to clear the "REPLACEMENT" flag.
+        final Glob glob = Glob.compileRegex(Pattern2.compile(pattern, flags & ~Glob.REPLACEMENT), replacement);
 
         // In the WILDCARD mode, wrap the glob in order to override the "toString()" method, so it returns the
         // *wildcard patten*, and not the *regex pattern*.
@@ -350,6 +351,10 @@ class Glob implements Predicate<String> {
         if ((flags & Glob.INCLUDES_EXCLUDES) == 0) {
             return Glob.compileWithReplacement(pattern, flags);
         }
+
+        // Important: JRE 11+ implements a check for "unknown flags" - thus we need to clear the "INCLUDES_EXCLUDES"
+        // flag.
+        flags &= ~Glob.INCLUDES_EXCLUDES;
 
         // Break the wildcard pattern up at ',' and '~' and construct an 'IncludeExclude' object from it.
 
