@@ -20,14 +20,14 @@
 		<dependency>
 			<groupId>de.unkrig.commons</groupId>
 			<artifactId>commons-nullanalysis</artifactId>
-			<version>1.2.14</version>
+			<version>1.2.15-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
 	<parent>
 		<groupId>de.unkrig.commons</groupId>
 		<artifactId>commons-parent</artifactId>
-		<version>1.2.14</version>
+		<version>1.2.15-SNAPSHOT</version>
 		<relativePath>../commons-parent</relativePath>
 	</parent>
 	<url>http://commons.unkrig.de/commons-junit4</url>
