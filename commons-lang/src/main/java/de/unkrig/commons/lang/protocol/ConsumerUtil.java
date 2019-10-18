@@ -62,7 +62,10 @@ class ConsumerUtil {
      * @return A consumer that forwards the subjects to both <var>delegate1</var> and <var>delegate2</var>
      */
     public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>
-    tee(final ConsumerWhichThrows<? super T, EX> delegate1, final ConsumerWhichThrows<? super T, EX> delegate2) {
+    tee(
+        final ConsumerWhichThrows<? super T, ? extends EX> delegate1,
+        final ConsumerWhichThrows<? super T, ? extends EX> delegate2
+    ) {
 
         return new ConsumerWhichThrows<T, EX>() {
 
@@ -93,15 +96,15 @@ class ConsumerUtil {
     /**
      * @return A consumer that forwards the subjects to all the <var>delegates</var>
      */
-    public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>
-    tee(final Collection<ConsumerWhichThrows<? super T, EX>> delegates) {
+    public static <T, EX extends Throwable> ConsumerWhichThrows<T, ? extends EX>
+    tee(final Collection<ConsumerWhichThrows<? super T, ? extends EX>> delegates) {
 
         return new ConsumerWhichThrows<T, EX>() {
 
             @Override public void
             consume(T subject) throws EX {
 
-                for (ConsumerWhichThrows<? super T, EX> delegate : delegates) {
+                for (ConsumerWhichThrows<? super T, ? extends EX> delegate : delegates) {
                     delegate.consume(subject);
                 }
             }
@@ -118,7 +121,7 @@ class ConsumerUtil {
      * @param <EX> The target consumer's exception
      * @deprecated Superseded by {@link #widen2(ConsumerWhichThrows)}.
      */
-    @Deprecated public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>
+    @Deprecated public static <T, EX extends Throwable> ConsumerWhichThrows<? super T, ? extends EX>
     asConsumerWhichThrows(final Consumer<? super T> source) {
 
         return new ConsumerWhichThrows<T, EX>() {
@@ -140,7 +143,7 @@ class ConsumerUtil {
      * @deprecated Not necessary if you declare variables, fields an parameters as "{@code ConsumerWhichThrows<? super
      *             consumed-type, ? extends thrown-exception>}"
      */
-    @Deprecated public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>
+    @Deprecated public static <T, EX extends Throwable> ConsumerWhichThrows<? super T, ? extends EX>
     widen(final ConsumerWhichThrows<? super T, ? extends EX> source) {
 
         @SuppressWarnings("unchecked") ConsumerWhichThrows<T, EX> result = (ConsumerWhichThrows<T, EX>) source;
@@ -158,7 +161,7 @@ class ConsumerUtil {
      * @param <T>  The element type
      * @param <EX> The target consumer's exception
      */
-    public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>
+    public static <T, EX extends Throwable> ConsumerWhichThrows<T, ? extends EX>
     widen2(final ConsumerWhichThrows<? super T, ? extends RuntimeException> source) {
 
         @SuppressWarnings("unchecked") ConsumerWhichThrows<T, EX> result = (ConsumerWhichThrows<T, EX>) source;
@@ -188,7 +191,8 @@ class ConsumerUtil {
      *         ConsumerWhichThrows&lt;Character, IOException>}
      */
     @NotNullByDefault(false) public static Writer
-    characterConsumerWriter(final ConsumerWhichThrows<? super Character, IOException> delegate) {
+    characterConsumerWriter(final ConsumerWhichThrows<? super Character, ? extends IOException> delegate) {
+
         return new Writer() {
 
             @Override public void
@@ -219,16 +223,16 @@ class ConsumerUtil {
      *   separator"), then that last line will not be sent to the <var>delegate</var>.
      * </p>
      */
-    public static <E extends Exception> ConsumerWhichThrows<Character, E>
-    lineAggregator(final ConsumerWhichThrows<? super String, E> delegate) {
+    public static <EX extends Throwable> ConsumerWhichThrows<? super Character, ? extends EX>
+    lineAggregator(final ConsumerWhichThrows<String, EX> delegate) {
 
-        return new ConsumerWhichThrows<Character, E>() {
+        return new ConsumerWhichThrows<Character, EX>() {
 
             private final StringBuilder sb = new StringBuilder();
             private boolean             crPending;
 
             @Override public void
-            consume(Character c) throws E {
+            consume(Character c) throws EX {
                 if (c == '\r') {
                     delegate.consume(this.sb.toString());
                     this.sb.setLength(0);
@@ -345,14 +349,14 @@ class ConsumerUtil {
      *
      * @see #combine(Consumer)
      */
-    public static <T, EX extends Throwable> Producer<ConsumerWhichThrows<T, EX>>
-    combineInOrder(final ConsumerWhichThrows<? super T, EX> target) {
+    public static <T, EX extends Throwable> Producer<? extends ConsumerWhichThrows<? super T, ? extends EX>>
+    combineInOrder(final ConsumerWhichThrows<? super T, ? extends EX> target) {
 
-        final Queue<ConsumerWhichThrows<? super T, EX>>
-        outstanding = new LinkedList<ConsumerWhichThrows<? super T, EX>>();
+        final Queue<ConsumerWhichThrows<T, EX>>
+        outstanding = new LinkedList<ConsumerWhichThrows<T, EX>>();
 
-        final Map<ConsumerWhichThrows<? super T, EX>, T>
-        postponed = new HashMap<ConsumerWhichThrows<? super T, EX>, T>();
+        final Map<ConsumerWhichThrows<T, EX>, T>
+        postponed = new HashMap<ConsumerWhichThrows<T, EX>, T>();
 
         return new Producer<ConsumerWhichThrows<T, EX>>() {
 
@@ -403,11 +407,13 @@ class ConsumerUtil {
      * these subjects are passed to the <var>target</var> consumer; then again when all consumers have consumed their
      * second subject, and so on.
      */
-    public static <T, EX extends Throwable> List<ConsumerWhichThrows<T, EX>>
-    splice(final int n, final ConsumerWhichThrows<? super List<T>, EX> target) {
+    public static <T, EX extends Throwable> List<ConsumerWhichThrows<? super T, ? extends EX>>
+    splice(final int n, final ConsumerWhichThrows<? super List<T>, ? extends EX> target) {
         final List<Queue<T>> buffers = new ArrayList<Queue<T>>(n);
 
-        List<ConsumerWhichThrows<T, EX>> consumers = new ArrayList<ConsumerWhichThrows<T, EX>>(n);
+        List<ConsumerWhichThrows<? super T, ? extends EX>>
+        consumers = new ArrayList<ConsumerWhichThrows<? super T, ? extends EX>>(n);
+
         for (int i = 0; i < n; i++) {
             consumers.add(new ConsumerWhichThrows<T, EX>() {
 
@@ -443,7 +449,7 @@ class ConsumerUtil {
      * @return A consumer that adds the subjects it consumes to the given collection
      */
     public static <T> Consumer<T>
-    addToCollection(final Collection<T> drain) {
+    addToCollection(final Collection<? super T> drain) {
 
         return new Consumer<T>() {
 
@@ -455,7 +461,7 @@ class ConsumerUtil {
     /**
      * @return A {@link ConsumerWhichThrows} which throws each subject it consumes
      */
-    public static <EX extends Throwable> ConsumerWhichThrows<EX, EX>
+    public static <EX extends Throwable> ConsumerWhichThrows<? super EX, ? extends EX>
     throwsSubject() {
 
         return new ConsumerWhichThrows<EX, EX>() {
@@ -505,8 +511,10 @@ class ConsumerUtil {
     /**
      * Equivalent with {@link #cumulate(ConsumerWhichThrows, long) cumulate(delegate)}.
      */
-    public static <EX extends Throwable> ConsumerWhichThrows<Number, EX>
-    cumulate(final ConsumerWhichThrows<? super Long, EX> delegate) { return ConsumerUtil.cumulate(delegate, 0); }
+    public static <EX extends Throwable> ConsumerWhichThrows<? super Number, ? extends EX>
+    cumulate(final ConsumerWhichThrows<? super Long, ? extends EX> delegate) {
+        return ConsumerUtil.cumulate(delegate, 0);
+    }
 
     /**
      * Creates and returns a {@link Consumer} which forwards the <i>cumulated</i> quantity to the given {@code
@@ -514,8 +522,8 @@ class ConsumerUtil {
      *
      * @param initialCount Initial value for the cumulated quantity, usually {@code 0L}
      */
-    public static <EX extends Throwable> ConsumerWhichThrows<Number, EX>
-    cumulate(final ConsumerWhichThrows<? super Long, EX> delegate, final long initialCount) {
+    public static <EX extends Throwable> ConsumerWhichThrows<? super Number, ? extends EX>
+    cumulate(final ConsumerWhichThrows<? super Long, ? extends EX> delegate, final long initialCount) {
 
         return new ConsumerWhichThrows<Number, EX>() {
 
@@ -639,8 +647,11 @@ class ConsumerUtil {
     /**
      * Wraps the <var>delegate</var> such that its declared exception is caught and ignored.
      */
-    public static <T, EX extends Throwable> Consumer<T>
-    ignoreExceptions(final Class<EX> exceptionClass, final ConsumerWhichThrows<T, ? extends EX> delegate) {
+    public static <T, EX extends Throwable> Consumer<? super T>
+    ignoreExceptions(
+        final Class<? extends EX>                          exceptionClass,
+        final ConsumerWhichThrows<? super T, ? extends EX> delegate
+    ) {
 
         return new Consumer<T>() {
 
@@ -695,6 +706,7 @@ class ConsumerUtil {
     ) throws EX {
 
         ConsumerWhichThrows<? super T, ? extends EX> c = ConsumerUtil.head(n, delegate1, delegate2);
+
         while (subject.hasNext()) c.consume(subject.next());
     }
 
@@ -702,7 +714,7 @@ class ConsumerUtil {
      * @return A consumer that forwards the first <var>n</var> consumed subjects to <var>delegate1</var>, and all
      *         following consumed subjects to <var>delegate2</var>
      */
-    public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>
+    public static <T, EX extends Throwable> ConsumerWhichThrows<? super T, ? extends EX>
     head(
         final int                                          n,
         final ConsumerWhichThrows<? super T, ? extends EX> delegate1,
@@ -724,8 +736,8 @@ class ConsumerUtil {
         };
     }
 
-   public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>
-   head(final int n, final ConsumerWhichThrows<T, EX> delegate) {
+   public static <T, EX extends Throwable> ConsumerWhichThrows<? super T, ? extends EX>
+   head(final int n, final ConsumerWhichThrows<? super T, ? extends EX> delegate) {
 
       return new ConsumerWhichThrows<T, EX>() {
 
@@ -790,7 +802,7 @@ class ConsumerUtil {
     /**
      * @return Counts the number of subjects consumed so far
      */
-    public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>
+    public static <T, EX extends Throwable> ConsumerWhichThrows<? super T, ? extends EX>
     count(final AtomicInteger delegate) {
 
        return new ConsumerWhichThrows<T, EX>() {
@@ -798,8 +810,8 @@ class ConsumerUtil {
        };
     }
 
-    public static <T1, T2, EX extends Throwable> ConsumerWhichThrows<Tuple2<T1, T2>, EX>
-    getFirstOfTuple2(final ConsumerWhichThrows<T1, EX> delegate) {
+    public static <T1, T2, EX extends Throwable> ConsumerWhichThrows<? super Tuple2<T1, T2>, ? extends EX>
+    getFirstOfTuple2(final ConsumerWhichThrows<? super T1, ? extends EX> delegate) {
 
        return new ConsumerWhichThrows<Tuple2<T1, T2>, EX>() {
 
@@ -808,8 +820,8 @@ class ConsumerUtil {
        };
     }
 
-    public static <T1, T2, EX extends Throwable> ConsumerWhichThrows<Tuple2<T1, T2>, EX>
-    getSecondOfTuple2(final ConsumerWhichThrows<T2, EX> delegate) {
+    public static <T1, T2, EX extends Throwable> ConsumerWhichThrows<? super Tuple2<T1, T2>, ? extends EX>
+    getSecondOfTuple2(final ConsumerWhichThrows<? super T2, ? extends EX> delegate) {
 
        return new ConsumerWhichThrows<Tuple2<T1, T2>, EX>() {
 
@@ -818,8 +830,8 @@ class ConsumerUtil {
        };
     }
 
-    public static <T1, T2, T3, EX extends Throwable> ConsumerWhichThrows<Tuple3<T1, T2, T3>, EX>
-    getFirstOfTuple3(final ConsumerWhichThrows<T1, EX> delegate) {
+    public static <T1, T2, T3, EX extends Throwable> ConsumerWhichThrows<? super Tuple3<T1, T2, T3>, ? extends EX>
+    getFirstOfTuple3(final ConsumerWhichThrows<? super T1, ? extends EX> delegate) {
 
         return new ConsumerWhichThrows<Tuple3<T1, T2, T3>, EX>() {
 
@@ -828,8 +840,8 @@ class ConsumerUtil {
         };
     }
 
-    public static <T1, T2, T3, EX extends Throwable> ConsumerWhichThrows<Tuple3<T1, T2, T3>, EX>
-    getSecondOfTuple3(final ConsumerWhichThrows<T2, EX> delegate) {
+    public static <T1, T2, T3, EX extends Throwable> ConsumerWhichThrows<? super Tuple3<T1, T2, T3>, ? extends EX>
+    getSecondOfTuple3(final ConsumerWhichThrows<? super T2, ? extends EX> delegate) {
 
         return new ConsumerWhichThrows<Tuple3<T1, T2, T3>, EX>() {
 
@@ -838,8 +850,8 @@ class ConsumerUtil {
         };
     }
 
-    public static <T1, T2, T3, EX extends Throwable> ConsumerWhichThrows<Tuple3<T1, T2, T3>, EX>
-    getThirdOfTuple3(final ConsumerWhichThrows<T3, EX> delegate) {
+    public static <T1, T2, T3, EX extends Throwable> ConsumerWhichThrows<? super Tuple3<T1, T2, T3>, ? extends EX>
+    getThirdOfTuple3(final ConsumerWhichThrows<? super T3, ? extends EX> delegate) {
 
         return new ConsumerWhichThrows<Tuple3<T1, T2, T3>, EX>() {
 
@@ -848,7 +860,7 @@ class ConsumerUtil {
         };
     }
 
-    public static <T1, T2, EX extends Throwable> ConsumerWhichThrows<Tuple2<T1, T2>, EX>
+    public static <T1, T2, EX extends Throwable> ConsumerWhichThrows<? super Tuple2<T1, T2>, ? extends EX>
     put(final Map<T1, T2> delegate) {
 
         return new ConsumerWhichThrows<Tuple2<T1, T2>, EX>() {
@@ -858,7 +870,7 @@ class ConsumerUtil {
         };
     }
 
-    public static <T extends Number> Consumer<T>
+    public static <T extends Number> Consumer<? super T>
     add(final AtomicInteger delegate) {
 
         return new Consumer<T>() {
@@ -868,12 +880,31 @@ class ConsumerUtil {
         };
     }
 
-    public static <T extends Number> Consumer<T>
+    public static <T extends Number> Consumer<? super T>
     add(final AtomicLong delegate) {
 
         return new Consumer<T>() {
             @Override public void
             consume(T subject) { delegate.addAndGet(subject.longValue()); }
+        };
+    }
+
+    public static <T, EX extends Throwable> ConsumerWhichThrows<? super T, ? extends EX>
+    conditional(
+        final PredicateWhichThrows<? super T, ? extends EX> condition,
+        final ConsumerWhichThrows<? super T, ? extends EX>  trueDelegate,
+        final ConsumerWhichThrows<? super T, ? extends EX>  falseDelegate
+    ) {
+        return new ConsumerWhichThrows<T, EX>() {
+
+            @Override public void
+            consume(T subject) throws EX {
+                if (condition.evaluate(subject)) {
+                    trueDelegate.consume(subject);
+                } else {
+                    falseDelegate.consume(subject);
+                }
+            }
         };
     }
 }
