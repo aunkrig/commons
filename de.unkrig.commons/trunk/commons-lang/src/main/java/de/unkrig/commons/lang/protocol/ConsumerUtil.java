@@ -736,7 +736,7 @@ class ConsumerUtil {
         };
     }
 
-   public static <T, EX extends Throwable> ConsumerWhichThrows<? super T, ? extends EX>
+   public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>
    head(final int n, final ConsumerWhichThrows<? super T, ? extends EX> delegate) {
 
       return new ConsumerWhichThrows<T, EX>() {
@@ -860,13 +860,32 @@ class ConsumerUtil {
         };
     }
 
-    public static <T1, T2, EX extends Throwable> ConsumerWhichThrows<? super Tuple2<T1, T2>, ? extends EX>
+    /**
+     * Puts the second element into the <var>delegate</var> map, with the first element as the key.
+     */
+    public static <T1, T2, EX extends Throwable> ConsumerWhichThrows<Tuple2<T1, T2>, ? extends EX>
     put(final Map<T1, T2> delegate) {
 
         return new ConsumerWhichThrows<Tuple2<T1, T2>, EX>() {
 
             @Override public void
             consume(Tuple2<T1, T2> subject) { delegate.put(subject.first, subject.second); }
+        };
+    }
+
+    /**
+     * Puts the second and third element as a {@link Tuple2} into the <var>delegate</var> map, with the first element
+     * as the key.
+     */
+    public static <T1, T2, T3, EX extends Throwable> ConsumerWhichThrows<Tuple3<T1, T2, T3>, ? extends EX>
+    putAsTuple2(final Map<T1, Tuple2<T2, T3>> delegate) {
+
+        return new ConsumerWhichThrows<Tuple3<T1, T2, T3>, EX>() {
+
+            @Override public void
+            consume(Tuple3<T1, T2, T3> subject) {
+                delegate.put(subject.first, new Tuple2<T2, T3>(subject.second, subject.third));
+            }
         };
     }
 
