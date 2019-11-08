@@ -889,6 +889,9 @@ class ConsumerUtil {
         };
     }
 
+    /**
+     * @return A consumer that adds each subject it receives to the given <var>delegate</var>
+     */
     public static <T extends Number> Consumer<? super T>
     add(final AtomicInteger delegate) {
 
@@ -899,6 +902,9 @@ class ConsumerUtil {
         };
     }
 
+    /**
+     * @return A consumer that adds each subject it receives to the given <var>delegate</var>
+     */
     public static <T extends Number> Consumer<? super T>
     add(final AtomicLong delegate) {
 
@@ -908,6 +914,10 @@ class ConsumerUtil {
         };
     }
 
+    /**
+     * @return A consumer that forwards each consumed subjects to either the <var>trueDelegate</var> or the
+     *         <var>falseDelegate</var>
+     */
     public static <T, EX extends Throwable> ConsumerWhichThrows<? super T, ? extends EX>
     conditional(
         final PredicateWhichThrows<? super T, ? extends EX> condition,
