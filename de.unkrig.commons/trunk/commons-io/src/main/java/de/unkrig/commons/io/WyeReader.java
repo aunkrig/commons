@@ -35,22 +35,19 @@ import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
- * Duplicates all bytes that it reads to a {@link Writer}.
- * <p>
- *   The {@link Writer} is flushed on end-of-input.
- * </p>
- * <p>
- *   The {@link Writer} is <i>not</i> closed on {@link #close()}.
- * </p>
+ * @deprecated Use {@link Readers#wye(Reader, Writer)} instead
  */
-public
+@Deprecated public
 class WyeReader extends FilterReader {
 
     static { AssertionUtil.enableAssertionsForThisClass(); }
 
     private final Writer out;
 
-    public
+    /**
+     * @deprecated Use {@link Readers#wye(Reader, Writer)} instead
+     */
+    @Deprecated public
     WyeReader(Reader in, Writer out) {
         super(in);
         this.out = out;
@@ -58,13 +55,13 @@ class WyeReader extends FilterReader {
 
     @Override public int
     read() throws IOException {
-        int b = super.read();
-        if (b == -1) {
+        int c = super.read();
+        if (c == -1) {
             this.out.flush();
         } else {
-            this.out.write(b);
+            this.out.write(c);
         }
-        return b;
+        return c;
     }
 
     @Override public int

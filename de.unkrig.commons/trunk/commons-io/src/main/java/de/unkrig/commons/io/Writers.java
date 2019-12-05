@@ -198,4 +198,33 @@ class Writers {
             }
         };
     }
+
+    /**
+     * @return A {@link Writer} that forwards all {@code write()} and {@code append()} operations to <var>out</var>,
+     *         and flushes <var>out</var> after each {@code write()} or {@code append()} operation
+     */
+    public static Writer
+    autoFlushing(Writer out) {
+
+        return new FilterWriter(out) {
+
+            @Override public void
+            write(int c) throws IOException {
+                this.out.write(c);
+                this.out.flush();
+            }
+
+            @Override @NotNullByDefault(false) public void
+            write(char[] cbuf, int off, int len) throws IOException {
+                this.out.write(cbuf, off, len);
+                this.out.flush();
+            }
+
+            @Override @NotNullByDefault(false) public void
+            write(String str, int off, int len) throws IOException {
+                this.out.write(str, off, len);
+                this.out.flush();
+            }
+        };
+    }
 }
