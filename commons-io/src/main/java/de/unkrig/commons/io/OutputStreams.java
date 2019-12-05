@@ -467,4 +467,27 @@ class OutputStreams {
             }
         };
     }
+
+    /**
+     * @return An {@link OutputStream} that forwards all {@code write()} operations to <var>out</var>,
+     *         and flushes <var>out</var> after each {@code write()} operation
+     */
+    public static OutputStream
+    autoFlushing(OutputStream out) {
+
+        return new FilterOutputStream(out) {
+
+            @Override public void
+            write(int b) throws IOException {
+                this.out.write(b);
+                this.out.flush();
+            }
+
+            @Override @NotNullByDefault(false) public void
+            write(byte[] b, int off, int len) throws IOException {
+                this.out.write(b, off, len);
+                this.out.flush();
+            }
+        };
+    }
 }

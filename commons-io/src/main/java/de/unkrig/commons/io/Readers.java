@@ -29,6 +29,7 @@ package de.unkrig.commons.io;
 import java.io.FilterReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.Writer;
 import java.nio.CharBuffer;
 
 import de.unkrig.commons.io.LineUtil.LineAndColumnTracker;
@@ -226,6 +227,38 @@ class Readers {
             @Override public boolean markSupported()                             { return false;            }
             @Override public void    mark(int readAheadLimit) throws IOException { throw new IOException(); }
             @Override public void    reset() throws IOException                  { throw new IOException(); }
+        };
+    }
+
+    /**
+     * Creates and returns a {@link Reader} that duplicates all chars read from <var>in</var> and writes them to
+     * <var>out</var>.
+     * <p>
+     *   <var>Out</var> is never flushed automatically; if you want to have that, you must flush <var>out</var>
+     *   yourself.
+     * </p>
+     * <p>
+     *   {@link Reader#close()} closes <var>in</var> but does <em>not</em> flush nor close <var>out</var>.
+     * </p>
+     */
+    public static Reader
+    wye(Reader in, final Writer out) {
+
+        return new FilterReader(in) {
+
+            @Override public int
+            read() throws IOException {
+                int c = super.read();
+                if (c >= 0) out.write(c);
+                return c;
+            }
+
+            @Override public int
+            read(@Nullable char[] cbuf, int off, int len) throws IOException {
+                int count = super.read(cbuf, off, len);
+                if (count > 0) out.write(cbuf, off, count);
+                return count;
+            }
         };
     }
 }
