@@ -479,6 +479,14 @@ class ConsumerUtil {
     interface Produmer<PT, CT>
     extends ProdumerWhichThrows<PT, NoException, CT, NoException> {}
 
+    /**
+     * The combination of a {@link ProducerWhichThrows} and a {@link ConsumerWhichThrows}.
+     *
+     * @param <PT>  The type that the {@link ProdumerWhichThrows} <em>produces</em>
+     * @param <PEX> The exception that {@link #produce()} may throw
+     * @param <CT>  The type that the {@link ProdumerWhichThrows} <em>consumes</em>
+     * @param <CEX> The exception that {@link #consume(Object)} may throw
+     */
     public
     interface ProdumerWhichThrows<PT, PEX extends Throwable, CT, CEX extends Throwable>
     extends ProducerWhichThrows<PT, PEX>, ConsumerWhichThrows<CT, CEX> {}
@@ -736,8 +744,15 @@ class ConsumerUtil {
         };
     }
 
+    /**
+     * @return A consumer that forwards the first <var>n</var> consumed subjects to the <var>delegate</var>, and
+     *         ignores all following consumed objects
+     */
    public static <T, EX extends Throwable> ConsumerWhichThrows<T, EX>
-   head(final int n, final ConsumerWhichThrows<? super T, ? extends EX> delegate) {
+   head(
+       final int                                          n,
+       final ConsumerWhichThrows<? super T, ? extends EX> delegate
+   ) {
 
       return new ConsumerWhichThrows<T, EX>() {
 
@@ -810,6 +825,9 @@ class ConsumerUtil {
        };
     }
 
+    /**
+     * @return A consumer that delegates its subjects' {@link Tuple2#first first} field to the <var>delegate</var>
+     */
     public static <T1, T2, EX extends Throwable> ConsumerWhichThrows<? super Tuple2<T1, T2>, ? extends EX>
     getFirstOfTuple2(final ConsumerWhichThrows<? super T1, ? extends EX> delegate) {
 
@@ -820,6 +838,9 @@ class ConsumerUtil {
        };
     }
 
+    /**
+     * @return A consumer that delegates its subjects' {@link Tuple2#second second} field to the <var>delegate</var>
+     */
     public static <T1, T2, EX extends Throwable> ConsumerWhichThrows<? super Tuple2<T1, T2>, ? extends EX>
     getSecondOfTuple2(final ConsumerWhichThrows<? super T2, ? extends EX> delegate) {
 
@@ -830,6 +851,9 @@ class ConsumerUtil {
        };
     }
 
+    /**
+     * @return A consumer that delegates its subjects' {@link Tuple3#first first} field to the <var>delegate</var>
+     */
     public static <T1, T2, T3, EX extends Throwable> ConsumerWhichThrows<? super Tuple3<T1, T2, T3>, ? extends EX>
     getFirstOfTuple3(final ConsumerWhichThrows<? super T1, ? extends EX> delegate) {
 
@@ -840,6 +864,9 @@ class ConsumerUtil {
         };
     }
 
+    /**
+     * @return A consumer that delegates its subjects' {@link Tuple3#second second} field to the <var>delegate</var>
+     */
     public static <T1, T2, T3, EX extends Throwable> ConsumerWhichThrows<? super Tuple3<T1, T2, T3>, ? extends EX>
     getSecondOfTuple3(final ConsumerWhichThrows<? super T2, ? extends EX> delegate) {
 
@@ -850,6 +877,9 @@ class ConsumerUtil {
         };
     }
 
+    /**
+     * @return A consumer that delegates its subjects' {@link Tuple3#third third} field to the <var>delegate</var>
+     */
     public static <T1, T2, T3, EX extends Throwable> ConsumerWhichThrows<? super Tuple3<T1, T2, T3>, ? extends EX>
     getThirdOfTuple3(final ConsumerWhichThrows<? super T3, ? extends EX> delegate) {
 
