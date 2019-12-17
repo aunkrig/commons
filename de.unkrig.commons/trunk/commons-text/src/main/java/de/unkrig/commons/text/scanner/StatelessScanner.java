@@ -79,13 +79,13 @@ class StatelessScanner<TT extends Enum<TT>> extends AbstractScanner<TT> {
         }
 
         throw new ScanException(
-            "Unexpected character '"
+            "Unexpected character \""
             + this.cs.charAt(this.offset)
-            + "' at offset "
+            + "\" at offset "
             + this.offset
-            + " of '"
+            + " of \""
             + this.cs
-            + "'"
+            + "\""
         );
     }
 

@@ -202,7 +202,7 @@ class StringStream<EX extends Throwable> {
 
         if (!expected.equals(next)) {
             throw new UnexpectedElementException(
-                this.prefixMessage("Expected '" + expected + "' instead of '" + next + "'")
+                this.prefixMessage("Expected '" + expected + "' instead of \"" + next + "\"")
             );
         }
         this.consume();
@@ -221,7 +221,7 @@ class StringStream<EX extends Throwable> {
         Matcher m = (this.matcher = pattern.matcher(next));
         if (!m.matches()) {
             throw new UnexpectedElementException(
-                this.prefixMessage("Expected '" + pattern + "' instead of '" + next + "'")
+                this.prefixMessage("Expected '" + pattern + "' instead of \"" + next + "\"")
             );
         }
 

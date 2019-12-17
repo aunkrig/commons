@@ -297,14 +297,14 @@ class ExpressionEvaluatorTest {
 
     @Test public void
     testNewArray() throws EvaluationException, ParseException {
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(new String[2],                             "new String[2]");
-        ExpressionEvaluatorTest.assertExpressionEvaluationFails("Argument is not an array",            "String[2]");
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(new String[2][3][][],                      "new String[2][3][][]");
-        ExpressionEvaluatorTest.assertExpressionParsingFails("Unexpected end of input",                "new int");
-        ExpressionEvaluatorTest.assertExpressionParsingFails("Primary expected instead of ']'",        "new int[]");
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(new int[3],                                "new int[3]");
-        ExpressionEvaluatorTest.assertExpressionParsingFails("Primary expected instead of 'int'",      "int[3]");
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(new int[2][3][][],                         "new int[2][3][][]");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(new String[2],                          "new String[2]");
+        ExpressionEvaluatorTest.assertExpressionEvaluationFails("Argument is not an array",         "String[2]");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(new String[2][3][][],                   "new String[2][3][][]");
+        ExpressionEvaluatorTest.assertExpressionParsingFails("Unexpected end of input",             "new int");
+        ExpressionEvaluatorTest.assertExpressionParsingFails("Primary expected instead of \"]\"",   "new int[]");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(new int[3],                             "new int[3]");
+        ExpressionEvaluatorTest.assertExpressionParsingFails("Primary expected instead of \"int\"", "int[3]");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(new int[2][3][][],                      "new int[2][3][][]");
     }
 
     @Test public void
@@ -345,15 +345,15 @@ class ExpressionEvaluatorTest {
 
     @Test public void
     testExpandVariable() throws Exception {
-        ExpressionEvaluatorTest.assertExpandedEquals("abc",                                            "abc");
-        ExpressionEvaluatorTest.assertExpandedEquals("abc7.0def",                                      "abc#do#def");
-        ExpressionEvaluatorTest.assertExpandingParseException("Unknown variable 'unknown'",            "abc#unknown#def");
+        ExpressionEvaluatorTest.assertExpandedEquals("abc",                                 "abc");
+        ExpressionEvaluatorTest.assertExpandedEquals("abc7.0def",                           "abc#do#def");
+        ExpressionEvaluatorTest.assertExpandingParseException("Unknown variable 'unknown'", "abc#unknown#def");
     }
 
     @Test public void
     testExpandAttribute() throws Exception {
-        ExpressionEvaluatorTest.assertExpandedEquals("abc9def",                                        "abc#da.Time#def");
-        ExpressionEvaluatorTest.assertExpandingParseException("'IDENTIFIER' expected instead of '.'",  "abc#da..Time#def");
+        ExpressionEvaluatorTest.assertExpandedEquals("abc9def",                                          "abc#da.Time#def");
+        ExpressionEvaluatorTest.assertExpandingParseException("'IDENTIFIER' expected instead of \".\"",  "abc#da..Time#def");
         ExpressionEvaluatorTest.assertExpandedEquals(
             "<!-- 'java.util.Date' has no field 'TTime' nor a method 'TTime()' or 'getTTime()' method -->",
             "abc#da.TTime#def"
