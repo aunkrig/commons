@@ -299,7 +299,7 @@ class CommandLineOptionException extends Exception {
                     + argument
                     + "\" to \""
                     + targetType.getSimpleName()
-                    + ": "
+                    + "\": "
                     + cause.getMessage()
                 ),
                 cause
@@ -311,5 +311,31 @@ class CommandLineOptionException extends Exception {
 
         public String    getArgument()   { return this.argument;   }
         public Class<?>  getTargetType() { return this.targetType; }
+    }
+
+    /**
+     * A command line option could not be processed.
+     */
+    public static
+    class OptionProcessingException extends CommandLineOptionException {
+
+    	private static final long serialVersionUID = 1L;
+
+    	private final String s;
+
+    	protected
+    	OptionProcessingException(String optionName, Throwable cause) {
+    		super(
+				(
+					"Processing option \""
+					+ optionName
+					+ "\": "
+					+ cause.getMessage()
+				),
+				cause
+			);
+
+    		this.s = optionName;
+    	}
     }
 }
