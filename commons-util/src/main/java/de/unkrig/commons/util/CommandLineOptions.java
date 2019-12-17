@@ -37,6 +37,7 @@ import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -69,6 +70,7 @@ import de.unkrig.commons.text.pattern.PatternUtil;
 import de.unkrig.commons.util.CommandLineOptionException.ArgumentConversionFailed;
 import de.unkrig.commons.util.CommandLineOptionException.ConflictingOptions;
 import de.unkrig.commons.util.CommandLineOptionException.DuplicateOption;
+import de.unkrig.commons.util.CommandLineOptionException.OptionProcessingException;
 import de.unkrig.commons.util.CommandLineOptionException.OptionArgumentMissing;
 import de.unkrig.commons.util.CommandLineOptionException.RequiredOptionGroupMissing;
 import de.unkrig.commons.util.CommandLineOptionException.RequiredOptionMissing;
@@ -658,8 +660,10 @@ class CommandLineOptions {
             // Now that the "methodArgs" array is filled, invoke the method.
             try {
                 option.invoke(target, methodArgs);
+            } catch (InvocationTargetException ite) {
+            	throw new OptionProcessingException(optionName, ite.getTargetException());
             } catch (Exception e) {
-                throw new AssertionError(e);
+                throw new OptionProcessingException(optionName, e);
             }
 
             this.actualOptions.add(option);
