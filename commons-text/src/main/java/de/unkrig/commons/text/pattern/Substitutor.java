@@ -165,6 +165,32 @@ class Substitutor<EX extends Throwable> implements TransformerWhichThrows<CharSe
                     @Override public String group()          { return m.group();                         }
                     @Override public int    end(int group)   { return m.end(group)   + s[0].offsetDelta; }
                     @Override public int    end()            { return m.end()        + s[0].offsetDelta; }
+
+					@Override public String
+					toString() {
+						String s = (
+							"[match("
+							+ m.start()
+							+ '-'
+							+ m.end()
+							+ ")="
+							+ this.group()
+						);
+						for (int i = 1; i <= this.groupCount(); i++) {
+							s += (
+								", group#"
+								+ i
+								+ '('
+								+ m.start(i)
+								+ '-'
+								+ m.end(i)
+								+ ")="
+								+ m.group(i)
+							);
+						}
+						s += ']';
+						return s;
+					}
                 });
             }
         }, lookBehindLimit);
