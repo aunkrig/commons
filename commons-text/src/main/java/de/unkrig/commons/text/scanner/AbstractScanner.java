@@ -146,7 +146,7 @@ class AbstractScanner<TT extends Enum<TT>> implements StringScanner<TT> {
 
     @Override public String
     toString() {
-        return "'" + this.cs + "' at offset " + this.previousTokenOffset;
+        return "\"" + this.cs + "\" at offset " + this.previousTokenOffset;
     }
 
     // STATE

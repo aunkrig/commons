@@ -259,7 +259,7 @@ class AbstractParser<TT extends Enum<TT>> {
     read(TT tokenType) throws ParseException {
         Token<TT> result = this.read();
         if (result.type != tokenType) {
-            throw new ParseException("'" + tokenType + "' expected instead of '" + result + "'");
+            throw new ParseException("'" + tokenType + "' expected instead of \"" + result + "\"");
         }
         return result.text;
     }
@@ -274,7 +274,7 @@ class AbstractParser<TT extends Enum<TT>> {
     public void
     read(String text) throws ParseException {
         Token<TT> t = this.read();
-        if (!t.text.equals(text)) throw new ParseException("'" + text + "' expected instead of '" + t + "'");
+        if (!t.text.equals(text)) throw new ParseException("'" + text + "' expected instead of \"" + t + "\"");
     }
 
     /**
@@ -318,14 +318,14 @@ class AbstractParser<TT extends Enum<TT>> {
         switch (tokenTypeOrText.length) {
 
         case 0:
-            throw new ParseException("One of [none] expected instead of '" + t + "'");
+            throw new ParseException("One of [none] expected instead of \"" + t + "\"");
 
         case 1:
             throw new ParseException(
                 AbstractParser.tokenTypeOrTextToString(tokenTypeOrText[0])
-                + " expected instead of '"
+                + " expected instead of \""
                 + t
-                + "'"
+                + "\""
             );
 
         default:
@@ -337,7 +337,7 @@ class AbstractParser<TT extends Enum<TT>> {
                     if (++i == tokenTypeOrText.length) break;
                     sb.append(i == tokenTypeOrText.length - 1 ? " or " : ", ");
                 }
-                throw new ParseException("One of " + sb + " expected instead of '" + t + "'");
+                throw new ParseException("One of " + sb + " expected instead of \"" + t + "\"");
             }
         }
     }
@@ -381,7 +381,7 @@ class AbstractParser<TT extends Enum<TT>> {
     public void
     eoi() throws ParseException {
         Token<TT> t = this.peek();
-        if (t != null) throw new ParseException("Expected end-of-input instead of '" + t + "'");
+        if (t != null) throw new ParseException("Expected end-of-input instead of \"" + t + "\"");
     }
 
     @Nullable private Token<TT>

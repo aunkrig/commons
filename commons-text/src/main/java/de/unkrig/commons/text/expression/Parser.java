@@ -1120,7 +1120,7 @@ class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
             };
         }
 
-        throw new ParseException("Primary expected instead of '" + this.peek() + "'");
+        throw new ParseException("Primary expected instead of \"" + this.peek() + "\"");
     }
 
     /**
