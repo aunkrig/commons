@@ -161,7 +161,7 @@ class CommandLineOptionsTest {
             Assert.fail("Exception");
         } catch (ArgumentConversionFailed acf) {
             Assert.assertEquals(
-                "Converting option argument \"-ff\" to \"int: Cannot convert \"-ff\" to int",
+                "Converting option argument \"-ff\" to \"int\": Cannot convert \"-ff\" to int",
                 acf.getMessage()
             );
             Assert.assertEquals("-ff", acf.getArgument());
