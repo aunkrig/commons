@@ -319,19 +319,19 @@ class CommandLineOptionException extends Exception {
     public static
     class OptionProcessingException extends CommandLineOptionException {
 
-    	private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-    	protected
-    	OptionProcessingException(String optionName, Throwable cause) {
-    		super(
-				(
-					"Processing option \""
-					+ optionName
-					+ "\": "
-					+ cause.getMessage()
-				),
-				cause
-			);
-    	}
+        protected
+        OptionProcessingException(String optionName, Throwable cause) {
+            super(
+                (
+                    "Processing option \""
+                    + optionName
+                    + "\": "
+                    + cause.getMessage()
+                ),
+                cause
+            );
+        }
     }
 }
