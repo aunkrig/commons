@@ -43,8 +43,8 @@ import de.unkrig.commons.nullanalysis.Nullable;
 public abstract
 class EventCounter {
 
-    protected final Map<String, AtomicLong>         events       = new HashMap<String, AtomicLong>();
-    protected final List<Entry<String, AtomicLong>> sortedEvents = new ArrayList<Map.Entry<String, AtomicLong>>();
+    protected Map<String, AtomicLong>         events       = new HashMap<String, AtomicLong>();
+    protected List<Entry<String, AtomicLong>> sortedEvents = new ArrayList<Map.Entry<String, AtomicLong>>();
 
     public void
     countEvent(String eventName) { this.countEvent(eventName, null); }
@@ -76,13 +76,20 @@ class EventCounter {
 
         AtomicLong value = this.events.get(key);
         if (value == null) {
-            this.events.put(key, (value = new AtomicLong(delta)));
-            this.sortedEvents.clear();
-            this.sortedEvents.addAll(this.events.entrySet());
-            Collections.sort(
-                this.sortedEvents,
-                Comparators.keyComparator(Comparators.nullSafeComparator(Comparators.<String>naturalOrderComparator()))
-            );
+        	synchronized (this) {
+        		Map<String, AtomicLong> tmp = new HashMap<String, AtomicLong>(this.events);
+        		tmp.put(key, (value = new AtomicLong(delta)));
+
+        		List<Entry<String, AtomicLong>> tmp2 = new ArrayList<Map.Entry<String, AtomicLong>>();
+        		tmp2.addAll(tmp.entrySet());
+	            Collections.sort(
+	                tmp2,
+	                Comparators.keyComparator(Comparators.nullSafeComparator(Comparators.<String>naturalOrderComparator()))
+	            );
+
+	            this.events       = tmp;
+	            this.sortedEvents = tmp2;
+        	}
         } else {
             value.addAndGet(delta);
         }
