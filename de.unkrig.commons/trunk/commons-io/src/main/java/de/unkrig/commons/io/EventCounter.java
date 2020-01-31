@@ -76,20 +76,20 @@ class EventCounter {
 
         AtomicLong value = this.events.get(key);
         if (value == null) {
-        	synchronized (this) {
-        		Map<String, AtomicLong> tmp = new HashMap<String, AtomicLong>(this.events);
-        		tmp.put(key, (value = new AtomicLong(delta)));
+            synchronized (this) {
+                Map<String, AtomicLong> tmp = new HashMap<String, AtomicLong>(this.events);
+                tmp.put(key, (value = new AtomicLong(delta)));
 
-        		List<Entry<String, AtomicLong>> tmp2 = new ArrayList<Map.Entry<String, AtomicLong>>();
-        		tmp2.addAll(tmp.entrySet());
-	            Collections.sort(
-	                tmp2,
-	                Comparators.keyComparator(Comparators.nullSafeComparator(Comparators.<String>naturalOrderComparator()))
-	            );
+                List<Entry<String, AtomicLong>> tmp2 = new ArrayList<Map.Entry<String, AtomicLong>>();
+                tmp2.addAll(tmp.entrySet());
+                Collections.sort(
+                    tmp2,
+                    Comparators.keyComparator(Comparators.nullSafeComparator(Comparators.<String>naturalOrderComparator()))
+                );
 
-	            this.events       = tmp;
-	            this.sortedEvents = tmp2;
-        	}
+                this.events       = tmp;
+                this.sortedEvents = tmp2;
+            }
         } else {
             value.addAndGet(delta);
         }
