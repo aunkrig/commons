@@ -321,8 +321,6 @@ class CommandLineOptionException extends Exception {
 
     	private static final long serialVersionUID = 1L;
 
-    	private final String s;
-
     	protected
     	OptionProcessingException(String optionName, Throwable cause) {
     		super(
@@ -334,8 +332,6 @@ class CommandLineOptionException extends Exception {
 				),
 				cause
 			);
-
-    		this.s = optionName;
     	}
     }
 }
