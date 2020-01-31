@@ -661,7 +661,7 @@ class CommandLineOptions {
             try {
                 option.invoke(target, methodArgs);
             } catch (InvocationTargetException ite) {
-            	throw new OptionProcessingException(optionName, ite.getTargetException());
+                throw new OptionProcessingException(optionName, ite.getTargetException());
             } catch (Exception e) {
                 throw new OptionProcessingException(optionName, e);
             }
