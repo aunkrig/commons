@@ -27,11 +27,14 @@
 package de.unkrig.commons.util.collections;
 
 import java.io.Serializable;
+import java.util.AbstractCollection;
 import java.util.AbstractMap;
+import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -39,6 +42,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import de.unkrig.commons.lang.ObjectUtil;
+import de.unkrig.commons.lang.protocol.Function;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
@@ -116,7 +120,7 @@ class MapUtil {
      * Creates, fills and returns a {@link HashMap}. The initial capacity of the {@link HashMap} is chosen to be
      * optimal for the number of <var>entries</var>.
      *
-     * @return                          A {@link HashMap} containing all <var>entries/<var>
+     * @return                          A {@link HashMap} containing all <var>entries</var>
      * @throws IllegalArgumentException Two <var>entries</var> have equal keys
      */
     // @SafeVarags <= Only available in Java 7
@@ -127,7 +131,7 @@ class MapUtil {
 
     /**
      * @param initialCapacity           See the documentation of {@link HashMap}
-     * @return                          A {@link HashMap} containing all <var>entries/<var>
+     * @return                          A {@link HashMap} containing all <var>entries</var>
      * @throws IllegalArgumentException Two <var>entries</var> have equal keys
      */
     // @SafeVarags <= Only available in Java 7
@@ -137,7 +141,7 @@ class MapUtil {
     }
 
     /**
-     * @return                          A {@link TreeMap} containing all <var>entries/<var>
+     * @return                          A {@link TreeMap} containing all <var>entries</var>
      * @throws IllegalArgumentException Two <var>entries</var> have equal keys
      */
     // @SafeVarags <= Only available in Java 7
@@ -417,5 +421,170 @@ class MapUtil {
             m.put((K) keysAndValues[i++], (V) keysAndValues[i++]);
         }
         return Collections.unmodifiableMap(m);
+    }
+
+    /**
+     * Creates and returns map that computes values only on demand, e.g. when {@code iterator().next().getValue()}
+     * is invoked, by calling {@code valueGetters.get(key).call(in)}.
+     * <p>
+     *   The returned map supports entry removal operations iff the <var>valueGetters</var> map supports them.
+     * </p>
+     * <p>
+     *   The returned map does <em>not</em> support {@link Map#put(Object, Object)} and {@link Map#putAll(Map)}
+     *   operations.
+     * </p>
+     * <p>
+     *   The returned map is backed by the <var>valueGetters</var> map, i.e. modifications to either of the two maps
+     *   is reflected by the other map.
+     * </p>
+     * <p>
+     *   The returned map supports {@code null} keys iff the <var>valueGetters</var> map supports {@code null} keys.
+     * </p>
+     * <p>
+     *   The returned map may return {@code null} values iff any of the the <var>valueGetters</var> produces {@code
+     *   null} values.
+     * </p>
+     *
+     * @param valueGetters Must not contain {@code null} values
+     */
+    public static <K, V, I> Map<K, V>
+    lazyMap(final Map<K, Function<I, V>> valueGetters, @Nullable final I in) {
+
+        return new AbstractMap<K, V>() {
+
+            @Nullable private Set<K>           keySet;
+            @Nullable private Collection<V>    values;
+            @Nullable private Set<Entry<K, V>> entrySet;
+
+            @Override public int
+            size() { return valueGetters.size(); }
+
+            @Override public Set<K>
+            keySet() {
+                Set<K> result = this.keySet;
+                return result != null ? result : (this.keySet = this.keySet2());
+            }
+
+            @Override public boolean
+            isEmpty() { return valueGetters.isEmpty(); }
+
+            @Override @NotNullByDefault(false) public V
+            get(Object key) {
+                Function<I, V> valueGetter = valueGetters.get(key);
+                if (valueGetter == null) return null;
+                return valueGetter.call(in);
+            }
+
+            @Override public Collection<V>
+            values() {
+                Collection<V> result = this.values;
+                return result != null ? result : (this.values = this.values2());
+            }
+
+            @Override public Set<Entry<K, V>>
+            entrySet() {
+                Set<Entry<K, V>> result = this.entrySet;
+                return result != null ? result : (this.entrySet = this.entrySet2());
+            }
+
+            // ==================================
+
+            private Set<K>
+            keySet2() { return valueGetters.keySet(); }
+
+            private Collection<V>
+            values2() {
+                return new AbstractCollection<V>() {
+
+                    @Override public int
+                    size() { return valueGetters.size(); }
+
+                    @Override public Iterator<V>
+                    iterator() {
+                        return new Iterator<V>() {
+
+                            final Iterator<Function<I, V>> it = valueGetters.values().iterator();
+
+                            @Override public boolean
+                            hasNext() { return this.it.hasNext(); }
+
+                            @Override @NotNullByDefault(false) public V
+                            next() { return this.it.next().call(in); }
+
+                            @Override public void
+                            remove() { this.it.remove(); }
+                        };
+                    }
+                };
+            }
+
+            private Set<Entry<K, V>>
+            entrySet2() {
+
+                return new AbstractSet<Map.Entry<K, V>>() {
+
+                    @Override public int
+                    size() { return valueGetters.size(); }
+
+                    @Override public Iterator<Entry<K, V>>
+                    iterator() {
+
+                        return new Iterator<Map.Entry<K, V>>() {
+
+                            final Iterator<Entry<K, Function<I, V>>> it = valueGetters.entrySet().iterator();
+
+                            @Override public boolean
+                            hasNext() { return this.it.hasNext(); }
+
+                            @Override public Entry<K, V>
+                            next() {
+                                final Entry<K, Function<I, V>> e = this.it.next();
+                                return new Map.Entry<K, V>() {
+
+                                    @Override public K
+                                    getKey() { return e.getKey(); }
+
+                                    @Override @NotNullByDefault(false) public V
+                                    getValue() { return e.getValue().call(in); }
+
+                                    @Override @NotNullByDefault(false) public V
+                                    setValue(Object value) { throw new UnsupportedOperationException("setValue"); }
+                                };
+                            }
+
+                            @Override public void
+                            remove() { this.it.remove(); }
+                        };
+                    }
+                };
+            }
+
+            @Override @NotNullByDefault(false) public boolean
+            containsValue(Object value) {
+                for (Function<I, V> valueGetter : valueGetters.values()) {
+                    if (ObjectUtil.equals(value, valueGetter.call(in))) return true;
+                }
+                return false;
+            }
+
+            @Override @NotNullByDefault(false) public boolean
+            containsKey(Object key) { return valueGetters.containsKey(key); }
+
+            @Override @NotNullByDefault(false) public V
+            put(K key, V value) { throw new UnsupportedOperationException("put"); }
+
+            @Override @NotNullByDefault(false) public void
+            putAll(Map<? extends K, ? extends V> m) { throw new UnsupportedOperationException("putAll"); }
+
+            @Override @NotNullByDefault(false) public V
+            remove(Object key) {
+                Function<I, V> valueGetter = valueGetters.remove(key);
+                if (valueGetter == null) return null;
+                return valueGetter.call(in);
+            }
+
+            @Override public void
+            clear() { valueGetters.clear(); }
+        };
     }
 }
