@@ -72,6 +72,7 @@ class MarkableFileInputStream extends InputStream {
         long result = 0;
         while (n > Integer.MAX_VALUE) {
             int tmp = this.randomAccessFile.skipBytes(Integer.MAX_VALUE);
+            if (tmp == 0) break;
             n      -= tmp;
             result += tmp;
         }
