@@ -43,7 +43,7 @@ class Notations {
     private Notations() {}
 
     /**
-     * Representation of the result of notation parsing.
+     * Immutable representation of the result of notation parsing.
      *
      * @see Notations#fromCamelCase(String)
      * @see Notations#fromHyphenated(String)
@@ -51,6 +51,18 @@ class Notations {
      */
     public
     interface Phrase {
+
+        /**
+         * @return The number of words; one or greater
+         */
+        int size();
+
+        /**
+         * @return                                The nth word of the phrase
+         * @throws ArrayIndexOutOfBoundsException <var>index</var> is less than zero, or equal to or greater than the
+         *                                        number of words
+         */
+        String get(int index);
 
         /**
          * @return A phrase which consists of the <var>words</var> and the words of {@code this} phrase
@@ -61,6 +73,17 @@ class Notations {
          * @return A phrase which consists of the words of {@code this} phrase and the <var>words</var>
          */
         Phrase append(String... words);
+
+        /**
+         * @return A phrase which consists of the words of {@code this} phrase, with the <var>word</var> inserted at
+         *         the nth position
+         */
+        Phrase add(int n, String word);
+
+        /**
+         * @return A phrase which consists of the words of {@code this} phrase, with the nth word removed
+         */
+        Phrase remove(int n);
 
         /**
          * Converts the first letter of each word to upper case, the rest of each word to lower case, and concatenates
@@ -106,6 +129,12 @@ class Notations {
 
         PhraseImpl(String word) { this.words = new String[] { word }; }
 
+        @Override public String
+        get(int index) { return this.words[index]; }
+
+        @Override public int
+        size() { return this.words.length; }
+
         @Override public Phrase
         prepend(String... words) {
             String[] tmp = new String[words.length + this.words.length];
@@ -119,6 +148,23 @@ class Notations {
             String[] tmp = new String[this.words.length + words.length];
             System.arraycopy(this.words, 0, tmp, 0,            this.words.length);
             System.arraycopy(words,      0, tmp, words.length, words.length);
+            return new PhraseImpl(tmp);
+        }
+
+        @Override public Phrase
+        add(int n, String word) {
+            String[] tmp = new String[this.words.length + 1];
+            System.arraycopy(this.words, 0, tmp, 0,     n);
+            System.arraycopy(this.words, n, tmp, n + 1, this.words.length - n);
+            tmp[n] = word;
+            return new PhraseImpl(tmp);
+        }
+
+        @Override public Phrase
+        remove(int n) {
+            String[] tmp = new String[this.words.length - 1];
+            System.arraycopy(this.words, 0,     tmp, 0, n);
+            System.arraycopy(this.words, n + 1, tmp, n, tmp.length - n);
             return new PhraseImpl(tmp);
         }
 
@@ -202,6 +248,9 @@ class Notations {
 
     /**
      * Parses a camel-case string: Each upper-case letter indicates the beginning of a new word.
+     *
+     * @param s                          Must not be empty
+     * @throws IndexOutOfBoundsException <var>s</var> is empty
      */
     public static Phrase
     fromCamelCase(String s) {
