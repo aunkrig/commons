@@ -104,6 +104,24 @@ class AssertRegex {
      */
     public static void
     assertMatches(@Nullable String message, List<String> expectedRegexes, List<String> actuals) {
+        
+        // Generate the "correct" REGEXes for the actual strings: 
+//        for (String s : actuals) {
+//            s = (
+//                s
+//                .replaceAll("\\\\", "\\\\\\\\")
+//                .replaceAll("[\\[{\\$}\\].*+]", "\\\\$0")
+//            );
+//            for (String regex : new String[] {
+//                "@\\w+",
+//                "\\w{3} \\w{3} \\d\\d \\d\\d:\\d\\d:\\d\\d \\w+ \\d{4}",
+//                "lastModified=-?\\d{7,}",
+//            }) {
+//                s = s.replaceAll(regex, Matcher.quoteReplacement(regex));
+//            }
+//            System.out.println(s);
+//        }
+        
         for (int i = 0; i < expectedRegexes.size() && i < actuals.size(); i++) {
             String expectedRegex = expectedRegexes.get(i);
             String actual        = actuals.get(i);
