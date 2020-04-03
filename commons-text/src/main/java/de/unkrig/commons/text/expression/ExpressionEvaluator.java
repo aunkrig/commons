@@ -280,6 +280,9 @@ class ExpressionEvaluator {
                 }
                 return sb.toString();
             }
+
+            @Override public String
+            toString() { return spec; }
         };
     }
 
