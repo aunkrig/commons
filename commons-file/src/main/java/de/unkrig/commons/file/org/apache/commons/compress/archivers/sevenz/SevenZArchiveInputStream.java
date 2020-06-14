@@ -45,7 +45,7 @@ class SevenZArchiveInputStream extends ArchiveInputStream {
     getCount() { throw new UnsupportedOperationException("getCount"); }
 
     @Override public long
-    getBytesRead() { throw new UnsupportedOperationException("getCount"); }
+    getBytesRead() { throw new UnsupportedOperationException("getBytesRead"); }
 
     @Override public int
     read(@Nullable byte[] b, int off, int len) throws IOException { return this.sevenZFile.read(b, off, len); }
