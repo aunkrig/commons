@@ -44,6 +44,11 @@
 			<artifactId>commons-compress</artifactId>
 			<version>1.9</version>
 		</dependency>
+		<dependency>
+			<groupId>org.redline-rpm</groupId>
+			<artifactId>redline</artifactId>
+			<version>1.2.9</version>
+		</dependency>
 
 		<!-- For unknown reasons, apache common compress fails to declare the following 
 			dependency, although it definitely depends on it. -->

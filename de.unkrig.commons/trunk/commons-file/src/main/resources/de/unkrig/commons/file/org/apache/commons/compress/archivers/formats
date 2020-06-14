@@ -8,6 +8,7 @@ de.unkrig.commons.file.org.apache.commons.compress.archivers.arj.ArjArchiveForma
 de.unkrig.commons.file.org.apache.commons.compress.archivers.cpio.CpioArchiveFormat
 de.unkrig.commons.file.org.apache.commons.compress.archivers.dump.DumpArchiveFormat
 de.unkrig.commons.file.org.apache.commons.compress.archivers.jar.JarArchiveFormat
+de.unkrig.commons.file.org.apache.commons.compress.archivers.rpm.RpmArchiveFormat
 de.unkrig.commons.file.org.apache.commons.compress.archivers.sevenz.SevenZArchiveFormat
 de.unkrig.commons.file.org.apache.commons.compress.archivers.tar.TarArchiveFormat
 de.unkrig.commons.file.org.apache.commons.compress.archivers.zip.ZipArchiveFormat
