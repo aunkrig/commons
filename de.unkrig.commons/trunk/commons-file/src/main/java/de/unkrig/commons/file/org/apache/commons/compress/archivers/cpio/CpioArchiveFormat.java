@@ -26,15 +26,12 @@
 
 package de.unkrig.commons.file.org.apache.commons.compress.archivers.cpio;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
+import java.util.Date;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -46,6 +43,7 @@ import org.apache.commons.compress.archivers.cpio.CpioArchiveOutputStream;
 import org.apache.commons.compress.archivers.cpio.CpioConstants;
 import org.apache.commons.compress.compressors.FileNameUtil;
 
+import de.unkrig.commons.file.org.apache.commons.compress.archivers.AbstractArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormatFactory;
 import de.unkrig.commons.io.IoUtil;
@@ -59,7 +57,7 @@ import de.unkrig.commons.nullanalysis.Nullable;
  * Representation of the 'ar' archive format.
  */
 public final
-class CpioArchiveFormat implements ArchiveFormat {
+class CpioArchiveFormat extends AbstractArchiveFormat {
 
     private static final FileNameUtil
     FILE_NAME_UTIL = new FileNameUtil(Collections.singletonMap(".cpio", ""), ".cpio");
@@ -83,21 +81,14 @@ class CpioArchiveFormat implements ArchiveFormat {
     @Override public ArchiveInputStream
     archiveInputStream(InputStream is) { return new CpioArchiveInputStream(is); }
 
-    @Override public ArchiveInputStream
-    open(File archiveFile)
-    throws IOException { return this.archiveInputStream(new BufferedInputStream(new FileInputStream(archiveFile))); }
-
     @Override public ArchiveOutputStream
     archiveOutputStream(OutputStream os) { return new CpioArchiveOutputStream(os); }
-
-    @Override public ArchiveOutputStream
-    create(File archiveFile)
-    throws IOException { return new CpioArchiveOutputStream(new FileOutputStream(archiveFile)); }
 
     @Override public void
     writeEntry(
         final ArchiveOutputStream                                              archiveOutputStream,
         final String                                                           name,
+        @Nullable final Date                                                   lastModifiedDate,
         final ConsumerWhichThrows<? super OutputStream, ? extends IOException> writeContents
     ) throws IOException {
         if (!(archiveOutputStream instanceof CpioArchiveOutputStream)) {
@@ -116,7 +107,9 @@ class CpioArchiveFormat implements ArchiveFormat {
 
             @Override public void
             drain(InputStream is) throws IOException {
-                archiveOutputStream.putArchiveEntry(new CpioArchiveEntry(name, this.count));
+                CpioArchiveEntry ae = new CpioArchiveEntry(name, this.count);
+                ae.setTime((lastModifiedDate != null ? lastModifiedDate.getTime() : System.currentTimeMillis()) / 1000);
+                archiveOutputStream.putArchiveEntry(ae);
                 IoUtil.copy(is, archiveOutputStream);
                 archiveOutputStream.closeArchiveEntry();
             }
@@ -176,7 +169,15 @@ class CpioArchiveFormat implements ArchiveFormat {
 
                 CpioArchiveEntry ncae = new CpioArchiveEntry(name != null ? name : archiveEntry.getName());
                 ncae.setSize(this.count);
-                ncae.setTime(archiveEntry.getLastModifiedDate().getTime());
+                try {
+                    ncae.setTime(archiveEntry.getLastModifiedDate().getTime());
+                } catch (UnsupportedOperationException uoe) {
+
+                    // Some ArchiveEntry implementations (e.g. SevenZArchiveEntry) throw UOE when "a
+                    // last modified date is not set".
+                    ;
+                }
+
                 ncae.setChksum(this.checksum & 0xff);
 
                 if (archiveEntry instanceof CpioArchiveEntry) {

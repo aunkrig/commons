@@ -28,20 +28,20 @@ package de.unkrig.commons.file.org.apache.commons.compress.archivers.sevenz;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
+import java.util.Date;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
-import org.apache.commons.compress.archivers.StreamingNotSupportedException;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
 import org.apache.commons.compress.compressors.FileNameUtil;
 
+import de.unkrig.commons.file.org.apache.commons.compress.archivers.AbstractArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormatFactory;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
@@ -51,7 +51,7 @@ import de.unkrig.commons.nullanalysis.Nullable;
  * Representation of the '7z' archive format.
  */
 public final
-class SevenZArchiveFormat implements ArchiveFormat {
+class SevenZArchiveFormat extends AbstractArchiveFormat {
 
     private static final FileNameUtil FILE_NAME_UTIL = new FileNameUtil(Collections.singletonMap(".7z", ""), ".7z");
 
@@ -72,15 +72,7 @@ class SevenZArchiveFormat implements ArchiveFormat {
     getArchiveFileName(String fileName) { return SevenZArchiveFormat.FILE_NAME_UTIL.getCompressedFilename(fileName); }
 
     @Override public ArchiveInputStream
-    archiveInputStream(InputStream is)
-    throws StreamingNotSupportedException { throw new StreamingNotSupportedException(ArchiveStreamFactory.SEVEN_Z); }
-
-    @Override public ArchiveInputStream
     open(File archiveFile) throws IOException { return new SevenZArchiveInputStream(archiveFile); }
-
-    @Override public ArchiveOutputStream
-    archiveOutputStream(OutputStream os)
-    throws StreamingNotSupportedException { throw new StreamingNotSupportedException(ArchiveStreamFactory.SEVEN_Z); }
 
     @Override public ArchiveOutputStream
     create(File archiveFile)
@@ -90,6 +82,7 @@ class SevenZArchiveFormat implements ArchiveFormat {
     writeEntry(
         final ArchiveOutputStream                                              archiveOutputStream,
         final String                                                           name,
+        @Nullable final Date                                                   lastModifiedDate,
         final ConsumerWhichThrows<? super OutputStream, ? extends IOException> writeContents
     ) throws IOException {
         if (!(archiveOutputStream instanceof SevenZArchiveOutputStream)) {
@@ -97,6 +90,10 @@ class SevenZArchiveFormat implements ArchiveFormat {
         }
 
         SevenZArchiveEntry szae = new SevenZArchiveEntry();
+        if (lastModifiedDate != null) {
+            szae.setLastModifiedDate(lastModifiedDate);
+            szae.setCreationDate(lastModifiedDate);
+        }
         szae.setName(name);
 
         archiveOutputStream.putArchiveEntry(szae);
@@ -136,7 +133,15 @@ class SevenZArchiveFormat implements ArchiveFormat {
         } else {
             szae = new SevenZArchiveEntry();
             szae.setName(name != null ? name : archiveEntry.getName());
-            szae.setLastModifiedDate(archiveEntry.getLastModifiedDate());
+            try {
+                szae.setLastModifiedDate(archiveEntry.getLastModifiedDate());
+            } catch (UnsupportedOperationException uoe) {
+
+                // Some ArchiveEntry implementations (e.g. SevenZArchiveEntry) throw UOE when "a
+                // last modified date is not set".
+                ;
+            }
+
             // 'setSize()' is automatically done by 'SevenZOutputFile.closeArchiveEntry()'.
         }
 

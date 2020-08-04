@@ -35,24 +35,22 @@ import java.io.OutputStream;
 import java.nio.channels.Channels;
 import java.util.Collections;
 
-import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream;
 import org.apache.commons.compress.compressors.FileNameUtil;
 
+import de.unkrig.commons.file.org.apache.commons.compress.archivers.AbstractArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormatFactory;
 import de.unkrig.commons.lang.ExceptionUtil;
-import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
-import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * Representation of the 'rpm' archive format.
  */
 public final
-class RpmArchiveFormat implements ArchiveFormat {
+class RpmArchiveFormat extends AbstractArchiveFormat {
 
     private static final FileNameUtil
     FILE_NAME_UTIL = new FileNameUtil(Collections.singletonMap(".rpm", ""), ".rpm");
@@ -114,31 +112,6 @@ class RpmArchiveFormat implements ArchiveFormat {
     archiveOutputStream(OutputStream os) throws ArchiveException {
         throw new ArchiveException("Creation of 'rpm' archives not supported");
     }
-
-    @Override public ArchiveOutputStream
-    create(File archiveFile) throws ArchiveException {
-        throw new ArchiveException("Creation of 'rpm' archives not supported");
-    }
-
-    @Override public void
-    writeEntry(
-        final ArchiveOutputStream                                              archiveOutputStream,
-        final String                                                           name,
-        final ConsumerWhichThrows<? super OutputStream, ? extends IOException> writeContents
-    ) { throw new IllegalArgumentException(archiveOutputStream.getClass().getName()); }
-
-    @Override public void
-    writeDirectoryEntry(ArchiveOutputStream archiveOutputStream, String name) {
-        throw new IllegalArgumentException(archiveOutputStream.getClass().getName());
-    }
-
-    @Override public void
-    writeEntry(
-        final ArchiveOutputStream                                              archiveOutputStream,
-        final ArchiveEntry                                                     archiveEntry,
-        @Nullable final String                                                 name,
-        final ConsumerWhichThrows<? super OutputStream, ? extends IOException> writeContents
-    ) { throw new IllegalArgumentException(archiveOutputStream.getClass().getName()); }
 
     @Override public boolean
     matches(byte[] signature, int signatureLength) {

@@ -26,13 +26,10 @@
 
 package de.unkrig.commons.file.org.apache.commons.compress.archivers.ar;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -43,6 +40,7 @@ import org.apache.commons.compress.archivers.ar.ArArchiveInputStream;
 import org.apache.commons.compress.archivers.ar.ArArchiveOutputStream;
 import org.apache.commons.compress.compressors.FileNameUtil;
 
+import de.unkrig.commons.file.org.apache.commons.compress.archivers.AbstractArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormatFactory;
 import de.unkrig.commons.io.IoUtil;
@@ -60,7 +58,7 @@ import de.unkrig.commons.util.collections.MapUtil;
  * Representation of the 'ar' archive format.
  */
 public final
-class ArArchiveFormat implements ArchiveFormat {
+class ArArchiveFormat extends AbstractArchiveFormat {
 
     private static final FileNameUtil
     FILE_NAME_UTIL = new FileNameUtil(MapUtil.<String, String>map(".a", "", ".ar", ""), ".a");
@@ -115,21 +113,21 @@ class ArArchiveFormat implements ArchiveFormat {
         };
     }
 
-    @Override public ArchiveInputStream
-    open(File archiveFile)
-    throws IOException { return this.archiveInputStream(new BufferedInputStream(new FileInputStream(archiveFile))); }
-
     @Override public ArchiveOutputStream
-    archiveOutputStream(OutputStream os) { return new ArArchiveOutputStream(os); }
+    archiveOutputStream(OutputStream os) {
+        ArArchiveOutputStream aaos = new ArArchiveOutputStream(os);
 
-    @Override public ArchiveOutputStream
-    create(File archiveFile)
-    throws IOException { return new ArArchiveOutputStream(new FileOutputStream(archiveFile)); }
+        // Otherwise archive entry names ar limited to 16 chars.
+        aaos.setLongFileMode(ArArchiveOutputStream.LONGFILE_BSD);
+
+        return aaos;
+    }
 
     @Override public void
     writeEntry(
         final ArchiveOutputStream                                              archiveOutputStream,
         final String                                                           name,
+        @Nullable Date                                                         lastModifiedDate,
         final ConsumerWhichThrows<? super OutputStream, ? extends IOException> writeContents
     ) throws IOException {
         if (!(archiveOutputStream instanceof ArArchiveOutputStream)) {
@@ -143,7 +141,16 @@ class ArArchiveFormat implements ArchiveFormat {
             long count = OutputStreams.writeAndCount(writeContents, ios.getOutputStream());
             ios.getOutputStream().close();
 
-            archiveOutputStream.putArchiveEntry(new ArArchiveEntry(name, count));
+            archiveOutputStream.putArchiveEntry(new ArArchiveEntry(
+                name,  // name
+                count, // length
+                0,     // userId
+                0,     // groupId
+                33188, // mode
+                (      // lastModified (seconds since 1970)
+                    lastModifiedDate != null ? lastModifiedDate.getTime() : System.currentTimeMillis()
+                ) / 1000
+            ));
 
             IoUtil.copy(ios.getInputStream(), archiveOutputStream);
             ios.getInputStream().close();
@@ -187,16 +194,25 @@ class ArArchiveFormat implements ArchiveFormat {
         // Copy the contents to a temporary storage in order to count the bytes.
         InputOutputStreams ios = PipeUtil.asInputOutputStreams(PipeFactory.elasticPipe());
         try {
-            long count = OutputStreams.writeAndCount(writeContents, ios.getOutputStream());
+            final long count = OutputStreams.writeAndCount(writeContents, ios.getOutputStream());
             ios.getOutputStream().close();
 
+            long lastModified; // Milliseconds since 1970
+            try {
+                lastModified = archiveEntry.getLastModifiedDate().getTime();
+            } catch (UnsupportedOperationException uoe) {
+
+                // Some ArchiveEntry implementations (e.g. SevenZArchiveEntry) throw UOE when "a
+                // last modified date is not set".
+                lastModified = 0;
+            }
             ArArchiveEntry naae = new ArArchiveEntry(
                 name != null ? name : archiveEntry.getName(),
                 count,
                 aae.getUserId(),
                 aae.getGroupId(),
                 aae.getMode(),
-                archiveEntry.getLastModifiedDate().getTime()
+                lastModified / 1000 // seconds since 1970
             );
             archiveOutputStream.putArchiveEntry(naae);
 
