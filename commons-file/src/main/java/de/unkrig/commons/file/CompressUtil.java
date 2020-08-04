@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -124,7 +125,7 @@ class CompressUtil {
          *      NormalContentsHandler)
          */
         @Nullable T
-        handleNormalContents(InputStream inputStream) throws IOException;
+        handleNormalContents(InputStream inputStream, @Nullable Date lastModifiedDate) throws IOException;
     }
 
     /**
@@ -146,6 +147,7 @@ class CompressUtil {
     processStream(
         String                             path,
         InputStream                        inputStream,
+        @Nullable Date                     lastModifiedDate,
         Predicate<? super String>          lookIntoFormat,
         ArchiveHandler<? extends T>        archiveHandler,
         CompressorHandler<? extends T>     compressorHandler,
@@ -156,6 +158,7 @@ class CompressUtil {
 
             return CompressUtil.processStream(
                 inputStream,                                           // inputStream
+                lastModifiedDate,                                      // lastModifiedDate
                 CompressUtil.lookIntoArchive(path, lookIntoFormat),    // lookIntoArchive
                 archiveHandler,                                        // archiveHandler
                 CompressUtil.lookIntoCompressed(path, lookIntoFormat), // lookIntoCompressed
@@ -190,6 +193,7 @@ class CompressUtil {
     @Nullable public static <T> T
     processStream(
         InputStream                          inputStream,
+        @Nullable Date                       lastModifiedDate,
         Predicate<? super ArchiveFormat>     lookIntoArchive,
         ArchiveHandler<? extends T>          archiveHandler,
         Predicate<? super CompressionFormat> lookIntoCompressed,
@@ -204,7 +208,7 @@ class CompressUtil {
             if (archiveFormat == null) break ARCHIVE;
 
             if (!lookIntoArchive.evaluate(archiveFormat)) {
-                return normalContentsHandler.handleNormalContents(inputStream);
+                return normalContentsHandler.handleNormalContents(inputStream, lastModifiedDate);
             }
 
             ArchiveInputStream ais;
@@ -222,7 +226,7 @@ class CompressUtil {
             if (compressionFormat == null) break COMPRESSED;
 
             if (!lookIntoCompressed.evaluate(compressionFormat)) {
-                return normalContentsHandler.handleNormalContents(inputStream);
+                return normalContentsHandler.handleNormalContents(inputStream, lastModifiedDate);
             }
 
             return compressorHandler.handleCompressor(
@@ -231,7 +235,7 @@ class CompressUtil {
             );
         }
 
-        return normalContentsHandler.handleNormalContents(inputStream);
+        return normalContentsHandler.handleNormalContents(inputStream, lastModifiedDate);
     }
 
     /**
@@ -299,7 +303,9 @@ class CompressUtil {
             if (archiveFormat != null) {
 
                 if (!lookIntoArchive.evaluate(archiveFormat)) {
-                    return normalContentsHandler.handleNormalContents(is);
+                    long lastModified     = file.lastModified();
+                    Date lastModifiedDate = lastModified == 0 ? null : new Date(lastModified);
+                    return normalContentsHandler.handleNormalContents(is, lastModifiedDate);
                 }
 
                 is.close();
@@ -316,7 +322,7 @@ class CompressUtil {
             if (compressionFormat != null) {
 
                 if (!lookIntoCompressed.evaluate(compressionFormat)) {
-                    return normalContentsHandler.handleNormalContents(is);
+                    return normalContentsHandler.handleNormalContents(is, null);
                 }
 
                 CompressorInputStream cis = compressionFormat.compressorInputStream(new BufferedInputStream(is));
@@ -328,7 +334,10 @@ class CompressUtil {
             }
 
             CompressUtil.LOGGER.log(Level.FINER, "Processing normal file \"{0}\"", file);
-            T result = normalContentsHandler.handleNormalContents(is);
+            long lastModified     = file.lastModified();
+            Date lastModifiedDate = lastModified == 0 ? null : new Date(lastModified);
+
+            T result = normalContentsHandler.handleNormalContents(is, lastModifiedDate);
 
             is.close();
             return result;

@@ -29,6 +29,7 @@ package de.unkrig.commons.file.contentstransformation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
@@ -113,6 +114,7 @@ class ContentsTransformations {
 
                 CompressUtil.<Void>processStream(
                     is,                                            // is
+                    null,                                          // lastModifiedDate
                     new Predicate<ArchiveFormat>() {               // lookIntoArchive
 
                         @Override public boolean
@@ -283,6 +285,7 @@ class ContentsTransformations {
                     outputFormat.writeEntry(
                         archiveOutputStream,
                         nac.getName(),
+                        nac.getLastModifiedDate(),
                         new ConsumerWhichThrows<OutputStream, IOException>() {
 
                             @Override public void
@@ -385,7 +388,7 @@ class ContentsTransformations {
         return new NormalContentsHandler<Void>() {
 
             @Override @Nullable public Void
-            handleNormalContents(InputStream inputStream) throws IOException {
+            handleNormalContents(InputStream inputStream, @Nullable Date lastModifiedDate) throws IOException {
                 contentsTransformer.transform(path, inputStream, os);
                 return null;
             }

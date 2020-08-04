@@ -31,6 +31,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -67,7 +68,7 @@ class FileContentsProcessor<T> implements FileProcessor<T> {
 
     /**
      * Opens the <var>file</var>, passes the input stream to {@link ContentsProcessor#process(String, InputStream,
-     * long, long, ProducerWhichThrows)}, then closes the file.
+     * Date, long, long, ProducerWhichThrows)}, then closes the file.
      * <p>
      *   Subclasses may override this behavior, e.g. by recursing into directories or archives.
      * </p>
@@ -76,11 +77,16 @@ class FileContentsProcessor<T> implements FileProcessor<T> {
      */
     @Override @Nullable public T
     process(String path, final File file) throws FileNotFoundException, IOException {
+
+        long lastModified     = file.lastModified();
+        Date lastModifiedDate = lastModified == 0 ? null : new Date(lastModified);
+
         InputStream is = FileContentsProcessor.fileInputStream(file);
         try {
             this.contentsProcessor.process(
                 file.getPath(),                                       // path
                 is,                                                   // inputStream
+                lastModifiedDate,                                     // lastModifiedDate
                 file.length(),                                        // size
                 -1L,                                                  // crc32
                 new ProducerWhichThrows<InputStream, IOException>() { // opener

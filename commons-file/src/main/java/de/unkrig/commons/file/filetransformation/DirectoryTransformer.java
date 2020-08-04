@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 
 import de.unkrig.commons.file.ExceptionHandler;
 import de.unkrig.commons.file.FileUtil;
@@ -247,7 +248,12 @@ class DirectoryTransformer implements FileTransformer {
 
                 @Override public void
                 consume(NameAndContents nac) throws IOException {
-                    IoUtil.copy(nac.open(), true, new File(outputDirectory, nac.getName()));
+                    File outputFile = new File(outputDirectory, nac.getName());
+
+                    IoUtil.copy(nac.open(), true, outputFile);
+
+                    Date lastModifiedDate = nac.getLastModifiedDate();
+                    if (lastModifiedDate != null) outputFile.setLastModified(lastModifiedDate.getTime());
                 }
             }
         );

@@ -28,14 +28,15 @@ package de.unkrig.commons.file.contentsprocessing;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 
 import de.unkrig.commons.lang.protocol.Predicate;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
- * @param <T> The type returned by {@link #process(String, InputStream, long, long, ProducerWhichThrows)}
- * @see       #process(String, InputStream, long, long, ProducerWhichThrows)
+ * @param <T> The type returned by {@link #process(String, InputStream, Date, long, long, ProducerWhichThrows)}
+ * @see       #process(String, InputStream, Date, long, long, ProducerWhichThrows)
  */
 public
 class SelectiveContentsProcessor<T> implements ContentsProcessor<T> {
@@ -63,15 +64,16 @@ class SelectiveContentsProcessor<T> implements ContentsProcessor<T> {
     process(
         String                                                            path,
         InputStream                                                       is,
+        @Nullable Date                                                    lastModifiedDate,
         long                                                              size,
         long                                                              crc32,
         ProducerWhichThrows<? extends InputStream, ? extends IOException> opener
     ) throws IOException {
 
         if (this.pathPredicate.evaluate(path)) {
-            return this.trueDelegate.process(path, is, size, crc32, opener);
+            return this.trueDelegate.process(path, is, lastModifiedDate, size, crc32, opener);
         } else {
-            return this.falseDelegate.process(path, is, size, crc32, opener);
+            return this.falseDelegate.process(path, is, lastModifiedDate, size, crc32, opener);
         }
     }
 }
