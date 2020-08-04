@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -43,6 +44,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.compressors.FileNameUtil;
 
+import de.unkrig.commons.file.org.apache.commons.compress.archivers.AbstractArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormatFactory;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
@@ -52,7 +54,7 @@ import de.unkrig.commons.nullanalysis.Nullable;
  * Representation of the 'zip' archive format.
  */
 public final
-class ZipArchiveFormat implements ArchiveFormat {
+class ZipArchiveFormat extends AbstractArchiveFormat {
 
     private static final FileNameUtil FILE_NAME_UTIL = new FileNameUtil(Collections.singletonMap(".zip", ""), ".zip");
 
@@ -89,6 +91,7 @@ class ZipArchiveFormat implements ArchiveFormat {
     writeEntry(
         ArchiveOutputStream                                              archiveOutputStream,
         String                                                           name,
+        @Nullable final Date                                             lastModifiedDate,
         ConsumerWhichThrows<? super OutputStream, ? extends IOException> writeContents
     ) throws IOException {
         if (!(archiveOutputStream instanceof ZipArchiveOutputStream)) {
@@ -98,8 +101,12 @@ class ZipArchiveFormat implements ArchiveFormat {
         // Entry names ending in "/" designate DIRECTORIES, so strip all trailing slashes.
         while (name.endsWith("/")) name = name.substring(0, name.length() - 1);
 
-        archiveOutputStream.putArchiveEntry(new ZipArchiveEntry(name));
+        ZipArchiveEntry zae = new ZipArchiveEntry(name);
+        if (lastModifiedDate != null) zae.setTime(lastModifiedDate.getTime());
+        archiveOutputStream.putArchiveEntry(zae);
+
         writeContents.consume(archiveOutputStream);
+
         archiveOutputStream.closeArchiveEntry();
     }
 
@@ -128,7 +135,15 @@ class ZipArchiveFormat implements ArchiveFormat {
         }
 
         ZipArchiveEntry nzae = new ZipArchiveEntry(name != null ? name : archiveEntry.getName());
-        nzae.setTime(archiveEntry.getLastModifiedDate().getTime());
+        try {
+            nzae.setTime(archiveEntry.getLastModifiedDate().getTime());
+        } catch (UnsupportedOperationException uoe) {
+
+            // Some ArchiveEntry implementations (e.g. SevenZArchiveEntry) throw UOE when "a
+            // last modified date is not set".
+            ;
+        }
+
         if (archiveEntry instanceof ZipArchiveEntry) {
             ZipArchiveEntry zae  = (ZipArchiveEntry) archiveEntry;
 

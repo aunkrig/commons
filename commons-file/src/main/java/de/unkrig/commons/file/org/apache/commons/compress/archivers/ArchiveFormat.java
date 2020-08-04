@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
@@ -98,8 +99,20 @@ interface ArchiveFormat {
     create(File archiveFile) throws IOException, ArchiveException;
 
     /**
+     * Shorthand for {@link #writeEntry(ArchiveOutputStream, String, Date, ConsumerWhichThrows)
+     * writeEntry(archiveOutputStream, name, null, writeContents)}.
+     */
+    void
+    writeEntry(
+        ArchiveOutputStream                                              archiveOutputStream,
+        String                                                           name,
+        ConsumerWhichThrows<? super OutputStream, ? extends IOException> writeContents
+    ) throws IOException;
+
+    /**
      * Appends a 'normal' entry (as opposed to a 'directory entry') with the given contents to the given {@code
-     * archiveOutputStream}. The archive entry is filled with "standard values", except for the entry <var>name</var>.
+     * archiveOutputStream}. The archive entry is filled with "standard values", except for the entry <var>name</var>
+     * and <var>lastModifiedDate</var>.
      * <p>
      *   <var>writeContents</var> is called exactly once unless the <var>name</var> designates a directory entry.
      * </p>
@@ -107,6 +120,7 @@ interface ArchiveFormat {
      * @param archiveOutputStream       <i>Must</i> match this {@link ArchiveFormat}
      * @param name                      The name for the entry; may be slightly changed (in particulary wrt/ leading
      *                                  and trailing slashes) before the entry is created
+     * @param lastModifiedDate          If {@code null}, then either "no date" or a default value is stored in the entry
      * @param writeContents             Writes the entry's contents to the 'subject' output stream
      * @throws IllegalArgumentException The type of the <var>archiveOutputStream</var> does not match this {@link
      *                                  ArchiveFormat}
@@ -116,6 +130,7 @@ interface ArchiveFormat {
     writeEntry(
         ArchiveOutputStream                                              archiveOutputStream,
         String                                                           name,
+        @Nullable Date                                                   lastModifiedDate,
         ConsumerWhichThrows<? super OutputStream, ? extends IOException> writeContents
     ) throws IOException;
 

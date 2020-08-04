@@ -26,14 +26,11 @@
 
 package de.unkrig.commons.file.org.apache.commons.compress.archivers.jar;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
+import java.util.Date;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -44,6 +41,7 @@ import org.apache.commons.compress.archivers.jar.JarArchiveInputStream;
 import org.apache.commons.compress.archivers.jar.JarArchiveOutputStream;
 import org.apache.commons.compress.compressors.FileNameUtil;
 
+import de.unkrig.commons.file.org.apache.commons.compress.archivers.AbstractArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormatFactory;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
@@ -53,7 +51,7 @@ import de.unkrig.commons.nullanalysis.Nullable;
  * Representation of the 'ar' archive format.
  */
 public final
-class JarArchiveFormat implements ArchiveFormat {
+class JarArchiveFormat extends AbstractArchiveFormat {
 
     private static final FileNameUtil FILE_NAME_UTIL = new FileNameUtil(Collections.singletonMap(".jar", ""), ".jar");
 
@@ -76,21 +74,14 @@ class JarArchiveFormat implements ArchiveFormat {
     @Override public ArchiveInputStream
     archiveInputStream(InputStream is) { return new JarArchiveInputStream(is); }
 
-    @Override public ArchiveInputStream
-    open(File archiveFile)
-    throws IOException { return this.archiveInputStream(new BufferedInputStream(new FileInputStream(archiveFile))); }
-
     @Override public ArchiveOutputStream
     archiveOutputStream(OutputStream os) { return new JarArchiveOutputStream(os); }
-
-    @Override public ArchiveOutputStream
-    create(File archiveFile)
-    throws IOException { return new JarArchiveOutputStream(new FileOutputStream(archiveFile)); }
 
     @Override public void
     writeEntry(
         ArchiveOutputStream                                              archiveOutputStream,
         String                                                           name,
+        @Nullable final Date                                             lastModifiedDate,
         ConsumerWhichThrows<? super OutputStream, ? extends IOException> writeContents
     ) throws IOException {
         if (!(archiveOutputStream instanceof JarArchiveOutputStream)) {
@@ -100,7 +91,9 @@ class JarArchiveFormat implements ArchiveFormat {
         // Entry names ending in "/" designate DIRECTORIES, so strip all trailing slashes.
         while (name.endsWith("/")) name = name.substring(0, name.length() - 1);
 
-        archiveOutputStream.putArchiveEntry(new JarArchiveEntry(name));
+        JarArchiveEntry jae = new JarArchiveEntry(name);
+        if (lastModifiedDate != null) jae.setTime(lastModifiedDate.getTime());
+        archiveOutputStream.putArchiveEntry(jae);
         writeContents.consume(archiveOutputStream);
         archiveOutputStream.closeArchiveEntry();
     }
@@ -130,7 +123,15 @@ class JarArchiveFormat implements ArchiveFormat {
         }
 
         JarArchiveEntry njae = new JarArchiveEntry(name != null ? name : archiveEntry.getName());
-        njae.setTime(archiveEntry.getLastModifiedDate().getTime());
+        try {
+            njae.setTime(archiveEntry.getLastModifiedDate().getTime());
+        } catch (UnsupportedOperationException uoe) {
+
+            // Some ArchiveEntry implementations (e.g. SevenZArchiveEntry) throw UOE when "a
+            // last modified date is not set".
+            ;
+        }
+
 
         if (archiveEntry instanceof JarArchiveEntry) {
             JarArchiveEntry jae = (JarArchiveEntry) archiveEntry;

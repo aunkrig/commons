@@ -26,15 +26,10 @@
 
 package de.unkrig.commons.file.org.apache.commons.compress.archivers.dump;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
 
-import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
@@ -42,16 +37,15 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.dump.DumpArchiveInputStream;
 import org.apache.commons.compress.compressors.FileNameUtil;
 
+import de.unkrig.commons.file.org.apache.commons.compress.archivers.AbstractArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormatFactory;
-import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
-import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * Representation of the 'ar' archive format.
  */
 public final
-class DumpArchiveFormat implements ArchiveFormat {
+class DumpArchiveFormat extends AbstractArchiveFormat {
 
     private static final FileNameUtil
     FILE_NAME_UTIL = new FileNameUtil(Collections.singletonMap(".dump", ""), ".dump");
@@ -75,39 +69,9 @@ class DumpArchiveFormat implements ArchiveFormat {
     @Override public ArchiveInputStream
     archiveInputStream(InputStream is) throws ArchiveException { return new DumpArchiveInputStream(is); }
 
-    @Override public ArchiveInputStream
-    open(File archiveFile)
-    throws IOException, ArchiveException {
-        return this.archiveInputStream(new BufferedInputStream(new FileInputStream(archiveFile)));
-    }
-
     @Override public ArchiveOutputStream
     archiveOutputStream(OutputStream os)
     throws ArchiveException { throw new ArchiveException("Creation of 'dump' archives not supported"); }
-
-    @Override public ArchiveOutputStream
-    create(File archiveFile)
-    throws ArchiveException { throw new ArchiveException("Creation of 'dump' archives not supported"); }
-
-    @Override public void
-    writeEntry(
-        final ArchiveOutputStream                                              archiveOutputStream,
-        final String                                                           name,
-        final ConsumerWhichThrows<? super OutputStream, ? extends IOException> writeContents
-    ) { throw new IllegalArgumentException(archiveOutputStream.getClass().getName()); }
-
-    @Override public void
-    writeDirectoryEntry(ArchiveOutputStream archiveOutputStream, String name) {
-        throw new IllegalArgumentException(archiveOutputStream.getClass().getName());
-    }
-
-    @Override public void
-    writeEntry(
-        final ArchiveOutputStream                                              archiveOutputStream,
-        final ArchiveEntry                                                     archiveEntry,
-        @Nullable final String                                                 name,
-        final ConsumerWhichThrows<? super OutputStream, ? extends IOException> writeContents
-    ) { throw new IllegalArgumentException(archiveOutputStream.getClass().getName()); }
 
     @Override public boolean
     matches(byte[] signature, int signatureLength) {

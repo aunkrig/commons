@@ -70,8 +70,13 @@ class SevenZArchiveOutputStream extends ArchiveOutputStream {
         assert entryName != null;
 
         SevenZArchiveEntry szae = new SevenZArchiveEntry();
+
         szae.setCreationDate(new Date(inputFile.lastModified()));
         szae.setHasCreationDate(true);
+
+        szae.setLastModifiedDate(new Date(inputFile.lastModified()));
+        szae.setHasLastModifiedDate(true);
+
         szae.setName(entryName);
         // 'setSize()' is automatically done by 'SevenZOutputFile.closeArchiveEntry()'.
 

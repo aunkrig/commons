@@ -26,14 +26,11 @@
 
 package de.unkrig.commons.file.org.apache.commons.compress.archivers.tar;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
+import java.util.Date;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -44,6 +41,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.FileNameUtil;
 
+import de.unkrig.commons.file.org.apache.commons.compress.archivers.AbstractArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormatFactory;
 import de.unkrig.commons.io.IoUtil;
@@ -57,7 +55,7 @@ import de.unkrig.commons.nullanalysis.Nullable;
  * Representation of the 'tar' archive format.
  */
 public final
-class TarArchiveFormat implements ArchiveFormat {
+class TarArchiveFormat extends AbstractArchiveFormat {
 
     private static final FileNameUtil FILE_NAME_UTIL = new FileNameUtil(Collections.singletonMap(".tar", ""), ".tar");
 
@@ -80,21 +78,14 @@ class TarArchiveFormat implements ArchiveFormat {
     @Override public ArchiveInputStream
     archiveInputStream(InputStream is) { return new TarArchiveInputStream(is); }
 
-    @Override public ArchiveInputStream
-    open(File archiveFile)
-    throws IOException { return this.archiveInputStream(new BufferedInputStream(new FileInputStream(archiveFile))); }
-
     @Override public ArchiveOutputStream
     archiveOutputStream(OutputStream os) { return new TarArchiveOutputStream(os); }
-
-    @Override public ArchiveOutputStream
-    create(File archiveFile)
-    throws IOException { return new TarArchiveOutputStream(new FileOutputStream(archiveFile)); }
 
     @Override public void
     writeEntry(
         final ArchiveOutputStream                                              archiveOutputStream,
         String                                                                 name,
+        @Nullable final Date                                                   lastModifiedDate,
         final ConsumerWhichThrows<? super OutputStream, ? extends IOException> writeContents
     ) throws IOException {
         if (!(archiveOutputStream instanceof TarArchiveOutputStream)) {
@@ -105,6 +96,7 @@ class TarArchiveFormat implements ArchiveFormat {
         while (name.endsWith("/")) name = name.substring(0, name.length() - 1);
 
         final TarArchiveEntry tae = new TarArchiveEntry(name);
+        if (lastModifiedDate != null) tae.setModTime(lastModifiedDate);
 
         // Copy the contents to a temporary storage in order to count the bytes.
         PipeUtil.temporaryStorage(new FillerAndDrainer() {
@@ -167,7 +159,15 @@ class TarArchiveFormat implements ArchiveFormat {
             drain(InputStream is) throws IOException {
 
                 TarArchiveEntry ntae = new TarArchiveEntry(name != null ? name : archiveEntry.getName());
-                ntae.setModTime(archiveEntry.getLastModifiedDate());
+                try {
+                    ntae.setModTime(archiveEntry.getLastModifiedDate());
+                } catch (UnsupportedOperationException uoe) {
+
+                    // Some ArchiveEntry implementations (e.g. SevenZArchiveEntry) throw UOE when "a
+                    // last modified date is not set".
+                    ;
+                }
+
                 ntae.setSize(this.count);
 
                 if (archiveEntry instanceof TarArchiveEntry) {
