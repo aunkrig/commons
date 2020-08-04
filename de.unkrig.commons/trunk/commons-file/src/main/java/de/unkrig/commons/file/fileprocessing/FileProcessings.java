@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -536,6 +537,7 @@ class FileProcessings {
                 return contentsProcessor.process(
                     path + '%',                                           // path
                     compressorInputStream,                                // compressorInputStream
+                    null,                                                 // lastModifiedDate
                     uncompressedSize,                                     // size
                     -1L,                                                  // crc32
                     new ProducerWhichThrows<InputStream, IOException>() { // opener
@@ -554,11 +556,12 @@ class FileProcessings {
         return new NormalContentsHandler<T>() {
 
             @Override @Nullable public T
-            handleNormalContents(InputStream inputStream)
+            handleNormalContents(InputStream inputStream, @Nullable Date lastModifiedDate)
             throws IOException {
                 return contentsProcessor.process(
                     path,                                                 // path
                     inputStream,                                          // inputStream
+                    lastModifiedDate,                                     // lastModifiedDate
                     -1L,                                                  // size
                     -1L,                                                  // crc32
                     new ProducerWhichThrows<InputStream, IOException>() { // opener

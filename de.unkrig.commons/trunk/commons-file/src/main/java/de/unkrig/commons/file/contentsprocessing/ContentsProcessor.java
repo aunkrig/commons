@@ -28,13 +28,14 @@ package de.unkrig.commons.file.contentsprocessing;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
- * @param <T> The type produced by {@link #process(String, InputStream, long, long, ProducerWhichThrows)}
- * @see #process(String, InputStream, long, long, ProducerWhichThrows)
+ * @param <T> The type produced by {@link #process(String, InputStream, Date, long, long, ProducerWhichThrows)}
+ * @see #process(String, InputStream, Date, long, long, ProducerWhichThrows)
  */
 public
 interface ContentsProcessor<T> {
@@ -42,16 +43,18 @@ interface ContentsProcessor<T> {
     /**
      * Reads from the input stream (typically until end-of-input), but does not close it.
      *
-     * @param path         E.g. "c:/dir/zipfile!dir/zipfile!dir/file"
-     * @param size         -1 if unknown
-     * @param crc32        -1 if unknown
-     * @param opener       Re-produces the <var>inputStream</var>
-     * @throws IOException Message should NOT include the <var>path</var>
+     * @param path             E.g. "c:/dir/zipfile!dir/zipfile!dir/file"
+     * @param lastModifiedDate An optional "last modification date" that is associated with the <var>inputStream</var>
+     * @param size             -1 if unknown
+     * @param crc32            -1 if unknown
+     * @param opener           Re-produces the <var>inputStream</var>
+     * @throws IOException     Message should NOT include the <var>path</var>
      */
     @Nullable T
     process(
         String                                                            path,
         InputStream                                                       inputStream,
+        @Nullable Date                                                    lastModifiedDate,
         long                                                              size,
         long                                                              crc32,
         ProducerWhichThrows<? extends InputStream, ? extends IOException> opener

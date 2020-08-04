@@ -30,6 +30,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -76,6 +77,7 @@ class ContentsProcessings {
         process(
             String                                                            path,
             InputStream                                                       inputStream,
+            @Nullable Date                                                    lastModifiedDate,
             long                                                              size,
             long                                                              crc32,
             ProducerWhichThrows<? extends InputStream, ? extends IOException> opener
@@ -142,9 +144,17 @@ class ContentsProcessings {
 
                 @SuppressWarnings("deprecation") long crc32 = ArchiveFormatFactory.getEntryCrc32(ae);
 
+                Date lastModifiedDate;
+                try {
+                    lastModifiedDate = ae.getLastModifiedDate();
+                } catch (UnsupportedOperationException uoe) {
+                    lastModifiedDate = null;
+                }
+
                 combinables.add(contentsProcessor.process(
                     entryPath,          // path
                     archiveInputStream, // inputStream
+                    lastModifiedDate,   // lastModifiedDate
                     ae.getSize(),       // size
                     crc32,              // crc32
                     opener              // opener
@@ -160,10 +170,10 @@ class ContentsProcessings {
     }
 
     /**
-     * Combines the results of {@link ContentsProcessor#process(String, InputStream, long, long, ProducerWhichThrows)}
+     * Combines the results of {@link ContentsProcessor#process(String, InputStream, Date, long, long, ProducerWhichThrows)}
      * for all archive entries into one object.
      *
-     * @param <T> The return type of {@link ContentsProcessor#process(String, InputStream, long, long,
+     * @param <T> The return type of {@link ContentsProcessor#process(String, InputStream, Date, long, long,
      *            ProducerWhichThrows)}
      */
     public
@@ -202,6 +212,7 @@ class ContentsProcessings {
             process(
                 final String                                                      path,
                 InputStream                                                       inputStream,
+                @Nullable Date                                                    lastModifiedDate,
                 long                                                              size,
                 long                                                              crc32,
                 ProducerWhichThrows<? extends InputStream, ? extends IOException> opener
@@ -210,6 +221,7 @@ class ContentsProcessings {
                 return CompressUtil.processStream(
                     path,                                      // path
                     inputStream,                               // inputStream
+                    lastModifiedDate,                          // lastModifiedDate
                     lookIntoFormat,                            // lookIntoFormat
                     ContentsProcessings.archiveHandler(        // archiveHandler
                         path,
@@ -293,13 +305,14 @@ class ContentsProcessings {
             process(
                 String                                                            name,
                 InputStream                                                       inputStream,
+                @Nullable Date                                                    lastModifiedDate,
                 long                                                              size,
                 long                                                              crc32,
                 ProducerWhichThrows<? extends InputStream, ? extends IOException> opener
             ) throws IOException {
                 ContentsProcessor<T> l = loopback.get();
                 assert l != null;
-                return l.process(name, inputStream, size, crc32, opener);
+                return l.process(name, inputStream, lastModifiedDate, size, crc32, opener);
             }
         };
 
@@ -393,6 +406,7 @@ class ContentsProcessings {
                     return contentsProcessor.process(
                         path + '%',                                           // path
                         compressorInputStream,                                // inputStream
+                        null,                                                 // lastModifiedDate
                         size,                                                 // size
                         -1L,                                                  // crc32
                         new ProducerWhichThrows<InputStream, IOException>() { // opener
@@ -424,7 +438,7 @@ class ContentsProcessings {
      * the given <var>contentsProcessor</var>.
      *
      * @param size   -1 if unknown
-     * @param crc32  See {@link ContentsProcessor#process(String, InputStream, long, long, ProducerWhichThrows)}
+     * @param crc32  See {@link ContentsProcessor#process(String, InputStream, Date, long, long, ProducerWhichThrows)}
      * @param opener Re-produces the
      */
     public static <T> NormalContentsHandler<T>
@@ -439,14 +453,15 @@ class ContentsProcessings {
         return new NormalContentsHandler<T>() {
 
             @Override @Nullable public T
-            handleNormalContents(InputStream inputStream)
+            handleNormalContents(InputStream inputStream, @Nullable Date lastModifiedDate)
             throws IOException {
                 return contentsProcessor.process(
-                    path,        // path
-                    inputStream, // inputStream
-                    size,        // size
-                    crc32,       // crc32
-                    opener       // opener
+                    path,             // path
+                    inputStream,      // inputStream
+                    lastModifiedDate, // lastModifiedDate
+                    size,             // size
+                    crc32,            // crc32
+                    opener            // opener
                 );
             }
         };

@@ -33,6 +33,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Comparator;
+import java.util.Date;
 
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -160,6 +161,8 @@ class FileTransformations {
 
         /** @return A simple name (must not contain separators) */
         String getName();
+
+        @Nullable Date getLastModifiedDate();
 
         /**
          * @return A stream producing the contents
@@ -645,7 +648,7 @@ class FileTransformations {
         return new NormalContentsHandler<Void>() {
 
             @Override @Nullable public Void
-            handleNormalContents(InputStream inputStream) throws IOException {
+            handleNormalContents(InputStream inputStream, @Nullable Date lastModifiedDate) throws IOException {
                 FileOutputStream os = new FileOutputStream(out);
                 try {
                     contentsTransformer.transform(path, inputStream, os);
