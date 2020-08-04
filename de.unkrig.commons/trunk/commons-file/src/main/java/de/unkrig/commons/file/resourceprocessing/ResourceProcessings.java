@@ -37,6 +37,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.regex.Pattern;
 
 import de.unkrig.commons.file.ExceptionHandler;
@@ -224,9 +225,12 @@ class ResourceProcessings {
                     size = huc.getContentLength();
                 }
 
+                long lastModified     = conn.getLastModified();
+                Date lastModifiedDate = lastModified == 0 ? null : new Date(lastModified);
+
                 InputStream is = conn.getInputStream();
                 try {
-                    T result = delegateCp.process(path, is, size, crc32, opener);
+                    T result = delegateCp.process(path, is, lastModifiedDate, size, crc32, opener);
                     is.close();
                     return result;
                 } finally {

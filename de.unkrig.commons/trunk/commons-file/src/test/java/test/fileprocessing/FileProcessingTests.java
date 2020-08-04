@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.After;
@@ -102,6 +103,7 @@ class FileProcessingTests {
         process(
             String                                                            path,
             InputStream                                                       inputStream,
+            @Nullable Date                                                    lastModifiedDate,
             long                                                              size,
             long                                                              crc32,
             ProducerWhichThrows<? extends InputStream, ? extends IOException> opener
