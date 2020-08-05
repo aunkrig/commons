@@ -26,6 +26,8 @@
 
 package de.unkrig.commons.file.org.apache.commons.compress.archivers.cpio;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,6 +85,10 @@ class CpioArchiveFormat extends AbstractArchiveFormat {
 
     @Override public ArchiveOutputStream
     archiveOutputStream(OutputStream os) { return new CpioArchiveOutputStream(os); }
+
+    @Override public ArchiveOutputStream
+    create(File archiveFile)
+    throws IOException { return new CpioArchiveOutputStream(new FileOutputStream(archiveFile)); }
 
     @Override public void
     writeEntry(
