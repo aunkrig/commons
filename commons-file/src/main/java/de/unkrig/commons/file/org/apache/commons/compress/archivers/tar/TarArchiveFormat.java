@@ -26,6 +26,8 @@
 
 package de.unkrig.commons.file.org.apache.commons.compress.archivers.tar;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -80,6 +82,10 @@ class TarArchiveFormat extends AbstractArchiveFormat {
 
     @Override public ArchiveOutputStream
     archiveOutputStream(OutputStream os) { return new TarArchiveOutputStream(os); }
+
+    @Override public ArchiveOutputStream
+    create(File archiveFile)
+    throws IOException { return new TarArchiveOutputStream(new FileOutputStream(archiveFile)); }
 
     @Override public void
     writeEntry(
