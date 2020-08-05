@@ -78,7 +78,7 @@ class CompressUtil {
          * May or may not read entries and data from the <var>archiveInputStream</var>, and may or may not close it.
          *
          * @see #processFile(File, Predicate, ArchiveHandler, Predicate, CompressorHandler, NormalContentsHandler)
-         * @see #processStream(InputStream, Predicate, ArchiveHandler, Predicate, CompressorHandler,
+         * @see #processStream(InputStream, Date, Predicate, ArchiveHandler, Predicate, CompressorHandler,
          *      NormalContentsHandler)
          */
         @Nullable T
@@ -100,7 +100,7 @@ class CompressUtil {
          * May or may not read from the <var>compressorInputStream</var>.
          *
          * @see #processFile(File, Predicate, ArchiveHandler, Predicate, CompressorHandler, NormalContentsHandler)
-         * @see #processStream(InputStream, Predicate, ArchiveHandler, Predicate, CompressorHandler,
+         * @see #processStream(InputStream, Date, Predicate, ArchiveHandler, Predicate, CompressorHandler,
          *      NormalContentsHandler)
          */
         @Nullable T
@@ -109,10 +109,10 @@ class CompressUtil {
     }
 
     /**
-     * @param <T>                             {@link #handleNormalContents(InputStream)} returns a value of this type,
-     *                                        which is, in turn, returned by the {@code processStream()} and {@code
-     *                                        processValue()} methods
-     * @see #handleNormalContents(InputStream)
+     * @param <T>                                    {@link #handleNormalContents(InputStream, Date)} returns a value
+     *                                               of this type, which is, in turn, returned by the {@code
+     *                                               processStream()} and {@code processValue()} methods
+     * @see #handleNormalContents(InputStream, Date)
      */
     public
     interface NormalContentsHandler<T> {
@@ -121,7 +121,7 @@ class CompressUtil {
          * May or may not read from the <var>inputStream</var>, and may or may not close it.
          *
          * @see #processFile(File, Predicate, ArchiveHandler, Predicate, CompressorHandler, NormalContentsHandler)
-         * @see CompressUtil#processStream(InputStream, Predicate, ArchiveHandler, Predicate, CompressorHandler,
+         * @see CompressUtil#processStream(InputStream, Date, Predicate, ArchiveHandler, Predicate, CompressorHandler,
          *      NormalContentsHandler)
          */
         @Nullable T
