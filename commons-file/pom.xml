@@ -49,14 +49,6 @@
 			<artifactId>redline</artifactId>
 			<version>1.2.9</version>
 		</dependency>
-
-		<!-- For unknown reasons, apache common compress fails to declare the following 
-			dependency, although it definitely depends on it. -->
-		<dependency>
-			<groupId>org.tukaani</groupId>
-			<artifactId>xz</artifactId>
-			<version>1.5</version>
-		</dependency>
 	</dependencies>
 
 	<parent>
