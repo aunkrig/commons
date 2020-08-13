@@ -105,28 +105,51 @@ class Html {
      * </p>
      * <dl>
      *   <dt>Field, constructor or method of same class:</dt>
-     *   <dd>{@code "#toField"}</dd>
-     *   <dd>{@code "#ToClass(java.lang.String)"}</dd>
-     *   <dd>{@code "#toMethod(java.lang.String)"}</dd>
+     *   <dd>
+     *     {@code "#toField"}
+     *     <br />
+     *     {@code "#ToClass(java.lang.String)"}
+     *     <br />
+     *     {@code "#toMethod(java.lang.String)"}
+     *   </dd>
      *   <dt>Class, field, constructor or method in external package:</dt>
-     *   <dd>{@code "http://external.url/to/package/ToClass"}</dd>
-     *   <dd>{@code "http://external.url/to/package/ToClass#toField"}</dd>
-     *   <dd>{@code "http://external.url/to/package/ToClass#ToClass(java.lang.String)"}</dd>
-     *   <dd>{@code "http://external.url/to/package/ToClass#toMethod(java.lang.String)"}</dd>
+     *   <dd>
+     *     {@code "http://external.url/to/package/ToClass"}
+     *     <br />
+     *     {@code "http://external.url/to/package/ToClass#toField"}
+     *     <br />
+     *     {@code "http://external.url/to/package/ToClass#ToClass(java.lang.String)"}
+     *     <br />
+     *     {@code "http://external.url/to/package/ToClass#toMethod(java.lang.String)"}
+     *   </dd>
      *   <dt>Class, field, constructor or method in same package:</dt>
-     *   <dd>{@code "ToClass"}</dd>
-     *   <dd>{@code "ToClass#toField"}</dd>
-     *   <dd>{@code "ToClass#ToClass(String)"}</dd>
-     *   <dd>{@code "ToClass#toMethod(String)"}</dd>
+     *   <dd>
+     *     {@code "ToClass"}
+     *     <br />
+     *     {@code "ToClass#toField"}
+     *     <br />
+     *     {@code "ToClass#ToClass(String)"}
+     *     <br />
+     *     {@code "ToClass#toMethod(String)"}
+     *   </dd>
      *   <dt>Class, field, constructor or method in different (but "included") package:</dt>
-     *   <dd>{@code "../../to/package/ToClass"}</dd>
-     *   <dd>{@code "../../to/package/ToClass#toField"}</dd>
-     *   <dd>{@code "../../to/package/ToClass#ToClass(String)"}</dd>
-     *   <dd>{@code "../../to/package/ToClass#toMethod(String)"}</dd>
+     *   <dd>
+     *     {@code "../../to/package/ToClass"}
+     *     <br />
+     *     {@code "../../to/package/ToClass#toField"}
+     *     <br />
+     *     {@code "../../to/package/ToClass#ToClass(String)"}
+     *     <br />
+     *     {@code "../../to/package/ToClass#toMethod(String)"}
+     *   </dd>
      *   <dt>Class, field or method in non-included package:</dt>
-     *   <dd>{@code null}</dd>
+     *   <dd>
+     *     {@code null}
+     *   </dd>
      *   <dt>RootDoc:</dt>
-     *   <dd>{@code "../../"}</dd>
+     *   <dd>
+     *     {@code "../../"}
+     *   </dd>
      * </dl>
      * <p>
      *   Default labels are generated as follows:
