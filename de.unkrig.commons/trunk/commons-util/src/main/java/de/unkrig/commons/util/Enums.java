@@ -55,8 +55,11 @@ class Enums {
     /**
      * Creates an {@link EnumSet} from the given string. The string must have one of the following formats:
      * <dl>
-     *   <dt>(Empty)</dt>
-     *   <dt><code>'[]'</code></dt>
+     *   <dt>
+     *     (Empty)
+     *     <br />
+     *     <code>'[]'</code>
+     *   </dt>
      *   <dd>Empty enum set</dd>
      *
      *   <dt><code>enum-constant</code></dt>
