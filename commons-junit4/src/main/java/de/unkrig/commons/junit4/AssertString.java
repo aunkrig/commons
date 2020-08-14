@@ -45,7 +45,7 @@ class AssertString {
      */
     public static void
     assertContains(String expectedInfix, String actual) {
-        assertContains(null, expectedInfix, actual);
+        AssertString.assertContains(null, expectedInfix, actual);
     }
 
     /**
@@ -59,9 +59,9 @@ class AssertString {
 
             Assert.fail(
                 (message == null ? "[" : message + ": [")
-                + actual
-                + "] is not contained in ["
                 + expectedInfix
+                + "] is not contained in ["
+                + actual
                 + "]"
             );
         }
@@ -72,7 +72,7 @@ class AssertString {
      */
     public static void
     assertContains(List<String> expectedInfixes, List<String> actuals) {
-        assertContains(null, expectedInfixes, actuals);
+        AssertString.assertContains(null, expectedInfixes, actuals);
     }
 
     /**
@@ -84,7 +84,7 @@ class AssertString {
             String expectedInfix = expectedInfixes.get(i);
             String actual        = actuals.get(i);
 
-            assertContains((message == null ? "Element " : message + ": Element ") + i, expectedInfix, actual);
+            AssertString.assertContains((message == null ? "Element " : message + ": Element ") + i, expectedInfix, actual);
         }
         if (expectedInfixes.size() != actuals.size()) {
             Assert.fail(
