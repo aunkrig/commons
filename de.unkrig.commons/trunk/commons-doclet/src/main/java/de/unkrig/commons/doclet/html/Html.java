@@ -156,14 +156,23 @@ class Html {
      * </p>
      * <dl>
      *   <dt>Field, constructor or method of same class:</dt>
-     *   <dd>{@code "toField"}</dd>
-     *   <dd>{@code "ToClass(java.lang.String)"}</dd>
-     *   <dd>{@code "toMethod(java.lang.String)"}</dd>
+     *   <dd>
+     *     {@code "toField"}
+     *     <br />
+     *     {@code "ToClass(java.lang.String)"}
+     *     <br />
+     *     {@code "toMethod(java.lang.String)"}
+     *   </dd>
      *   <dt>Class, or field, constructor or method in different class:</dt>
-     *   <dd>{@code ToClass}</dd>
-     *   <dd>{@code ToClass.toField}</dd>
-     *   <dd>{@code ToClass(java.lang.String)}</dd>
-     *   <dd>{@code ToClass.toMethod(java.lang.String)}</dd>
+     *   <dd>
+     *     {@code ToClass}
+     *     <br />
+     *     {@code ToClass.toField}
+     *     <br />
+     *     {@code ToClass(java.lang.String)}
+     *     <br />
+     *     {@code ToClass.toMethod(java.lang.String)}
+     *   </dd>
      * </dl>
      */
     public static final LinkMaker
