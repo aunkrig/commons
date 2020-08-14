@@ -84,8 +84,11 @@ import de.unkrig.commons.text.scanner.ScannerUtil;
  *     Arithmetic comparison (if both operands are numeric) or lexicographic comparison (otherwise).
  *   </dd>
  *
- *   <dt>{@code a =* "*.c"}</dt>
- *   <dt>{@code a =* "(*).c=$1.h"}</dt>
+ *   <dt>
+ *     {@code a =* "*.c"}
+ *     <br />
+ *     {@code a =* "(*).c=$1.h"}
+ *   </dt>
  *   <dd>
  *     Wildcard matching/replacing (see {@link Glob}).
  *     The left-hand-side operand is the <var>subject</var>, the right-hand-side operand is the <var>glob</var>.
@@ -102,8 +105,11 @@ import de.unkrig.commons.text.scanner.ScannerUtil;
  *     enabled (which is the default).
  *   </dd>
  *
- *   <dt>{@code a =~ "A.*"}</dt>
- *   <dt>{@code a =~ "(.*)abc(.*)=$1$2"}</dt>
+ *   <dt>
+ *     {@code a =~ "A.*"}
+ *     <br />
+ *     {@code a =~ "(.*)abc(.*)=$1$2"}
+ *   </dt>
  *   <dd>
  *     Regex matching/replacing (see {@link Pattern}).
  *     The left-hand-side operand is the <var>subject</var>, the right-hand-side operand is the <var>pattern</var>.
@@ -177,34 +183,52 @@ import de.unkrig.commons.text.scanner.ScannerUtil;
  *     Variable reference, see {@link Expression#evaluate(de.unkrig.commons.lang.protocol.Mapping)}
  *   </dd>
  *
- *   <dt>{@code new pkg.Clazz(arg1, arg2)}</dt>
- *   <dt>{@code new RootPackageClazz(arg1, arg2)}</dt>
- *   <dt>{@code new ImportedClazz(arg1, arg2)}</dt>
+ *   <dt>
+ *     {@code new pkg.Clazz(arg1, arg2)}
+ *     <br />
+ *     {@code new RootPackageClazz(arg1, arg2)}
+ *     <br />
+ *     {@code new ImportedClazz(arg1, arg2)}
+ *   </dt>
  *   <dd>
  *     Class instance creation
  *   </dd>
  *
- *   <dt>{@code new pkg.Clazz} (Only with {@link Parser.Extension#NEW_CLASS_WITHOUT_PARENTHESES})</dt>
- *   <dt>{@code pkg.Clazz()} (Only with {@link Parser.Extension#NEW_CLASS_WITHOUT_KEYWORD})</dt>
- *   <dt>{@code pkg.Clazz} (Only with {@link Parser.Extension#NEW_CLASS_WITHOUT_KEYWORD} <em>and</em> {@link
- *   Parser.Extension#NEW_CLASS_WITHOUT_PARENTHESES})</dt>
+ *   <dt>
+ *     {@code new pkg.Clazz} (Only with {@link Parser.Extension#NEW_CLASS_WITHOUT_PARENTHESES})
+ *     <br />
+ *     {@code pkg.Clazz()} (Only with {@link Parser.Extension#NEW_CLASS_WITHOUT_KEYWORD})
+ *     <br />
+ *     {@code pkg.Clazz} (Only with {@link Parser.Extension#NEW_CLASS_WITHOUT_KEYWORD} <em>and</em> {@link
+ *     Parser.Extension#NEW_CLASS_WITHOUT_PARENTHESES})
+ *   </dt>
  *   <dd>
  *     Abbreviated forms of "{@code new pkg.Clazz()}"
  *   </dd>
  *
- *   <dt>{@code new pkg.Clazz[x]}</dt>
- *   <dt>{@code new pkg.Clazz[x][y][][]}</dt>
- *   <dt>{@code new int[x]}</dt>
- *   <dt>{@code new int[x][y][][]}</dt>
+ *   <dt>
+ *     {@code new pkg.Clazz[x]}
+ *     <br />
+ *     {@code new pkg.Clazz[x][y][][]}
+ *     <br />
+ *     {@code new int[x]}
+ *     <br />
+ *     {@code new int[x][y][][]}
+ *   </dt>
  *   <dd>
  *     Array creation (notice that there is no abbreviated notation, without the {@code new} keyword, as for class
  *     instance creation)
  *   </dd>
  *
- *   <dt>{@code pkg.Clazz[x]}</dt>
- *   <dt>{@code pkg.Clazz[x][y][][]}</dt>
- *   <dt>{@code int[x]}</dt>
- *   <dt>{@code int[x][y][][]}</dt>
+ *   <dt>
+ *     {@code pkg.Clazz[x]}
+ *     <br />
+ *     {@code pkg.Clazz[x][y][][]}
+ *     <br />
+ *     {@code int[x]}
+ *     <br />
+ *     {@code int[x][y][][]}
+ *   </dt>
  *   <dd>
  *     Abbreviated array creation
  *   </dd>
