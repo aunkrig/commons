@@ -26,8 +26,6 @@
 
 package de.unkrig.commons.net.http.servlett;
 
-import static java.util.logging.Level.FINE;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
