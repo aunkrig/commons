@@ -31,7 +31,9 @@ import static java.util.logging.Level.FINE;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -39,6 +41,7 @@ import java.util.Date;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -47,6 +50,7 @@ import de.unkrig.commons.io.FixedLengthInputStream;
 import de.unkrig.commons.io.InputStreams;
 import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
+import de.unkrig.commons.lang.protocol.RunnableWhichThrows;
 import de.unkrig.commons.net.http.HttpMessage;
 import de.unkrig.commons.net.http.HttpRequest;
 import de.unkrig.commons.net.http.HttpResponse;
@@ -65,17 +69,17 @@ class FileServlett extends AbstractServlett {
 
     private static final Map<String, String> EXTENSION_TO_CONTENT_TYPE = new HashMap<String, String>();
     static {
-        EXTENSION_TO_CONTENT_TYPE.put("gif",       "image/gif");
-        EXTENSION_TO_CONTENT_TYPE.put("jpg",       "image/jpeg");
-        EXTENSION_TO_CONTENT_TYPE.put("jpeg",      "image/jpeg");
-        EXTENSION_TO_CONTENT_TYPE.put("css",       "text/css");
-        EXTENSION_TO_CONTENT_TYPE.put("html",      "text/html");
-        EXTENSION_TO_CONTENT_TYPE.put("java",      "text/plain");
-        EXTENSION_TO_CONTENT_TYPE.put("txt",       "text/plain");
-        EXTENSION_TO_CONTENT_TYPE.put("classpath", "text/xml");
-        EXTENSION_TO_CONTENT_TYPE.put("launch",    "text/xml");
-        EXTENSION_TO_CONTENT_TYPE.put("project",   "text/xml");
-        EXTENSION_TO_CONTENT_TYPE.put("xml",       "text/xml");
+        FileServlett.EXTENSION_TO_CONTENT_TYPE.put("gif",       "image/gif");
+        FileServlett.EXTENSION_TO_CONTENT_TYPE.put("jpg",       "image/jpeg");
+        FileServlett.EXTENSION_TO_CONTENT_TYPE.put("jpeg",      "image/jpeg");
+        FileServlett.EXTENSION_TO_CONTENT_TYPE.put("css",       "text/css");
+        FileServlett.EXTENSION_TO_CONTENT_TYPE.put("html",      "text/html");
+        FileServlett.EXTENSION_TO_CONTENT_TYPE.put("java",      "text/plain");
+        FileServlett.EXTENSION_TO_CONTENT_TYPE.put("txt",       "text/plain");
+        FileServlett.EXTENSION_TO_CONTENT_TYPE.put("classpath", "text/xml");
+        FileServlett.EXTENSION_TO_CONTENT_TYPE.put("launch",    "text/xml");
+        FileServlett.EXTENSION_TO_CONTENT_TYPE.put("project",   "text/xml");
+        FileServlett.EXTENSION_TO_CONTENT_TYPE.put("xml",       "text/xml");
     }
 
     /**
@@ -97,13 +101,13 @@ class FileServlett extends AbstractServlett {
             throw ExceptionUtil.wrap(file.toString(), ioe);
         }
 
-        if (LOGGER.isLoggable(FINE)) LOGGER.fine("Accessing file '" + file + "'");
+        if (FileServlett.LOGGER.isLoggable(Level.FINE)) FileServlett.LOGGER.fine("Accessing file '" + file + "'");
 
         long from = 0, to = Long.MAX_VALUE;
 
         String s = httpRequest.getHeader("Range");
         if (s != null) {
-            Matcher m = RANGES_SPECIFIER.matcher(s);
+            Matcher m = FileServlett.RANGES_SPECIFIER.matcher(s);
             if (m.matches()) {
                 if (m.group(1) != null) from = Long.parseLong(m.group(1));
                 if (m.group(2) != null) to   = Long.parseLong(m.group(2) + 1);
@@ -115,17 +119,17 @@ class FileServlett extends AbstractServlett {
         if (path.endsWith("/") && file.isDirectory()) {
             File indexFile = new File(file, "index.html");
             if (indexFile.isFile()) {
-                return processFileRequest(indexFile, from, to);
+                return FileServlett.processFileRequest(indexFile, from, to);
             }
 
             // Generate a nice directory listing.
-            return processDirectoryListing(file);
+            return FileServlett.processDirectoryListing(file);
         }
 
         // Handle file.
         if (file.isFile()) {
 
-            HttpResponse rsp = processFileRequest(file, from, to);
+            HttpResponse rsp = FileServlett.processFileRequest(file, from, to);
             return rsp;
         }
 
@@ -166,7 +170,7 @@ class FileServlett extends AbstractServlett {
             throw ExceptionUtil.wrap(file.toString(), ioe);
         }
 
-        if (LOGGER.isLoggable(FINE)) LOGGER.fine("Accessing file '" + file + "'");
+        if (FileServlett.LOGGER.isLoggable(Level.FINE)) FileServlett.LOGGER.fine("Accessing file '" + file + "'");
 
         // Handle file.
         if (file.isFile() || !file.exists()) {
@@ -216,8 +220,8 @@ class FileServlett extends AbstractServlett {
                     for (File f : directory.listFiles()) {
                         String name = f.getName();
                         String displayName, title;
-                        if (name.length() > LENGTH_LIMIT) {
-                            displayName = name.substring(0, LENGTH_LIMIT - 3) + "...";
+                        if (name.length() > FileServlett.LENGTH_LIMIT) {
+                            displayName = name.substring(0, FileServlett.LENGTH_LIMIT - 3) + "...";
                             title       = name;
                         } else {
                             displayName = name;
@@ -232,7 +236,7 @@ class FileServlett extends AbstractServlett {
                             + (title == null ? "" : " title=\"" + title + "\"")
                             + ">"
                             + "%-"
-                            + (LENGTH_LIMIT + 4)
+                            + (FileServlett.LENGTH_LIMIT + 4)
                             + "s %s"
                         ), displayName + "</a>", new Date(f.lastModified()));
                     }
@@ -269,7 +273,7 @@ class FileServlett extends AbstractServlett {
                 idx       = name.indexOf('.', idx);
                 extension = idx == -1 ? "" : name.substring(idx + 1);
             }
-            contentType = EXTENSION_TO_CONTENT_TYPE.get(extension);
+            contentType = FileServlett.EXTENSION_TO_CONTENT_TYPE.get(extension);
             if (contentType == null) contentType = "application/octet-stream";
         }
 
@@ -280,16 +284,21 @@ class FileServlett extends AbstractServlett {
 
         long contentLength = to - from;
 
-        FileInputStream is = new FileInputStream(file);
+        final FileInputStream is = new FileInputStream(file);
         if (InputStreams.skip(is, from) != from) {
             throw new IOException("Cannot skip " + from + " bytes of \"" + file + "\"");
         }
 
         // Create the response.
-        HttpResponse httpResponse = HttpResponse.response(
-            Status.OK,
-            new FixedLengthInputStream(is, contentLength)
-        );
+        FixedLengthInputStream flis = new FixedLengthInputStream(is, contentLength);
+
+        // "FixedLengthInputStream.close()" does not close the underlying stream, so do the magic here.
+        InputStream is2 = FileServlett.whenClosed(flis, new RunnableWhichThrows<IOException>() {
+            @Override public void run() throws IOException { is.close(); }
+        });
+
+        HttpResponse httpResponse = HttpResponse.response(Status.OK, is2);
+
         httpResponse.addHeader("Content-Length", contentLength);
         if (contentLength != fileLength) {
             httpResponse.addHeader("Content-Range", from + "-" + (to - 1) + "/" + fileLength);
@@ -298,5 +307,18 @@ class FileServlett extends AbstractServlett {
         httpResponse.addHeader("Content-Type", contentType);
 
         return httpResponse;
+    }
+
+    private static InputStream
+    whenClosed(InputStream is, final RunnableWhichThrows<IOException> runnable) {
+
+        return new FilterInputStream(is) {
+
+            @Override public void
+            close() throws IOException {
+                super.close();
+                runnable.run();
+            }
+        };
     }
 }
