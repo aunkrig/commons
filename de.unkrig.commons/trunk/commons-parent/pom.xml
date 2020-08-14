@@ -110,6 +110,24 @@
           <additionalparam>-Xdoclint:none</additionalparam>
           <encoding>UTF-8</encoding>
           <quiet>true</quiet>
+
+          <!--
+            Fix up the styles of <dt> and <dd> - by default, JAVADOC renders them with ZERO indentation.
+            Notice that adding styles through <header> is a dirty trick. (There is no way to put styles in the
+            document <head>.)
+          -->
+          <header><![CDATA[
+<style>
+
+dt {
+  margin-left: 20px !important;
+}
+
+dd {
+  margin-left: 40px !important;
+}
+</style>
+          ]]></header>
         </configuration>
       </plugin>
     </plugins>
