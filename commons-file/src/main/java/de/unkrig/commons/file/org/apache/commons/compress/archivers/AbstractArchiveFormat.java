@@ -64,6 +64,7 @@ class AbstractArchiveFormat implements ArchiveFormat {
         throw new StreamingNotSupportedException(this.getName());
     }
 
+    /** @throws IOException */
     @Override public ArchiveOutputStream
     create(File archiveFile) throws IOException, ArchiveException {
         throw new ArchiveException("Creation of \"" + this.getName() + "\" archives not supported");
@@ -76,6 +77,7 @@ class AbstractArchiveFormat implements ArchiveFormat {
         ConsumerWhichThrows<? super OutputStream, ? extends IOException> writeContents
     ) throws IOException { this.writeEntry(archiveOutputStream, name, null, writeContents); }
 
+    /** @throws IOException */
     @Override public void
     writeEntry(
         final ArchiveOutputStream                                              archiveOutputStream,
@@ -84,11 +86,13 @@ class AbstractArchiveFormat implements ArchiveFormat {
         final ConsumerWhichThrows<? super OutputStream, ? extends IOException> writeContents
     ) throws IOException { throw new IllegalArgumentException(archiveOutputStream.getClass().getName()); }
 
+    /** @throws IOException */
     @Override public void
     writeDirectoryEntry(ArchiveOutputStream archiveOutputStream, String name) throws IOException {
         throw new IllegalArgumentException(archiveOutputStream.getClass().getName());
     }
 
+    /** @throws IOException */
     @Override public void
     writeEntry(
         final ArchiveOutputStream                                              archiveOutputStream,
