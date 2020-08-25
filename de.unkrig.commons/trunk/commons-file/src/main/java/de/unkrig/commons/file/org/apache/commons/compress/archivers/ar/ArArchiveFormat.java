@@ -86,10 +86,32 @@ class ArArchiveFormat extends AbstractArchiveFormat {
 
         return new ArchiveInputStream() {
 
-            @Override public ArchiveEntry
+            @Override @Nullable public ArchiveEntry
             getNextEntry() throws IOException {
+
+                ArArchiveEntry aae = this.getNextEntry2(aais);
+
+                // Fun fact: AR archives sometimes contain entries named "" (or "/"), with actual content, but we cannot
+                // process these reasonably, so we silently change their name to "__ROOT".
+                if (aae != null && aae.getName().isEmpty()) {
+                    aae = new ArArchiveEntry(
+                        "__ROOT", // name
+                        aae.getLength(),
+                        aae.getUserId(),
+                        aae.getGroupId(),
+                        aae.getMode(),
+                        aae.getLastModified()
+                    );
+                }
+
+                return aae;
+            }
+
+
+            @Nullable private ArArchiveEntry
+            getNextEntry2(final ArArchiveInputStream aais) throws IOException {
                 try {
-                    return aais.getNextEntry();
+                    return this.getNextEntry3(aais);
                 } catch (NumberFormatException nfe) {
 
                     // A corrupt AR entry may cause this RTE:
@@ -102,6 +124,11 @@ class ArArchiveFormat extends AbstractArchiveFormat {
 
                     throw nfe;
                 }
+            }
+
+            @Nullable private ArArchiveEntry
+            getNextEntry3(final ArArchiveInputStream aais) throws IOException {
+                return aais.getNextArEntry();
             }
 
 
