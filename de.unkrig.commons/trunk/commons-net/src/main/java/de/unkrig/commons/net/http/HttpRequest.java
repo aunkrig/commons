@@ -131,7 +131,11 @@ class HttpRequest extends HttpMessage {
             method = Method.valueOf(matcher.group(1));
 
             try {
-                uri = new URI(matcher.group(2));
+                uri = (
+            		method == Method.CONNECT
+            		? new URI(null, matcher.group(2), null, null, null) :
+        			new URI(matcher.group(2))
+    			);
             } catch (URISyntaxException use) {
                 throw new InvalidHttpMessageException(use);
             }
@@ -533,7 +537,11 @@ class HttpRequest extends HttpMessage {
     write(OutputStream out, String loggingPrefix) throws IOException {
 
         {
-            String requestLine = this.method + " " + this.uri;
+            String requestLine = (
+                this.method
+                + " "
+                + (this.method == Method.CONNECT ? this.uri.getAuthority() : this.uri)
+            );
             if (!"0.9".equals(this.httpVersion)) requestLine += " HTTP/" + this.httpVersion;
             LOGGER.fine(loggingPrefix + requestLine);
 
