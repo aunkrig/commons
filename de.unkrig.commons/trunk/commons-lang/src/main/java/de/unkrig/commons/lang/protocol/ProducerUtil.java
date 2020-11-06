@@ -403,7 +403,8 @@ class ProducerUtil {
     constantProducer(final T constant) {
 
         return new Producer<T>() {
-            @Override public T produce() { return constant; }
+            @Override public T      produce()  { return constant; }
+            @Override public String toString() { return "constant=" + constant; }
         };
     }
 
