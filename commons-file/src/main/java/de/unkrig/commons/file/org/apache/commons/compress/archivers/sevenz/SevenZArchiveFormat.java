@@ -40,6 +40,7 @@ import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
 import org.apache.commons.compress.compressors.FileNameUtil;
+import org.apache.commons.compress.utils.Charsets;
 
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.AbstractArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormat;
@@ -52,6 +53,11 @@ import de.unkrig.commons.nullanalysis.Nullable;
  */
 public final
 class SevenZArchiveFormat extends AbstractArchiveFormat {
+
+    /**
+     * Iff a system property with this name is set, then its value is used to decrypt 7ZIP input files.
+     */
+    public static final String SYSTEM_PROPERTY_SEVEN_Z_INPUT_FILE_PASSWORD = "sevenZInputFilePassword";
 
     private static final FileNameUtil FILE_NAME_UTIL = new FileNameUtil(Collections.singletonMap(".7z", ""), ".7z");
 
@@ -72,7 +78,11 @@ class SevenZArchiveFormat extends AbstractArchiveFormat {
     getArchiveFileName(String fileName) { return SevenZArchiveFormat.FILE_NAME_UTIL.getCompressedFilename(fileName); }
 
     @Override public ArchiveInputStream
-    open(File archiveFile) throws IOException { return new SevenZArchiveInputStream(archiveFile); }
+    open(File archiveFile) throws IOException {
+        String password      = System.getProperty(SevenZArchiveFormat.SYSTEM_PROPERTY_SEVEN_Z_INPUT_FILE_PASSWORD);
+        byte[] passwordBytes = password == null ? null : password.getBytes(Charsets.UTF_16LE);
+        return new SevenZArchiveInputStream(archiveFile, passwordBytes);
+    }
 
     @Override public ArchiveOutputStream
     create(File archiveFile)

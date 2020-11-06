@@ -41,6 +41,10 @@ class SevenZArchiveInputStream extends ArchiveInputStream {
 
     SevenZArchiveInputStream(File file) throws IOException { this.sevenZFile = new SevenZFile(file); }
 
+    SevenZArchiveInputStream(File file, @Nullable byte[] password) throws IOException {
+        this.sevenZFile = new SevenZFile(file, password);
+    }
+
     @Override public int
     getCount() { throw new UnsupportedOperationException("getCount"); }
 
