@@ -261,7 +261,10 @@ class FileProcessings {
 
                 // Submit callables that do the actual work for each member.
                 List<Future<T>> futures = new ArrayList<Future<T>>(memberNames.length);
-                for (final String memberName : memberNames) {
+                for (final String mn : memberNames) {
+
+                    // JRE11+MS WINDOWS replace colons (#003A) in member names with #F03A, for whatever reason.
+                    final String memberName = mn.replace((char) 0xf031, ':');
 
                     futures.add(squadExecutor.submit(new Callable<T>() {
 
