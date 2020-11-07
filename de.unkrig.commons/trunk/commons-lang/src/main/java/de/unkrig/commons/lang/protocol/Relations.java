@@ -28,6 +28,12 @@ package de.unkrig.commons.lang.protocol;
 
 /**
  * Various {@link Relation}-related utility methods.
+ * <p>
+ *   Examples:
+ * </p>
+ * <pre>{@code
+ *   Relation<Float> greaterOrEqual = Relations.not(Relations.lessThan());
+ * }</pre>
  */
 public final
 class Relations {
@@ -50,20 +56,35 @@ class Relations {
     /**
      * @return A {@link Relation} that evaluates {@code true} iff the <var>lhs</var> is greater than the <var>rhs</var>
      */
-    @SuppressWarnings("unchecked") static <T extends Comparable<T>> Relation<T>
+    @SuppressWarnings("unchecked") public static <T extends Comparable<T>> Relation<T>
     greaterThan() { return (Relation<T>) Relations.GREATER_THAN; }
 
     /**
      * @return A {@link Relation} that evaluates {@code true} iff the <var>lhs</var> is less than the <var>rhs</var>
      */
-    @SuppressWarnings("unchecked") static <T extends Comparable<T>> Relation<T>
+    @SuppressWarnings("unchecked") public static <T extends Comparable<T>> Relation<T>
     lessThan() { return (Relation<T>) Relations.LESS_THAN; }
 
     /**
      * @return A {@link Relation} that evaluates {@code true} iff the <var>lhs</var> is equal to the <var>rhs</var>
      */
-    @SuppressWarnings("unchecked") static <T extends Comparable<T>> Relation<T>
+    @SuppressWarnings("unchecked") public static <T extends Comparable<T>> Relation<T>
     equalTo() { return (Relation<T>) Relations.EQUAL_TO; }
+
+    /**
+     * @return A {@link Relation} that evaluates to the negation of the <var>delegate</var> relation
+     */
+    public static <T extends Comparable<T>> Relation<T>
+    not(final Relation<T> delegate) {
+        return new Relation<T>() {
+
+            @Override public boolean
+            evaluate(Comparable<T> lhs, Comparable<T> rhs) { return !delegate.evaluate(lhs, rhs); }
+
+            @Override public String
+            toString() { return "!" + delegate.toString(); }
+        };
+    }
 
     @SuppressWarnings({ "rawtypes", "unchecked" }) private static final Relation<? extends Comparable>
     GREATER_THAN = new Relation() {
