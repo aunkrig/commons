@@ -47,11 +47,6 @@ class Relations {
         };
     }
 
-    public
-    interface Relation<T extends Comparable<T>> {
-        boolean evaluate(Comparable<T> lhs, Comparable<T> rhs);
-    }
-
     /**
      * @return A {@link Relation} that evaluates {@code true} iff the <var>lhs</var> is greater than the <var>rhs</var>
      */
