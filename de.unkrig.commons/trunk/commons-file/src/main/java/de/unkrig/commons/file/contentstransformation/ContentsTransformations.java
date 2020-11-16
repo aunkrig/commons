@@ -269,9 +269,9 @@ class ContentsTransformations {
                     }
                 );
             } catch (IOException ioe) {
-                exceptionHandler.handle(path, ExceptionUtil.wrap("Transforming entry '" + ae + "'", ioe));
+                exceptionHandler.handle(path, ExceptionUtil.wrap("Transforming entry \"" + ae.getName() + "\"", ioe));
             } catch (RuntimeException re) {
-                exceptionHandler.handle(path, ExceptionUtil.wrap("Transforming entry '" + ae + "'", re));
+                exceptionHandler.handle(path, ExceptionUtil.wrap("Transforming entry \"" + ae.getName() + "\"", re));
             }
         }
 
