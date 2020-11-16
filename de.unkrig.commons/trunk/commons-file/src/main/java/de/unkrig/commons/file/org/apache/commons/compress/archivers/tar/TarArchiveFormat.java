@@ -81,11 +81,41 @@ class TarArchiveFormat extends AbstractArchiveFormat {
     archiveInputStream(InputStream is) { return new TarArchiveInputStream(is); }
 
     @Override public ArchiveOutputStream
-    archiveOutputStream(OutputStream os) { return new TarArchiveOutputStream(os); }
+    archiveOutputStream(OutputStream os) {
+        TarArchiveOutputStream result = new TarArchiveOutputStream(os);
+        if (TarArchiveFormat.longFileMode == -1) {
+            String lfm = System.getProperty(
+                TarArchiveFormat.LONG_FILE_MODE_SYSTEM_PROPERTY_NAME,
+                TarArchiveFormat.DEFAULT_LONG_FILE_MODE
+            );
+            try {
+                TarArchiveFormat.longFileMode = (Integer) TarArchiveOutputStream.class.getField("LONGFILE_" + lfm).get(null);
+            } catch (NoSuchFieldException e) {
+                throw new IllegalArgumentException(
+                    "System property \""
+                    + TarArchiveFormat.LONG_FILE_MODE_SYSTEM_PROPERTY_NAME
+                    + "\" has invalid value \""
+                    + lfm
+                    + "\"; allowed values are \"ERROR\", \"TRUNCATE\", \"GNU\" and \"POSIX\"; default is \""
+                    + TarArchiveFormat.DEFAULT_LONG_FILE_MODE
+                    + "\""
+                );
+            } catch (Exception e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        result.setLongFileMode(TarArchiveFormat.longFileMode);
+
+        return result;
+    }
+    private static int          longFileMode                        = -1;
+    private static final String DEFAULT_LONG_FILE_MODE              = "GNU";
+    private static final String LONG_FILE_MODE_SYSTEM_PROPERTY_NAME = "TarArchiveFormat.longFileMode";
 
     @Override public ArchiveOutputStream
     create(File archiveFile)
-    throws IOException { return new TarArchiveOutputStream(new FileOutputStream(archiveFile)); }
+    throws IOException { return this.archiveOutputStream(new FileOutputStream(archiveFile)); }
 
     @Override public void
     writeEntry(
