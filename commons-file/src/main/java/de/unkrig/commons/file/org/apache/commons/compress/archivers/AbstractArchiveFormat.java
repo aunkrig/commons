@@ -100,4 +100,7 @@ class AbstractArchiveFormat implements ArchiveFormat {
         @Nullable final String                                                 name,
         final ConsumerWhichThrows<? super OutputStream, ? extends IOException> writeContents
     ) throws IOException { throw new IllegalArgumentException(archiveOutputStream.getClass().getName()); }
+
+    @Override @Nullable public String
+    getCompressionMethod(ArchiveEntry ae) { return null; }
 }

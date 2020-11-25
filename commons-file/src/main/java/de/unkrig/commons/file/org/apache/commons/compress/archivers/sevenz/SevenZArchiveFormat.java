@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -38,6 +39,7 @@ import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
+import org.apache.commons.compress.archivers.sevenz.SevenZMethodConfiguration;
 import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
 import org.apache.commons.compress.compressors.FileNameUtil;
 import org.apache.commons.compress.utils.Charsets;
@@ -162,6 +164,25 @@ class SevenZArchiveFormat extends AbstractArchiveFormat {
 
     @Override public boolean
     matches(byte[] signature, int signatureLength) { return SevenZFile.matches(signature, signatureLength); }
+
+    @Override @Nullable public String
+    getCompressionMethod(ArchiveEntry ae) {
+
+        Iterable<? extends SevenZMethodConfiguration> contentMethods = ((SevenZArchiveEntry) ae).getContentMethods();
+        if (contentMethods == null) return "none";
+
+        Iterator<? extends SevenZMethodConfiguration> it = contentMethods.iterator();
+        if (!it.hasNext()) return "zero";
+
+        String s = it.next().getMethod().toString();
+        if (!it.hasNext()) return s;
+
+        StringBuilder sb = new StringBuilder(s);
+        do {
+            sb.append('+').append(it.next().getMethod().toString());
+        } while (it.hasNext());
+        return sb.toString();
+    }
 
     @Override public String
     toString() { return this.getName(); }

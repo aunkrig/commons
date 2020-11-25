@@ -42,6 +42,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.compress.archivers.zip.ZipMethod;
 import org.apache.commons.compress.compressors.FileNameUtil;
 
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.AbstractArchiveFormat;
@@ -177,6 +178,11 @@ class ZipArchiveFormat extends AbstractArchiveFormat {
 
     @Override public boolean
     matches(byte[] signature, int signatureLength) { return ZipArchiveInputStream.matches(signature, signatureLength); }
+
+    @Override @Nullable public String
+    getCompressionMethod(ArchiveEntry ae) {
+        return ZipMethod.getMethodByCode(((ZipArchiveEntry) ae).getMethod()).toString();
+    }
 
     private static ArchiveInputStream
     zipArchiveInputStream(final File file) throws IOException {

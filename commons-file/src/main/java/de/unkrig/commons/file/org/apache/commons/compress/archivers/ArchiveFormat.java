@@ -177,4 +177,13 @@ interface ArchiveFormat {
     /** @return Whether the first few bytes of archive data match what is expected for this format */
     boolean
     matches(byte[] signature, int signatureLength);
+
+    /**
+     * Some archive formats provide a per-entry "compression method" - these would return a non-{@code null} value.
+     *
+     * @throws ClassCastException The <var>ae</var>'s is not suitable for this archive format
+     * @since 1.2.16
+     */
+    @Nullable String
+    getCompressionMethod(ArchiveEntry ae);
 }
