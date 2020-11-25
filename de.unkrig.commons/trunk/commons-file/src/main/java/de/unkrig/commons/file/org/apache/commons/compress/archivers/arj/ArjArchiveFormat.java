@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
 
+import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
@@ -40,6 +41,7 @@ import org.apache.commons.compress.compressors.FileNameUtil;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.AbstractArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormatFactory;
+import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * Representation of the 'ar' archive format.
@@ -75,6 +77,14 @@ class ArjArchiveFormat extends AbstractArchiveFormat {
 
     @Override public boolean
     matches(byte[] signature, int signatureLength) { return ArjArchiveInputStream.matches(signature, signatureLength); }
+
+    @Override @Nullable public String
+    getCompressionMethod(ArchiveEntry ae) {
+
+        // For whatever reason, "ArjArchiveEntry.getMethod()" is default-accessible, so we cannot invoke it here.
+
+        return null;
+    }
 
     @Override public String
     toString() { return this.getName(); }
