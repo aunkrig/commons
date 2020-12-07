@@ -45,49 +45,51 @@ class Pattern2 {
     /**
      * Modifies the pattern compilation as follows:
      * <p>
-     * The meaning of the '*' and '?' metacharacters is now different, and '.' is no longer a metacharacter.
+     * The meaning of the "{@code *}" and "{@code ?}" metacharacters is now different, and "{@code .}" is no longer a metacharacter.
      * <p>
-     * '/' is now a metacharacter, i.e. to include it literally in the pattern, it must be escaped with a backslash.
+     * "{@code /}" is now a metacharacter, i.e. to include it literally in the pattern, it must be escaped with a backslash.
      * <p>
-     * The semantics of '*', '?' and '.' are as follows:
+     * The semantics of "{@code *}", "{@code ?}" and "{@code .}" are as follows:
      * <table border="1">
      *   <tr align="left">
      *     <th bgcolor="#CCCCFF" align="left" id="construct">Construct</th>
      *     <th bgcolor="#CCCCFF" align="left" id="matches">Matches</th>
      *   </tr>
-     *   <tr align="left">
-     *     <th colspan="2" id="alternatives"><font color="red">Wildcards</font></th>
+     *   <tr>
+     *     <td>{@code *}</td>
+     *     <td>Zero or more characters except "{@code /}", the file separator and "{@code !}"</td>
      *   </tr>
      *   <tr>
-     *     <td valign="top" headers="construct characters"><tt>*</tt></td>
-     *     <td headers="matches">Zero or more characters except '/', the file separator and '!'</td>
+     *     <td>{@code **}</td>
+     *     <td>Zero or more characters except "{@code !}"</td>
      *   </tr>
      *   <tr>
-     *     <td valign="top" headers="construct characters"><tt>**</tt></td>
-     *     <td headers="matches">Zero or more characters except '!'</td>
+     *     <td>{@code ***}</td>
+     *     <td>Zero or more characters</td>
      *   </tr>
      *   <tr>
-     *     <td valign="top" headers="construct characters"><tt>***</tt></td>
-     *     <td headers="matches">Zero or more characters</td>
+     *     <td>{@code ?}</td>
+     *     <td>Any character except "{@code /}", the file separator and "{@code !}"</td>
      *   </tr>
      *   <tr>
-     *     <td valign="top" headers="construct characters"><tt>?</tt></td>
-     *     <td headers="matches">Any character except '/', the file separator and '!'</td>
+     *     <td>{@code .}</td>
+     *     <td>"{@code .}"</td>
      *   </tr>
      *   <tr>
-     *     <td valign="top" headers="construct characters"><tt>.</tt></td>
-     *     <td headers="matches">The '.'</td>
-     *   </tr>
-     *   <tr>
-     *     <td valign="top" headers="construct characters"><tt>/</tt></td>
-     *     <td headers="matches">
-     *       '/' or the system-dependent file separator (see {@link java.io.File#separatorChar separatorChar})
+     *     <td>{@code /}</td>
+     *     <td>
+     *       "{@code /}" or the system-dependent file separator (see {@link java.io.File#separatorChar separatorChar})
      *     </td>
      *   </tr>
      * </table>
-     * Naturally, '*' is no longer the regex quantifier '*', so if you need to quantify 'zero or more', then you'd have
-     * to write '<code>{0,}</code>'. Similarly, to quantify 'zero or one', you can no longer write '{@code ?}', but
-     * must use '<code>{0,1}</code>'.
+     * <p>
+     *   Naturally, "{@code *}" is no longer the regex quantifier "{@code *}", so if you need to quantify "zero or
+     *   more", then you'd have to write "<code>{0,}</code>".
+     *   <br />
+     *   Similarly, to quantify "zero or one", you can no longer write "{@code ?}", but must use "<code>{0,1}</code>".
+     *   <br />
+     *   And to match "any character", you can no longer write "{@code .}", but must use "{@code ?}".
+     * </p>
      */
     public static final int WILDCARD = 0x20000000;
 
