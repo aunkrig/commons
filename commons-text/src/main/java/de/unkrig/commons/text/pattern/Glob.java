@@ -221,15 +221,16 @@ class Glob implements Predicate<String> {
      *   <li>If the <var>regex</var> matches the <var>subject</var>, then {@code true} is returned.</li>
      *   <li>
      *     Otherwise, if the <var>regex</var> matches a prefix of <var>subject</var>, and that prefix is followed by
-     *     '/' or '!', then {@code true} is returned. (Effectively, a glob 'dir' or 'dir/file.zip' matches all members
-     *     and entries under 'dir' resp. 'dir/file.zip'.)
+     *     {@code "/"} or {@code "!"}, then {@code true} is returned ("Parent dir match"). Effectively, a glob {@code "dir"} or {@code "dir/file.zip"}
+     *     matches all members and entries under {@code "dir"} resp. {@code "dir/file.zip"}.)
      *   </li>
      *   <li>
-     *     Otherwise, if the subject ends with "!" or "/", and the <var>regex</var> could match the concatenation of
-     *     the <var>subject</var> and another string, then {@code true} is returned. (Example: The <var>subject</var>
-     *     {@code "dir/"} is matched by <var>regex</var>s {@code "dir"}, {@code "dir/"}, {@code "dir/anything"} and
-     *     {@code "**.c"}, but not by <var>regex</var>s {@code "dirr/anything"}, {@code "file"}, {@code "*.c"} and
-     *     {@code "file.zip!file"}.)
+     *     Otherwise, if the subject ends with {@code "!"} or {@code "/"}, and the <var>regex</var> could match the concatenation of
+     *     the <var>subject</var> and another string, then {@code true} is returned ("Prefix match").
+     *     <br>
+     *     Example: The <var>subject</var> {@code "dir/"} is matched by <var>regex</var>s {@code "dir"},
+     *     {@code "dir/"}, {@code "dir/anything"} and {@code "**.c"}, but not by <var>regex</var>s
+     *     {@code "dirr/anything"}, {@code "file"}, {@code "*.c"} and {@code "file.zip!file"}.)
      *   </li>
      *   <li>Otherwise {@code false} is returned.</li>
      * </ul>
@@ -240,7 +241,7 @@ class Glob implements Predicate<String> {
      *     <ul>
      *       <li>If <var>replacementString</var> is {@code null}, then the subject is returned.</li>
      *       <li>
-     *         Otherwise, the <var>replacementString</var> is returned, with '$1', '$2', ... replaced with the {@code
+     *         Otherwise, the <var>replacementString</var> is returned, with {@code "$1"}, {@code "$2"}, ... replaced with the {@code
      *         regex}'s "capturing groups" (see {@link Pattern}).
      *       </li>
      *     </ul>
@@ -259,15 +260,16 @@ class Glob implements Predicate<String> {
                 Matcher matcher = regex.matcher(subject);
                 if (subject.isEmpty() || subject.endsWith("/") || subject.endsWith("!")) {
 
-                    // Subcomponent match (e.g. subject 'a/b/c/d' vs. glob 'a/b/')?
+                    // "Prefix match" (e.g. subject "a/b/" vs. glob "a/b/c/d")?
                     return matcher.matches() || matcher.hitEnd();
                 }
 
                 for (;;) {
 
-                    // Precise match (e.g. subject 'a/b/c' vs. glob 'a/b/c') or subcomponent match (e.g. subject
-                    // 'a/b/c/d' vs. glob 'a/b/c')?
+                    // Precise match (e.g. subject "a/b/c" vs. glob "a/b/c")?
                     if (matcher.matches()) return true;
+
+                    // "Parent dir match" (e.g. subject "a/b/c/d" vs. glob "a/b/c")?
                     for (int i = subject.length() - 1;; i--) {
                         if (i < 0) return false;
                         char c = subject.charAt(i);
@@ -328,7 +330,7 @@ class Glob implements Predicate<String> {
      * </p>
      * <p>
      *   Iff a replacement is specified, then {@link Glob#replace(String)} will return the replacement, with
-     *   "{@code $1}"... replaces with the match groups; otherwise the <var>subject</var> will be returned.
+     *   {@code "$1"}... replaces with the match groups; otherwise the <var>subject</var> will be returned.
      * </p>
      *
      * @param flags Modifies the semantics of the <var>pattern</var>, e.g. {@link Pattern2#WILDCARD} switches from
