@@ -214,7 +214,6 @@ class Substitutor<EX extends Throwable> implements TransformerWhichThrows<CharSe
                 if (replacement == null) {
                     result.append(this.buffer.charAt(this.start++));
                 } else {
-                    this.substitutionCount++;
                     result.append(replacement);
                     this.substitutionCount++;
                     if (m.end() == m.start()) {
