@@ -351,11 +351,11 @@ class PipeFactory {
                     case 1:
                         return PipeFactory.mappedTempFileRingBuffer(10000000);
 
-                    case 3:
+                    case 2:
                         return PipeFactory.randomAccessTempFileRingBuffer(Long.MAX_VALUE);
 
                     default:
-                        throw new IllegalStateException("elasticPipe");
+                        throw new IllegalStateException("elasticPipe: " + index);
                     }
                 }
             })
