@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Random;
 
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -137,6 +139,34 @@ class PipeTest {
             @Override @Nullable public Pipe
             produce() { return PipeFactory.byteArrayRingBuffer(20000); }
         }));
+    }
+
+    @Test public void
+    elasticPipe2() throws Exception {
+        PipeTest.testPipe(PipeFactory.byteBufferRingBuffer(ByteBuffer.allocateDirect(300000)), 290000);
+        PipeTest.testPipe(PipeFactory.mappedTempFileRingBuffer(10 * 1000 * 1000), 10 * 1000 * 1000);
+        PipeTest.testPipe(PipeFactory.elasticPipe(), 300 * 1000);
+        PipeTest.testPipe(PipeFactory.elasticPipe(), 300 * 1000 + 1);
+        PipeTest.testPipe(PipeFactory.elasticPipe(), 21298725);
+    }
+
+    private static void
+    testPipe(Pipe pipe, int n) throws IOException {
+
+        byte[] src = new byte[n];
+        byte[] dst = new byte[n + 1000];
+
+        new Random(11).nextBytes(src);
+
+        Random r = new Random(7);
+        for (int off = 0; off < src.length;) off += pipe.write(src, off, Math.min(src.length - off, r.nextInt(100)));
+
+        long count = 0;
+        while (!pipe.isEmpty()) {
+            count += pipe.read(dst, (int) count, (int) (dst.length - count));
+        }
+        dst = Arrays.copyOf(dst, (int) count);
+        Assert.assertArrayEquals(src, dst);
     }
 
     // ------------------------------------------------------
