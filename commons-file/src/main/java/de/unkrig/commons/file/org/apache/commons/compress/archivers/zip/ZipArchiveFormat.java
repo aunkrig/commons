@@ -33,6 +33,7 @@ import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.zip.CRC32;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -48,7 +49,12 @@ import org.apache.commons.compress.compressors.FileNameUtil;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.AbstractArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormatFactory;
+import de.unkrig.commons.io.OutputStreams;
+import de.unkrig.commons.io.pipe.Pipe;
+import de.unkrig.commons.io.pipe.PipeFactory;
+import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
+import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -56,6 +62,8 @@ import de.unkrig.commons.nullanalysis.Nullable;
  */
 public final
 class ZipArchiveFormat extends AbstractArchiveFormat {
+
+    static { AssertionUtil.enableAssertionsForThisClass(); }
 
     private static final FileNameUtil FILE_NAME_UTIL = new FileNameUtil(Collections.singletonMap(".zip", ""), ".zip");
 
@@ -160,19 +168,59 @@ class ZipArchiveFormat extends AbstractArchiveFormat {
             }
         }
 
-        // Work around
-        //    Caused by: java.util.zip.ZipException: uncompressed size is required for STORED method when not writing to a file    // SUPPRESS CHECKSTYLE LineLength:4
-        //        at org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream.validateSizeInformation(ZipArchiveOutputStream.java:652)
-        //        at org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream.putArchiveEntry(ZipArchiveOutputStream.java:601)
-        //        at de.unkrig.commons.file.org.apache.commons.compress.archivers.zip.ZipArchiveFormat.writeEntry(ZipArchiveFormat.java:147)
-        //        at de.unkrig.commons.file.contentstransformation.ContentsTransformations.transformArchive(ContentsTransformations.java:254)
-        //        ... 25 more
-        if (nzae.getMethod() == ZipArchiveOutputStream.STORED) {
-            nzae.setMethod(ZipArchiveOutputStream.DEFLATED);
+        if (archiveEntry.isDirectory()) {
+            archiveOutputStream.putArchiveEntry(nzae);
+        } else
+        if (nzae.getMethod() != ZipArchiveOutputStream.STORED) {
+            archiveOutputStream.putArchiveEntry(nzae);
+            writeContents.consume(archiveOutputStream);
+        } else
+        {
+
+            // Work around
+            //    java.util.zip.ZipException: uncompressed size is required for STORED method when not writing to a file
+            //    java.util.zip.ZipException: crc checksum is required for STORED method when not writing to a file
+            final Pipe ep = PipeFactory.elasticPipe();
+            try {
+                CRC32 crc32 = new CRC32();
+
+                // Copy the entry contents to the elastic pipe, and, at the same time, count the bytes and compute
+                // the CRC32.
+                long uncompressedSize = OutputStreams.writeAndCount(writeContents, OutputStreams.tee(
+                    OutputStreams.updatesChecksum(crc32),
+                    new OutputStream() {
+
+                        @Override public void
+                        write(int b) throws IOException { this.write(new byte[] { (byte) b }, 0, 1); }
+
+                        @NotNullByDefault(false) @Override public void
+                        write(byte[] b, int off, int len) throws IOException {
+                            while (len > 0) {
+                                int x = ep.write(b, off, len);
+                                assert x > 0;
+                                off += x;
+                                len -= x;
+                            }
+                        }
+                    }
+                ));
+
+                nzae.setSize(uncompressedSize);
+                nzae.setCrc(crc32.getValue());
+                archiveOutputStream.putArchiveEntry(nzae);
+
+                byte[] buffer = new byte[8192];
+                while (!ep.isEmpty()) {
+                    int n = ep.read(buffer);
+                    archiveOutputStream.write(buffer, 0, n);
+                }
+
+                ep.close();
+            } finally {
+                try { ep.close(); } catch (Exception e) {}
+            }
         }
 
-        archiveOutputStream.putArchiveEntry(nzae);
-        if (!archiveEntry.isDirectory()) writeContents.consume(archiveOutputStream);
         archiveOutputStream.closeArchiveEntry();
     }
 
