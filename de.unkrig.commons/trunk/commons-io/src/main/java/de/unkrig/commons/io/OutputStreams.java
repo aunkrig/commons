@@ -429,6 +429,19 @@ class OutputStreams {
     }
 
     /**
+     * @param checksum E.g. "{@code new java.util.zip.CRC32()}"
+     * @return An {@link OutputStream} that updates the <var>checksum</var> for all data written to it
+     */
+    public static OutputStream
+    updatesChecksum(final Checksum checksum) {
+
+        return new OutputStream() {
+            @Override public void                          write(int b)                      throws IOException { checksum.update(b); }
+            @NotNullByDefault(false) @Override public void write(byte[] b, int off, int len) throws IOException { checksum.update(b, off, len); }
+        };
+    }
+
+    /**
      * @return Counts all file operations in the given <var>eventCounter</var>
      */
     public static OutputStream
