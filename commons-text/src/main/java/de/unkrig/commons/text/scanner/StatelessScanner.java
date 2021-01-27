@@ -65,6 +65,7 @@ class StatelessScanner<TT extends Enum<TT>> extends AbstractScanner<TT> {
 
         for (Rule<TT> rule : this.rules) {
             Matcher matcher = rule.regex.matcher(this.cs);
+            matcher.useTransparentBounds(true); // Allow lookaheads and lookbehinds in the patterns.
             matcher.region(this.offset, length);
             if (matcher.lookingAt()) {
                 this.previousTokenOffset = this.offset;
@@ -83,9 +84,12 @@ class StatelessScanner<TT extends Enum<TT>> extends AbstractScanner<TT> {
             + this.cs.charAt(this.offset)
             + "\" at offset "
             + this.offset
-            + " of \""
-            + this.cs
-            + "\""
+            + " of input string "
+            + (
+        		this.cs.length() > 100
+        		? "\"" + this.cs.subSequence(0, 100) + "\"..."
+            	: "\"" + this.cs + "\""
+    		)
         );
     }
 

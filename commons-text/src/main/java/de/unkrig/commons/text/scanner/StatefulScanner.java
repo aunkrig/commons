@@ -125,8 +125,7 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
 
     /**
      * Adds a rule that applies iff <var>states</var>{@code ==} {@link #ANY_STATE}, or the scanner is in one of the
-     * given non-default <var>states</var>, or the <var>states</var> contain {@code null} and the scanner is in the
-     * default state. The scanner returns to the default state after the rule has matched.
+     * given non-default <var>states</var>. The scanner returns to the default state after the rule has matched.
      *
      * @see Pattern
      */
@@ -183,6 +182,7 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
 
         for (Rule rule : this.currentStateRules) {
             Matcher matcher = rule.regex.matcher(this.cs);
+            matcher.useTransparentBounds(true); // Allow lookaheads and lookbehinds in the patterns.
             matcher.region(this.offset, length);
             if (matcher.lookingAt()) {
                 if (rule.popState) {
@@ -208,9 +208,12 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
             + this.cs.charAt(this.offset)
             + "\" at offset "
             + this.offset
-            + " of input string \""
-            + this.cs
-            + "\""
+            + " of input string "
+            + (
+        		this.cs.length() > 100
+        		? "\"" + this.cs.subSequence(0, 100) + "\"..."
+            	: "\"" + this.cs + "\""
+    		)
         );
 
         if (this.currentStateRules == this.defaultStateRules) {
