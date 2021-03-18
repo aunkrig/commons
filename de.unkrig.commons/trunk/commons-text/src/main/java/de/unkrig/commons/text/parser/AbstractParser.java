@@ -342,6 +342,28 @@ class AbstractParser<TT extends Enum<TT>> {
         }
     }
 
+    /**
+     * Consumes the next token and returns the one of the <var>values</var> which, converted {@link Object#toString()} equals
+     * the token text.
+     *
+     * @return                The matched value
+     * @throws ParseException None of the <var>values</var> matches the token text
+     * @throws ParseException The scanner is at end-of-input
+     */
+    public <T extends Enum<T>> T
+    readEnum(T... values) throws ParseException {
+        Token<TT> c = this.read();
+
+        for (T value : values) {
+            if (c.text.equals(value.toString())) {
+                this.current = null;
+                return value;
+            }
+        }
+
+        throw new IllegalArgumentException("Invalid value \"" + c.text + "\"; allowed values are " + Arrays.toString(values));
+    }
+
     private static String
     tokenTypeOrTextToString(@Nullable Object o) {
         return o == null ? "end-of-input" : o instanceof String ? ('"' + (String) o + '"') : String.valueOf(o);
