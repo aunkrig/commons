@@ -27,16 +27,17 @@
 package de.unkrig.commons.lang.crypto;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.Arrays;
+import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.security.auth.DestroyFailedException;
 import javax.security.auth.Destroyable;
 
 import de.unkrig.commons.lang.AssertionUtil;
-import de.unkrig.commons.lang.java6.Base64;
 import de.unkrig.commons.lang.security.SecureCharsets;
 import de.unkrig.commons.nullanalysis.Nullable;
 
@@ -153,6 +154,6 @@ class Encryptors {
 
         byte[] encryptedBytes = encryptor.encrypt(unencryptedBytes);
 
-        return Base64.encode(encryptedBytes);
+        return new String(Base64.getEncoder().encode(encryptedBytes), StandardCharsets.ISO_8859_1);
     }
 }
