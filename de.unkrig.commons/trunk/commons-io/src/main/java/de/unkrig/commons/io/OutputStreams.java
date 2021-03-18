@@ -436,8 +436,8 @@ class OutputStreams {
     updatesChecksum(final Checksum checksum) {
 
         return new OutputStream() {
-            @Override public void                          write(int b)                      throws IOException { checksum.update(b); }
-            @NotNullByDefault(false) @Override public void write(byte[] b, int off, int len) throws IOException { checksum.update(b, off, len); }
+            @Override public void                          write(int b)                      { checksum.update(b); }
+            @NotNullByDefault(false) @Override public void write(byte[] b, int off, int len) { checksum.update(b, off, len); }
         };
     }
 
