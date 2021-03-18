@@ -30,6 +30,7 @@ import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.Arrays;
+import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -37,7 +38,6 @@ import javax.security.auth.DestroyFailedException;
 import javax.security.auth.Destroyable;
 
 import de.unkrig.commons.lang.AssertionUtil;
-import de.unkrig.commons.lang.java6.Base64;
 import de.unkrig.commons.lang.security.SecureCharsets;
 import de.unkrig.commons.nullanalysis.Nullable;
 
@@ -178,7 +178,7 @@ class Decryptors {
     public static char[]
     decrypt(Decryptor decryptor, @Nullable byte[] salt, String subject) throws WrongKeyException, SaltException {
 
-        byte[] encryptedBytes = Base64.decode(subject);
+        byte[] encryptedBytes = Base64.getDecoder().decode(subject);
 
         byte[] decryptedBytes = decryptor.decrypt(encryptedBytes);
 
