@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.ObjectUtil;
 import de.unkrig.commons.lang.StringUtil;
@@ -75,7 +76,11 @@ import de.unkrig.commons.text.scanner.StringScanner;
 public
 class ExpressionEvaluator {
 
-    /**
+	static {
+		AssertionUtil.enableAssertionsForThisClass();
+	}
+
+	/**
      * The currently configured on-demand imports (fully qualified package names).
      */
     private final List<String> onDemandImports = new ArrayList<String>();
@@ -228,8 +233,7 @@ class ExpressionEvaluator {
                         @Override public String
                         transform(Mapping<String, ?> variables) {
                             Object variableValue = variables.get(variableName);
-                            assert variableValue != null : variableName;
-                            return variableValue.toString();
+                            return variableValue == null ? "" : variableValue.toString();
                         }
                     });
                     idx = to;
