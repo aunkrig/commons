@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.protocol.Mapping;
 import de.unkrig.commons.lang.protocol.Mappings;
 import de.unkrig.commons.lang.protocol.Predicate;
@@ -49,6 +50,10 @@ import de.unkrig.commons.text.scanner.StringScanner;
  */
 public final
 class ExpressionUtil {
+
+	static {
+		AssertionUtil.enableAssertionsForThisClass();
+	}
 
     private
     ExpressionUtil() {}

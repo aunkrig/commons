@@ -26,6 +26,7 @@
 
 package de.unkrig.commons.text.expression;
 
+import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.protocol.Mapping;
 import de.unkrig.commons.lang.protocol.Mappings;
 import de.unkrig.commons.nullanalysis.Nullable;
@@ -35,6 +36,10 @@ import de.unkrig.commons.nullanalysis.Nullable;
  */
 public abstract
 class AbstractExpression implements Expression {
+
+	static {
+		AssertionUtil.enableAssertionsForThisClass();
+	}
 
     @Override @Nullable public Object
     evaluate(Object... variableNamesAndValues) throws EvaluationException {

@@ -39,6 +39,7 @@ import static de.unkrig.commons.text.expression.Scanner.TokenType.OPERATOR;
 import static de.unkrig.commons.text.expression.Scanner.TokenType.SPACE;
 import static de.unkrig.commons.text.expression.Scanner.TokenType.STRING_LITERAL;
 
+import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.protocol.Predicate;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.scanner.AbstractScanner.Token;
@@ -52,6 +53,10 @@ import de.unkrig.commons.text.scanner.StringScanner;
  */
 public final
 class Scanner {
+
+	static {
+		AssertionUtil.enableAssertionsForThisClass();
+	}
 
     private Scanner() {}
 
