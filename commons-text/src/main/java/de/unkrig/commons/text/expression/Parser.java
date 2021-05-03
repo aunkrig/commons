@@ -41,6 +41,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.nullanalysis.NotNull;
@@ -264,6 +265,10 @@ import de.unkrig.commons.text.scanner.ScannerUtil;
  */
 public abstract
 class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
+
+	static {
+		AssertionUtil.enableAssertionsForThisClass();
+	}
 
     public
     Parser(ProducerWhichThrows<? extends Token<TokenType>, ? extends ScanException> tokenProducer) {
