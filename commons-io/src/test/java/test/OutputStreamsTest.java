@@ -28,8 +28,14 @@
 
 package test;
 
+import java.io.DataInputStream;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Random;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -103,5 +109,110 @@ class OutputStreamsTest {
         Assert.assertTrue(!definitelyIdentical[0]);
         oss[1].close();
         Assert.assertTrue(!definitelyIdentical[0] && definitelyNotIdentical[0]);
+    }
+
+    // ===========================================
+
+    private static File   file   = new File("foo");
+    private static Random random = new Random();
+
+    @Test public void
+    testOverwriteFilesEqual() throws Exception {
+        byte[] data = OutputStreamsTest.randomData(100);
+        OutputStreamsTest.writeToFile(OutputStreamsTest.file, data);
+        OutputStreamsTest.overwrite(OutputStreamsTest.file, data);
+        OutputStreamsTest.assertFileContents(OutputStreamsTest.file, data);
+    }
+
+    @Test public void
+    testOverwriteOldFileLonger() throws Exception {
+        byte[] data = OutputStreamsTest.randomData(100), data2 = OutputStreamsTest.randomData(20);
+        OutputStreamsTest.writeToFile(OutputStreamsTest.file, data, data2);
+        OutputStreamsTest.overwrite(OutputStreamsTest.file, data);
+        OutputStreamsTest.assertFileContents(OutputStreamsTest.file, data);
+    }
+
+    @Test public void
+    testOverwriteOldFileShorter() throws Exception {
+        byte[] data = OutputStreamsTest.randomData(100), data2 = OutputStreamsTest.randomData(20);
+        OutputStreamsTest.writeToFile(OutputStreamsTest.file, data);
+        OutputStreamsTest.overwrite(OutputStreamsTest.file, data, data2);
+        OutputStreamsTest.assertFileContents(OutputStreamsTest.file, data, data2);
+    }
+
+    @Test public void
+    testOverwriteFilesDiffer() throws Exception {
+        byte[] data = OutputStreamsTest.randomData(100), data2 = OutputStreamsTest.randomData(20), data3 = OutputStreamsTest.randomData(30);
+        OutputStreamsTest.writeToFile(OutputStreamsTest.file, data, data2);
+        OutputStreamsTest.overwrite(OutputStreamsTest.file, data, data3);
+        OutputStreamsTest.assertFileContents(OutputStreamsTest.file, data, data3);
+    }
+
+    @Test public void
+    testOverwriteFilesDiffer2() throws Exception {
+        byte[] data = OutputStreamsTest.randomData(100), data2 = OutputStreamsTest.randomData(20), data3 = OutputStreamsTest.randomData(30);
+        OutputStreamsTest.writeToFile(OutputStreamsTest.file, OutputStreamsTest.cat(data, data2));
+        OutputStreamsTest.overwrite(OutputStreamsTest.file, OutputStreamsTest.cat(data, data3));
+        OutputStreamsTest.assertFileContents(OutputStreamsTest.file, data, data3);
+    }
+
+    // ====================================================
+
+    private static byte[]
+    cat(byte[] ba1, byte[] ba2) {
+
+        int len1 = ba1.length, len2 = ba2.length;
+
+        byte[] result = new byte[len1 + len2];
+        System.arraycopy(ba1, 0, result, 0,    len1);
+        System.arraycopy(ba2, 0, result, len1, len2);
+        return result;
+    }
+
+    private static void
+    overwrite(File file, byte[]... data) throws IOException {
+        OutputStream os = OutputStreams.newOverwritingFileOutputStream(file);
+        try {
+            for (byte[] ba : data) os.write(ba);
+        } finally {
+            os.close();
+        }
+    }
+
+    private static void
+    writeToFile(File file, byte[]... data) throws IOException {
+        OutputStream os = new FileOutputStream(file);
+        try {
+            for (byte[] ba : data) os.write(ba);
+        } finally {
+            os.close();
+        }
+    }
+
+    private static void
+    assertFileContents(File file, byte[]... expected) throws IOException {
+        DataInputStream dis = new DataInputStream(new FileInputStream(file));
+        try {
+            for (byte[] ba : expected) {
+                byte[] buf = new byte[ba.length];
+                try {
+                    dis.readFully(buf);
+                } catch (EOFException eofe) {
+                    int x = 0;
+                    for (byte[] ba2 : expected) x += ba2.length;
+                    throw new AssertionError("File \"" + file + "\" shorter (" + file.length() + ") than expected (" + x + ")", eofe);
+                }
+                Assert.assertArrayEquals(ba, buf);
+            }
+        } finally {
+            dis.close();
+        }
+    }
+
+    private static byte[]
+    randomData(int n) {
+        byte[] result = new byte[n];
+        OutputStreamsTest.random.nextBytes(result);
+        return result;
     }
 }

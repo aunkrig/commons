@@ -26,8 +26,12 @@
 
 package de.unkrig.commons.io;
 
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.zip.CRC32;
@@ -40,6 +44,7 @@ import de.unkrig.commons.lang.protocol.ConsumerUtil.Produmer;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
 import de.unkrig.commons.lang.protocol.Producer;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
+import de.unkrig.commons.nullanalysis.NotNull;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
@@ -503,4 +508,129 @@ class OutputStreams {
             }
         };
     }
+
+    /**
+     * Creates an {@link OutputStream} that operates exactly like {@code new FileOutputStream(file)}, except that
+     * iff the file exists and is overwritten with exactly the same data and then closed, then the file is not
+     * re-created and written to, but is left totally untouched, which is typically tremendously faster.
+     */
+    public static OutputStream
+    newOverwritingFileOutputStream(final File file) throws IOException {
+
+        if (!file.exists()) return new FileOutputStream(file);
+
+        final InputStream is      = new MarkableFileInputStream(file);
+        final File        newFile = new File(file.getParent(), file.getName() + ".new");
+
+        return new OutputStream() {
+
+            /**
+             * After this has changed to non-null, "is", "readBuffer" and "pos" are no longer used.
+             */
+            @Nullable OutputStream os = null;
+
+            byte[] readBuffer = new byte[4096];
+            long   pos        = 0; // Position of first unread byte in this.is
+
+            @Override public void
+            write(int b) throws IOException { this.write(new byte[] { (byte) b}); }
+
+            @Override @NotNullByDefault(false) public void
+            write(byte[] b, int off, int len) throws IOException {
+
+                if (this.os != null) {
+                    this.os.write(b, off,  len);
+                    return;
+                }
+
+                if (len > this.readBuffer.length) this.readBuffer = new byte[len];
+
+                int off2 = 0; // Offset in this.readBuffer
+                while (len > 0) {
+                    int n = is.read(this.readBuffer, off2, len);
+                    if (n == -1) {
+
+                        // Input file is at EOF.
+                        this.switchToFos();
+                        @SuppressWarnings("null") @NotNull OutputStream os2 = this.os; os2.write(b, off, len);
+                        return;
+                    }
+
+                    if (!OutputStreams.arrayEquals(this.readBuffer, off2, off2 + n, b, off, off + n)) {
+
+                        // Contents of input file differs.
+                        this.switchToFos();
+                        @SuppressWarnings("null") @NotNull OutputStream os2 = this.os; os2.write(b, off, len);
+                        return;
+                    }
+
+                    this.pos  += n;
+                    off2 += n;
+                    off += n;
+                    len -= n;
+                }
+            }
+
+			@Override public void
+            flush() throws IOException {
+                if (this.os != null) this.os.flush();
+            }
+
+            @Override public void
+            close() throws IOException {
+
+                if (this.os != null) {
+                    is.close();
+                    @SuppressWarnings("null") @NotNull OutputStream os2 = this.os; os2.close();
+                    if (!file.delete()) throw new IOException("Could not delete original file \"" + file + "\"");
+                    if (!newFile.renameTo(file)) throw new IOException("Could not rename new file \"" + newFile + "\" to original file \"" + file + "\"");
+                    return;
+                }
+
+                int b = is.read();
+                if (b == -1) {
+
+                    // Input file has identical contents.
+                    is.close();
+                    return;
+                }
+
+                // Input file has trailing contents.
+                this.switchToFos();
+                @SuppressWarnings("null") @NotNull OutputStream os2 = this.os; os2.close();
+
+                if (!file.delete()) throw new IOException("Could not delete original file \"" + file + "\"");
+                if (!newFile.renameTo(file)) throw new IOException("Could not rename new file \"" + newFile + "\" to original file \"" + file + "\"");
+            }
+
+            private void
+            switchToFos() throws IOException {
+                OutputStream os2 = this.os = new FileOutputStream(newFile);
+                is.reset();
+                if (IoUtil.copy(is, os2, this.pos) != this.pos) throw new EOFException();
+                is.close();
+            }
+        };
+    }
+
+    /**
+     * Surrogate for {@code Arrays.equals(byte[] a, int aFromIndex, int aToIndex, byte[] b, int bFromIndex, int
+     * bToIndex)}, which exists only in JRE 9+. Lives here because we don't want to create a dependency on
+     * {commons-util}.
+     */
+    static boolean
+    arrayEquals(byte[] a, int aFromIndex, int aToIndex, byte[] b, int bFromIndex, int bToIndex) {
+    	int aLen = aToIndex - aFromIndex;
+    	int bLen = bToIndex - bFromIndex;
+
+    	if (aLen < 0) new IllegalArgumentException("fromIndex(" + aFromIndex + ") > toIndex(" + aToIndex + ")");
+    	if (bLen < 0) new IllegalArgumentException("fromIndex(" + bFromIndex + ") > toIndex(" + bToIndex + ")");
+
+    	if (aLen != bLen) return false;
+
+    	for (; aLen > 0; aLen--) {
+    		if (a[aFromIndex++] != b[bFromIndex++]) return false;
+    	}
+		return true;
+	}
 }
