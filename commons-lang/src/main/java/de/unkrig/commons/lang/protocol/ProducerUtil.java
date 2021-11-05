@@ -400,11 +400,11 @@ class ProducerUtil {
      * @return A producer which always produces the <var>constant</var>
      */
     public static <T> Producer<T>
-    constantProducer(final T constant) {
+    constantProducer(@Nullable final T constant) {
 
         return new Producer<T>() {
-            @Override public T      produce()  { return constant; }
-            @Override public String toString() { return "constant=" + constant; }
+            @Override @Nullable public T produce()  { return constant; }
+            @Override public String      toString() { return "constant=" + constant; }
         };
     }
 
