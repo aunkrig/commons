@@ -30,6 +30,7 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -246,7 +247,9 @@ class AsyncBufferedOutputStream extends FilterOutputStream {
                         if (n > 4096) n = 4096;
 
                         ba = new byte[n];
-                        this.buffer.position(this.head);
+                        // Need to cast to base type here, otherwise JRE 8 throws a "NoSuchMethodError:
+                        // java.nio.ByteBuffer.position(I)Ljava/nio/ByteBuffer;"
+                        ((Buffer) this.buffer).position(this.head);
                         this.buffer.get(ba);
 
                         this.head = (this.head + n) % this.capacity;
