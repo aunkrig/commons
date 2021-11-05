@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Method;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -219,7 +220,9 @@ class PipeFactory {
                 ByteBuffer d = this.delegate2;
                 if (d == null) throw new IllegalStateException("Pipe closed");
 
-                d.position((int) pos);
+                // Need to cast to base type here, otherwise JRE 8 throws a "NoSuchMethodError:
+                // java.nio.ByteBuffer.position(I)Ljava/nio/ByteBuffer;"
+                ((Buffer) d).position((int) pos);
                 d.get(buf, off, len);
             }
 
@@ -230,7 +233,9 @@ class PipeFactory {
                 ByteBuffer d = this.delegate2;
                 if (d == null) throw new IllegalStateException("Pipe closed");
 
-                d.position((int) pos);
+                // Need to cast to base type here, otherwise JRE 8 throws a "NoSuchMethodError:
+                // java.nio.ByteBuffer.position(I)Ljava/nio/ByteBuffer;"
+                ((Buffer) d).position((int) pos);
                 d.put(buf, off, len);
             }
 
