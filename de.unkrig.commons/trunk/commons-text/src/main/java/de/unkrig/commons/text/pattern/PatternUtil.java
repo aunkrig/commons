@@ -73,7 +73,7 @@ class PatternUtil {
     /** @deprecated Use {@link #replacementStringMatchReplacer(String)} instead */
     @Deprecated public static <EX extends Throwable> FunctionWhichThrows<MatchResult, String, ? extends EX>
     replacementStringReplacer(final String replacementString) {
-        return PatternUtil.replacementStringMatchReplacer(replacementString);
+        return PatternUtil.<EX>replacementStringMatchReplacer(replacementString);
     }
 
     /**
