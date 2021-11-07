@@ -46,7 +46,7 @@ class ProxyConsumerWhichThrows<T, EX extends Throwable> implements ConsumerWhich
 
     public
     ProxyConsumerWhichThrows(ConsumerWhichThrows<? super T, ? extends RuntimeException> delegate, int unused) {
-        this.delegate = ConsumerUtil.widen2(delegate);
+        this.delegate = ConsumerUtil.<T, EX>widen2(delegate);
     }
 
     @Override public void
