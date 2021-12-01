@@ -232,6 +232,33 @@ class PatternUtilTest extends TestCase {
         } catch (ComparisonFailure cf) {}
     }
 
+    @Test public void
+    testLiteralInfix() {
+    	Assert.assertArrayEquals(new String[] { "abc", "" }, PatternUtil.constantPrefix("abc"));
+
+    	// Meta characters.
+    	Assert.assertArrayEquals(new String[] { "abc",       "." }, PatternUtil.constantPrefix("abc."));
+    	Assert.assertArrayEquals(new String[] { "abc.*?",    ""  }, PatternUtil.constantPrefix("abc\\Q.*?"));
+    	Assert.assertArrayEquals(new String[] { "abc.*?",    "." }, PatternUtil.constantPrefix("abc\\Q.*?\\E."));
+    	Assert.assertArrayEquals(new String[] { "abc.*?def", ""  }, PatternUtil.constantPrefix("abc\\Q.*?\\Edef"));
+    	Assert.assertArrayEquals(new String[] { ".",         ""  }, PatternUtil.constantPrefix("\\."));
+
+    	// Octal literals.
+    	Assert.assertArrayEquals(new String[] { "\0",         "" }, PatternUtil.constantPrefix("\\00"));
+    	Assert.assertArrayEquals(new String[] { "\0def",      "" }, PatternUtil.constantPrefix("\\00def"));
+    	Assert.assertArrayEquals(new String[] { "\u0001",     "" }, PatternUtil.constantPrefix("\\01"));
+    	Assert.assertArrayEquals(new String[] { "\u0001def",  "" }, PatternUtil.constantPrefix("\\01def"));
+    	Assert.assertArrayEquals(new String[] { "\n",         "" }, PatternUtil.constantPrefix("\\012"));
+    	Assert.assertArrayEquals(new String[] { "\ndef",      "" }, PatternUtil.constantPrefix("\\012def"));
+    	Assert.assertArrayEquals(new String[] { "\u0053",     "" }, PatternUtil.constantPrefix("\\0123"));
+    	Assert.assertArrayEquals(new String[] { "\u0053def",  "" }, PatternUtil.constantPrefix("\\0123def"));
+    	Assert.assertArrayEquals(new String[] { "\u00232",    "" }, PatternUtil.constantPrefix("\\0432"));
+    	Assert.assertArrayEquals(new String[] { "\u00232def", "" }, PatternUtil.constantPrefix("\\0432def"));
+
+    	// Hex literals. (SOUTH WEST POINTING LEAF = U+1F651 (128593) = 125*1024 + 593 = D87D,EE51)
+    	Assert.assertArrayEquals(new String[] { "\ud87d\uee51def", "" }, PatternUtil.constantPrefix("\\x{1f651}def"));
+    }
+
     // ---------------------------------------------------------------
 
     private static String
