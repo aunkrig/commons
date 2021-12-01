@@ -98,7 +98,7 @@ class ContentsProcessingTests {
 		String tfp  = tf.getPath();
 		String tfpq = tfp.replace(File.separatorChar, '/');
 
-		List<String>            result = new ArrayList<String>();
+		final List<String>      result = new ArrayList<String>();
 		ContentsProcessor<Void> cp     = new ContentsProcessor<Void>() {
 
 			@NotNullByDefault @Override @Nullable public Void
