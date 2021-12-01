@@ -31,6 +31,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -41,6 +42,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -64,6 +66,9 @@ import de.unkrig.commons.lang.protocol.Predicate;
 import de.unkrig.commons.lang.protocol.PredicateUtil;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
+import de.unkrig.commons.text.pattern.Glob;
+import de.unkrig.commons.text.pattern.Pattern2;
+import de.unkrig.commons.text.pattern.PatternUtil;
 import de.unkrig.commons.util.concurrent.ConcurrentUtil;
 import de.unkrig.commons.util.concurrent.SquadExecutor;
 
@@ -122,10 +127,30 @@ class FileProcessings {
         }
     }
 
+    public static <T> FileProcessor<T>
+    directoryTreeProcessor(
+        Predicate<? super String>            pathPredicate,
+        FileProcessor<T>                     regularFileProcessor,
+        @Nullable Comparator<? super String> directoryMemberNameComparator,
+        DirectoryCombiner<T>                 directoryCombiner,
+        SquadExecutor<T>                     squadExecutor,
+        ExceptionHandler<IOException>        exceptionHandler
+    ) {
+    	return FileProcessings.directoryTreeProcessor(
+			pathPredicate,
+			regularFileProcessor,
+			directoryMemberNameComparator,
+			directoryCombiner,
+			false, // includeDirs
+			squadExecutor,
+			exceptionHandler
+		);
+    }
+
     /**
      * Returns a {@link FileProcessor} which processes directories and regular files exactly like the {@link
      * FileProcessor} returned by {@link #directoryProcessor(Predicate, FileProcessor, Comparator, FileProcessor,
-     * DirectoryCombiner, SquadExecutor, ExceptionHandler)}, except that it processes directory members
+     * DirectoryCombiner, boolean, SquadExecutor, ExceptionHandler)}, except that it processes directory members
      * <i>recursively</i>.
      * <p>
      *   Notice that the list passed to the <var>directoryCombiner</var> can contain {@code null} values iff the
@@ -139,14 +164,15 @@ class FileProcessings {
      *                                      DirectoryCombiner, SquadExecutor, ExceptionHandler)
      */
     public static <T> FileProcessor<T>
-    directoryTreeProcessor(
-        Predicate<? super String>      pathPredicate,
-        FileProcessor<T>               regularFileProcessor,
-        @Nullable Comparator<Object>   directoryMemberNameComparator,
-        DirectoryCombiner<T>           directoryCombiner,
-        SquadExecutor<T>               squadExecutor,
-        ExceptionHandler<IOException>  exceptionHandler
-    ) {
+	directoryTreeProcessor(
+		Predicate<? super String>            pathPredicate,
+		FileProcessor<T>                     regularFileProcessor,
+		@Nullable Comparator<? super String> directoryMemberNameComparator,
+		DirectoryCombiner<T>                 directoryCombiner,
+		boolean                              includeDirs,
+		SquadExecutor<T>                     squadExecutor,
+		ExceptionHandler<IOException>        exceptionHandler
+	) {
 
         final HardReference<FileProcessor<T>> loopback = new HardReference<FileProcessor<T>>();
 
@@ -166,6 +192,7 @@ class FileProcessings {
             directoryMemberNameComparator,
             directoryMemberProcessor,
             directoryCombiner,
+            includeDirs,
             squadExecutor,
             exceptionHandler
         );
@@ -173,6 +200,28 @@ class FileProcessings {
         loopback.set(result);
 
         return result;
+    }
+
+    public static <T> FileProcessor<T>
+    directoryProcessor(
+		final Predicate<? super String>            pathPredicate,
+		final FileProcessor<T>                     regularFileProcessor,
+		@Nullable final Comparator<? super String> directoryMemberNameComparator,
+		final FileProcessor<T>                     directoryMemberProcessor,
+		final DirectoryCombiner<T>                 directoryCombiner,
+		final SquadExecutor<T>                     squadExecutor,
+		final ExceptionHandler<IOException>        exceptionHandler
+	) {
+    	return FileProcessings.directoryProcessor(
+			pathPredicate,
+			regularFileProcessor,
+			directoryMemberNameComparator,
+			directoryMemberProcessor,
+			directoryCombiner,
+			false, // includeDirs
+			squadExecutor,
+			exceptionHandler
+		);
     }
 
     /**
@@ -222,6 +271,8 @@ class FileProcessings {
      * </p>
      *
      * @param <T>                           The return type of all {@link FileProcessor#process(String, File)} methods
+     * @param includeDirs                   Whether to call the <var>regularFileProcessor</var> also for matching
+     *                                      <em>directories</em>
      * @param squadExecutor                 Is used to process independent subtrees - could be {@link
      *                                      ConcurrentUtil#SEQUENTIAL_EXECUTOR_SERVICE}
      * @param directoryMemberNameComparator The comparator used to sort a directory's members; a {@code null} value
@@ -230,13 +281,14 @@ class FileProcessings {
      */
     public static <T> FileProcessor<T>
     directoryProcessor(
-        final Predicate<? super String>      pathPredicate,
-        final FileProcessor<T>               regularFileProcessor,
-        @Nullable final Comparator<Object>   directoryMemberNameComparator,
-        final FileProcessor<T>               directoryMemberProcessor,
-        final DirectoryCombiner<T>           directoryCombiner,
-        final SquadExecutor<T>               squadExecutor,
-        final ExceptionHandler<IOException>  exceptionHandler
+        final Predicate<? super String>            pathPredicate,
+        final FileProcessor<T>                     regularFileProcessor,
+        @Nullable final Comparator<? super String> directoryMemberNameComparator,
+        final FileProcessor<T>                     directoryMemberProcessor,
+        final DirectoryCombiner<T>                 directoryCombiner,
+        final boolean                              includeDirs,
+        final SquadExecutor<T>                     squadExecutor,
+        final ExceptionHandler<IOException>        exceptionHandler
     ) {
 
         final FileProcessor<T> directoryProcessor = new FileProcessor<T>() {
@@ -310,7 +362,10 @@ class FileProcessings {
             process(String path, File file) throws IOException, InterruptedException {
 
                 if (file.isDirectory()) {
-                    return pathPredicate.evaluate(path + '/') ? directoryProcessor.process(path, file) : null;
+
+                	if (includeDirs) regularFileProcessor.process(path, file);
+
+                	return pathPredicate.evaluate(path + '/') ? directoryProcessor.process(path, file) : null;
                 } else {
 
                     // As described in the method JAVADOC, the "pathPredicate" is *not* applied here!
@@ -575,5 +630,86 @@ class FileProcessings {
                 );
             }
         };
+    }
+
+    /**
+     * Determines the (not necessarily existing) file or directory that contains <em>all</em> the directories,
+     * files, and archives that match the <var>regex</var>.
+     * Return value {@code null} means that the matching dirctories, files and archive exist in the current
+     * directory.
+     * <p>
+     *   Examples:
+     * </p>
+     * <table border="1">
+     *   <tr><td>{@code "C:/tmp/abc.*\.txt"}</td><td>{@code new File("C:/tmp")}</td></tr>
+     *   <tr><td>{@code "C:/tmp/foo.zip!dir/.*"}</td><td>{@code new File("C:/tmp/foo.zip")}</td></tr>
+     */
+    @Nullable public static File
+    starterFile(String regex) {
+    	String[] sa = PatternUtil.constantPrefix(regex);
+		String prefix  = sa[0];
+		String suffix  = sa[1];
+
+    	// Iff the prefix contains a "!", then the text before the "!" is the file name.
+    	{
+	    	int idx = prefix.indexOf('!');
+	    	if (idx != -1) return new File(prefix.substring(0, idx));
+    	}
+
+    	if (suffix.isEmpty()) return new File(prefix);
+
+    	// Iff the prefix contains a separator ("/" or "\"), then the text before the separator is the dir name.
+    	{
+    		int idx = Math.max(prefix.lastIndexOf('/'), prefix.lastIndexOf(File.separatorChar));
+    		if (idx != -1) return new File(prefix.substring(0, idx));
+    	}
+
+    	// Else the pattern applies to the current working directory.
+    	return null;
+    }
+
+    /**
+     * Expands the given <var>pattern</var> (which is typeically created with {@link Pattern2#compile(String, int)})
+     * to a set of files, which are passed to the <var>fp</var>.
+     * <p>
+     *   Examples:
+     * </p>
+     * <table border="1">
+     *   <tr><td>{@code "*.c"}</td><td>{@code "foo.c", "bar.c"}</td></tr>
+     *   <tr><td>{@code "C:/dir/*"}</td>          <td>{@code "C:/dir/file" "C:/dir/subdir"}</td>                              </tr>
+     *   <tr><td>{@code "C:/dir/**"}</td>         <td>{@code "C:/dir/file" "C:/dir/subdir" "C:/dir/subdir/file"}</td>         </tr>
+     *   <tr><td>{@code "C:/dir/*}{@code /*"}</td><td>{@code "C:/dir/subdir/file"}</td>                                       </tr>
+     *   <tr><td>{@code "C:/dir**"}</td>          <td>{@code "C:/dir" "C:/dir/file" "C:/dir/subdir" "C:/dir/subdir/file"}</td></tr>
+     * </table>
+     */
+    public static void
+    glob(final Pattern pattern, final FileProcessor<Void> fp) throws IOException, InterruptedException {
+
+    	File sf = FileProcessings.starterFile(pattern.pattern().replace("[/\\\\]", "/"));
+
+    	if (sf != null) {
+    		Predicate<String> pathPredicate = Glob.compileRegex(pattern);
+			FileProcessings.directoryTreeProcessor(
+				pathPredicate,                                                                    // pathPredicate
+				new SelectiveFileProcessor<Void>(pathPredicate, fp, FileProcessings.<Void>nop()), // regularFileProcessor
+				Collator.getInstance(),                                                           // directoryMemberNameComparator
+				FileProcessings.<Void>nopDirectoryCombiner(),                                     // directoryCombiner
+				true,                                                                             // includeDirs
+				new SquadExecutor<Void>(ConcurrentUtil.SEQUENTIAL_EXECUTOR_SERVICE),              // squadExecutor
+				ExceptionHandler.<IOException>defaultHandler()                                    // exceptionHandler
+			).process(sf.getPath(), sf);
+    	}
+    }
+
+    public static List<File>
+    glob(final Pattern pattern) throws IOException, InterruptedException {
+    	final List<File> files = new ArrayList<File>();
+    	FileProcessings.glob(
+			pattern,
+			new FileProcessor<Void>() {
+				@Override @Nullable public Void process(String path, File file) { files.add(file); return null; }
+			}
+		);
+    	return files;
     }
 }
