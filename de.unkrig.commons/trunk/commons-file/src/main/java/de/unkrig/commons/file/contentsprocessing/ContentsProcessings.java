@@ -27,11 +27,14 @@
 package de.unkrig.commons.file.contentsprocessing;
 
 import java.io.EOFException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
@@ -44,6 +47,8 @@ import de.unkrig.commons.file.CompressUtil.ArchiveHandler;
 import de.unkrig.commons.file.CompressUtil.CompressorHandler;
 import de.unkrig.commons.file.CompressUtil.NormalContentsHandler;
 import de.unkrig.commons.file.ExceptionHandler;
+import de.unkrig.commons.file.fileprocessing.FileProcessings;
+import de.unkrig.commons.file.fileprocessing.FileProcessor;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormat;
 import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormatFactory;
 import de.unkrig.commons.file.org.apache.commons.compress.compressors.CompressionFormat;
@@ -56,6 +61,10 @@ import de.unkrig.commons.lang.protocol.PredicateUtil;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.lang.protocol.TransformerWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
+import de.unkrig.commons.text.pattern.Glob;
+import de.unkrig.commons.text.pattern.Pattern2;
+import de.unkrig.commons.util.concurrent.ConcurrentUtil;
+import de.unkrig.commons.util.concurrent.SquadExecutor;
 
 /** {@link ContentsProcessor}-related utility methods. */
 public final
@@ -465,5 +474,55 @@ class ContentsProcessings {
                 );
             }
         };
+    }
+
+    /**
+     * Expands the given <var>pattern</var> (which is typeically created with {@link Pattern2#compile(String, int)})
+     * to a set of contents, which are passed to the <var>fp</var>. Notice that directories, archives and compressed
+     * files are <em>not</em> contents.
+     * <p>
+     *   Examples:
+     * </p>
+     * <table border="1">
+     *   <tr><td>{@code "*.c"}</td>               <td>{@code "foo.c", "bar.c"}</td>                                             </tr>
+     *   <tr><td>{@code "C:/dir/*"}</td>          <td>{@code "C:/dir/file"}</td>                                                </tr>
+     *   <tr><td>{@code "C:/dir/**"}</td>         <td>{@code "C:/dir/file" "C:/dir/subdir/file"}</td>                           </tr>
+     *   <tr><td>{@code "C:/dir/*}{@code /*"}</td><td>{@code "C:/dir/subdir/file"}</td>                                         </tr>
+     *   <tr><td>{@code "C:/dir**"}</td>          <td>{@code "C:/dir/file" "C:/dir/subdir/file"}</td>                           </tr>
+     *   <tr><td>{@code "C:/file.zip!*"}</td>     <td>{@code "C:/file.zip!file"}</td>                                           </tr>
+     *   <tr><td>{@code "C:/file.gz"}</td>        <td>{@code "C:/file.gz%"}</td>                                                </tr>
+     *   <tr><td>{@code "C:/***file"}</td>        <td>{@code "C:/file" "C:/file.zip!file" "C:/file.tgz/file" "C:/file.gz%"}</td></tr>
+     * </table>
+     */
+    public static void
+    glob(final Pattern pattern, final ContentsProcessor<Void> cp) throws IOException, InterruptedException {
+
+    	File sf = FileProcessings.starterFile(pattern.pattern().replace("[/\\\\]", "/"));
+
+		Predicate<String> pathPredicate = Glob.compileRegex(pattern);
+
+		FileProcessor<Void> fp = FileProcessings.recursiveCompressedAndArchiveFileProcessor(
+			PredicateUtil.always(), // lookIntoFormat
+			pathPredicate,                                                                    // pathPredicate
+			ContentsProcessings.nopArchiveCombiner(),                                         // archiveEntryCombiner
+			new SelectiveContentsProcessor<Void>(pathPredicate, cp, ContentsProcessings.<Void>nopContentsProcessor()), // regularFileProcessor
+			ExceptionHandler.<IOException>defaultHandler()                                    // exceptionHandler
+		);
+
+		fp = FileProcessings.directoryTreeProcessor(
+			pathPredicate,                                                                    // pathPredicate
+			fp,//new SelectiveFileProcessor<Void>(pathPredicate, fp, FileProcessings.<Void>nop()), // regularFileProcessor
+			Collator.getInstance(),                                                           // directoryMemberNameComparator
+			FileProcessings.<Void>nopDirectoryCombiner(),                                     // directoryCombiner
+			false,                                                                            // includeDirs
+			new SquadExecutor<Void>(ConcurrentUtil.SEQUENTIAL_EXECUTOR_SERVICE),              // squadExecutor
+			ExceptionHandler.<IOException>defaultHandler()                                    // exceptionHandler
+		);
+
+		if (sf != null) {
+			fp.process(sf.getPath(), sf);
+    	} else {
+    		fp.process("", new File("."));
+    	}
     }
 }
