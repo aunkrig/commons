@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -148,5 +149,64 @@ class FileProcessingTests {
             "prefix::\\dir1\\file1",
             "prefix::\\dir1\\file2.gz!",
         }), pr.getPaths());
+    }
+
+    @Test public void
+    globTest() throws IOException, InterruptedException {
+		File   tf   = FileProcessingTests.TEST_FILES;
+		String tfpq = Pattern.quote(tf.getPath());
+
+		Assert.assertEquals(
+			Arrays.asList(
+				new File("test_files")
+			),
+			FileProcessings.glob(
+				Pattern2.compile("test_files", Pattern2.WILDCARD)
+			)
+		);
+
+		Assert.assertEquals(
+			Arrays.asList(
+				tf
+			),
+			FileProcessings.glob(
+				Pattern2.compile(tfpq, Pattern2.WILDCARD)
+			)
+		);
+
+		Assert.assertEquals(
+			Arrays.asList(
+				new File(tf, "dir1")
+			),
+			FileProcessings.glob(
+				Pattern2.compile(tfpq + "/*", Pattern2.WILDCARD)
+			)
+		);
+
+		Assert.assertEquals(
+			Arrays.asList(
+	            new File(tf, "dir1"),
+	            new File(tf, "dir1/dir2"),
+	            new File(tf, "dir1\\dir2\\file.zip"),
+	            new File(tf, "dir1\\dir2\\file2"),
+	            new File(tf, "dir1\\dir2\\file3.tgz"),
+	            new File(tf, "dir1\\dir3"),
+	            new File(tf, "dir1\\dir3\\file1"),
+	            new File(tf, "dir1\\file1"),
+	            new File(tf, "dir1\\file2.gz")
+			),
+			FileProcessings.glob(
+				Pattern2.compile(tfpq + "/**", Pattern2.WILDCARD)
+			)
+		);
+
+		Assert.assertEquals(
+			Arrays.asList(
+	            new File(tf, "dir1\\dir2\\file3.tgz")
+			),
+			FileProcessings.glob(
+				Pattern2.compile(tfpq + "/**.tgz", Pattern2.WILDCARD)
+			)
+		);
     }
 }
