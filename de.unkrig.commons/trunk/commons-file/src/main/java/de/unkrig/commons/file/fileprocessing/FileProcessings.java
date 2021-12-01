@@ -675,7 +675,7 @@ class FileProcessings {
      *   Examples:
      * </p>
      * <table border="1">
-     *   <tr><td>{@code "*.c"}</td><td>{@code "foo.c", "bar.c"}</td></tr>
+     *   <tr><td>{@code "*.c"}</td>               <td>{@code "foo.c", "bar.c"}</td>                                           </tr>
      *   <tr><td>{@code "C:/dir/*"}</td>          <td>{@code "C:/dir/file" "C:/dir/subdir"}</td>                              </tr>
      *   <tr><td>{@code "C:/dir/**"}</td>         <td>{@code "C:/dir/file" "C:/dir/subdir" "C:/dir/subdir/file"}</td>         </tr>
      *   <tr><td>{@code "C:/dir/*}{@code /*"}</td><td>{@code "C:/dir/subdir/file"}</td>                                       </tr>
