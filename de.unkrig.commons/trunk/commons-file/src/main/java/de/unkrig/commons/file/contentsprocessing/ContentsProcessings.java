@@ -497,32 +497,35 @@ class ContentsProcessings {
     public static void
     glob(final Pattern pattern, final ContentsProcessor<Void> cp) throws IOException, InterruptedException {
 
-    	File sf = FileProcessings.starterFile(pattern.pattern().replace("[/\\\\]", "/"));
+        File sf = FileProcessings.starterFile(pattern.pattern().replace("[/\\\\]", "/"));
 
-		Predicate<String> pathPredicate = Glob.compileRegex(pattern);
+        Predicate<String> pathPredicate = Glob.compileRegex(pattern);
 
-		FileProcessor<Void> fp = FileProcessings.recursiveCompressedAndArchiveFileProcessor(
-			PredicateUtil.always(), // lookIntoFormat
-			pathPredicate,                                                                    // pathPredicate
-			ContentsProcessings.nopArchiveCombiner(),                                         // archiveEntryCombiner
-			new SelectiveContentsProcessor<Void>(pathPredicate, cp, ContentsProcessings.<Void>nopContentsProcessor()), // regularFileProcessor
-			ExceptionHandler.<IOException>defaultHandler()                                    // exceptionHandler
-		);
+        FileProcessor<Void> fp = FileProcessings.recursiveCompressedAndArchiveFileProcessor(
+            PredicateUtil.always(),                              // lookIntoFormat
+            pathPredicate,                                       // pathPredicate
+            ContentsProcessings.<Void>nopArchiveCombiner(),      // archiveEntryCombiner
+            new SelectiveContentsProcessor<Void>(                // regularFileProcessor
+                pathPredicate,
+                cp,
+                ContentsProcessings.<Void>nopContentsProcessor()
+            ),
+            ExceptionHandler.<IOException>defaultHandler()       // exceptionHandler
+        );
+        fp = FileProcessings.directoryTreeProcessor(
+            pathPredicate,                                                                    // pathPredicate
+            fp,//new SelectiveFileProcessor<Void>(pathPredicate, fp, FileProcessings.<Void>nop()), // regularFileProcessor
+            Collator.getInstance(),                                                           // directoryMemberNameComparator
+            FileProcessings.<Void>nopDirectoryCombiner(),                                     // directoryCombiner
+            false,                                                                            // includeDirs
+            new SquadExecutor<Void>(ConcurrentUtil.SEQUENTIAL_EXECUTOR_SERVICE),              // squadExecutor
+            ExceptionHandler.<IOException>defaultHandler()                                    // exceptionHandler
+        );
 
-		fp = FileProcessings.directoryTreeProcessor(
-			pathPredicate,                                                                    // pathPredicate
-			fp,//new SelectiveFileProcessor<Void>(pathPredicate, fp, FileProcessings.<Void>nop()), // regularFileProcessor
-			Collator.getInstance(),                                                           // directoryMemberNameComparator
-			FileProcessings.<Void>nopDirectoryCombiner(),                                     // directoryCombiner
-			false,                                                                            // includeDirs
-			new SquadExecutor<Void>(ConcurrentUtil.SEQUENTIAL_EXECUTOR_SERVICE),              // squadExecutor
-			ExceptionHandler.<IOException>defaultHandler()                                    // exceptionHandler
-		);
-
-		if (sf != null) {
-			fp.process(sf.getPath(), sf);
-    	} else {
-    		fp.process("", new File("."));
-    	}
+        if (sf != null) {
+            fp.process(sf.getPath(), sf);
+        } else {
+            fp.process("", new File("."));
+        }
     }
 }
