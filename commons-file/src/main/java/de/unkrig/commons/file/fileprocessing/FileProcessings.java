@@ -641,8 +641,9 @@ class FileProcessings {
      *   Examples:
      * </p>
      * <table border="1">
-     *   <tr><td>{@code "C:/tmp/abc.*\.txt"}</td><td>{@code new File("C:/tmp")}</td></tr>
-     *   <tr><td>{@code "C:/tmp/foo.zip!dir/.*"}</td><td>{@code new File("C:/tmp/foo.zip")}</td></tr>
+     *   <tr><td>{@code "C:/tmp/abc.*\.txt"}</td>     <td>{@code new File("C:/tmp")}</td></tr>
+     *   <tr><td>{@code "C:/tmp/foo\.zip!dir/.*"}</td><td>{@code new File("C:/tmp/foo.zip")}</td></tr>
+     * </table>
      */
     @Nullable public static File
     starterFile(String regex) {
