@@ -113,22 +113,38 @@ class ArchiveFormatFactory {
                         Class<?> archiveFormatClass = cl.loadClass(line);
 
                         ArchiveFormat af = (ArchiveFormat) archiveFormatClass.getMethod("get").invoke(null);
-                        if (m.put(af.getName(), af) != null) {
-                            throw new ExceptionInInitializerError(
-                                "Scanning \"" + url + "\": Duplicate archive format name '"
-                                + af.getName()
-                                + "'. Previously scanned locations: "
-                                + scannedResources
-                                + ". Archive formats scanned so far: "
-                                + m.keySet()
-                            );
+
+                        // Silently override formats implemented in de.unkrig.commons.file.
+                        ArchiveFormat prev = m.get(af.getName());
+                        if (prev != null) {
+                            if (prev == af) {
+                                ;
+                            } else
+                            if (prev.getClass().getName().startsWith("de.unkrig.commons.file.org.apache.commons.compress.archivers.")) {
+                                ;
+                            } else
+                            if (af.getClass().getName().startsWith("de.unkrig.commons.file.org.apache.commons.compress.archivers.")) {
+                                continue;
+                            } else
+                            {
+                                throw new ExceptionInInitializerError(
+                                    "Scanning \"" + url + "\": Duplicate archive format name '"
+                                    + af.getName()
+                                    + "'. Previously scanned locations: "
+                                    + scannedResources
+                                    + ". Archive formats scanned so far: "
+                                    + m.keySet()
+                                );
+                            }
                         }
+
+                        m.put(af.getName(), af);
                     }
                     br.close();
                 } finally {
                     try { br.close(); } catch (Exception e) {}
+                    scannedResources.add(url);
                 }
-                scannedResources.add(url);
             }
         } catch (Exception e) {
             throw new ExceptionInInitializerError(e);
