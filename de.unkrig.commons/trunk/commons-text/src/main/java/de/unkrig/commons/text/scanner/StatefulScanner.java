@@ -210,10 +210,10 @@ class StatefulScanner<TT extends Enum<TT>, S extends Enum<S>> extends AbstractSc
             + this.offset
             + " of input string "
             + (
-        		this.cs.length() > 100
-        		? "\"" + this.cs.subSequence(0, 100) + "\"..."
-            	: "\"" + this.cs + "\""
-    		)
+                this.cs.length() > 100
+                ? "\"" + this.cs.subSequence(0, 100) + "\"..."
+                : "\"" + this.cs + "\""
+            )
         );
 
         if (this.currentStateRules == this.defaultStateRules) {

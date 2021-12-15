@@ -332,33 +332,33 @@ class PatternUtil {
      */
     public static String[]
     constantPrefix(String regex) {
-    	StringBuilder result = new StringBuilder();
-    	int state = 0;
-    	int offset = 0;
-    	int beforeChar1 = -1, beforeChar2 = -1;
-    	INFIX:
+        StringBuilder result = new StringBuilder();
+        int state = 0;
+        int offset = 0;
+        int beforeChar1 = -1, beforeChar2 = -1;
+        INFIX:
         for (;; offset++) {
             char c = offset < regex.length() ? regex.charAt(offset) : 0;
 
             // Quantifier? If so, then the preceding char is *not* literal; e.g. "abc*" => only "ab" is literal.
             if (state == 0 && "?*+{".indexOf(c) != -1) {
-            	if (beforeChar1 == -1) throw new PatternSyntaxException("Regex starts with quantifier", regex, offset);
-            	offset = beforeChar1;
-            	result.delete(beforeChar2, Integer.MAX_VALUE);
-            	break INFIX;
+                if (beforeChar1 == -1) throw new PatternSyntaxException("Regex starts with quantifier", regex, offset);
+                offset = beforeChar1;
+                result.delete(beforeChar2, Integer.MAX_VALUE);
+                break INFIX;
             }
 
             // Remember position of literal because if it is followed by a quanitifier, then it is not a literal.
             if (state == 0 || state == 2) {
-            	beforeChar1 = offset;
-            	beforeChar2 = result.length();
+                beforeChar1 = offset;
+                beforeChar2 = result.length();
             }
 
             switch (state) {
             case 0:
-            	if (c == 0) {
-            		break INFIX;
-            	} else
+                if (c == 0) {
+                    break INFIX;
+                } else
                 if (c == '\\') {
                     state = 1;
                 } else
@@ -366,148 +366,148 @@ class PatternUtil {
                     break INFIX;
                 } else
                 {
-                	// In addition to "normal" characters, these are also literals: ] } )
-                	result.append(c);
+                    // In addition to "normal" characters, these are also literals: ] } )
+                    result.append(c);
                 }
                 break;
             case 1: // After backslash.
-            	if (c == 0) {
-            		throw new PatternSyntaxException("Trailing backslash", regex, offset);
-            	} else
+                if (c == 0) {
+                    throw new PatternSyntaxException("Trailing backslash", regex, offset);
+                } else
                 if ("\\[.^$?*+{|(".indexOf(c) != -1) { // Quoted metacharacter.
-                	result.append(c);
-                	state = 0;
+                    result.append(c);
+                    state = 0;
                 } else
                 if (c == '0') { // Octal literal ("\0n" or "\0nn" or "\0mnn")
-                	state = 4;
+                    state = 4;
                 } else
-            	if (c == 'x') { // 2-digit hex literal ("\xhh") or multi-digit hex literal ("\x{h...h}").
-            		state = 7;
-            	} else
-        		if (c == 'u') { // 4-digit hex literal ("/uhhhh")
-        			state = 9;
-        		} else
-    			if (c == 'N') { // Unicode character name literal ("\N{name}")
-    				break INFIX; // Too complicated, give up.
-    			} else
-				if ("tnrfae".indexOf(c) != -1) { // Control character (e.g. "\n")
-   					result.append("\t\n\r\f\u0007\u001b".charAt("tnrfae".indexOf(c)));
-				} else
-				if (c == 'c') { // Control character ("\cx")
-					state = 15;
-				} else
-				if (c == 'Q') { // Beginning of quoted section ("\Q...\E")
-					state = 2;
-				} else
-				{
-					// Predefined character classes (e.g. "\d"), or boundary matchers (e.g. "\b"), or similar.
-					break INFIX;
-				}
+                if (c == 'x') { // 2-digit hex literal ("\xhh") or multi-digit hex literal ("\x{h...h}").
+                    state = 7;
+                } else
+                if (c == 'u') { // 4-digit hex literal ("/uhhhh")
+                    state = 9;
+                } else
+                if (c == 'N') { // Unicode character name literal ("\N{name}")
+                    break INFIX; // Too complicated, give up.
+                } else
+                if ("tnrfae".indexOf(c) != -1) { // Control character (e.g. "\n")
+                       result.append("\t\n\r\f\u0007\u001b".charAt("tnrfae".indexOf(c)));
+                } else
+                if (c == 'c') { // Control character ("\cx")
+                    state = 15;
+                } else
+                if (c == 'Q') { // Beginning of quoted section ("\Q...\E")
+                    state = 2;
+                } else
+                {
+                    // Predefined character classes (e.g. "\d"), or boundary matchers (e.g. "\b"), or similar.
+                    break INFIX;
+                }
                 break;
             case 2: // In quoted section.
-            	if (c == 0) {
-            		break INFIX;
-            	} else
+                if (c == 0) {
+                    break INFIX;
+                } else
                 if (c == '\\') {
-                	state = 3;
+                    state = 3;
                 } else {
-                	result.append(c);
+                    result.append(c);
                 }
                 break;
             case 3: // In quoted section, after backslash.
-            	if (c == 0) {
-            		result.append('\\');
-            		break INFIX;
-            	} else
+                if (c == 0) {
+                    result.append('\\');
+                    break INFIX;
+                } else
                 if (c == 'E') {
                     state = 0;
                 } else {
-                	result.append('\\');
-                	result.append(c);
+                    result.append('\\');
+                    result.append(c);
                     state = 2;
                 }
                 break;
             case 4: // Octal literal (after "\0")
-            	if (Character.digit(c, 8) == -1) throw new PatternSyntaxException("Octal literal does not start with an ocatal digit", regex, offset);
-            	state = 5;
-            	break;
+                if (Character.digit(c, 8) == -1) throw new PatternSyntaxException("Octal literal does not start with an ocatal digit", regex, offset);
+                state = 5;
+                break;
             case 5: // Octal literal (after "\0n")
-            	if (Character.digit(c, 8) != -1) {
-            		state = 6;
-            	} else {
-            		result.append((char) Integer.parseInt(regex.substring(offset - 1, offset), 8)); // \0n
-            		state = 0;
-            		offset--;
-            	}
-            	break;
+                if (Character.digit(c, 8) != -1) {
+                    state = 6;
+                } else {
+                    result.append((char) Integer.parseInt(regex.substring(offset - 1, offset), 8)); // \0n
+                    state = 0;
+                    offset--;
+                }
+                break;
             case 6: // Octal literal (after "\0nn")
-            	if (Character.digit(c, 8) != -1 && "0123".indexOf(regex.charAt(offset - 2)) != -1) { // \0mnn
-            		result.append((char) Integer.parseInt(regex.substring(offset - 2, offset + 1), 8));
-            		state = 0;
-            	} else {
-            		result.append((char) Integer.parseInt(regex.substring(offset - 2, offset), 8)); // \0nn
-            		state = 0;
-            		offset--;
-            	}
-            	break;
+                if (Character.digit(c, 8) != -1 && "0123".indexOf(regex.charAt(offset - 2)) != -1) { // \0mnn
+                    result.append((char) Integer.parseInt(regex.substring(offset - 2, offset + 1), 8));
+                    state = 0;
+                } else {
+                    result.append((char) Integer.parseInt(regex.substring(offset - 2, offset), 8)); // \0nn
+                    state = 0;
+                    offset--;
+                }
+                break;
             case 7: // Hex literal (after "\x")
-            	if (c == '{') {
-            		state = 13;
-            	} else
-            	if (Character.digit(c, 16) != -1) {
-            		state = 8;
-            	} else
-            	{
-            		throw new PatternSyntaxException("Hex literal does not start with \"{\" or hex digit", regex, offset);
-            	}
-            	break;
+                if (c == '{') {
+                    state = 13;
+                } else
+                if (Character.digit(c, 16) != -1) {
+                    state = 8;
+                } else
+                {
+                    throw new PatternSyntaxException("Hex literal does not start with \"{\" or hex digit", regex, offset);
+                }
+                break;
             case 8: // 2-digit hex literal (after "\xh")
-            	if (Character.digit(c, 16) == -1) throw new PatternSyntaxException("2-digit hex literal lacks second hex digit", regex, offset);
-            	result.append((char) Integer.parseInt(regex.substring(offset - 1, offset + 1), 16)); // \xhh
-            	state = 0;
-            	break;
+                if (Character.digit(c, 16) == -1) throw new PatternSyntaxException("2-digit hex literal lacks second hex digit", regex, offset);
+                result.append((char) Integer.parseInt(regex.substring(offset - 1, offset + 1), 16)); // \xhh
+                state = 0;
+                break;
             case 9: // 4-digit hex literal (after "\ u")
             case 10: // 4-digit hex literal (after "\ uh")
             case 11: // 4-digit hex literal (after "\ uhh")
-            	if (Character.digit(c, 16) == -1) throw new PatternSyntaxException("4-digit hex literal lacks hex digit", regex, offset);
-            	state++;
-            	break;
+                if (Character.digit(c, 16) == -1) throw new PatternSyntaxException("4-digit hex literal lacks hex digit", regex, offset);
+                state++;
+                break;
             case 12: // 4-digit hex literal (after "\ uhhh")
-            	if (Character.digit(c, 16) == -1) throw new PatternSyntaxException("4-digit hex literal lacks fourth hex digit", regex, offset);
-            	result.append((char) Integer.parseInt(regex.substring(offset - 3, offset + 1), 16)); // \ uhhhh
-            	state = 0;
-            	break;
+                if (Character.digit(c, 16) == -1) throw new PatternSyntaxException("4-digit hex literal lacks fourth hex digit", regex, offset);
+                result.append((char) Integer.parseInt(regex.substring(offset - 3, offset + 1), 16)); // \ uhhhh
+                state = 0;
+                break;
             case 13: // multi-digit hex literal (after "\x{")
-            	if (Character.digit(c, 16) == -1) throw new PatternSyntaxException("Multi-digit hex literal lacks first hex digit", regex, offset);
-            	state = 14;
-            	break;
+                if (Character.digit(c, 16) == -1) throw new PatternSyntaxException("Multi-digit hex literal lacks first hex digit", regex, offset);
+                state = 14;
+                break;
             case 14: // multi-digit hex literal (after "\x{h")
-            	if (Character.digit(c, 16) != -1) {
-            		;
-            	} else
-            	if (c == '}') {         // \x{h...h}
-            		int cp = Integer.parseInt(
-        				regex.substring(regex.lastIndexOf('{', offset) + 1, offset), // h...h
-        				16
-        			);
-					result.append((char) (0xd800 + ((cp >> 10) & 0x3ff)));
-					result.append((char) (0xec00 + (cp         & 0x3ff)));
-            		state = 0;
-            	} else
-            	{
-            		throw new PatternSyntaxException("Unexpected character in multi-digit hex literal", regex, offset);
-            	}
-            	break;
+                if (Character.digit(c, 16) != -1) {
+                    ;
+                } else
+                if (c == '}') {         // \x{h...h}
+                    int cp = Integer.parseInt(
+                        regex.substring(regex.lastIndexOf('{', offset) + 1, offset), // h...h
+                        16
+                    );
+                    result.append((char) (0xd800 + ((cp >> 10) & 0x3ff)));
+                    result.append((char) (0xec00 + (cp         & 0x3ff)));
+                    state = 0;
+                } else
+                {
+                    throw new PatternSyntaxException("Unexpected character in multi-digit hex literal", regex, offset);
+                }
+                break;
             case 15: // Control character (after "\c")
-            	if (c == 0) throw new PatternSyntaxException("Control character missing control character literal", regex, offset);
-            	result.append((char) (c & 0x1f)); // \cx
-            	state = 0;
-            	break;
+                if (c == 0) throw new PatternSyntaxException("Control character missing control character literal", regex, offset);
+                result.append((char) (c & 0x1f)); // \cx
+                state = 0;
+                break;
             default:
                 throw new AssertionError(state);
             }
         }
 
-    	return new String[] { result.toString(), regex.substring(offset) };
+        return new String[] { result.toString(), regex.substring(offset) };
     }
 }
