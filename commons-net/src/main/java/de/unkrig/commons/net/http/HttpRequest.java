@@ -132,10 +132,10 @@ class HttpRequest extends HttpMessage {
 
             try {
                 uri = (
-            		method == Method.CONNECT
-            		? new URI(null, matcher.group(2), null, null, null) :
-        			new URI(matcher.group(2))
-    			);
+                    method == Method.CONNECT
+                    ? new URI(null, matcher.group(2), null, null, null) :
+                    new URI(matcher.group(2))
+                );
             } catch (URISyntaxException use) {
                 throw new InvalidHttpMessageException(use);
             }
