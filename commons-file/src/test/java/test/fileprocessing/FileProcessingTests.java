@@ -153,66 +153,66 @@ class FileProcessingTests {
 
     @Test public void
     globTest() throws IOException, InterruptedException {
-		File   tf   = FileProcessingTests.TEST_FILES;
-		String tfpq = Pattern.quote(tf.getPath());
+        File   tf   = FileProcessingTests.TEST_FILES;
+        String tfpq = Pattern.quote(tf.getPath());
 
-		Assert.assertEquals(
-			Arrays.asList(
-				new File("test_files")
-			),
-			FileProcessings.glob(
-				Pattern2.compile("test_files", Pattern2.WILDCARD)
-			)
-		);
+        Assert.assertEquals(
+            Arrays.asList(
+                new File("test_files")
+            ),
+            FileProcessings.glob(
+                Pattern2.compile("test_files", Pattern2.WILDCARD)
+            )
+        );
 
-		Assert.assertEquals(
-			Arrays.asList(
-				tf
-			),
-			FileProcessings.glob(
-				Pattern2.compile(tfpq, Pattern2.WILDCARD)
-			)
-		);
+        Assert.assertEquals(
+            Arrays.asList(
+                tf
+            ),
+            FileProcessings.glob(
+                Pattern2.compile(tfpq, Pattern2.WILDCARD)
+            )
+        );
 
-		Assert.assertEquals(
-			Arrays.asList(
-				new File(tf, "dir1")
-			),
-			FileProcessings.glob(
-				Pattern2.compile(tfpq + "/*", Pattern2.WILDCARD)
-			)
-		);
+        Assert.assertEquals(
+            Arrays.asList(
+                new File(tf, "dir1")
+            ),
+            FileProcessings.glob(
+                Pattern2.compile(tfpq + "/*", Pattern2.WILDCARD)
+            )
+        );
 
-		Assert.assertEquals(
-			Arrays.asList(
-	            new File(tf, "dir1"),
-	            new File(tf, "dir1/dir2"),
-	            new File(tf, "dir1\\dir2\\file.zip"),
-	            new File(tf, "dir1\\dir2\\file2"),
-	            new File(tf, "dir1\\dir2\\file3.tgz"),
-	            new File(tf, "dir1\\dir3"),
-	            new File(tf, "dir1\\dir3\\file1"),
-	            new File(tf, "dir1\\file1"),
-	            new File(tf, "dir1\\file2.gz")
-			),
-			FileProcessings.glob(
-				Pattern2.compile(tfpq + "/**", Pattern2.WILDCARD)
-			)
-		);
+        Assert.assertEquals(
+            Arrays.asList(
+                new File(tf, "dir1"),
+                new File(tf, "dir1/dir2"),
+                new File(tf, "dir1\\dir2\\file.zip"),
+                new File(tf, "dir1\\dir2\\file2"),
+                new File(tf, "dir1\\dir2\\file3.tgz"),
+                new File(tf, "dir1\\dir3"),
+                new File(tf, "dir1\\dir3\\file1"),
+                new File(tf, "dir1\\file1"),
+                new File(tf, "dir1\\file2.gz")
+            ),
+            FileProcessings.glob(
+                Pattern2.compile(tfpq + "/**", Pattern2.WILDCARD)
+            )
+        );
 
-		Assert.assertEquals(
-			Arrays.asList(
-	            new File(tf, "dir1\\dir2\\file3.tgz")
-			),
-			FileProcessings.glob(
-				Pattern2.compile(tfpq + "/**.tgz", Pattern2.WILDCARD)
-			)
-		);
+        Assert.assertEquals(
+            Arrays.asList(
+                new File(tf, "dir1\\dir2\\file3.tgz")
+            ),
+            FileProcessings.glob(
+                Pattern2.compile(tfpq + "/**.tgz", Pattern2.WILDCARD)
+            )
+        );
     }
 
     @Test public void
     testStarterFile() throws Exception {
-    	Assert.assertEquals(new File("C:/tmp"),         FileProcessings.starterFile("C:/tmp/abc.*\\.txt"));
-    	Assert.assertEquals(new File("C:/tmp/foo.zip"), FileProcessings.starterFile("C:/tmp/foo\\.zip!dir/.*"));
+        Assert.assertEquals(new File("C:/tmp"),         FileProcessings.starterFile("C:/tmp/abc.*\\.txt"));
+        Assert.assertEquals(new File("C:/tmp/foo.zip"), FileProcessings.starterFile("C:/tmp/foo\\.zip!dir/.*"));
     }
 }

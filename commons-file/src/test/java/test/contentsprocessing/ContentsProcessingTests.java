@@ -94,85 +94,84 @@ class ContentsProcessingTests {
 
     @Test public void
     globTest() throws IOException, InterruptedException {
-		File   tf   = ContentsProcessingTests.TEST_FILES;
-		String tfp  = tf.getPath();
-		String tfpq = tfp.replace(File.separatorChar, '/');
+        File   tf   = ContentsProcessingTests.TEST_FILES;
+        String tfp  = tf.getPath();
+        String tfpq = tfp.replace(File.separatorChar, '/');
 
-		final List<String>      result = new ArrayList<String>();
-		ContentsProcessor<Void> cp     = new ContentsProcessor<Void>() {
+        final List<String>      result = new ArrayList<String>();
+        ContentsProcessor<Void> cp     = new ContentsProcessor<Void>() {
 
-			@NotNullByDefault @Override @Nullable public Void
-			process(
-				String                                                            path,
-				InputStream                                                       inputStream,
-				@Nullable Date                                                    lastModifiedDate,
-				long                                                              size,
-				long                                                              crc32,
-				ProducerWhichThrows<? extends InputStream, ? extends IOException> opener
-			) throws IOException {
-				result.add(path + "=" + InputStreams.readAll(inputStream, Charsets.UTF_8, /*closeInputStream*/ false));
-				return null;
-			}
-		};
+            @NotNullByDefault @Override @Nullable public Void
+            process(
+                String                                                            path,
+                InputStream                                                       inputStream,
+                @Nullable Date                                                    lastModifiedDate,
+                long                                                              size,
+                long                                                              crc32,
+                ProducerWhichThrows<? extends InputStream, ? extends IOException> opener
+            ) throws IOException {
+                result.add(path + "=" + InputStreams.readAll(inputStream, Charsets.UTF_8, /*closeInputStream*/ false));
+                return null;
+            }
+        };
 
-		{
-			result.clear();
-			ContentsProcessings.glob(Pattern2.compile(tfpq, Pattern2.WILDCARD), cp);
-			Assert.assertEquals(Collections.emptyList(), result);
-		}
+        {
+            result.clear();
+            ContentsProcessings.glob(Pattern2.compile(tfpq, Pattern2.WILDCARD), cp);
+            Assert.assertEquals(Collections.emptyList(), result);
+        }
 
-		{
-			result.clear();
-			ContentsProcessings.glob(Pattern2.compile(tfpq + "/*/*", Pattern2.WILDCARD), cp);
-			Assert.assertEquals(
-				Arrays.asList(
-					new File(tf, "/dir1/file1")    + "=line1\nline2\nline3\n",
-					new File(tf, "/dir1/file2.gz") + "%=line1\nline2\nline3\n"
-				),
-				result
-			);
-		}
+        {
+            result.clear();
+            ContentsProcessings.glob(Pattern2.compile(tfpq + "/*/*", Pattern2.WILDCARD), cp);
+            Assert.assertEquals(
+                Arrays.asList(
+                    new File(tf, "/dir1/file1")    + "=line1\nline2\nline3\n",
+                    new File(tf, "/dir1/file2.gz") + "%=line1\nline2\nline3\n"
+                ),
+                result
+            );
+        }
 
-		{
-			result.clear();
-			ContentsProcessings.glob(Pattern2.compile(tfpq + "/**", Pattern2.WILDCARD), cp);
-			Assert.assertEquals(
-				Arrays.asList(
-		            new File(tf, "dir1\\dir2\\file2")     + "=line1\nline2\nline3\n",
-		            new File(tf, "dir1\\dir3\\file1")     + "=line1\nline2\nline3\n",
-		            new File(tf, "dir1\\file1")           + "=line1\nline2\nline3\n",
-		            new File(tf, "dir1\\file2.gz")        + "%=line1\nline2\nline3\n"
-				),
-				result
-			);
-		}
+        {
+            result.clear();
+            ContentsProcessings.glob(Pattern2.compile(tfpq + "/**", Pattern2.WILDCARD), cp);
+            Assert.assertEquals(
+                Arrays.asList(
+                    new File(tf, "dir1\\dir2\\file2")     + "=line1\nline2\nline3\n",
+                    new File(tf, "dir1\\dir3\\file1")     + "=line1\nline2\nline3\n",
+                    new File(tf, "dir1\\file1")           + "=line1\nline2\nline3\n",
+                    new File(tf, "dir1\\file2.gz")        + "%=line1\nline2\nline3\n"
+                ),
+                result
+            );
+        }
 
-		{
-			result.clear();
-			ContentsProcessings.glob(Pattern2.compile(tfpq + "/***.gz", Pattern2.WILDCARD), cp);
-			Assert.assertEquals(
-				Arrays.asList(
-					new File(tf, "dir1\\dir2\\file3.tgz") + "%!dir3/dir4/file3.gz%=line1\nline2\nline3\n",
-		            new File(tf, "dir1\\file2.gz")        +                     "%=line1\nline2\nline3\n"
-				),
-				result
-			);
-		}
+        {
+            result.clear();
+            ContentsProcessings.glob(Pattern2.compile(tfpq + "/***.gz", Pattern2.WILDCARD), cp);
+            Assert.assertEquals(
+                Arrays.asList(
+                    new File(tf, "dir1\\dir2\\file3.tgz") + "%!dir3/dir4/file3.gz%=line1\nline2\nline3\n",
+                    new File(tf, "dir1\\file2.gz")        +                     "%=line1\nline2\nline3\n"
+                ),
+                result
+            );
+        }
 
-		{
-			result.clear();
-			ContentsProcessings.glob(Pattern2.compile(tfpq + "***/file1", Pattern2.WILDCARD), cp);
-			Assert.assertEquals(
-				Arrays.asList(
-		            new File(tf, "dir1\\dir2\\file.zip")  +  "!dir1/dir2/file1=line1\nline2\nline3\n",
-            		new File(tf, "dir1\\dir2\\file3.tgz") + "%!dir1/dir2/file1=line1\nline2\nline3\n",
-    				new File(tf, "dir1\\dir3\\file1")     +                  "=line1\nline2\nline3\n",
-					new File(tf, "dir1\\file1")          +                  "=line1\nline2\nline3\n",
-					new File(tf, "dir1\\file2.gz")       +                 "%=line1\nline2\nline3\n"
-				),
-				result
-			);
-		}
-
+        {
+            result.clear();
+            ContentsProcessings.glob(Pattern2.compile(tfpq + "***/file1", Pattern2.WILDCARD), cp);
+            Assert.assertEquals(
+                Arrays.asList(
+                    new File(tf, "dir1\\dir2\\file.zip")  +  "!dir1/dir2/file1=line1\nline2\nline3\n",
+                    new File(tf, "dir1\\dir2\\file3.tgz") + "%!dir1/dir2/file1=line1\nline2\nline3\n",
+                    new File(tf, "dir1\\dir3\\file1")     +                  "=line1\nline2\nline3\n",
+                    new File(tf, "dir1\\file1")          +                  "=line1\nline2\nline3\n",
+                    new File(tf, "dir1\\file2.gz")       +                 "%=line1\nline2\nline3\n"
+                ),
+                result
+            );
+        }
     }
 }
