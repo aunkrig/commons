@@ -51,9 +51,9 @@ import de.unkrig.commons.text.scanner.StringScanner;
 public final
 class ExpressionUtil {
 
-	static {
-		AssertionUtil.enableAssertionsForThisClass();
-	}
+    static {
+        AssertionUtil.enableAssertionsForThisClass();
+    }
 
     private
     ExpressionUtil() {}

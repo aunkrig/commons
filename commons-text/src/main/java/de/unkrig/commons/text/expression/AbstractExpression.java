@@ -37,9 +37,9 @@ import de.unkrig.commons.nullanalysis.Nullable;
 public abstract
 class AbstractExpression implements Expression {
 
-	static {
-		AssertionUtil.enableAssertionsForThisClass();
-	}
+    static {
+        AssertionUtil.enableAssertionsForThisClass();
+    }
 
     @Override @Nullable public Object
     evaluate(Object... variableNamesAndValues) throws EvaluationException {
