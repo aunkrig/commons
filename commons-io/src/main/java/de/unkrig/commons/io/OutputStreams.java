@@ -571,7 +571,7 @@ class OutputStreams {
                 }
             }
 
-			@Override public void
+            @Override public void
             flush() throws IOException {
                 if (this.os != null) this.os.flush();
             }
@@ -620,17 +620,17 @@ class OutputStreams {
      */
     static boolean
     arrayEquals(byte[] a, int aFromIndex, int aToIndex, byte[] b, int bFromIndex, int bToIndex) {
-    	int aLen = aToIndex - aFromIndex;
-    	int bLen = bToIndex - bFromIndex;
+        int aLen = aToIndex - aFromIndex;
+        int bLen = bToIndex - bFromIndex;
 
-    	if (aLen < 0) new IllegalArgumentException("fromIndex(" + aFromIndex + ") > toIndex(" + aToIndex + ")");
-    	if (bLen < 0) new IllegalArgumentException("fromIndex(" + bFromIndex + ") > toIndex(" + bToIndex + ")");
+        if (aLen < 0) new IllegalArgumentException("fromIndex(" + aFromIndex + ") > toIndex(" + aToIndex + ")");
+        if (bLen < 0) new IllegalArgumentException("fromIndex(" + bFromIndex + ") > toIndex(" + bToIndex + ")");
 
-    	if (aLen != bLen) return false;
+        if (aLen != bLen) return false;
 
-    	for (; aLen > 0; aLen--) {
-    		if (a[aFromIndex++] != b[bFromIndex++]) return false;
-    	}
-		return true;
-	}
+        for (; aLen > 0; aLen--) {
+            if (a[aFromIndex++] != b[bFromIndex++]) return false;
+        }
+        return true;
+    }
 }

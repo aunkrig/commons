@@ -106,15 +106,15 @@ class InputStreams {
 
     public static int
     readFully(InputStream in, byte[] buffer, int offset, int len) throws IOException {
-    	int result = 0;
-    	while (len > 0) {
-    		int n = in.read(buffer, offset, len);
-    		if (n == -1) return result == 0 ? -1 : result;
-    		offset += n;
-    		len    -= n;
-    		result += n;
-    	}
-    	return result;
+        int result = 0;
+        while (len > 0) {
+            int n = in.read(buffer, offset, len);
+            if (n == -1) return result == 0 ? -1 : result;
+            offset += n;
+            len    -= n;
+            result += n;
+        }
+        return result;
     }
 
     /**
