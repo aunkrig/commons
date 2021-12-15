@@ -136,15 +136,15 @@ class FileProcessings {
         SquadExecutor<T>                     squadExecutor,
         ExceptionHandler<IOException>        exceptionHandler
     ) {
-    	return FileProcessings.directoryTreeProcessor(
-			pathPredicate,
-			regularFileProcessor,
-			directoryMemberNameComparator,
-			directoryCombiner,
-			false, // includeDirs
-			squadExecutor,
-			exceptionHandler
-		);
+        return FileProcessings.directoryTreeProcessor(
+            pathPredicate,
+            regularFileProcessor,
+            directoryMemberNameComparator,
+            directoryCombiner,
+            false, // includeDirs
+            squadExecutor,
+            exceptionHandler
+        );
     }
 
     /**
@@ -164,15 +164,15 @@ class FileProcessings {
      *                                      DirectoryCombiner, SquadExecutor, ExceptionHandler)
      */
     public static <T> FileProcessor<T>
-	directoryTreeProcessor(
-		Predicate<? super String>            pathPredicate,
-		FileProcessor<T>                     regularFileProcessor,
-		@Nullable Comparator<? super String> directoryMemberNameComparator,
-		DirectoryCombiner<T>                 directoryCombiner,
-		boolean                              includeDirs,
-		SquadExecutor<T>                     squadExecutor,
-		ExceptionHandler<IOException>        exceptionHandler
-	) {
+    directoryTreeProcessor(
+        Predicate<? super String>            pathPredicate,
+        FileProcessor<T>                     regularFileProcessor,
+        @Nullable Comparator<? super String> directoryMemberNameComparator,
+        DirectoryCombiner<T>                 directoryCombiner,
+        boolean                              includeDirs,
+        SquadExecutor<T>                     squadExecutor,
+        ExceptionHandler<IOException>        exceptionHandler
+    ) {
 
         final HardReference<FileProcessor<T>> loopback = new HardReference<FileProcessor<T>>();
 
@@ -204,24 +204,24 @@ class FileProcessings {
 
     public static <T> FileProcessor<T>
     directoryProcessor(
-		final Predicate<? super String>            pathPredicate,
-		final FileProcessor<T>                     regularFileProcessor,
-		@Nullable final Comparator<? super String> directoryMemberNameComparator,
-		final FileProcessor<T>                     directoryMemberProcessor,
-		final DirectoryCombiner<T>                 directoryCombiner,
-		final SquadExecutor<T>                     squadExecutor,
-		final ExceptionHandler<IOException>        exceptionHandler
-	) {
-    	return FileProcessings.directoryProcessor(
-			pathPredicate,
-			regularFileProcessor,
-			directoryMemberNameComparator,
-			directoryMemberProcessor,
-			directoryCombiner,
-			false, // includeDirs
-			squadExecutor,
-			exceptionHandler
-		);
+        final Predicate<? super String>            pathPredicate,
+        final FileProcessor<T>                     regularFileProcessor,
+        @Nullable final Comparator<? super String> directoryMemberNameComparator,
+        final FileProcessor<T>                     directoryMemberProcessor,
+        final DirectoryCombiner<T>                 directoryCombiner,
+        final SquadExecutor<T>                     squadExecutor,
+        final ExceptionHandler<IOException>        exceptionHandler
+    ) {
+        return FileProcessings.directoryProcessor(
+            pathPredicate,
+            regularFileProcessor,
+            directoryMemberNameComparator,
+            directoryMemberProcessor,
+            directoryCombiner,
+            false, // includeDirs
+            squadExecutor,
+            exceptionHandler
+        );
     }
 
     /**
@@ -363,9 +363,9 @@ class FileProcessings {
 
                 if (file.isDirectory()) {
 
-                	if (includeDirs) regularFileProcessor.process(path, file);
+                    if (includeDirs) regularFileProcessor.process(path, file);
 
-                	return pathPredicate.evaluate(path + '/') ? directoryProcessor.process(path, file) : null;
+                    return pathPredicate.evaluate(path + '/') ? directoryProcessor.process(path, file) : null;
                 } else {
 
                     // As described in the method JAVADOC, the "pathPredicate" is *not* applied here!
@@ -647,26 +647,26 @@ class FileProcessings {
      */
     @Nullable public static File
     starterFile(String regex) {
-    	String[] sa = PatternUtil.constantPrefix(regex);
-		String prefix  = sa[0];
-		String suffix  = sa[1];
+        String[] sa = PatternUtil.constantPrefix(regex);
+        String prefix  = sa[0];
+        String suffix  = sa[1];
 
-    	// Iff the prefix contains a "!", then the text before the "!" is the file name.
-    	{
-	    	int idx = prefix.indexOf('!');
-	    	if (idx != -1) return new File(prefix.substring(0, idx));
-    	}
+        // Iff the prefix contains a "!", then the text before the "!" is the file name.
+        {
+            int idx = prefix.indexOf('!');
+            if (idx != -1) return new File(prefix.substring(0, idx));
+        }
 
-    	if (suffix.isEmpty()) return new File(prefix);
+        if (suffix.isEmpty()) return new File(prefix);
 
-    	// Iff the prefix contains a separator ("/" or "\"), then the text before the separator is the dir name.
-    	{
-    		int idx = Math.max(prefix.lastIndexOf('/'), prefix.lastIndexOf(File.separatorChar));
-    		if (idx != -1) return new File(prefix.substring(0, idx));
-    	}
+        // Iff the prefix contains a separator ("/" or "\"), then the text before the separator is the dir name.
+        {
+            int idx = Math.max(prefix.lastIndexOf('/'), prefix.lastIndexOf(File.separatorChar));
+            if (idx != -1) return new File(prefix.substring(0, idx));
+        }
 
-    	// Else the pattern applies to the current working directory.
-    	return null;
+        // Else the pattern applies to the current working directory.
+        return null;
     }
 
     /**
@@ -686,31 +686,31 @@ class FileProcessings {
     public static void
     glob(final Pattern pattern, final FileProcessor<Void> fp) throws IOException, InterruptedException {
 
-    	File sf = FileProcessings.starterFile(pattern.pattern().replace("[/\\\\]", "/"));
+        File sf = FileProcessings.starterFile(pattern.pattern().replace("[/\\\\]", "/"));
 
-    	if (sf != null) {
-    		Predicate<String> pathPredicate = Glob.compileRegex(pattern);
-			FileProcessings.directoryTreeProcessor(
-				pathPredicate,                                                                    // pathPredicate
-				new SelectiveFileProcessor<Void>(pathPredicate, fp, FileProcessings.<Void>nop()), // regularFileProcessor
-				Collator.getInstance(),                                                           // directoryMemberNameComparator
-				FileProcessings.<Void>nopDirectoryCombiner(),                                     // directoryCombiner
-				true,                                                                             // includeDirs
-				new SquadExecutor<Void>(ConcurrentUtil.SEQUENTIAL_EXECUTOR_SERVICE),              // squadExecutor
-				ExceptionHandler.<IOException>defaultHandler()                                    // exceptionHandler
-			).process(sf.getPath(), sf);
-    	}
+        if (sf != null) {
+            Predicate<String> pathPredicate = Glob.compileRegex(pattern);
+            FileProcessings.directoryTreeProcessor(
+                pathPredicate,                                                                    // pathPredicate
+                new SelectiveFileProcessor<Void>(pathPredicate, fp, FileProcessings.<Void>nop()), // regularFileProcessor
+                Collator.getInstance(),                                                           // directoryMemberNameComparator
+                FileProcessings.<Void>nopDirectoryCombiner(),                                     // directoryCombiner
+                true,                                                                             // includeDirs
+                new SquadExecutor<Void>(ConcurrentUtil.SEQUENTIAL_EXECUTOR_SERVICE),              // squadExecutor
+                ExceptionHandler.<IOException>defaultHandler()                                    // exceptionHandler
+            ).process(sf.getPath(), sf);
+        }
     }
 
     public static List<File>
     glob(final Pattern pattern) throws IOException, InterruptedException {
-    	final List<File> files = new ArrayList<File>();
-    	FileProcessings.glob(
-			pattern,
-			new FileProcessor<Void>() {
-				@Override @Nullable public Void process(String path, File file) { files.add(file); return null; }
-			}
-		);
-    	return files;
+        final List<File> files = new ArrayList<File>();
+        FileProcessings.glob(
+            pattern,
+            new FileProcessor<Void>() {
+                @Override @Nullable public Void process(String path, File file) { files.add(file); return null; }
+            }
+        );
+        return files;
     }
 }
