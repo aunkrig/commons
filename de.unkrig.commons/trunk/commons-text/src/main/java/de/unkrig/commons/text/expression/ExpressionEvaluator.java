@@ -76,11 +76,11 @@ import de.unkrig.commons.text.scanner.StringScanner;
 public
 class ExpressionEvaluator {
 
-	static {
-		AssertionUtil.enableAssertionsForThisClass();
-	}
+    static {
+        AssertionUtil.enableAssertionsForThisClass();
+    }
 
-	/**
+    /**
      * The currently configured on-demand imports (fully qualified package names).
      */
     private final List<String> onDemandImports = new ArrayList<String>();

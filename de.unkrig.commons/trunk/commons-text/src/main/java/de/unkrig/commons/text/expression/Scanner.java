@@ -54,9 +54,9 @@ import de.unkrig.commons.text.scanner.StringScanner;
 public final
 class Scanner {
 
-	static {
-		AssertionUtil.enableAssertionsForThisClass();
-	}
+    static {
+        AssertionUtil.enableAssertionsForThisClass();
+    }
 
     private Scanner() {}
 

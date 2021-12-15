@@ -266,9 +266,9 @@ import de.unkrig.commons.text.scanner.ScannerUtil;
 public abstract
 class Parser<T, EX extends Throwable> extends AbstractParser<TokenType> {
 
-	static {
-		AssertionUtil.enableAssertionsForThisClass();
-	}
+    static {
+        AssertionUtil.enableAssertionsForThisClass();
+    }
 
     public
     Parser(ProducerWhichThrows<? extends Token<TokenType>, ? extends ScanException> tokenProducer) {
