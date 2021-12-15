@@ -86,10 +86,10 @@ class StatelessScanner<TT extends Enum<TT>> extends AbstractScanner<TT> {
             + this.offset
             + " of input string "
             + (
-        		this.cs.length() > 100
-        		? "\"" + this.cs.subSequence(0, 100) + "\"..."
-            	: "\"" + this.cs + "\""
-    		)
+                this.cs.length() > 100
+                ? "\"" + this.cs.subSequence(0, 100) + "\"..."
+                : "\"" + this.cs + "\""
+            )
         );
     }
 
