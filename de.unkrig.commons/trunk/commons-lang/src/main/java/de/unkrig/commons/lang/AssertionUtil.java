@@ -61,6 +61,22 @@ class AssertionUtil {
      *   {@link #enableAssertionsForThisClass()} is an even more elegant way to enable assertions for classes
      *   as they are loaded and initialized.
      * </p>
+     * <h3>Notice:</h3>
+     * <p>
+     *   Some JREs (e.g. adopt_openjdk-11.0.11.9-hotspot) print ugly messages to STDERR when this method is executed
+     * </p>
+     * <pre>
+     *   WARNING: An illegal reflective access operation has occurred
+     *   WARNING: Illegal reflective access by de.unkrig.commons.lang.AssertionUtil (file:/C:/dev/mavenrepo/de/unkrig/zz/zz-find/1.3.10-SNAPSHOT/zz-find-1.3.10-SNAPSHOT-jar-with-dependencies.jar) to field java.lang.reflect.Field.modifiers
+     *   WARNING: Please consider reporting this to the maintainers of de.unkrig.commons.lang.AssertionUtil
+     *   WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+     *   WARNING: All illegal access operations will be denied in a future release
+     * </pre>
+     * <p>
+     *   , while most other JREs (e.g. adopt_openjdk-16.0.1.9-hotspot jdk-13.0.2+8 adopt_openjdk-14.0.2_12-hotspot
+     *   adopt_openjdk-8.0.292.10-hotspot jdk-17.0.1+12) don't.
+     *   That can be avoided by running the 11+ JREs with {@code --add-opens java.base/java.lang.reflect=ALL-UNNAMED}.
+     * </p>
      */
     public static void
     enableAssertionsFor(Class<?> clasS) {
