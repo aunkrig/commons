@@ -258,7 +258,15 @@ class Glob implements Predicate<String> {
             @Override public boolean
             matches(String subject) {
                 Matcher matcher = regex.matcher(subject);
-                if (subject.isEmpty() || subject.endsWith("/") || subject.endsWith("!") || subject.endsWith("%")) {
+                if (
+                    subject.isEmpty()
+                    || subject.endsWith("/")
+                    || subject.endsWith("!")
+
+                    // "%" is *not* a valid suffix; otherwise all compressed contents (e.g. "dir/file.gz%") would match
+                    // a pattern like "***foo":
+                    // || subject.endsWith("%")
+                ) {
 
                     // "Prefix match" (e.g. subject "a/b/" vs. glob "a/b/c/d")?
                     return matcher.matches() || matcher.hitEnd();
