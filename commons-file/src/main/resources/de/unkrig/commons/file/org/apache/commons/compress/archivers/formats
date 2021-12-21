@@ -1,6 +1,5 @@
 
-# This is the resource
-#    de/unkrig/commons/file/org/apache/commons/compress/archivers/formats
+# This resource is part of "de.unkrig.commons:commons-file".
 
 # The class names of the archive formats implemented by this module:
 de.unkrig.commons.file.org.apache.commons.compress.archivers.ar.ArArchiveFormat
