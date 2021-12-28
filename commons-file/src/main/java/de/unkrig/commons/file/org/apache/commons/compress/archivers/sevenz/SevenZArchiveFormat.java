@@ -57,11 +57,14 @@ public final
 class SevenZArchiveFormat extends AbstractArchiveFormat {
 
     /**
-     * Iff a system property with this name is set, then its value is used to decrypt 7ZIP input files.
+     * Iff a system property with this name is set, then its value is used to decrypt 7ZIP input files. That password
+     * can be overridden with {@link #setPassword(byte[])}.
      */
     public static final String SYSTEM_PROPERTY_SEVEN_Z_INPUT_FILE_PASSWORD = "sevenZInputFilePassword";
 
     private static final FileNameUtil FILE_NAME_UTIL = new FileNameUtil(Collections.singletonMap(".7z", ""), ".7z");
+
+    @Nullable private static byte[] passwordBytes;
 
     private SevenZArchiveFormat() {}
 
@@ -81,8 +84,20 @@ class SevenZArchiveFormat extends AbstractArchiveFormat {
 
     @Override public ArchiveInputStream
     open(File archiveFile) throws IOException {
-        String password      = System.getProperty(SevenZArchiveFormat.SYSTEM_PROPERTY_SEVEN_Z_INPUT_FILE_PASSWORD);
-        byte[] passwordBytes = password == null ? null : password.getBytes(Charsets.UTF_16LE);
+
+        byte[] passwordBytes;
+
+        if (SevenZArchiveFormat.passwordBytes != null) {
+            passwordBytes = SevenZArchiveFormat.passwordBytes;
+        } else {
+            String password = System.getProperty(SevenZArchiveFormat.SYSTEM_PROPERTY_SEVEN_Z_INPUT_FILE_PASSWORD);
+            if (password != null) {
+                passwordBytes = password.getBytes(Charsets.UTF_16LE);
+            } else {
+                passwordBytes = null;
+            }
+        }
+
         return new SevenZArchiveInputStream(archiveFile, passwordBytes);
     }
 
@@ -183,6 +198,14 @@ class SevenZArchiveFormat extends AbstractArchiveFormat {
         } while (it.hasNext());
         return sb.toString();
     }
+
+    /**
+     * Sets the password for all 7z archives that will be {@link #open(File) open}ed afterwards.
+     *
+     * @param passwordBytes UTF_16LE-encoded
+     */
+    public static void
+    setPassword(@Nullable byte[] passwordBytes) { SevenZArchiveFormat.passwordBytes = passwordBytes; }
 
     @Override public String
     toString() { return this.getName(); }
