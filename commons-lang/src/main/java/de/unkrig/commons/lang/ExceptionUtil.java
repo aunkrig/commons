@@ -42,19 +42,34 @@ class ExceptionUtil {
     private
     ExceptionUtil() {}
 
-    private static final Field
+    @Nullable private static final Field
     THROWABLE_DETAIL_MESSAGE_FIELD = ExceptionUtil.getDeclaredField(Throwable.class, "detailMessage");
 
-    private static Field
+    @Nullable private static Field
     getDeclaredField(Class<Throwable> declaringClass, String fieldName) {
 
+        Field f;
         try {
-            Field f = declaringClass.getDeclaredField(fieldName);
-            f.setAccessible(true);
-            return f;
+            f = declaringClass.getDeclaredField(fieldName);
         } catch (Exception e) {
             throw new ExceptionInInitializerError(e);
         }
+
+        if (!f.isAccessible()) {
+            try {
+                f.setAccessible(true);
+            } catch (RuntimeException rte) {
+                if (!"java.lang.reflect.InaccessibleObjectException".contentEquals(rte.getClass().getName())) throw rte;
+                System.err.println((
+                    "Warning: " + ExceptionUtil.class.getName() + ": "
+                    + "This JVM forbids the use of \"java.lang.reflect.Field.setAccessible()\"; "
+                    + "\"--add-opens java.base/java.lang=ALL-UNNAMED\" should solve that"
+                ));
+                return null;
+            }
+        }
+
+        return f;
     }
 
     /**
@@ -77,12 +92,17 @@ class ExceptionUtil {
         String message;
         {
             String causeMessage;
-            try {
 
-                // Some classes override "getMessage()", so it is better to get the message from the
-                // "Throwable.detailMessage" field.
-                causeMessage = (String) ExceptionUtil.THROWABLE_DETAIL_MESSAGE_FIELD.get(cause);
-            } catch (Exception e) {
+            // Some classes override "getMessage()", so it is better to get the message from the
+            // "Throwable.detailMessage" field.
+            Field tdmf = ExceptionUtil.THROWABLE_DETAIL_MESSAGE_FIELD;
+            if (tdmf != null) {
+                try {
+                    causeMessage = (String) tdmf.get(cause);
+                } catch (Exception e) {
+                    causeMessage = cause.getMessage();
+                }
+            } else {
                 causeMessage = cause.getMessage();
             }
             message = prefix == null ? causeMessage : causeMessage == null ? prefix : prefix + ": " + causeMessage;
