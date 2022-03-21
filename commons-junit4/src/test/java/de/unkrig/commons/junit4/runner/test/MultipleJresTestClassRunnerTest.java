@@ -26,6 +26,7 @@
 
 package de.unkrig.commons.junit4.runner.test;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -33,6 +34,7 @@ import de.unkrig.commons.junit4.AssertRegex;
 import de.unkrig.commons.junit4.runner.JavaHomes;
 import de.unkrig.commons.junit4.runner.MultipleJresTestClassRunner;
 
+@Ignore
 @RunWith(MultipleJresTestClassRunner.class)
 @JavaHomes({
     "c:/Program Files/Java/jdk1.6.0_43",

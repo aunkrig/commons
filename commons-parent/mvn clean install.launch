@@ -4,7 +4,7 @@
 <stringAttribute key="M2_GOALS" value="clean install"/>
 <booleanAttribute key="M2_NON_RECURSIVE" value="false"/>
 <booleanAttribute key="M2_OFFLINE" value="false"/>
-<stringAttribute key="M2_PROFILES" value=""/>
+<stringAttribute key="M2_PROFILES" value="have_gpg"/>
 <listAttribute key="M2_PROPERTIES">
 <listEntry value="jdk18=C:/dev/Java/adopt_openjdk-8.0.292.10-hotspot"/>
 </listAttribute>

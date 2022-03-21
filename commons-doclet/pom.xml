@@ -23,7 +23,8 @@
 			<artifactId>tools</artifactId>
 			<version>1.8.0</version>
 			<scope>system</scope>
-			<systemPath>${jdk18}/lib/tools.jar</systemPath>
+<!--			<systemPath>${jdk18}/lib/tools.jar</systemPath>-->
+			<systemPath>C:/dev/Java/adopt_openjdk-8.0.292.10-hotspot/lib/tools.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>de.unkrig.commons</groupId>
@@ -40,7 +41,7 @@
 	<parent>
 		<groupId>de.unkrig.commons</groupId>
 		<artifactId>commons-parent</artifactId>
-		<version>1.2.16-SNAPSHOT</version>
+		<version>1.2.16</version>
 		<relativePath>../commons-parent</relativePath>
 	</parent>
 	<url>http://commons.unkrig.de/commons-doclet</url>
