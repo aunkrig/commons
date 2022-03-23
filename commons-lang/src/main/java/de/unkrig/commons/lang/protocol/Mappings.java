@@ -68,6 +68,9 @@ class Mappings {
      */
     public static <K, V> Mapping<K, V>
     mapping(final Object... keysAndValues) {
+
+        assert keysAndValues.length % 2 == 0;
+
         return new Mapping<K, V>() {
 
             @Override public boolean
