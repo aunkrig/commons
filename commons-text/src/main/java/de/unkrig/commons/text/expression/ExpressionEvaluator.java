@@ -575,7 +575,7 @@ class ExpressionEvaluator {
                         Object value = variables.get(variableName);
 
                         if (value == null && !variables.containsKey(variableName)) {
-                            throw new EvaluationException("Unkown variable \"" + variableName + "\"");
+                            throw new EvaluationException("Unknown variable \"" + variableName + "\"");
                         }
 
                         return value;
