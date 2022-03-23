@@ -137,6 +137,9 @@ class PatternUtil {
 
                 return result.toString();
             }
+
+            @Override public String
+            toString() { return replacementString; }
         };
     }
 
