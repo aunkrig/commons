@@ -31,14 +31,15 @@ import java.io.IOException;
 import java.util.Date;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
 
+import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveFormat;
+import de.unkrig.commons.file.org.apache.commons.compress.archivers.ArchiveOutputStream2;
 import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.nullanalysis.Nullable;
 
-class SevenZArchiveOutputStream extends ArchiveOutputStream {
+class SevenZArchiveOutputStream extends ArchiveOutputStream2 {
 
     static { AssertionUtil.enableAssertionsForThisClass(); }
 
@@ -82,4 +83,7 @@ class SevenZArchiveOutputStream extends ArchiveOutputStream {
 
         return szae;
     }
+
+    @Override public ArchiveFormat
+    getArchiveFormat() { return SevenZArchiveFormat.get(); }
 }

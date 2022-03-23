@@ -49,14 +49,12 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
-import org.apache.commons.compress.archivers.StreamingNotSupportedException;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.compressors.FileNameUtil;
 import org.apache.commons.compress.utils.IOUtils;
 
 import de.unkrig.commons.io.MarkableFileInputStream;
-import de.unkrig.commons.io.OutputStreams;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -244,24 +242,18 @@ class ArchiveFormatFactory {
     }
 
     /**
-     * @return     The {@link ArchiveFormat} corresponding with the <var>archiveOutputStream</var>
-     * @deprecated Should be replaced by a new method {@code ArchiveOutputStream.getFormat()}
+     * @return The {@link ArchiveFormat} corresponding with the <var>archiveOutputStream</var>
      */
     @Deprecated public static ArchiveFormat
     forArchiveOutputStream(ArchiveOutputStream archiveOutputStream) {
-        for (ArchiveFormat af : ArchiveFormatFactory.ALL_ARCHIVE_FORMATS.values()) {
-            try {
-                if (
-                    af.archiveOutputStream(OutputStreams.DISCARD).getClass()
-                    == archiveOutputStream.getClass()
-                ) return af;
-            } catch (StreamingNotSupportedException e) {
-                ;
-            } catch (ArchiveException e) {
-                ;
-            }
+        if (archiveOutputStream instanceof ArchiveOutputStream2) {
+            return ((ArchiveOutputStream2) archiveOutputStream).getArchiveFormat();
         }
-        throw new AssertionError(archiveOutputStream.getClass());
+
+        String packageName = archiveOutputStream.getClass().getPackage().getName();
+        ArchiveFormat af = ArchiveFormatFactory.ALL_ARCHIVE_FORMATS.get(packageName.substring(packageName.lastIndexOf('.') + 1));
+        assert af != null : archiveOutputStream + ": " + packageName;
+        return af;
     }
 
     /**
