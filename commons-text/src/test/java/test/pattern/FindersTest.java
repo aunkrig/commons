@@ -44,11 +44,11 @@ class FindersTest {
 
     @Test public void
     test1() {
-        this.testPatternFinder("   [$0=A]   ",       Pattern.compile("A"),  "   A   ");
-        this.testPatternFinder("[$0=] [$0=A][$0=] ", Pattern.compile("A*"), " A ", "");
+        FindersTest.testPatternFinder("   [$0=A]   ",            Pattern.compile("A"),  "   A   ");
+        FindersTest.testPatternFinder("[$0=] [$0=A][$0=] [$0=]", Pattern.compile("A*"), " A ", "");
     }
 
-    private void
+    private static void
     testPatternFinder(String expected, Object... patternsAndInputs) {
 
         List<Pattern> patterns = new ArrayList<Pattern>();
@@ -68,17 +68,17 @@ class FindersTest {
             if (i != patternsAndInputs.length) throw new IllegalArgumentException(i + ": " + patternsAndInputs[i]);
         }
 
-        this.testPatternFinder(
+        FindersTest.testPatternFinder(
             expected,                                       // expected
             patterns.toArray(new Pattern[patterns.size()]), // patterns
             inputs.toArray(new String[inputs.size()])       // inputs
         );
     }
 
-    private void
+    static private void
     testPatternFinder(String expected, Pattern[] patterns, String[] in) {
 
-        StringBuilder result = new StringBuilder();
+        final StringBuilder result = new StringBuilder();
 
         ConsumerWhichThrows<CharSequence, NoException> finder = Finders.patternFinder(
             patterns,                     // patterns

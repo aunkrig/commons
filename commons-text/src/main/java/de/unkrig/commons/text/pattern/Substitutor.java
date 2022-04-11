@@ -55,7 +55,7 @@ import de.unkrig.commons.text.pattern.Finders.MatchResult2;
  * <p>
  *   If you plan to use "look-behinds" (the most common of which is "^"), bear in mind that the look-behind memory is
  *   limited; by default to {@value #DEFAULT_LOOKBEHIND_LIMIT}. If you need more look-behind space, use {@link
- *   #Substitutor(Pattern, FunctionWhichThrows, int)}.
+ *   Substitutor#create(Pattern, FunctionWhichThrows, int)}.
  * </p>
  * <p>
  *   Also bear in mind that, specifically when using "greedy quantifiers", that it may happen quite easily that the
@@ -64,9 +64,9 @@ import de.unkrig.commons.text.pattern.Finders.MatchResult2;
  *   (another) "b".
  * </p>
  *
- * @param <EX> The exception type that the "match replacer" (see {@link #Substitutor(Pattern, FunctionWhichThrows)}
- *             is allowed to throw; use {@link NoException} if your match replacer does not throw any (checked)
- *             exceptions
+ * @param <EX> The exception type that the "match replacer" (see {@link Substitutor#create(Pattern,
+ *             FunctionWhichThrows)} is allowed to throw; use {@link NoException} if your match replacer does not throw
+ *             any (checked) exceptions
  */
 public
 class Substitutor<EX extends Throwable> implements TransformerWhichThrows<CharSequence, CharSequence, EX> {
@@ -74,7 +74,7 @@ class Substitutor<EX extends Throwable> implements TransformerWhichThrows<CharSe
 
     /**
      * The number of characters that can safely be used for look-behind, unless a different value is configured through
-     * {@link #Substitutor(Pattern, FunctionWhichThrows, int)}.
+     * {@link #create(Pattern, FunctionWhichThrows, int)}.
      */
     public static final int DEFAULT_LOOKBEHIND_LIMIT = 10;
 
@@ -89,9 +89,9 @@ class Substitutor<EX extends Throwable> implements TransformerWhichThrows<CharSe
 
     private
     Substitutor(
-        Pattern[]                                                                       patterns,
-        FunctionWhichThrows<? super MatchResult2, ? extends CharSequence, ? extends EX> matchReplacer,
-        int                                                                             lookBehindLimit
+        Pattern[]                                                                             patterns,
+        final FunctionWhichThrows<? super MatchResult2, ? extends CharSequence, ? extends EX> matchReplacer,
+        int                                                                                   lookBehindLimit
     ) {
         this.finder = Finders.patternFinder(
             patterns,                                     // patterns

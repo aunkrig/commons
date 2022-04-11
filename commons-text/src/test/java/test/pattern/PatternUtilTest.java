@@ -85,6 +85,7 @@ class PatternUtilTest extends TestCase {
 
     @Test public void
     test4() throws IOException {
+        this.assertReplaceAllEquals("[AAA][]",                  "AAA",              ".*",       "[$0]");
         this.assertReplaceAllEquals("xxxAxxx\nxxxBxxx",         "xxxAxxx\nxxxBxxx", "A.*B",     "C");
         this.assertReplaceAllEquals("xxxCxxx",                  "xxxAxxx\nxxxBxxx", "A.*\n.*B", "C");
         this.assertReplaceAllEquals("xxxCxxx",                  "xxxAxxx\nxxxBxxx", "(?s)A.*B", "C");    // "(?s)" = DOTALL
@@ -274,27 +275,33 @@ class PatternUtilTest extends TestCase {
         Pattern pattern = Pattern.compile(regex);
 
         // First of all, verify that "java.util.regex.Pattern" actually yields the SAME result.
-        Assert.assertEquals(expected, pattern.matcher(subject).replaceAll(replacementString));
+        Assert.assertEquals("Matcher.replaceAll()", expected, pattern.matcher(subject).replaceAll(replacementString));
 
         // Now, test "PatternUtil.replaceAll(Reader, ...)".
         {
             StringWriter sw = new StringWriter();
             PatternUtil.replaceAll(new StringReader(subject), pattern, replacementString, sw);
-            TestCase.assertEquals(expected, sw.toString());
+            TestCase.assertEquals("PatternUtil.replaceAll()", expected, sw.toString());
         }
 
         // Then, test "Substitutor".
-        Substitutor<NoException> t = PatternUtil.substitutor(pattern, replacementString);
-        TestCase.assertEquals(expected, t.transform(subject).toString() + t.transform(""));
+        {
+            Substitutor<NoException> t = PatternUtil.substitutor(pattern, replacementString);
+            TestCase.assertEquals("PatternUtil.substitutor()", expected, t.transform(subject).toString() + t.transform(""));
+        }
 
         // Test the "Substitutor" with a sequence of single-character strings.
-        StringBuilder sb = new StringBuilder();
-        for (Character c : StringUtil.asIterable(subject)) sb.append(t.transform(new String(new char[] { c })));
-        sb.append(t.transform(""));
-        TestCase.assertEquals(expected, sb.toString());
+        {
+            Substitutor<NoException> t = PatternUtil.substitutor(pattern, replacementString);
+            StringBuilder sb = new StringBuilder();
+            for (Character c : StringUtil.asIterable(subject)) sb.append(t.transform(new String(new char[] { c })));
+            sb.append(t.transform(""));
+            TestCase.assertEquals("PatternUtil.substitutor()", expected, sb.toString());
+        }
 
         // Then, test the "replaceAllFilterReader()".
         Assert.assertEquals(
+            "PatternUtil.replaceAllFilterReader()",
             expected,
             PatternUtilTest.readAll(PatternUtil.replaceAllFilterReader(
                 new StringReader(subject),
@@ -304,17 +311,19 @@ class PatternUtilTest extends TestCase {
         );
 
         // Then, test the "replaceAllFilterWriter()".
-        StringWriter sw = new StringWriter();
+        {
+            StringWriter sw = new StringWriter();
 
-        Writer w = PatternUtil.replaceAllFilterWriter(
-            pattern,
-            PatternUtil.<IOException>replacementStringMatchReplacer(replacementString),
-            sw
-        );
+            Writer w = PatternUtil.replaceAllFilterWriter(
+                pattern,
+                PatternUtil.<IOException>replacementStringMatchReplacer(replacementString),
+                sw
+            );
 
-        w.write(subject);
-        w.close();
-        Assert.assertEquals(expected, sw.toString());
+            w.write(subject);
+            w.close();
+            Assert.assertEquals("PatternUtil.replaceAllFilterReader()", expected, sw.toString());
+        }
     }
 
     private static void

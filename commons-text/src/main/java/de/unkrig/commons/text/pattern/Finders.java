@@ -41,7 +41,7 @@ class Finders {
 
     /**
      * The number of characters that can safely be used for look-behind, unless a different value is configured through
-     * {@link #Substitutor(Pattern, FunctionWhichThrows, int)}.
+     * {@link Substitutor#Substitutor(Pattern[], FunctionWhichThrows, int)}.
      */
     public static final int DEFAULT_LOOKBEHIND_LIMIT = 10;
 
@@ -80,10 +80,10 @@ class Finders {
      */
     public static <EX extends Throwable> ConsumerWhichThrows<CharSequence, EX>
     patternFinder(
-        Pattern[]                                     patterns,
-        ConsumerWhichThrows<? super MatchResult2, EX> match,
-        ConsumerWhichThrows<? super Character, EX>    nonMatch,
-        int                                           lookBehindLimit
+        final Pattern[]                                     patterns,
+        final ConsumerWhichThrows<? super MatchResult2, EX> match,
+        final ConsumerWhichThrows<? super Character, EX>    nonMatch,
+        final int                                           lookBehindLimit
     ) {
         return new ConsumerWhichThrows<CharSequence, EX>() {
 
@@ -99,20 +99,26 @@ class Finders {
 
             private int bufferOffset;
 
+            private boolean flushed;
+
             @Override public void
             consume(CharSequence in) throws EX {
 
+                // Unfortunately, "flush()" is not idempotent... must make sure that the finder is never multi-flushed.
                 if (in.length() == 0) {
+                    if (this.flushed) return;
                     this.flush();
+                    this.flushed = true;
                     return;
                 }
+                this.flushed = false;
 
                 this.buffer.append(in);
 
                 NEXT_CHAR:
                 while (this.start < this.buffer.length()) {
 
-                    for (Pattern pattern : patterns) {
+                    for (final Pattern pattern : patterns) {
 
                         final Matcher m = pattern.matcher(this.buffer);
                         m.useTransparentBounds(true);
@@ -165,7 +171,7 @@ class Finders {
             flush() throws EX {
 
                 NEXT_CHAR:
-                while (this.start < this.buffer.length()) {
+                for (;;) {
 
                     for (Pattern pattern : patterns) {
 
@@ -181,13 +187,19 @@ class Finders {
 
                             this.start = m.end();
 
-                            if (m.end() == m.start() && this.start < this.buffer.length()) { // Special case: Zero-length match.
+                            if (m.end() == m.start()) {
+
+                                // Special case: Zero-length match.
+                                if (this.start >= this.buffer.length()) break NEXT_CHAR;
+
                                 nonMatch.consume(this.buffer.charAt(this.start++));
                             }
 
                             continue NEXT_CHAR;
                         }
                     }
+
+                    if (this.start >= this.buffer.length()) break;
 
                     // E.g. "A" => "Bxx" => No match.
                     nonMatch.consume(this.buffer.charAt(this.start++));
@@ -200,7 +212,7 @@ class Finders {
     }
 
     protected static MatchResult2
-    offset(Matcher m, int bufferOffset) {
+    offset(final Matcher m, final int bufferOffset) {
         return new MatchResult2() {
 
             // SUPPRESS CHECKSTYLE LineLength:7

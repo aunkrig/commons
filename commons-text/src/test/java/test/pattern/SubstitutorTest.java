@@ -86,9 +86,9 @@ class SubstitutorTest {
     @Test public void
     testSubstitutor2() {
 
-        Pattern pattern = Pattern.compile("(A)(B)");
+        final Pattern pattern = Pattern.compile("(A)(B)");
 
-        int[] replacerCallCount = new int[1];
+        final int[] replacerCallCount = new int[1];
 
         FunctionWhichThrows<MatchResult2, CharSequence, NoException>
         matchReplacer = new FunctionWhichThrows<MatchResult2, CharSequence, NoException>() {
