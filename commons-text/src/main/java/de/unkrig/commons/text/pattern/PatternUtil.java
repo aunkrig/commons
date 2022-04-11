@@ -34,12 +34,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import de.unkrig.commons.io.ConsumingWriter;
 import de.unkrig.commons.io.IoUtil;
 import de.unkrig.commons.io.TransformingFilterReader;
 import de.unkrig.commons.io.TransformingFilterWriter;
+import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
 import de.unkrig.commons.lang.protocol.Function;
 import de.unkrig.commons.lang.protocol.FunctionWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
+import de.unkrig.commons.text.pattern.Finders.MatchResult2;
 
 /**
  * {@link Pattern}-related utility methods.
@@ -284,9 +287,9 @@ class PatternUtil {
      */
     public static Reader
     replaceAllFilterReader(
-        Reader                                                                                        delegate,
-        final Pattern                                                                                 pattern,
-        final FunctionWhichThrows<? super MatchResult, ? extends CharSequence, ? extends IOException> matchReplacer
+        Reader                                                                                  delegate,
+        Pattern                                                                                 pattern,
+        FunctionWhichThrows<? super MatchResult, ? extends CharSequence, ? extends IOException> matchReplacer
     ) { return TransformingFilterReader.create(delegate, Substitutor.create(pattern, matchReplacer)); }
 
     /**
@@ -295,10 +298,26 @@ class PatternUtil {
      */
     public static Writer
     replaceAllFilterWriter(
-        final Pattern                                                                                 pattern,
-        final FunctionWhichThrows<? super MatchResult, ? extends CharSequence, ? extends IOException> matchReplacer,
-        final Appendable                                                                              delegate
+        Pattern                                                                                 pattern,
+        FunctionWhichThrows<? super MatchResult, ? extends CharSequence, ? extends IOException> matchReplacer,
+        Appendable                                                                              delegate
     ) { return TransformingFilterWriter.create(Substitutor.create(pattern, matchReplacer), delegate); }
+
+    public static Writer
+    patternFinderWriter(
+        Pattern                                                          pattern,
+        ConsumerWhichThrows<? super MatchResult2, ? extends IOException> match,
+        ConsumerWhichThrows<? super Character, ? extends IOException>    nonMatch
+    ) { return PatternUtil.patternFinderWriter(new Pattern[] { pattern },  match, nonMatch); }
+
+    public static Writer
+    patternFinderWriter(
+        Pattern[]                                                        patterns,
+        ConsumerWhichThrows<? super MatchResult2, ? extends IOException> match,
+        ConsumerWhichThrows<? super Character, ? extends IOException>    nonMatch
+    ) {
+        return ConsumingWriter.create(Finders.patternFinder(patterns, match, nonMatch));
+    }
 
     /**
      * Creates and returns a {@link Substitutor} which replaces {@link Pattern} matches in a stream of strings through
