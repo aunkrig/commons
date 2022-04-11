@@ -36,7 +36,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import de.unkrig.commons.lang.StringUtil;
+import de.unkrig.commons.lang.protocol.Function;
+import de.unkrig.commons.lang.protocol.FunctionWhichThrows;
+import de.unkrig.commons.lang.protocol.Functions;
 import de.unkrig.commons.lang.protocol.NoException;
+import de.unkrig.commons.nullanalysis.Nullable;
+import de.unkrig.commons.text.pattern.Finders.MatchResult2;
 import de.unkrig.commons.text.pattern.PatternUtil;
 import de.unkrig.commons.text.pattern.Substitutor;
 
@@ -44,7 +49,7 @@ public
 class SubstitutorTest {
 
     @Test public void
-    testSubstitutor() {
+    testSubstitutor1() {
 
         Substitutor<NoException> s = Substitutor.create(
             Pattern.compile("A..B"),
@@ -76,5 +81,91 @@ class SubstitutorTest {
             "",     // "y"
             "Ay",   // ""
         }, result.toArray());
+    }
+
+    @Test public void
+    testSubstitutor2() {
+
+        Pattern pattern = Pattern.compile("(A)(B)");
+
+        int[] replacerCallCount = new int[1];
+
+        FunctionWhichThrows<MatchResult2, CharSequence, NoException>
+        matchReplacer = new FunctionWhichThrows<MatchResult2, CharSequence, NoException>() {
+
+            @Override @Nullable public CharSequence
+            call(@Nullable MatchResult2 mr2) {
+
+                assert mr2 != null;
+
+                switch (replacerCallCount[0]++) {
+
+                case 0:
+                case 2:
+                case 4:
+                    return null;
+
+                case 1:
+                case 3:
+                    return "*";
+
+                case 5:
+                    Assert.assertSame(pattern, mr2.pattern());
+                    Assert.assertEquals(mr2.group(), "AB");
+                    Assert.assertEquals(mr2.groupCount(), 2);
+
+                    Assert.assertEquals(mr2.group(1), "A");
+                    Assert.assertEquals(mr2.start(1), 65);
+                    Assert.assertEquals(mr2.end(1),   66);
+
+                    Assert.assertEquals(mr2.group(2), "B");
+                    Assert.assertEquals(mr2.start(2), 66);
+                    Assert.assertEquals(mr2.end(2),   67);
+                    return "*";
+
+                default:
+                    throw new AssertionError();
+                }
+            }
+        };
+
+        Substitutor<NoException> s = Substitutor.create(pattern, matchReplacer);
+
+        StringBuilder out = new StringBuilder();
+        out.append(s.transform("     AB     "));
+        out.append(s.transform("     AB     "));
+        out.append(s.transform("     AB     "));
+        out.append(s.transform("     AB     "));
+        out.append(s.transform("     AB     "));
+        out.append(s.transform("     AB     "));
+
+        Assert.assertEquals(6, replacerCallCount[0]);
+        Assert.assertEquals("     AB          *          AB          *          AB          *     ", out.toString());
+        Assert.assertEquals(3, s.substitutionCount());
+    }
+
+    @Test public void
+    testSubstitutor3() {
+
+        Pattern                              pattern       = Pattern.compile("A{3,5}");
+        Function<MatchResult2, CharSequence> matchReplacer = Functions.<MatchResult2, CharSequence>constant("*");
+
+        Substitutor<NoException> s  = Substitutor.create(pattern, matchReplacer);
+        StringBuilder             out = new StringBuilder();
+
+        out.append(s.transform(" AA "));
+        Assert.assertEquals(" AA ", out.toString());
+        out.append(s.transform(" AAA "));
+        Assert.assertEquals(" AA  * ", out.toString());
+        out.append(s.transform(" AAAA "));
+        Assert.assertEquals(" AA  *  * ", out.toString());
+        out.append(s.transform(" AAAAA "));
+        Assert.assertEquals(" AA  *  *  * ", out.toString());
+        out.append(s.transform(" AAAAAA "));
+        Assert.assertEquals(" AA  *  *  *  *A ", out.toString());
+        out.append(s.transform(" AA"));   // <= Now one match is pending.
+        Assert.assertEquals(" AA  *  *  *  *A  ", out.toString());
+        out.append(s.transform(""));      // Flush.
+        Assert.assertEquals(" AA  *  *  *  *A  AA", out.toString());
     }
 }
