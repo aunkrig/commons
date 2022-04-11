@@ -47,9 +47,9 @@ class Finders {
 
     public static <EX extends Throwable> ConsumerWhichThrows<CharSequence, EX>
     patternFinder(
-        Pattern[]                                    patterns,
-        ConsumerWhichThrows<? super MatchResult, EX>  match,
-        ConsumerWhichThrows<? super Character, EX>   nonMatch
+        Pattern[]                                                patterns,
+        ConsumerWhichThrows<? super MatchResult2, ? extends EX>  match,
+        ConsumerWhichThrows<? super Character, ? extends EX>     nonMatch
     ) { return Finders.patternFinder(patterns, match, nonMatch, Finders.DEFAULT_LOOKBEHIND_LIMIT); }
 
     /**
@@ -80,10 +80,10 @@ class Finders {
      */
     public static <EX extends Throwable> ConsumerWhichThrows<CharSequence, EX>
     patternFinder(
-        final Pattern[]                                     patterns,
-        final ConsumerWhichThrows<? super MatchResult2, EX> match,
-        final ConsumerWhichThrows<? super Character, EX>    nonMatch,
-        final int                                           lookBehindLimit
+        final Pattern[]                                               patterns,
+        final ConsumerWhichThrows<? super MatchResult2, ? extends EX> match,
+        final ConsumerWhichThrows<? super Character, ? extends EX>    nonMatch,
+        final int                                                     lookBehindLimit
     ) {
         return new ConsumerWhichThrows<CharSequence, EX>() {
 
