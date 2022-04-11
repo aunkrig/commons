@@ -187,11 +187,11 @@ class PatternUtil {
     replaceAll(Reader in, Pattern pattern, String replacementString, Appendable out) throws IOException {
 
         return PatternUtil.replaceSome(
-            in,
-            pattern,
-            PatternUtil.<IOException>replacementStringMatchReplacer(replacementString),
-            out,
-            8192
+            in,                                                                         // in
+            pattern,                                                                    // pattern
+            PatternUtil.<IOException>replacementStringMatchReplacer(replacementString), // matchReplacer
+            out,                                                                        // out
+            8192                                                                        // bufferCapacity
         );
     }
 
