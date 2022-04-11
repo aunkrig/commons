@@ -204,11 +204,11 @@ class Substitutor<EX extends Throwable> implements TransformerWhichThrows<CharSe
             if (m.lookingAt()) {
                 if (m.hitEnd()) {
 
-                    // E.g. "A.*B" => "AxxxBxx"
+                    // E.g. "A.*B" => "AxxxBxx" => matches, but more input could lead to a different match.
                     break;
                 }
 
-                // E.g. "A" => "Axxx"
+                // E.g. "A" => "Axxx" => matches, and more input would not change the match.
                 CharSequence replacement = this.matchReplacer.call(m);
 
                 if (replacement == null) {
@@ -225,11 +225,11 @@ class Substitutor<EX extends Throwable> implements TransformerWhichThrows<CharSe
             } else {
                 if (m.hitEnd()) {
 
-                    // E.g. "Axxxxxx" => "Axxx"
+                    // E.g. "Axxxxxx" => "Axxx" => No match, but more input could lead to a match.
                     break;
                 }
 
-                // E.g. "A" => "Bxx"
+                // E.g. "A" => "Bxx" => No match, and more input would not lead to a match (starting within "Bxx").
                 if (this.start == this.buffer.length()) break;
                 result.append(this.buffer.charAt(this.start++));
             }
