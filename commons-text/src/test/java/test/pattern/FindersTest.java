@@ -44,8 +44,13 @@ class FindersTest {
 
     @Test public void
     test1() {
-        FindersTest.testPatternFinder("   [$0=A]   ",            Pattern.compile("A"),  "   A   ");
+        FindersTest.testPatternFinder("   [$0=A]   ", Pattern.compile("A"),  "   A   ");
+    }
+
+    @Test public void
+    testZeroWidthMatches() {
         FindersTest.testPatternFinder("[$0=] [$0=A][$0=] [$0=]", Pattern.compile("A*"), " A ", "");
+        FindersTest.testPatternFinder("[$0=] [$0=A][$0=]",       Pattern.compile("A*"), " A", "");
     }
 
     private static void
@@ -78,27 +83,36 @@ class FindersTest {
     static private void
     testPatternFinder(String expected, Pattern[] patterns, String[] in) {
 
-        final StringBuilder result = new StringBuilder();
+        // Try "Finders.patternFinder()":
+        {
+            final StringBuilder result = new StringBuilder();
 
-        ConsumerWhichThrows<CharSequence, NoException> finder = Finders.patternFinder(
-            patterns,                     // patterns
-            new Consumer<MatchResult>() { // match
+            ConsumerWhichThrows<CharSequence, NoException> finder = Finders.patternFinder(
+                patterns,                     // patterns
+                new Consumer<MatchResult>() { // match
 
-                @Override public void
-                consume(MatchResult m) {
-                    result.append("[$0=").append(m.group());
-                    for (int i = 1; i <= m.groupCount(); i++) result.append(" $" + i + "=" + m.group(i));
-                    result.append("]");
+                    @Override public void
+                    consume(MatchResult m) {
+                        result.append("[$0=").append(m.group());
+                        for (int i = 1; i <= m.groupCount(); i++) result.append(" $" + i + "=" + m.group(i));
+                        result.append("]");
+                    }
+                },
+                new Consumer<Character>() {   // nonMatch
+                    @Override public void consume(Character c) { result.append(c); }
                 }
-            },
-            new Consumer<Character>() {   // nonMatch
-                @Override public void consume(Character c) { result.append(c); }
-            }
-        );
+            );
 
-        for (String s : in) finder.consume(s);
+            for (String s : in) finder.consume(s);
+            Assert.assertEquals("Finders.patternFinder()", expected, result.toString());
+        }
 
-        Assert.assertEquals(expected, result.toString());
+        // Try "Matcher.replaceAll()":
+        {
+            StringBuilder sb = new StringBuilder();
+            for (String s : in) sb.append(s);
+            Assert.assertEquals("Matcher.replaceAll()", expected, patterns[0].matcher(sb).replaceAll("[\\$0=$0]"));
+        }
     }
 }
 
