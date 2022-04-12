@@ -255,6 +255,41 @@ class ConsumerUtil {
     }
 
     /**
+     * Invokes <var>lineChar</var> for every non-line-terminator char, and <var>lineComplete</var> for every line
+     * terminator.
+     */
+    public static <EX extends Throwable> ConsumerWhichThrows<Character, ? extends EX>
+    lineCounter(
+        ConsumerWhichThrows<Character, ? extends EX> lineChar,
+        ConsumerWhichThrows<Integer, ? extends EX>   lineComplete
+    ) {
+
+        return new ConsumerWhichThrows<Character, EX>() {
+
+            int     lineNumber = 1;
+            boolean crPending;
+
+            @Override public void
+            consume(Character c) throws EX {
+                if (c == '\n') {
+                    if (this.crPending) {
+                        this.crPending = false;
+                    } else {
+                        lineComplete.consume(this.lineNumber++);
+                    }
+                } else
+                if (c == '\r') {
+                    this.crPending = true;
+                    lineComplete.consume(this.lineNumber++);
+                } else
+                {
+                    lineChar.consume(c);
+                }
+            }
+        };
+    }
+
+    /**
      * @return A {@link Consumer} that writes lines to the given file with the default character encoding
      */
     public static ConsumerWhichThrows<String, IOException>
