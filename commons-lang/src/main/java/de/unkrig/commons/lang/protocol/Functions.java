@@ -55,6 +55,16 @@ class Functions {
     };
 
     /**
+     * @return A {@link Function} that transforms any object to one constant object.
+     */
+    public static <I, O> Function<I, O>
+    constant(@Nullable final O constantResult) {
+        return new Function<I, O>() {
+            @Override @Nullable public O call(@Nullable I argument) { return constantResult; }
+        };
+    }
+
+    /**
      * Converts a {@link Function} into a {@link FunctionWhichThrows}.
      * <p>
      *   That is possible iff:
