@@ -182,6 +182,7 @@ class Finders {
                     for (Matcher m : matchers) {
 
                         m.region(this.start, this.buffer.length());
+                        boolean la = m.lookingAt();
 
                         if (m.hitEnd()) {
 
@@ -190,7 +191,7 @@ class Finders {
                             break NEXT_CHAR;
                         }
 
-                        if (m.lookingAt()) {
+                        if (la) {
 
                             // E.g. "A" => "Axxx" => matches, and more input would not change the match.
                             match.consume(Finders.offset(m, this.bufferOffset));
