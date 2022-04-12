@@ -32,6 +32,8 @@ import java.util.regex.Pattern;
 
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
 import de.unkrig.commons.lang.protocol.FunctionWhichThrows;
+import de.unkrig.commons.lang.protocol.RunnableUtil;
+import de.unkrig.commons.lang.protocol.RunnableWhichThrows;
 
 /**
  * Finding "matches" of {@link Pattern}s in streams of characters.
@@ -45,12 +47,59 @@ class Finders {
      */
     public static final int DEFAULT_LOOKBEHIND_LIMIT = 10;
 
+    /**
+     * Equivalent with {@link #patternFinder(Pattern[], ConsumerWhichThrows, ConsumerWhichThrows, RunnableWhichThrows,
+     * int) patternFinder}{@code (}<var>patterns</var>{@code ,} <var>match</var>{@code ,} <var>nonMatch</var>{@code ,}
+     * {@link RunnableUtil#NOP}{@code ,} {@link #DEFAULT_LOOKBEHIND_LIMIT}{@code )}.
+     */
     public static <EX extends Throwable> ConsumerWhichThrows<CharSequence, EX>
     patternFinder(
         Pattern[]                                                patterns,
         ConsumerWhichThrows<? super MatchResult2, ? extends EX>  match,
         ConsumerWhichThrows<? super Character, ? extends EX>     nonMatch
-    ) { return Finders.patternFinder(patterns, match, nonMatch, Finders.DEFAULT_LOOKBEHIND_LIMIT); }
+    ) {
+        return Finders.patternFinder(
+            patterns,
+            match,
+            nonMatch,
+            RunnableUtil.asRunnableWhichThrows(RunnableUtil.NOP), // flush
+            Finders.DEFAULT_LOOKBEHIND_LIMIT                      // lookBehindLimit
+        );
+    }
+
+    /**
+     * Equivalent with {@link #patternFinder(Pattern[], ConsumerWhichThrows, ConsumerWhichThrows, RunnableWhichThrows,
+     * int) patternFinder}{@code (}<var>patterns</var>{@code ,} <var>match</var>{@code ,} <var>nonMatch</var>{@code ,}
+     * <var>flush</var>{@code ,} {@link #DEFAULT_LOOKBEHIND_LIMIT}{@code )}.
+     */
+    public static <EX extends Throwable> ConsumerWhichThrows<CharSequence, EX>
+    patternFinder(
+        Pattern[]                                                patterns,
+        ConsumerWhichThrows<? super MatchResult2, ? extends EX>  match,
+        ConsumerWhichThrows<? super Character, ? extends EX>     nonMatch,
+        RunnableWhichThrows<? extends EX>                        flush
+    ) { return Finders.patternFinder(patterns, match, nonMatch, flush, Finders.DEFAULT_LOOKBEHIND_LIMIT); }
+
+    /**
+     * Equivalent with {@link #patternFinder(Pattern[], ConsumerWhichThrows, ConsumerWhichThrows, RunnableWhichThrows,
+     * int) patternFinder}{@code (}<var>patterns</var>{@code ,} <var>match</var>{@code ,} <var>nonMatch</var>{@code ,}
+     * {@link RunnableUtil#NOP}{@code ,} <var>lookBehindLimit</var>{@code )}.
+     */
+    public static <EX extends Throwable> ConsumerWhichThrows<CharSequence, EX>
+    patternFinder(
+        final Pattern[]                                               patterns,
+        final ConsumerWhichThrows<? super MatchResult2, ? extends EX> match,
+        final ConsumerWhichThrows<? super Character, ? extends EX>    nonMatch,
+        final int                                                     lookBehindLimit
+    ) {
+        return Finders.patternFinder(
+            patterns,
+            match,
+            nonMatch,
+            RunnableUtil.asRunnableWhichThrows(RunnableUtil.NOP), // flush
+            lookBehindLimit
+        );
+    }
 
     /**
      * Creates and returns a {@link ConsumerWhichThrows} which consumes chunks of text, and invokes <var>match</var>
@@ -83,6 +132,7 @@ class Finders {
         final Pattern[]                                               patterns,
         final ConsumerWhichThrows<? super MatchResult2, ? extends EX> match,
         final ConsumerWhichThrows<? super Character, ? extends EX>    nonMatch,
+        final RunnableWhichThrows<? extends EX>                       flush,
         final int                                                     lookBehindLimit
     ) {
         return new ConsumerWhichThrows<CharSequence, EX>() {
@@ -108,6 +158,7 @@ class Finders {
                 if (in.length() == 0) {
                     if (this.flushed) return;
                     this.flush();
+                    flush.run();
                     this.flushed = true;
                     return;
                 }
