@@ -41,6 +41,8 @@ import de.unkrig.commons.io.TransformingFilterWriter;
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
 import de.unkrig.commons.lang.protocol.Function;
 import de.unkrig.commons.lang.protocol.FunctionWhichThrows;
+import de.unkrig.commons.lang.protocol.RunnableUtil;
+import de.unkrig.commons.lang.protocol.RunnableWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.pattern.Finders.MatchResult2;
 
@@ -316,7 +318,22 @@ class PatternUtil {
         ConsumerWhichThrows<? super MatchResult2, ? extends IOException> match,
         ConsumerWhichThrows<? super Character, ? extends IOException>    nonMatch
     ) {
-        return ConsumingWriter.create(Finders.patternFinder(patterns, match, nonMatch));
+        return PatternUtil.patternFinderWriter(
+            patterns,
+            match,
+            nonMatch,
+            RunnableUtil.asRunnableWhichThrows(RunnableUtil.NOP)
+        );
+    }
+
+    public static Writer
+    patternFinderWriter(
+        Pattern[]                                                        patterns,
+        ConsumerWhichThrows<? super MatchResult2, ? extends IOException> match,
+        ConsumerWhichThrows<? super Character, ? extends IOException>    nonMatch,
+        RunnableWhichThrows<? extends IOException>                       flush
+    ) {
+        return ConsumingWriter.create(Finders.patternFinder(patterns, match, nonMatch, flush));
     }
 
     /**
