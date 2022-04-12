@@ -257,6 +257,10 @@ class ConsumerUtil {
     /**
      * Invokes <var>lineChar</var> for every non-line-terminator char, and <var>lineComplete</var> for every line
      * terminator.
+     * <p>
+     *   Notice that a line terminator could comprise <em>two</em> chars ({@code '\r', '\n'}); then,
+     *   <var>lineComplete</var> is only invoked once (on the {@code '\r'}).
+     * </p>
      */
     public static <EX extends Throwable> ConsumerWhichThrows<Character, ? extends EX>
     lineCounter(
