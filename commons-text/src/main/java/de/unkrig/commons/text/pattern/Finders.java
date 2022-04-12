@@ -166,22 +166,31 @@ class Finders {
 
                 this.buffer.append(in);
 
+                Matcher[] matchers = new Matcher[patterns.length];
+                for (int i = 0; i < patterns.length; i++) {
+                    matchers[i] = (
+                        patterns[i]
+                        .matcher(this.buffer)
+                        .useTransparentBounds(true)
+                        .useAnchoringBounds(false)
+                    );
+                }
+
                 NEXT_CHAR:
                 while (this.start < this.buffer.length()) {
 
-                    for (final Pattern pattern : patterns) {
+                    for (Matcher m : matchers) {
 
-                        final Matcher m = pattern.matcher(this.buffer);
-                        m.useTransparentBounds(true);
-                        m.useAnchoringBounds(false);
                         m.region(this.start, this.buffer.length());
 
-                        if (m.lookingAt()) {
-                            if (m.hitEnd()) {
+                        if (m.hitEnd()) {
 
-                                // E.g. "A.*B" => "AxxxBxx" => matches, but more input could lead to a different match.
-                                break NEXT_CHAR;
-                            }
+                            // E.g. "A.*B" => "AxxxBxx" => matches, but more input could lead to a different match.
+                            // E.g. "Axxxxxx" => "Axxx" => No match, but more input could lead to a match.
+                            break NEXT_CHAR;
+                        }
+
+                        if (m.lookingAt()) {
 
                             // E.g. "A" => "Axxx" => matches, and more input would not change the match.
                             match.consume(Finders.offset(m, this.bufferOffset));
@@ -192,12 +201,6 @@ class Finders {
                                 nonMatch.consume(this.buffer.charAt(this.start++));
                             }
                             continue NEXT_CHAR;
-                        } else {
-                            if (m.hitEnd()) {
-
-                                // E.g. "Axxxxxx" => "Axxx" => No match, but more input could lead to a match.
-                                break NEXT_CHAR;
-                            }
                         }
                     }
 
