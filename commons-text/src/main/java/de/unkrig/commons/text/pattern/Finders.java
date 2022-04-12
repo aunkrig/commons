@@ -181,6 +181,7 @@ class Finders {
 
                     for (Matcher m : matchers) {
 
+                        // Match at the current position?
                         m.region(this.start, this.buffer.length());
                         boolean la = m.lookingAt();
 
@@ -228,16 +229,23 @@ class Finders {
             private void
             flush() throws EX {
 
+                Matcher[] matchers = new Matcher[patterns.length];
+                for (int i = 0; i < patterns.length; i++) {
+                    matchers[i] = (
+                        patterns[i]
+                        .matcher(this.buffer)
+                        .useTransparentBounds(true)
+                        .useAnchoringBounds(false)
+                    );
+                }
+
                 NEXT_CHAR:
                 for (;;) {
 
-                    for (Pattern pattern : patterns) {
+                    for (Matcher m : matchers) {
 
-                        Matcher m = pattern.matcher(this.buffer);
-                        m.useTransparentBounds(true);
-                        m.useAnchoringBounds(false);
+                        // Match at the current position?
                         m.region(this.start, this.buffer.length());
-
                         if (m.lookingAt()) {
 
                             // E.g. "A" => "Axxx" => matches.
