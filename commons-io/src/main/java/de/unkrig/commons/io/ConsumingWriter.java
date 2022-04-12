@@ -48,7 +48,7 @@ class ConsumingWriter extends Writer {
     private final ConsumerWhichThrows<? super CharSequence, ? extends IOException> consumer;
 
     /**
-     * This method is sometimes more efficient than calling "{@code new TransformingFilterWriter()}".
+     * This method is sometimes more efficient than calling "{@code new ConsumingWriter()}".
      */
     public static Writer
     create(ConsumerWhichThrows<? super CharSequence, ? extends IOException> consumer) {
