@@ -198,9 +198,12 @@ class Finders {
 
                             this.start = m.end();
 
-                            if (m.end() == m.start() && this.start < this.buffer.length()) { // Special case: Zero-length match.
+                            if (m.end() == m.start() && this.start < this.buffer.length()) {
+
+                                // Special case: Zero-length match.
                                 nonMatch.consume(this.buffer.charAt(this.start++));
                             }
+
                             continue NEXT_CHAR;
                         }
                     }
@@ -246,7 +249,6 @@ class Finders {
 
                                 // Special case: Zero-length match.
                                 if (this.start >= this.buffer.length()) break NEXT_CHAR;
-
                                 nonMatch.consume(this.buffer.charAt(this.start++));
                             }
 
@@ -254,6 +256,9 @@ class Finders {
                         }
                     }
 
+                    // No match at this position.
+
+                    // Input buffer exhausted?
                     if (this.start >= this.buffer.length()) break;
 
                     // E.g. "A" => "Bxx" => No match.

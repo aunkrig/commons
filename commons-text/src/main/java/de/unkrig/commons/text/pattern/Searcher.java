@@ -58,7 +58,9 @@ import de.unkrig.commons.lang.protocol.NoException;
  * @param <EX> The exception type that the "match handler" (see {@link #Searcher(Pattern, ConsumerWhichThrows)}
  *             is allowed to throw; use {@link NoException} if your match handler does not throw any (checked)
  *             exceptions
+ * @deprecated Use the more modern {@link Finders} instead
  */
+@Deprecated
 public
 class Searcher<EX extends Throwable> implements ConsumerWhichThrows<CharSequence, EX> {
 
@@ -123,46 +125,50 @@ class Searcher<EX extends Throwable> implements ConsumerWhichThrows<CharSequence
 
         this.buffer.append(in);
 
-        final Matcher m = this.pattern.matcher(this.buffer);
+        Matcher m = this.pattern.matcher(this.buffer);
         m.useTransparentBounds(true);
         m.useAnchoringBounds(false);
 
-        final MatchResult matchResult = new MatchResult() {
-
-            // SUPPRESS CHECKSTYLE LineLength:7
-            @Override public int    start(int group) { return m.start(group) + Searcher.this.offsetDelta; }
-            @Override public int    start()          { return m.start()      + Searcher.this.offsetDelta; }
-            @Override public int    groupCount()     { return m.groupCount();                             }
-            @Override public String group(int group) { return m.group(group);                             }
-            @Override public String group()          { return m.group();                                  }
-            @Override public int    end(int group)   { return m.end(group)   + Searcher.this.offsetDelta; }
-            @Override public int    end()            { return m.end()        + Searcher.this.offsetDelta; }
-        };
-
         for (;;) {
-            m.region(this.start, this.buffer.length());
-            if (m.lookingAt()) {
-                if (m.hitEnd()) {
 
-                    // E.g. "A.*B" => "AxxxBxx"
-                    break;
-                }
+            m.region(this.start, this.buffer.length());
+
+            // Match at current position?
+            boolean la = m.lookingAt();
+
+            if (m.hitEnd()) {
+
+                // E.g. "A.*B" => "AxxxBxx" => Not where the match will end
+                // E.g. "Axxxxxx" => "Axxx" => Not sure if match
+                break;
+            }
+
+            if (la) {
 
                 // E.g. "A" => "Axxx"
+                MatchResult matchResult = new MatchResult() {
+
+                    // SUPPRESS CHECKSTYLE LineLength:7
+                    @Override public int    start(int group) { return m.start(group) + Searcher.this.offsetDelta; }
+                    @Override public int    start()          { return m.start()      + Searcher.this.offsetDelta; }
+                    @Override public int    groupCount()     { return m.groupCount();                             }
+                    @Override public String group(int group) { return m.group(group);                             }
+                    @Override public String group()          { return m.group();                                  }
+                    @Override public int    end(int group)   { return m.end(group)   + Searcher.this.offsetDelta; }
+                    @Override public int    end()            { return m.end()        + Searcher.this.offsetDelta; }
+                };
+
                 this.matchHandler.consume(matchResult);
                 this.matchCount++;
 
-                if (m.end() == m.start()) {
+                if (m.end() == m.start() && this.start < this.buffer.length()) {
+
+                    // Special case: Zero-width match.
                     this.start++;
                 } else {
                     this.start = m.end();
                 }
             } else {
-                if (m.hitEnd()) {
-
-                    // E.g. "Axxxxxx" => "Axxx"
-                    break;
-                }
 
                 // E.g. "A" => "Bxx"
                 if (this.start == this.buffer.length()) break;
