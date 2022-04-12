@@ -199,9 +199,10 @@ class Finders {
 
                             this.start = m.end();
 
-                            if (m.end() == m.start() && this.start < this.buffer.length()) {
+                            if (m.end() == m.start()) {
 
                                 // Special case: Zero-length match.
+                                if (this.start >= this.buffer.length()) break NEXT_CHAR;
                                 nonMatch.consume(this.buffer.charAt(this.start++));
                             }
 
