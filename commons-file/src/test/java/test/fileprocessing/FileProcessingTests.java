@@ -211,7 +211,7 @@ class FileProcessingTests {
     }
 
     @Test public void
-    testStarterFile() throws Exception {
+    testStarterFile() {
         Assert.assertEquals(new File("C:/tmp"),         FileProcessings.starterFile("C:/tmp/abc.*\\.txt"));
         Assert.assertEquals(new File("C:/tmp/foo.zip"), FileProcessings.starterFile("C:/tmp/foo\\.zip!dir/.*"));
     }
