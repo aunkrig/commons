@@ -516,7 +516,7 @@ class ConsumerUtil {
      */
     public
     interface Produmer<PT, CT>
-    extends ProdumerWhichThrows<PT, NoException, CT, NoException> {}
+    extends ProdumerWhichThrows<PT, NoException, CT, NoException>, Producer<PT>, Consumer<CT> {}
 
     /**
      * The combination of a {@link ProducerWhichThrows} and a {@link ConsumerWhichThrows}.
