@@ -129,7 +129,7 @@ import de.unkrig.commons.text.scanner.ScannerUtil;
  *
  *   <dt>{@code + -}</dt>
  *   <dd>
- *     Addition (if both operands are numeric) or string concatenation; subtraction.
+ *     Addition (if both operands are numeric) or string concatenation (with arrays pretty-printed); subtraction.
  *   </dd>
  *
  *   <dt>{@code * / %}</dt>
@@ -242,7 +242,13 @@ import de.unkrig.commons.text.scanner.ScannerUtil;
  *   <dt>{@code x.name}</dt>
  *   <dd>
  *     Attribute reference; gets the value of the field "{@code x.name}", or invokes "{@code x.name()}" or "{@code
- *     x.getName()}" (it is <em>not</em> possible to <em>set</em> an attribute this way)
+ *     x.getName()}".
+ *     The special attributes {@code "_attributes"} and {@code "_properties"} evaluate to the names of all non-static
+ *     attributes;
+ *     the special attributes {@code "_staticAttributes"} and {@code "_staticProperties"} evaluate to the names of all
+ *     <em>static</em> attributes.
+ *     <br>
+ *     (It is <em>not</em> possible to <em>set</em> an attribute this way.)
  *   </dd>
  *
  *   <dt>{@code x.meth(a, b, c)}</dt>

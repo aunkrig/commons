@@ -836,8 +836,10 @@ class ExpressionEvaluator {
      * Return the value of the given attribute of the given <var>target</var> object. An attribute is either a PUBLIC
      * field, or it is retrieved by invoking a getter ("xyz()" or "getXyz()").
      * <p>
-     * The special attributes {@code "_attributes"} and {@code "_properties"} evaluate to all attributes' names, as
-     * a {@code String} array.
+     *   The special attributes {@code "_attributes"} and {@code "_properties"} evaluate to all non-static attributes'
+     *   names; The special attributes {@code "_staticAttributes"} and {@code "_staticProperties"} evaluate to all
+     *   <em>static</em> attributes' names.
+     * </p>
      */
     @Nullable private static <E extends Exception> Object
     getAttributeValue(@Nullable Object target, String attributeName) throws EvaluationException {
