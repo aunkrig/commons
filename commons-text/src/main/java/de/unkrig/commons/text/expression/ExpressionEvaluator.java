@@ -859,35 +859,52 @@ class ExpressionEvaluator {
                 result.add(f.getName());
             }
             for (Method m : clasS.getMethods()) {
-                if (Modifier.isStatic(m.getModifiers()) ^ isStatic) continue;
+                if (m.getReturnType() == void.class || m.getParameterCount() > 0 || Modifier.isStatic(m.getModifiers()) ^ isStatic) continue;
 
                 String mn = m.getName();
-                result.add(mn);
 
                 Phrase p = Notations.fromCamelCase(mn);
-                if ("get".equals(p.get(0))) result.add(p.remove(0).toLowerCamelCase());
+                if ("get".equals(p.get(0))) {
+                    result.add(p.remove(0).toLowerCamelCase());
+                } else {
+                    result.add(mn);
+                }
             }
             return result.toArray(new String[result.size()]);
-        }
 
-        try {
+        default:
             try {
-                return clasS.getField(attributeName).get(target);
-            } catch (NoSuchFieldException nsfe) {}
-            try {
-                return clasS.getMethod(attributeName).invoke(target);
-            } catch (NoSuchMethodException nsme) {}
-            try {
-                return clasS.getMethod(
-                    Notations.fromCamelCase(attributeName).prepend("get").toLowerCamelCase()
-                ).invoke(target);
-            } catch (NoSuchMethodException nsme) {}
-        } catch (Exception e) {
-            throw ExceptionUtil.wrap(
-                "Retrieving attribute '" + attributeName + "' of '" + clasS.getName() + "'",
-                e,
-                EvaluationException.class
-            );
+                try {
+
+                    // Field by name?
+                    return clasS.getField(attributeName).get(target);
+                } catch (NoSuchFieldException nsfe) {}
+
+                Method m;
+                try {
+
+                    // Method by name?
+                    m = clasS.getMethod(attributeName);
+                } catch (NoSuchMethodException nsme) {
+                    try {
+
+                        // Method by "get" + name?
+                        m = clasS.getMethod(Notations.fromCamelCase(attributeName).prepend("get").toLowerCamelCase());
+                    } catch (NoSuchMethodException nsme2) {
+                        m = null;
+                    }
+                }
+                if (m != null && m.getParameterCount() == 0 && m.getReturnType() != void.class && !Modifier.isStatic(m.getModifiers())) {
+                    return m.invoke(target);
+                }
+            } catch (Exception e) {
+                throw ExceptionUtil.wrap(
+                    "Retrieving attribute '" + attributeName + "' of '" + clasS.getName() + "'",
+                    e,
+                    EvaluationException.class
+                );
+            }
+            break;
         }
 
         throw new EvaluationException(
