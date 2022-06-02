@@ -28,6 +28,7 @@ package de.unkrig.commons.text.expression;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ import de.unkrig.commons.lang.protocol.TransformerWhichThrows;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.reflect.ReflectUtil;
 import de.unkrig.commons.text.Notations;
+import de.unkrig.commons.text.Notations.Phrase;
 import de.unkrig.commons.text.expression.Parser.BinaryOperator;
 import de.unkrig.commons.text.expression.Parser.UnaryOperator;
 import de.unkrig.commons.text.expression.Scanner.TokenType;
@@ -770,7 +772,7 @@ class ExpressionEvaluator {
      * @return {@code subject.toString()} or {@code null} iff {@code subject == null}
      */
     public static String
-    toString(@Nullable Object subject) { return subject == null ? "" : subject.toString(); }
+    toString(@Nullable Object subject) { return subject == null ? "" : ObjectUtil.arrayToString(subject); }
 
     @Nullable private static Object
     invokeMethod(@Nullable Object lhsv, String methodName, List<Object> argumentValues) throws EvaluationException {
@@ -833,12 +835,38 @@ class ExpressionEvaluator {
     /**
      * Return the value of the given attribute of the given <var>target</var> object. An attribute is either a PUBLIC
      * field, or it is retrieved by invoking a getter ("xyz()" or "getXyz()").
+     * <p>
+     * The special attributes {@code "_attributes"} and {@code "_properties"} evaluate to all attributes' names, as
+     * a {@code String} array.
      */
     @Nullable private static <E extends Exception> Object
     getAttributeValue(@Nullable Object target, String attributeName) throws EvaluationException {
         if (target == null) return null;
 
         Class<?> clasS = target.getClass();
+
+        switch (attributeName) {
+        case "_attributes":
+        case "_properties":
+        case "_staticAttributes":
+        case "_staticProperties":
+            boolean isStatic = attributeName.startsWith("_static");
+            List<String> result = new ArrayList<>();
+            for (Field f : clasS.getFields()) {
+                if (Modifier.isStatic(f.getModifiers()) ^ isStatic) continue;
+                result.add(f.getName());
+            }
+            for (Method m : clasS.getMethods()) {
+                if (Modifier.isStatic(m.getModifiers()) ^ isStatic) continue;
+
+                String mn = m.getName();
+                result.add(mn);
+
+                Phrase p = Notations.fromCamelCase(mn);
+                if ("get".equals(p.get(0))) result.add(p.remove(0).toLowerCamelCase());
+            }
+            return result.toArray(new String[result.size()]);
+        }
 
         try {
             try {
@@ -1319,7 +1347,7 @@ class ExpressionEvaluator {
         if (subject == null) return null;
 
         if (targetType == String.class) {
-            return (T) subject.toString();
+            return (T) ObjectUtil.arrayToString(subject);
         }
 
         Class<? extends Object> sourceClass = subject.getClass();
