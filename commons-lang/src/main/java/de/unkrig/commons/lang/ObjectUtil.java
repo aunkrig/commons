@@ -28,6 +28,7 @@ package de.unkrig.commons.lang;
 
 import java.lang.reflect.Array;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.regex.Pattern;
 
@@ -76,6 +77,27 @@ class ObjectUtil {
      */
     public static <T> String
     toString(@Nullable T value, String defaultValue) { return value != null ? value.toString() : defaultValue; }
+
+    /**
+     * @return {@code Arrays.toString(o)} iff <var>o</var> is an array of primitives, {@code Arrays.deepToString(o)}
+     *         iff <var>o</var> is an array of objects, and otherwise {@code String.valueOf(o)}
+     */
+    public static String
+    arrayToString(Object o) {
+
+        if (o instanceof boolean[]) return Arrays.toString((boolean[]) o);
+        if (o instanceof byte[])    return Arrays.toString((byte[])    o);
+        if (o instanceof char[])    return Arrays.toString((char[])    o);
+        if (o instanceof double[])  return Arrays.toString((double[])  o);
+        if (o instanceof float[])   return Arrays.toString((float[])   o);
+        if (o instanceof int[])     return Arrays.toString((int[])     o);
+        if (o instanceof long[])    return Arrays.toString((long[])    o);
+        if (o instanceof short[])   return Arrays.toString((short[])   o);
+
+        if (o instanceof Object[]) return Arrays.deepToString((Object[]) o);
+
+        return String.valueOf(o);
+    }
 
     /**
      * @return <var>lhs</var>, or <var>rhs</var> iff {@code lhs == null}
