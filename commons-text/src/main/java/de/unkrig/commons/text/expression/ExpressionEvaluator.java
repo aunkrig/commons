@@ -894,7 +894,7 @@ class ExpressionEvaluator {
                         m = null;
                     }
                 }
-                if (m != null && m.getParameterCount() == 0 && m.getReturnType() != void.class && !Modifier.isStatic(m.getModifiers())) {
+                if (m != null && m.getParameterCount() == 0 && m.getReturnType() != void.class) {
                     return m.invoke(target);
                 }
             } catch (Exception e) {
