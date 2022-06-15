@@ -328,7 +328,7 @@ class CommandLineOptionException extends Exception {
                     "Processing option \""
                     + optionName
                     + "\": "
-                    + cause.getMessage()
+                    + cause.toString()
                 ),
                 cause
             );
