@@ -43,6 +43,7 @@ import java.util.TreeMap;
 
 import de.unkrig.commons.lang.ObjectUtil;
 import de.unkrig.commons.lang.protocol.Function;
+import de.unkrig.commons.lang.protocol.Producer;
 import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 
@@ -278,12 +279,11 @@ class MapUtil {
      * </p>
      */
     @NotNullByDefault(false) public static <K, V> Map<K, V>
-    combine(final Map<K, V> map1, final Map<? extends K, ? extends V> map2) {
+    combine(final Map<K, V> map1, final Map<K, V> map2) {
         return new Map<K, V>() {
 
             // SUPPRESS CHECKSTYLE LineLength:5
             @Override public void                 clear()            { throw new UnsupportedOperationException("clear");    }
-            @Override public Set<Map.Entry<K, V>> entrySet()         { throw new UnsupportedOperationException("entrySet"); }
             @Override public Set<K>               keySet()           { throw new UnsupportedOperationException("keySet");   }
             @Override public V                    remove(Object key) { throw new UnsupportedOperationException("remove");   }
             @Override public Collection<V>        values()           { throw new UnsupportedOperationException("values");   }
@@ -316,6 +316,31 @@ class MapUtil {
                     if (!map1.containsKey(key)) result++;
                 }
                 return result;
+            }
+
+            @Override public Set<Map.Entry<K, V>>
+            entrySet() {
+
+                return new AbstractSet<Map.Entry<K, V>>() {
+
+                    @Override public Iterator<Map.Entry<K, V>>
+                    iterator() {
+                        return IteratorUtil.concat(
+                            map1.entrySet().iterator(),
+                            IteratorUtil.filter(map2.entrySet().iterator(), e -> !map1.containsKey(e.getKey()))
+                        );
+                    }
+
+                    @Override public int
+                    size() {
+                        return map1.size() + IteratorUtil.elementCount(
+                            IteratorUtil.filter(
+                                map2.keySet().iterator(),
+                                key -> !map1.containsKey(key)
+                            )
+                        );
+                    }
+                };
             }
         };
     }
@@ -424,8 +449,10 @@ class MapUtil {
     }
 
     /**
-     * Creates and returns map that computes values only on demand, e.g. when {@code iterator().next().getValue()}
-     * is invoked, by calling {@code valueGetters.get(key).call(in)}.
+     * Creates and returns map that computes values only on demand, e.g. when {@code
+     * Map.entrySet().iterator().next().getValue()} is invoked, by calling <var>valueGetters</var>{@code
+     * .get(key).call(}<var>in</var>{@code )}. (<var>in</var> is the value of this method's <var>in</var> parameter,
+     * and can be used to convey "context information" to the <var>valueGetters</var>.)
      * <p>
      *   The returned map supports entry removal operations iff the <var>valueGetters</var> map supports them.
      * </p>
@@ -441,23 +468,41 @@ class MapUtil {
      *   The returned map supports {@code null} keys iff the <var>valueGetters</var> map supports {@code null} keys.
      * </p>
      * <p>
-     *   The returned map may return {@code null} values iff any of the the <var>valueGetters</var> produces {@code
-     *   null} values.
+     *   The returned map may return {@code null} values if there is no value getter for the key, or if the value
+     *   getter returns {@code null}.
      * </p>
      *
      * @param valueGetters Must not contain {@code null} values
      */
     public static <K, V, I> Map<K, V>
-    lazyMap(final Map<K, Function<I, V>> valueGetters, @Nullable final I in) {
+    lazyMap(final Map<K, Function<? super I, ? extends V>> valueGetters, @Nullable final I in) {
+        return MapUtil.transformingMap(valueGetters, vg -> vg != null ? vg.call(in) : null);
+    }
 
-        return new AbstractMap<K, V>() {
+    /**
+     * Creates and returns a map that produces values through the <var>valueGetters</var> map only when they are
+     * needed.
+     */
+    public static <K, V> Map<K, V>
+    lazyMap(final Map<K, Producer<? extends V>> valueGetters) {
+        return MapUtil.transformingMap(valueGetters, vg -> vg != null ? vg.produce() : null);
+    }
 
-            @Nullable private Set<K>           keySet;
-            @Nullable private Collection<V>    values;
-            @Nullable private Set<Entry<K, V>> entrySet;
+    /**
+     * Wraps the <var>delegate</var> map such that values are fed through the <var>transformer</var> whenever they
+     * are needed.
+     */
+    public static <K, V1, V2> Map<K, V2>
+    transformingMap(final Map<K, ? extends V1> delegate, Function<V1, V2> transformer) {
+
+        return new AbstractMap<K, V2>() {
+
+            @Nullable private Set<K>            keySet;
+            @Nullable private Collection<V2>    values;
+            @Nullable private Set<Entry<K, V2>> entrySet;
 
             @Override public int
-            size() { return valueGetters.size(); }
+            size() { return delegate.size(); }
 
             @Override public Set<K>
             keySet() {
@@ -466,50 +511,46 @@ class MapUtil {
             }
 
             @Override public boolean
-            isEmpty() { return valueGetters.isEmpty(); }
+            isEmpty() { return delegate.isEmpty(); }
 
-            @Override @NotNullByDefault(false) public V
-            get(Object key) {
-                Function<I, V> valueGetter = valueGetters.get(key);
-                if (valueGetter == null) return null;
-                return valueGetter.call(in);
-            }
+            @Override @NotNullByDefault(false) public V2
+            get(Object key) { return transformer.call(delegate.get(key)); }
 
-            @Override public Collection<V>
+            @Override public Collection<V2>
             values() {
-                Collection<V> result = this.values;
+                Collection<V2> result = this.values;
                 return result != null ? result : (this.values = this.values2());
             }
 
-            @Override public Set<Entry<K, V>>
+            @Override public Set<Entry<K, V2>>
             entrySet() {
-                Set<Entry<K, V>> result = this.entrySet;
+                Set<Entry<K, V2>> result = this.entrySet;
                 return result != null ? result : (this.entrySet = this.entrySet2());
             }
 
             // ==================================
 
             private Set<K>
-            keySet2() { return valueGetters.keySet(); }
+            keySet2() { return delegate.keySet(); }
 
-            private Collection<V>
+            private Collection<V2>
             values2() {
-                return new AbstractCollection<V>() {
+                return new AbstractCollection<V2>() {
 
                     @Override public int
-                    size() { return valueGetters.size(); }
+                    size() { return delegate.size(); }
 
-                    @Override public Iterator<V>
+                    @Override public Iterator<V2>
                     iterator() {
-                        return new Iterator<V>() {
+                        return new Iterator<V2>() {
 
-                            final Iterator<Function<I, V>> it = valueGetters.values().iterator();
+                            final Iterator<? extends V1> it = delegate.values().iterator();
 
                             @Override public boolean
                             hasNext() { return this.it.hasNext(); }
 
-                            @Override @NotNullByDefault(false) public V
-                            next() { return this.it.next().call(in); }
+                            @Override @NotNullByDefault(false) public V2
+                            next() { return transformer.call(this.it.next()); }
 
                             @Override public void
                             remove() { this.it.remove(); }
@@ -518,36 +559,37 @@ class MapUtil {
                 };
             }
 
-            private Set<Entry<K, V>>
+            private Set<Entry<K, V2>>
             entrySet2() {
 
-                return new AbstractSet<Map.Entry<K, V>>() {
+                return new AbstractSet<Map.Entry<K, V2>>() {
 
                     @Override public int
-                    size() { return valueGetters.size(); }
+                    size() { return delegate.size(); }
 
-                    @Override public Iterator<Entry<K, V>>
+                    @Override public Iterator<Entry<K, V2>>
                     iterator() {
 
-                        return new Iterator<Map.Entry<K, V>>() {
+                        return new Iterator<Map.Entry<K, V2>>() {
 
-                            final Iterator<Entry<K, Function<I, V>>> it = valueGetters.entrySet().iterator();
+                            @SuppressWarnings({ "unchecked", "rawtypes" }) final Iterator<Entry<K, ? extends V1>>
+                            it = (Iterator) delegate.entrySet().iterator();
 
                             @Override public boolean
                             hasNext() { return this.it.hasNext(); }
 
-                            @Override public Entry<K, V>
+                            @Override public Entry<K, V2>
                             next() {
-                                final Entry<K, Function<I, V>> e = this.it.next();
-                                return new Map.Entry<K, V>() {
+                                final Entry<K, ? extends V1> e = this.it.next();
+                                return new Map.Entry<K, V2>() {
 
                                     @Override public K
                                     getKey() { return e.getKey(); }
 
-                                    @Override @NotNullByDefault(false) public V
-                                    getValue() { return e.getValue().call(in); }
+                                    @Override @NotNullByDefault(false) public V2
+                                    getValue() { return transformer.call(e.getValue()); }
 
-                                    @Override @NotNullByDefault(false) public V
+                                    @Override @NotNullByDefault(false) public V2
                                     setValue(Object value) { throw new UnsupportedOperationException("setValue"); }
                                 };
                             }
@@ -561,30 +603,26 @@ class MapUtil {
 
             @Override @NotNullByDefault(false) public boolean
             containsValue(Object value) {
-                for (Function<I, V> valueGetter : valueGetters.values()) {
-                    if (ObjectUtil.equals(value, valueGetter.call(in))) return true;
+                for (V1 v1 : delegate.values()) {
+                    if (ObjectUtil.equals(value, transformer.call(v1))) return true;
                 }
                 return false;
             }
 
             @Override @NotNullByDefault(false) public boolean
-            containsKey(Object key) { return valueGetters.containsKey(key); }
+            containsKey(Object key) { return delegate.containsKey(key); }
 
-            @Override @NotNullByDefault(false) public V
-            put(K key, V value) { throw new UnsupportedOperationException("put"); }
+            @Override @NotNullByDefault(false) public V2
+            put(K key, V2 value) { throw new UnsupportedOperationException("put"); }
 
             @Override @NotNullByDefault(false) public void
-            putAll(Map<? extends K, ? extends V> m) { throw new UnsupportedOperationException("putAll"); }
+            putAll(Map<? extends K, ? extends V2> m) { throw new UnsupportedOperationException("putAll"); }
 
-            @Override @NotNullByDefault(false) public V
-            remove(Object key) {
-                Function<I, V> valueGetter = valueGetters.remove(key);
-                if (valueGetter == null) return null;
-                return valueGetter.call(in);
-            }
+            @Override @NotNullByDefault(false) public V2
+            remove(Object key) { return transformer.call(delegate.remove(key)); }
 
             @Override public void
-            clear() { valueGetters.clear(); }
+            clear() { delegate.clear(); }
         };
     }
 }
