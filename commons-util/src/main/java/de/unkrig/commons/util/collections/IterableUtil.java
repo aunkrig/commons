@@ -190,7 +190,7 @@ class IterableUtil {
     }
 
     /**
-     * @return An iterator for the elements of the given <var>elements</var>
+     * @return An {@link Iterable} for the elements of the given <var>elements</var>
      */
     public static <T> Iterable<T>
     concat(final Iterable<? extends Iterable<? extends T>> elements) {
