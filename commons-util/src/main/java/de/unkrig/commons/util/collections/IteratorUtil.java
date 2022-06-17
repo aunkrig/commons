@@ -26,6 +26,7 @@
 
 package de.unkrig.commons.util.collections;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.ListIterator;
@@ -235,8 +236,8 @@ class IteratorUtil {
     /**
      * Retrieves, counts and discards all elements remaining on the <var>iterator</var>
      */
-    public static int
-    elementCount(Iterator<Integer> iterator) {
+    public static <T> int
+    elementCount(Iterator<T> iterator) {
         int n = 0;
         for (; iterator.hasNext(); iterator.next()) n++;
         return n;
@@ -406,5 +407,54 @@ class IteratorUtil {
     public static <T> void
     addAllElementsTo(Iterator<? extends T> iterator, Collection<? super T> target) {
         while (iterator.hasNext()) target.add(iterator.next());
+    }
+
+    public static <T> Iterator<T>
+    concat(
+        Iterator<? extends T> iterator1,
+        Iterator<? extends T> iterator2
+    ) {
+        return IteratorUtil.concat(Arrays.asList(iterator1, iterator2).iterator());
+    }
+
+    public static <T> Iterator<T>
+    concat(
+        Iterator<? extends T> iterator1,
+        Iterator<? extends T> iterator2,
+        Iterator<? extends T> iterator3
+    ) {
+        return IteratorUtil.concat(Arrays.asList(iterator1, iterator2, iterator3).iterator());
+    }
+
+    /**
+     * @return An iterator for the elements of the given <var>iterators</var>
+     */
+    public static <T> Iterator<T>
+    concat(final Iterator<? extends Iterator<? extends T>> iterators) {
+
+        return new Iterator<T>() {
+
+            Iterator<? extends T> inner = IteratorUtil.atEnd();
+
+            @Override public boolean
+            hasNext() {
+
+                while (!this.inner.hasNext()) {
+                    if (!iterators.hasNext()) return false;
+                    this.inner = iterators.next();
+                }
+
+                return true;
+            }
+
+            @Override public T
+            next() throws NoSuchElementException {
+                if (!this.hasNext()) throw new NoSuchElementException();
+                return this.inner.next();
+            }
+
+            @Override public void
+            remove() {  this.inner.remove(); }
+        };
     }
 }
