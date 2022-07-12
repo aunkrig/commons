@@ -28,6 +28,10 @@
 
 package test;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.List;
 import java.util.Random;
 
 import org.junit.Assert;
@@ -38,6 +42,7 @@ import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.lang.PrettyPrinter;
 import de.unkrig.commons.lang.StringUtil;
 import de.unkrig.commons.lang.StringUtil.IndexOf;
+import de.unkrig.commons.lang.StringUtil.MultiNeedleIndexOf;
 import de.unkrig.commons.lang.protocol.Producer;
 
 public
@@ -331,6 +336,85 @@ class StringUtilTest {
         Assert.assertEquals(-1, io.indexOf("__________**", 7, 7, 10));
     }
 
+    @Test public void
+    testBoyerMooreHorspoolIndex3d__1() {
+        char[][][] needles = {
+            { { 'T', 't' }, { 'O', 'o' }, { 'M', 'm' } },
+            { { 'S', 'S' }, { 'a', 'a' }, { 'w', 'w' }, { 'y', 'y' }, { 'e', 'e' }, { 'r', 'r' } },
+            { { 'H', 'H' }, { 'u', 'u' }, { 'c', 'c' }, { 'k', 'k' }, { 'l', 'l' }, { 'e', 'e' }, { 'b', 'b' }, { 'e', 'e' }, { 'r', 'r' }, { 'r', 'r' }, { 'y', 'y' } },
+            { { 'F', 'F' }, { 'i', 'i' }, { 'n', 'n' }, { 'n', 'n' } }
+        };
+
+        MultiNeedleIndexOf io = StringUtil.boyerMooreHorspoolIndexOf(needles);
+
+        Assert.assertEquals(4, io.indexOf("    Tom    "));
+    }
+
+    @Test public void
+    testBoyerMooreHorspoolIndex3d__2() {
+        char[][][] needles = {
+            { { 'T', 't' }, { 'O', 'o' }, { 'M', 'm' } },
+            { { 'P', 'p' }, { 'H', 'h' }, { 'A', 'a' }, { 'N', 'n' }, { 'T', 't' }, { 'O', 'o' }, { 'M', 'm' }, { 'A', 'a' }, { 'S', 's' } },
+            { { 'P', 'p' }, { 'H', 'h' }, { 'A', 'a' }, { 'N', 'n' }, { 'T', 't' }, { 'O', 'o' }, { 'M', 'm' } },
+        };
+
+        MultiNeedleIndexOf mnio = StringUtil.boyerMooreHorspoolIndexOf(needles);
+
+        Random r = new Random(99);
+        for (String[] words : StringUtilTest.allPermutationsOf(new String[] { "Tom", "Phantomas", "Phantom" }, String.class)) {
+
+            for (int j = 0; j < 100; j++) {
+                String subject;
+                {
+                    StringBuilder lb = new StringBuilder();
+                    StringUtilTest.addFiller(r, lb);
+                    for (String word : words) {
+                        lb.append(word);
+                        StringUtilTest.addFiller(r, lb);
+                    }
+                    subject = lb.toString();
+                }
+
+                BitSet mnis = new BitSet();
+                int needleIndex = mnio.indexOf(subject, mnis);
+
+                Assert.assertNotEquals(subject, needleIndex, -1);
+
+                BitSet expected = new BitSet();
+                expected.set(0);
+                Assert.assertEquals(subject, expected, mnis);
+
+                Assert.assertEquals(subject, subject.indexOf(words[0]), needleIndex);
+            }
+        }
+    }
+
+    private static void
+    addFiller(Random r, StringBuilder lb) {
+        for (int i = r.nextInt(7); i > 0; i--) lb.append((char) ('a' + r.nextInt(26)));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T[][]
+    allPermutationsOf(T[] a, Class<T> clasS) {
+        int[] indices = new int[a.length];
+
+        List<T[]> result = new ArrayList<T[]>();
+        for (;;) {
+            for (int i = a.length - 1;; i--) {
+                if (i == -1) return result.toArray((T[][]) Array.newInstance(Array.newInstance(clasS, 0).getClass(), a.length));
+                if (indices[i] == a.length - 1) {
+                    indices[i] = 0;
+                } else {
+                    indices[i]++;
+                    break;
+                }
+            }
+            T[] tmp = (T[]) Array.newInstance(clasS, a.length);
+            for (int i = 0; i < a.length; i++) tmp[i] = a[i];
+            result.add(tmp);
+        }
+    }
     @Test public void
     testIndexOf1() throws Throwable {
 
