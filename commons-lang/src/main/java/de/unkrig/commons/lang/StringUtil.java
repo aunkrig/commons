@@ -28,6 +28,7 @@ package de.unkrig.commons.lang;
 
 import java.io.BufferedReader;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -404,6 +405,116 @@ class StringUtil {
     }
 
     /**
+     * @see #indexOf(CharSequence, BitSet, int, int, int)
+     */
+    public
+    interface MultiNeedleIndexOf {
+
+        /**
+         * Equivalent with {@link #startsWith(CharSequence, BitSet, int, int) startsWith}{@code (haystack, new BitSet(),
+         * 0, haystack.length())}.
+         */
+        boolean startsWith(CharSequence haystack);
+
+        /**
+         * Equivalent with {@link #startsWith(CharSequence, BitSet, int, int) startsWith}{@code (haystack,
+         * matchingNeedleIndices, 0, haystack.length())}.
+         */
+        boolean startsWith(CharSequence haystack, BitSet matchingNeedleIndices);
+
+        /**
+         * Equivalent with {@link #startsWith(CharSequence, BitSet, int, int) startsWith}{@code (haystack,
+         * matchingNeedleIndices, offset, haystack.length())}.
+         */
+        boolean startsWith(CharSequence haystack, BitSet matchingNeedleIndices, int offset);
+
+        /**
+         * Checks whether one or more of the needles matches the <var>haystack</var> at position <var>offset</var>. If
+         * so, then the indices of the matching needles are set in the <var>matchingNeedleIndices</var> bit set.
+         *
+         * @param limit Never look beyond this limit in the <var>haystack</var>
+         */
+        boolean startsWith(CharSequence haystack, BitSet matchingNeedleIndices, int offset, int limit);
+
+        /**
+         * Equivalent with {@link #indexOf(CharSequence, BitSet, int, int, int) indexOf}{@code (haystack, new BitSet(),
+         * 0, haystack.length(), haystack.length())}.
+         */
+        int indexOf(CharSequence haystack);
+
+        /**
+         * Equivalent with {@link #indexOf(CharSequence, BitSet, int, int, int) indexOf}{@code (haystack,
+         * matchingNeedleIndices, 0, haystack.length(), haystack.length())}.
+         */
+        int indexOf(CharSequence haystack, BitSet matchingNeedleIndices);
+
+        /**
+         * Equivalent with {@link #indexOf(CharSequence, BitSet, int, int, int) indexOf}{@code (haystack,
+         * matchingNeedleIndices, minIndex, haystack.length(), haystack.length())}.
+         */
+        int indexOf(CharSequence haystack, BitSet matchingNeedleIndices, int minIndex);
+
+        /**
+         * Equivalent with {@link #indexOf(CharSequence, BitSet, int, int, int) indexOf}{@code (haystack,
+         * matchingNeedleIndices, minIndex, maxIndex, haystack.length())}.
+         */
+        int indexOf(CharSequence haystack, BitSet matchingNeedleIndices, int minIndex, int maxIndex);
+
+        /**
+         * Finds the first match of any of the needles in the <var>haystack</var>, starting at position
+         * <var>minIndex</var>, and stopping at position <var>maxIndex</var> (inclusive). If there is such a match,
+         * then it sets the indices of the matching needles in the <var>matchingNeedleIndices</var> bit set, and
+         * returns the position of the match.
+         *
+         * @param limit Never look beyond this limit in the <var>haystack</var>
+         * @return      -1 iff there is no match under the given conditions
+         */
+        int indexOf(CharSequence haystack, BitSet matchingNeedleIndices, int minIndex, int maxIndex, int limit);
+    }
+
+    abstract static
+    class AbstractMultiNeedleIndexOf implements MultiNeedleIndexOf {
+
+        // Default implementations of "startsWith()".
+
+        @Override public boolean
+        startsWith(CharSequence haystack) {
+            return this.startsWith(haystack, new BitSet() /*matchingNeedleIndices*/, 0 /*offset*/, haystack.length() /*limit*/);
+        }
+
+        @Override public boolean
+        startsWith(CharSequence haystack, BitSet matchingNeedleIndices) {
+            return this.startsWith(haystack, matchingNeedleIndices, 0 /*offset*/, haystack.length() /*limit*/);
+        }
+
+        @Override public boolean startsWith(CharSequence haystack, BitSet matchingNeedleIndices, int offset) {
+            return this.startsWith(haystack, matchingNeedleIndices, offset, haystack.length() /*limit*/);
+        }
+
+        // Default implementations of "indexOf()".
+
+        @Override public int
+        indexOf(CharSequence haystack) {
+            return this.indexOf(haystack, new BitSet() /*matchingNeedleIndices*/, 0 /*minIndex*/, haystack.length() /*maxIndex*/, haystack.length() /*limit*/);
+        }
+        @Override public int
+        indexOf(CharSequence haystack, BitSet matchingNeedleIndices) {
+            return this.indexOf(haystack, matchingNeedleIndices, 0 /*minIndex*/, haystack.length() /*maxIndex*/, haystack.length() /*limit*/);
+        }
+        @Override public int
+            indexOf(CharSequence haystack, BitSet matchingNeedleIndices, int minIndex) {
+            return this.indexOf(haystack, matchingNeedleIndices, minIndex, haystack.length() /*maxIndex*/, haystack.length() /*limit*/);
+        }
+        @Override public int
+        indexOf(CharSequence haystack, BitSet matchingNeedleIndices, int minIndex, int maxIndex) {
+            return this.indexOf(haystack, matchingNeedleIndices, minIndex, maxIndex, haystack.length() /*limit*/);
+        }
+
+        @Override
+        public abstract String toString();
+    }
+
+    /**
      * Runtime-optimized reimplementation of {@link String#indexOf(String)} and {@link String#lastIndexOf(String)}.
      * <p>
      *   This method returns an implementation that performs at least as well as the {@link String} methods by
@@ -738,6 +849,113 @@ class StringUtil {
     }
 
     /**
+     * Implementation of the Boyer-Moore-Horspool string search algorithm for multiple needles.
+     */
+    public static MultiNeedleIndexOf
+    boyerMooreHorspoolIndexOf(CharSequence[] needles) {
+
+        return new AbstractMultiNeedleIndexOf() {
+
+            private int shortestNeedleLength;
+            {
+                this.shortestNeedleLength = Integer.MAX_VALUE;
+                for (CharSequence needle : needles) {
+                    int nl = needle.length();
+                    if (nl < this.shortestNeedleLength) this.shortestNeedleLength = nl;
+                }
+            }
+
+            /**
+             * Element value >= 1: Pivot offset can safely be incremented by this value
+             * Element value <= 0: The first possible match is at (pivot offset) - |value|
+             */
+            private final int[] safeSkipTable = new int[256];
+            {
+                for (int i = 0; i < 256; i++) this.safeSkipTable[i] = this.shortestNeedleLength - 1;
+
+                for (CharSequence needle : needles) {
+                    for (int offset = 0; offset < this.shortestNeedleLength; offset++) {
+                        char c = needle.charAt(offset);
+                        if (offset > -this.safeSkipTable[255 & c]) {
+                            this.safeSkipTable[255 & c] = -offset;
+                        }
+                    }
+                }
+            }
+
+            @Override public boolean
+            startsWith(CharSequence haystack, BitSet matchingNeedleIndices, int offset, int limit) {
+
+                boolean result = false;
+
+                NEXT_NEEDLE: for (int needleIndex = 0; needleIndex < needles.length; needleIndex++) {
+                    CharSequence needle = needles[needleIndex];
+                    if (offset + needle.length() > limit) continue;
+                    NEXT_OFFSET: for (int offset2 = 0; offset2 < needle.length(); offset2++) {
+                        if (needle.charAt(offset2) != haystack.charAt(offset + offset2)) continue NEXT_NEEDLE;
+                    }
+                    matchingNeedleIndices.set(needleIndex);
+                    result = true;
+                }
+
+                return result;
+            }
+
+            @Override public int
+            indexOf(CharSequence haystack, BitSet matchingNeedleIndices, int minIndex, int maxIndex, int limit) {
+
+                assert limit <= haystack.length();
+
+                if (minIndex + this.shortestNeedleLength > limit) return -1;
+
+                int pivot;
+                for (pivot = minIndex + this.shortestNeedleLength - 1;;) {
+
+                    // Step one: Compute the smallest possible match offset, using the Boyer-Moore-Horspool algorithm.
+                    int firstPossibleMatchOffset;
+                    for (;;) {
+
+                        if (pivot >= limit) return -1;
+
+                        int x = this.safeSkipTable[255 & haystack.charAt(pivot)];
+                        if (x >= 1) {
+                            pivot += x;
+                        } else {
+                            firstPossibleMatchOffset = pivot + x;
+                            break;
+                        }
+                    }
+
+                    if (firstPossibleMatchOffset > maxIndex) return -1;
+
+                    // Step two: Check if any of the needle matches at that position. If so, return the first match.
+                    if (this.startsWith(haystack, matchingNeedleIndices, firstPossibleMatchOffset, limit)) {
+                        return firstPossibleMatchOffset;
+                    }
+
+                    // Step 3: Avance the pivot offset.
+                    pivot += this.shortestNeedleLength;
+                }
+            }
+
+            @Override public String
+            toString() {
+                StringBuilder sb = new StringBuilder();
+                sb.append("boyerMooreHorspool(");
+                if (needles.length > 0) {
+                    for (int ni = 0;;) {
+                        sb.append(needles[ni]);
+                        if (++ni >= needles.length) break;
+                        sb.append('|');
+                    }
+                }
+                sb.append(')');
+                return sb.toString();
+            }
+        };
+    }
+
+    /**
      * Implementation of the Boyer-Moore-Horspool string search algorithm.
      * <p>
      *   Notice that the {@link #indexOf(char[][])} method performs some extra optimizations, e.g. when the needle
@@ -760,7 +978,11 @@ class StringUtil {
             needle[i] = n;
         }
 
-        if (univalent) return StringUtil.boyerMooreHorspoolIndexOf(StringUtil.mirror(needle));
+        if (univalent) {
+            char[] univalentNeedle = new char[needle.length];
+            for (int i = needle.length - 1; i >= 0; i--) univalentNeedle[i] = needle[i][0];
+            return StringUtil.boyerMooreHorspoolIndexOf(String.valueOf(univalentNeedle));
+        }
 
         return new AbstractIndexOf() {
 
@@ -910,6 +1132,143 @@ class StringUtil {
 
             @Override public String
             toString() { return "boyerMooreHorspool(" + PrettyPrinter.toJavaArrayInitializer(needle) + ")"; }
+        };
+    }
+
+    /**
+     * @param needle {@code [needleIndex][offset][multivalence]}
+     */
+    public static MultiNeedleIndexOf
+    boyerMooreHorspoolIndexOf(final char[][][] needles) {
+
+        // Check whether all needles are univalent, i.e. needles[needleIndex][offset].length == 1
+        OPTIMIZE_UNIVALENT: {
+            for (char[][] needle : needles) {
+                for (int i = needle.length - 1; i >= 0; i--) {
+
+                    char[] n = StringUtil.removeDuplicates(needle[i]);
+                    needle[i] = n;
+
+                    if (n.length != 1) break OPTIMIZE_UNIVALENT;
+                }
+            }
+
+            // Because all needles are univalent, we can delegate to the (probably faster)
+            // "boyerMoorHorspoolIndexOf(CharSequence[])".
+            CharSequence[] univalentNeedles = new CharSequence[needles.length];
+            for (int i = needles.length - 1; i >= 0; i--) {
+                char[][] needle = needles[i];
+
+                char[] un = new char[needle.length];
+                for (int j = needle.length - 1; j >= 0; j--) un[j] = needle[j][0];
+                univalentNeedles[i] = String.valueOf(un);
+            }
+            return StringUtil.boyerMooreHorspoolIndexOf(univalentNeedles);
+        }
+
+        return new AbstractMultiNeedleIndexOf() {
+
+            private int shortestNeedleLength;
+            {
+                this.shortestNeedleLength = Integer.MAX_VALUE;
+                for (char[][] needle : needles) {
+                    int nl = needle.length;
+                    if (nl < this.shortestNeedleLength) this.shortestNeedleLength = nl;
+                }
+            }
+
+            /**
+             * Element value >= 1: Pivot offset can safely be incremented by this value
+             * Element value <= 0: The first possible match is at (pivot offset) - |value|
+             */
+            private final int[] safeSkipTable = new int[256];
+            {
+                for (int i = 0; i < 256; i++) this.safeSkipTable[i] = this.shortestNeedleLength - 1;
+
+                for (char[][] needle : needles) {
+                    for (int offset = 0; offset < this.shortestNeedleLength; offset++) {
+                        for (char c : needle[offset]) {
+                            if (offset > -this.safeSkipTable[255 & c]) {
+                                this.safeSkipTable[255 & c] = -offset;
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override public boolean
+            startsWith(CharSequence haystack, BitSet matchingNeedleIndices, int offset, int limit) {
+
+                boolean result = false;
+
+                NEXT_NEEDLE: for (int needleIndex = 0; needleIndex < needles.length; needleIndex++) {
+                    char[][] needle = needles[needleIndex];
+                    if (offset + needle.length > limit) continue;
+                    NEXT_OFFSET: for (int offset2 = 0; offset2 < needle.length; offset2++) {
+                        char haystackChar = haystack.charAt(offset + offset2);
+                        for (char c : needle[offset2]) {
+                            if (c == haystackChar) continue NEXT_OFFSET;
+                        }
+                        continue NEXT_NEEDLE;
+                    }
+                    matchingNeedleIndices.set(needleIndex);
+                    result = true;
+                }
+
+                return result;
+            }
+
+            @Override public int
+            indexOf(CharSequence haystack, BitSet matchingNeedleIndices, int minIndex, int maxIndex, int limit) {
+
+                assert limit <= haystack.length();
+
+                if (minIndex + this.shortestNeedleLength > limit) return -1;
+
+                int pivot;
+                for (pivot = minIndex + this.shortestNeedleLength - 1;;) {
+
+                    // Step one: Compute the smallest possible match offset, using the Boyer-Moore-Horspool algorithm.
+                    int firstPossibleMatchOffset;
+                    for (;;) {
+
+                        if (pivot >= limit) return -1;
+
+                        int x = this.safeSkipTable[255 & haystack.charAt(pivot)];
+                        if (x >= 1) {
+                            pivot += x;
+                        } else {
+                            firstPossibleMatchOffset = pivot + x;
+                            break;
+                        }
+                    }
+
+                    if (firstPossibleMatchOffset > maxIndex) return -1;
+
+                    // Step two: Check if any of the needle matches at that position. If so, return the first match.
+                    if (this.startsWith(haystack, matchingNeedleIndices, firstPossibleMatchOffset, limit)) {
+                        return firstPossibleMatchOffset;
+                    }
+
+                    // Step 3: Avance the pivot offset.
+                    pivot += this.shortestNeedleLength;
+                }
+            }
+
+            @Override public String
+            toString() {
+                StringBuilder sb = new StringBuilder();
+                sb.append("boyerMooreHorspool(");
+                if (needles.length > 0) {
+                    for (int ni = 0;;) {
+                        for (char[] o : needles[ni]) sb.append('[').append(o).append(']');
+                        if (++ni >= needles.length) break;
+                        sb.append('|');
+                    }
+                }
+                sb.append(')');
+                return sb.toString();
+            }
         };
     }
 
