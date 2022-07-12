@@ -281,6 +281,7 @@ class PrettyPrinter {
     private static String
     getPrettyClassName(Object o) {
         String result = o.getClass().getCanonicalName();
+        if (result == null) result = o.getClass().getName();
         if (result.startsWith("java.")) result = result.substring(result.lastIndexOf('.') + 1);
         return result;
     }
