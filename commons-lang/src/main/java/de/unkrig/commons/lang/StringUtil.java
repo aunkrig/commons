@@ -852,7 +852,7 @@ class StringUtil {
      * Implementation of the Boyer-Moore-Horspool string search algorithm for multiple needles.
      */
     public static MultiNeedleIndexOf
-    boyerMooreHorspoolIndexOf(CharSequence[] needles) {
+    boyerMooreHorspoolIndexOf(final CharSequence[] needles) {
 
         return new AbstractMultiNeedleIndexOf() {
 
