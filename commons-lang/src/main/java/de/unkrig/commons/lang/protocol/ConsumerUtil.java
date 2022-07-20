@@ -264,8 +264,8 @@ class ConsumerUtil {
      */
     public static <EX extends Throwable> ConsumerWhichThrows<Character, ? extends EX>
     lineCounter(
-        ConsumerWhichThrows<Character, ? extends EX> lineChar,
-        ConsumerWhichThrows<Integer, ? extends EX>   lineComplete
+        final ConsumerWhichThrows<Character, ? extends EX> lineChar,
+        final ConsumerWhichThrows<Integer, ? extends EX>   lineComplete
     ) {
 
         return new ConsumerWhichThrows<Character, EX>() {
