@@ -853,7 +853,7 @@ class ExpressionEvaluator {
         case "_staticAttributes":
         case "_staticProperties":
             boolean isStatic = attributeName.startsWith("_static");
-            List<String> result = new ArrayList<>();
+            List<String> result = new ArrayList<String>();
             for (Field f : clasS.getFields()) {
                 if (Modifier.isStatic(f.getModifiers()) ^ isStatic) continue;
                 result.add(f.getName());
