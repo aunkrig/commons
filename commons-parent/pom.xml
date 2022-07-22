@@ -4,7 +4,7 @@
 
   <groupId>de.unkrig.commons</groupId>
   <artifactId>commons-parent</artifactId>
-  <version>1.2.17-SNAPSHOT</version>
+  <version>1.2.17</version>
   <packaging>pom</packaging>
 
   <name>commons-parent</name>
@@ -57,10 +57,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.5.1</version>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
       </plugin>
 
       <!-- Java source-jar plug-in: -->
