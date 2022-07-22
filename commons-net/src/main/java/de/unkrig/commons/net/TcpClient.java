@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 import de.unkrig.commons.io.HexOutputStream;
 import de.unkrig.commons.io.InputStreams;
 import de.unkrig.commons.io.OutputStreams;
+import de.unkrig.commons.lang.ExceptionUtil;
 import de.unkrig.commons.util.logging.LogUtil;
 
 /**
@@ -79,8 +80,12 @@ class TcpClient implements Closeable {
     public
     TcpClient(InetAddress address, int port) throws IOException {
 
-        this.socket = new Socket(address, port);
-        LOGGER.fine("Connected to " + this.socket.getRemoteSocketAddress());
+        try {
+			this.socket = new Socket(address, port);
+		} catch (IOException ioe) {
+			throw ExceptionUtil.wrap(address + ":" + port, ioe);
+		}
+		LOGGER.fine("Connected to " + this.socket.getRemoteSocketAddress());
 
         InputStream  in  = this.socket.getInputStream();
         OutputStream out = this.socket.getOutputStream();
