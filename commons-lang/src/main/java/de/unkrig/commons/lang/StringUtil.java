@@ -1136,7 +1136,7 @@ class StringUtil {
     }
 
     /**
-     * @param needle {@code [needleIndex][offset][multivalence]}
+     * @param needles {@code [needleIndex][offset][multivalence]}
      */
     public static MultiNeedleIndexOf
     boyerMooreHorspoolIndexOf(final char[][][] needles) {
