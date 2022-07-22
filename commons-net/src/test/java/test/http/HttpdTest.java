@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
@@ -182,18 +183,23 @@ class HttpdTest {
 
 //        SimpleLogging.setDebug();
 
-        Httpd     httpd     = new Httpd(new InetSocketAddress(0), HTTP_ROOT_DIR + "{path}");
-        HttpProxy httpProxy = new HttpProxy(new InetSocketAddress(0), httpd.getEndpointAddress());
+        // Set up an http server for "localhost:<ephemeral1>".
+        Httpd httpd = new Httpd(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), HTTP_ROOT_DIR + "{path}");
+
+        // Set up an http proxy for the http server on "localhost;<ephemeral2>".
+        HttpProxy httpProxy = new HttpProxy(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), httpd.getEndpointAddress());
         try {
             ThreadUtil.runInBackground(httpd, "httpd");
             ThreadUtil.runInBackground(httpProxy, "http_proxy");
 
+            // Connect with the http proxy.
             URLConnection connection = new URL(
                 "http",
                 "localhost",
                 httpProxy.getEndpointAddress().getPort(),
                 "/index.html"
             ).openConnection();
+
             Assert.assertEquals("text/html", connection.getContentType());
             InputStream is1 = connection.getInputStream();
             InputStream is2 = new FileInputStream(new File(HTTP_ROOT_DIR, "index.html"));
