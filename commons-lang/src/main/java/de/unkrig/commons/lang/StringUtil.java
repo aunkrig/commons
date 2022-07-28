@@ -891,7 +891,7 @@ class StringUtil {
                 NEXT_NEEDLE: for (int needleIndex = 0; needleIndex < needles.length; needleIndex++) {
                     CharSequence needle = needles[needleIndex];
                     if (offset + needle.length() > limit) continue;
-                    NEXT_OFFSET: for (int offset2 = 0; offset2 < needle.length(); offset2++) {
+                    for (int offset2 = 0; offset2 < needle.length(); offset2++) {
                         if (needle.charAt(offset2) != haystack.charAt(offset + offset2)) continue NEXT_NEEDLE;
                     }
                     matchingNeedleIndices.set(needleIndex);
@@ -1270,33 +1270,6 @@ class StringUtil {
                 return sb.toString();
             }
         };
-    }
-
-    // Duplicated from "ArrayUtil".
-    private static char[][]
-    mirror(char[][] subject) {
-
-        int height = subject.length;
-        if (height == 0) return new char[0][];
-
-        int width = subject[0].length;
-
-        char[][] result = new char[width][];
-
-        result[0] = new char[height];
-        for (int j = 0; j < height; j++) {
-            if (subject[j].length != width) throw new IllegalArgumentException();
-            result[0][j] = subject[j][0];
-        }
-
-        for (int i = 1; i < width; i++) {
-            result[i] = new char[height];
-            for (int j = 0; j < height; j++) {
-                result[i][j] = subject[j][i];
-            }
-        }
-
-        return result;
     }
 
     private static char[]
