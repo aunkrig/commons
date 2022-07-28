@@ -190,6 +190,8 @@ class ExpressionMatchReplacer {
                 assert variables != null;
                 return ExpressionMatchReplacer.get(expression, variables);
             }
+
+            @Override public String toString() { return spec; }
         };
     }
 
@@ -254,6 +256,8 @@ class ExpressionMatchReplacer {
                             assert m != null;
                             return ((MatchResult) m).group(groupNumber);
                         }
+
+                        @Override public String toString() { return "$" + groupNumber; }
                     });
                     idx = to;
                     continue;
@@ -273,6 +277,8 @@ class ExpressionMatchReplacer {
                             assert variableValue != null;
                             return variableValue.toString();
                         }
+
+                        @Override public String toString() { return "$" + variableName; }
                     });
                     idx = to;
                     continue;
@@ -285,6 +291,7 @@ class ExpressionMatchReplacer {
                     int                 to         = idx + 2 + offset[0];
 
                     if (to < specLength && spec.charAt(to) == '}') {
+                        final int idx2 = idx;
 
                         // ${expr}
                         segments.add(new Transformer<Mapping<String, ?>, String>() {
@@ -301,6 +308,8 @@ class ExpressionMatchReplacer {
                                     );
                                 }
                             }
+
+                            @Override public String toString() { return spec.substring(idx2, to + 1); }
                         });
                         idx = to + 1;
                         continue;
@@ -316,6 +325,8 @@ class ExpressionMatchReplacer {
 
                 @Override public String
                 transform(Mapping<String, ?> in) { return s; }
+
+                @Override public String toString() { return s; }
             });
             idx = to;
         }
@@ -340,11 +351,13 @@ class ExpressionMatchReplacer {
                 };
             }
 
+            @Override public String toString() { return spec; }
         };
     }
 
     /**
-     * Simplified version of {@link #parseExt(String, Predicate)} for expressions that do not use variables.
+     * Simplified version of {@link #parseExt(String, Predicate)} for expressions that do not use variables (in
+     * addition to the predefined variable "m").
      */
     public static Function<MatchResult, String>
     parseExt(final String spec) throws ParseException {
@@ -423,6 +436,9 @@ class ExpressionMatchReplacer {
                     throw ExceptionUtil.wrap("Evaluating \"" + expression + "\"", ee, IllegalArgumentException.class);
                 }
             }
+
+            @Override public String
+            toString() { return expression.toString(); }
         };
     }
 }
