@@ -415,7 +415,10 @@ class ExpressionEvaluatorTest {
                 try {
                     ExpressionEvaluatorTest.assertEquals2(expected, parser.parse().evaluate(ExpressionEvaluatorTest.VARIABLES));
                 } catch (ParseException pe) {
-                    throw ExceptionUtil.wrap("Parsing with extensions " + extensions, pe);
+                    throw ExceptionUtil.wrap(
+                        extensions.isEmpty() ? "Parsing without extensions" : "Parsing with extensions " + extensions,
+                        pe
+                    );
                 }
             } else {
 
