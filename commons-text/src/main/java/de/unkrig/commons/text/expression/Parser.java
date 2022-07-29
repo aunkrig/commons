@@ -221,19 +221,6 @@ import de.unkrig.commons.text.scanner.ScannerUtil;
  *     instance creation)
  *   </dd>
  *
- *   <dt>
- *     {@code pkg.Clazz[x]}
- *     <br />
- *     {@code pkg.Clazz[x][y][][]}
- *     <br />
- *     {@code int[x]}
- *     <br />
- *     {@code int[x][y][][]}
- *   </dt>
- *   <dd>
- *     Abbreviated array creation
- *   </dd>
- *
  *   <dt>{@code x[y]}</dt>
  *   <dd>
  *     Array element access
