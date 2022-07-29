@@ -200,14 +200,16 @@ class ExpressionMatchReplacer {
      * Semantically identical with {@link #parse(String, Predicate)}, but implements a different syntax, downwards
      * compatible with that of {@link Matcher#appendReplacement(StringBuffer, String)}:
      * <dl>
-     *   <dt>$<var>n</var></dt>
-     *   <dd>The Text captured by the <var>n</var>th group</dd>
-     *   <dt>$<var>xxx</var></dt>
-     *   <dd>The value of variable <var>xxx</var></dd>
-     *   <dt>${<var>expr</var>}</dt>
-     *   <dd>The value of the expression <var>expr</var></dd>
-     *   <dt><var>any-other-char</var></dt>
-     *   <dd>That char, literally</dd>
+     *   <dt>$<var>n</var></dt>                <dd>The Text captured by the <var>n</var>th group</dd>
+     *   <dt>$<var>xxx</var></dt>              <dd>The value of variable <var>xxx</var></dd>
+     *   <dt>${<var>expr</var>}</dt>           <dd>The value of the {@link Parser expression} <var>expr</var> (variable "m" is the {@link Matcher})</dd>
+     *   <dt>${m.group("<var>xxx</var>")}</dt> <dd>The text captured by the group named <var>xxx</var></dd>
+     *   <dt>\x<i>hh</i></dt>                  <dd>The character with hex value 0x<i>hh</i></dd>
+     *   <dt>&#92;u<i>hhhh</i></dt>            <dd>The codepoint with hex value 0x<i>hhhh</i></dd>
+     *   <dt>\x{<i>h...h</i>}</dt>             <dd>The codepoint with hex value 0x<i>h...h</i></dd>
+     *   <dt>\t \n \r \f \a \e \b</dt>         <dd>TAB NL CR FF BEL ESC BACKSPACE</dd>
+     *   <dt>\<var>char</var></dt>             <dd>That char, literally</dd>
+     *   <dt><var>any-except-\-and-$</var></dt><dd>That char, literally</dd>
      * </dl>
      * <p>
      *   Usage example:
@@ -239,7 +241,11 @@ class ExpressionMatchReplacer {
         segments = new ArrayList<Transformer<Mapping<String, ?>, String>>();
 
         for (int idx = 0; idx < specLength;) {
-            if (spec.charAt(idx) == '$' && idx <= specLength - 2) {
+
+            if (spec.charAt(idx) == '$') {
+
+                if (idx + 2 > specLength) throw new ParseException("Stray dollar sign at end of sequence");
+
                 char c2 = spec.charAt(idx + 1);
                 if (Character.isDigit(c2)) {
 
@@ -253,7 +259,7 @@ class ExpressionMatchReplacer {
                         @Override public String
                         transform(Mapping<String, ?> variables) {
                             Object m = variables.get("m");
-                            assert m != null;
+                            assert m instanceof MatchResult : "Variable \"m\" is not a MatchResult, but \"" + m + "\"";
                             return ((MatchResult) m).group(groupNumber);
                         }
 
@@ -285,6 +291,7 @@ class ExpressionMatchReplacer {
                 }
                 if (c2 == '{') {
 
+                    // ${expr}
                     ExpressionEvaluator ee         = new ExpressionEvaluator(variableNamePredicate);
                     int[]               offset     = new int[1];
                     final Expression    expression = ee.parsePart(spec.substring(idx + 2), offset);
@@ -293,7 +300,6 @@ class ExpressionMatchReplacer {
                     if (to < specLength && spec.charAt(to) == '}') {
                         final int idx2 = idx;
 
-                        // ${expr}
                         segments.add(new Transformer<Mapping<String, ?>, String>() {
 
                             @Override public String
@@ -315,19 +321,83 @@ class ExpressionMatchReplacer {
                         continue;
                     }
                 }
+
+                throw new ParseException("Invalid dollar sequence (\"$9\", \"$xxx\" or \"${expr}\"");
+            }
+
+            if (spec.charAt(idx) == '\\') {
+
+                if (idx + 2 > specLength) throw new ParseException("Incomplete escape sequence");
+                char c2 = spec.charAt(idx + 1);
+
+                if (c2 == 'x') {
+
+                    if (idx + 3 > specLength) throw new ParseException("Incomplete hex or codepoint literal");
+
+                    if (spec.charAt(idx + 2) == '{') {
+
+                        // Codepoint literal ("\x{h...h}").
+                        int to = spec.indexOf('}', idx + 3);
+                        if (to == -1) throw new ParseException("Closing \"}\" missing from codepoint literal \"\\${h...h}\"");
+                        String digits = spec.substring(idx + 3, to);
+                        try {
+                            int cp = Integer.parseInt(digits, 16);
+                            segments.add(new LiteralSegment(new String(Character.toChars(cp))));
+                            idx = to + 1;
+                            continue;
+                        } catch (NumberFormatException nfe) {
+                            throw new ParseException("Non-hex-digits in codepoint literal \"\\x{" + digits + "}\"");
+                        }
+                    }
+
+                    // Hex literal ("\x99").
+                    if (idx + 4 > specLength) throw new ParseException("Incomplete hex literal \"\\xhh\"");
+                    String digits = spec.substring(idx + 2, idx + 4);
+                    try {
+                        int cp = Integer.parseInt(digits, 16);
+                        segments.add(new LiteralSegment(new String(Character.toChars(cp))));
+                        idx += 4;
+                        continue;
+                    } catch (NumberFormatException nfe) {
+                        throw new ParseException("Non-hex-digits in hex literal \"\\x" + digits + "\"");
+                    }
+                }
+
+                if (c2 == 'u') {
+
+                    // Unicode literal ("\uffff").
+                    if (idx + 6 > specLength) throw new ParseException("Incomplete unicode literal \"\\uhhhh\"");
+
+                    String digits = spec.substring(idx + 2, idx + 6);
+                    try {
+                        int cp = Integer.parseInt(digits, 16);
+                        segments.add(new LiteralSegment(new String(Character.toChars(cp))));
+                        idx += 6;
+                        continue;
+                    } catch (NumberFormatException nfe) {
+                        throw new ParseException("Invalid hex digits in unicode literal \"\\u" + digits + "\"");
+                    }
+                }
+
+                int ci = "tnrfaeb".indexOf(c2); // a=BELL e=ESCAPE b=BACKSPACE
+                if (ci != -1) {
+
+                    // "Normal" escape sequence "\r", "\n", etc.
+                    segments.add(new LiteralSegment(new String(new char[] { "\t\n\r\f\u0007\u001b\b".charAt(ci) })));
+                    idx += 2;
+                    continue;
+                }
+
+                // Escaped char (including "\$" and "\\").
+                segments.add(new LiteralSegment(new String(new char[] { c2 })));
+                idx += 2;
+                continue;
             }
 
             // xxx (literal text)
-            int to = idx + 1;
-            while (to < specLength && spec.charAt(to) != '$') to++;
-            final String s = spec.substring(idx, to);
-            segments.add(new Transformer<Mapping<String, ?>, String>() {
-
-                @Override public String
-                transform(Mapping<String, ?> in) { return s; }
-
-                @Override public String toString() { return s; }
-            });
+            int to;
+            for (to = idx + 1; to < specLength && "$\\".indexOf(spec.charAt(to)) == -1; to++);
+            segments.add(new LiteralSegment(spec.substring(idx, to)));
             idx = to;
         }
 
@@ -440,5 +510,18 @@ class ExpressionMatchReplacer {
             @Override public String
             toString() { return expression.toString(); }
         };
+    }
+
+    static final
+    class LiteralSegment implements Transformer<Mapping<String, ?>, String> {
+
+        private final String s;
+
+        private LiteralSegment(String s) { this.s = s; }
+
+        @Override public String
+        transform(Mapping<String, ?> in) { return this.s; }
+
+        @Override public String toString() { return this.s; }
     }
 }
