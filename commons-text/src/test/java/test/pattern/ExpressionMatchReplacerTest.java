@@ -118,7 +118,7 @@ class ExpressionMatchReplacerTest {
 
         Transformer<Mapping<String, ?>, Function<MatchResult, String>>
         matchReplacer = ExpressionMatchReplacer.parseExt(
-            "FOO $1 $abc ${abc + \"\"} BAR \\x00 \\u0000 \\x{fffff} \\n \\\\ \\Z",
+            "FOO $1 $abc ${abc + \"\"} BAR \\x00 \\u0000 \\x{fffff} \\n \\\\ \\Z \\Q\\Q$\\E \\\\ \\Q\\$",
             Mappings.containsKeyPredicate(variables)
         );
 
@@ -126,7 +126,7 @@ class ExpressionMatchReplacerTest {
         Assert.assertTrue(m.matches());
 
         Assert.assertEquals(
-            "FOO ONE ABC ABC BAR \0 \0 " + new String(Character.toChars(0xfffff)) + " \n \\ Z",
+            "FOO ONE ABC ABC BAR \0 \0 " + new String(Character.toChars(0xfffff)) + " \n \\ Z \\Q$ \\ \\$",
             matchReplacer.transform(variables).call(m)
         );
     }

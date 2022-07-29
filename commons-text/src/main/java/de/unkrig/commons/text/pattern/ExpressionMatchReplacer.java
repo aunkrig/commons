@@ -208,8 +208,9 @@ class ExpressionMatchReplacer {
      *   <dt>&#92;u<i>hhhh</i></dt>            <dd>The codepoint with hex value 0x<i>hhhh</i></dd>
      *   <dt>\x{<i>h...h</i>}</dt>             <dd>The codepoint with hex value 0x<i>h...h</i></dd>
      *   <dt>\t \n \r \f \a \e \b</dt>         <dd>TAB NL CR FF BEL ESC BACKSPACE</dd>
-     *   <dt>\<var>char</var></dt>             <dd>That char, literally</dd>
-     *   <dt><var>any-except-\-and-$</var></dt><dd>That char, literally</dd>
+     *   <dt>\Q...\E<br>\Q...</dt>             <dd>Literal text "..."</dd>
+     *   <dt>\<var>c</var></dt>                <dd>That char, literally</dd>
+     *   <dt>(Any char except \ and $)</dt>    <dd>That char, literally</dd>
      * </dl>
      * <p>
      *   Usage example:
@@ -385,6 +386,21 @@ class ExpressionMatchReplacer {
                     // "Normal" escape sequence "\r", "\n", etc.
                     segments.add(new LiteralSegment(new String(new char[] { "\t\n\r\f\u0007\u001b\b".charAt(ci) })));
                     idx += 2;
+                    continue;
+                }
+
+                if (c2 == 'Q') {
+                    int to = spec.indexOf("\\E", idx + 2);
+                    if (to == -1) {
+
+                        // \Q...
+                        segments.add(new LiteralSegment(spec.substring(idx + 2)));
+                        break;
+                    }
+
+                    // \Q...\E
+                    segments.add(new LiteralSegment(spec.substring(idx + 2, to)));
+                    idx = to + 2;
                     continue;
                 }
 
