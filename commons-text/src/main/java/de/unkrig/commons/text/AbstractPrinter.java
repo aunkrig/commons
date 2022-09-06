@@ -80,15 +80,16 @@ class AbstractPrinter implements Printer {
 
         if (t != null) {
             StringWriter sw = new StringWriter();
-            {
-                PrintWriter pw = new PrintWriter(sw);
-                if (message != null) {
-                    pw.print(message);
-                    pw.print(": ");
-                }
-                t.printStackTrace(pw);
-                pw.flush();
+            PrintWriter  pw = new PrintWriter(sw);
+
+            if (message != null) {
+                pw.print(message);
+                pw.print(": ");
             }
+
+            t.printStackTrace(pw);
+
+            pw.flush();
             message = sw.toString().trim();
         }
 
