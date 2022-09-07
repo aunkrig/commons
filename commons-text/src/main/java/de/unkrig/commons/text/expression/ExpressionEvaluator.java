@@ -177,8 +177,29 @@ class ExpressionEvaluator {
      */
     public Expression
     parsePart(CharSequence spec, int[] offset) throws ParseException {
+    	return this.parsePart(spec, offset, spec.length());
+    }
 
-        StringScanner<TokenType> scanner = Scanner.stringScanner().setInput(spec);
+    /**
+     * Parses an expression from the <var>spec</var>, staring at <var>offset</var>{@code [0]}, and ending before
+     * <var>end</var>, but only as far as it is possible without a parse error.
+     * E.g. {@code "a + b)"} is parsed up to and including "b".
+     *
+     * @param spec            The text to be parsed
+     * @param offset          Index of the first character to scan; on return the position of the first character
+     *                        within the <var>spec</var> that was <em>not</em> parsed (&lt;= <var>end</var>)
+     * @param end             The index to stop parsing
+     * @throws ParseException The expression cannot be parsed, e.g. {@code "a +)"} (the second operand of the "+"
+     *                        operator is missing)
+     * @see Parser            The expression syntax
+     */
+    public Expression
+	parsePart(CharSequence spec, int[] offset, int end) throws ParseException {
+
+    	assert end <= spec.length();
+    	assert end > offset[0];
+
+        StringScanner<TokenType> scanner = Scanner.stringScanner().setInput(spec, offset[0], end);
 
         Expression result = this.parser(scanner).parsePart();
 
