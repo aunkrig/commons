@@ -47,6 +47,13 @@ interface StringScanner<TT extends Enum<TT>> extends ProducerWhichThrows<Token<T
     StringScanner<TT> setInput(CharSequence cs);
 
     /**
+     * @param cs The {@link CharSequence} from which following calls to {@link #produce()} will scan tokens
+     *
+     * @return This scanner
+     */
+    StringScanner<TT> setInput(CharSequence cs, int start, int end);
+
+    /**
      * Before {@link #setInput(CharSequence)} is called, this method returns {@code null}. After {@link
      * #setInput(CharSequence)} was called, this method breaks the input char character sequence up into tokens and
      * returns them one by one. When the input char sequence is exhausted, {@code null} is returned until {@link

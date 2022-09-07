@@ -161,7 +161,13 @@ class ScannerUtil {
                 return this;
             }
 
-            @Override public int
+            @Override public StringScanner<TT>
+            setInput(CharSequence cs, int start, int end) {
+            	delegate.setInput(cs, start, end);
+            	return this;
+			}
+
+			@Override public int
             getOffset() {
                 return delegate.getOffset();
             }

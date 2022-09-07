@@ -60,13 +60,12 @@ class StatelessScanner<TT extends Enum<TT>> extends AbstractScanner<TT> {
     @Override @Nullable public Token<TT>
     produce() throws ScanException {
 
-        int length = this.cs.length();
-        if (this.offset == length) return null;
+        if (this.offset == this.end) return null;
 
         for (Rule<TT> rule : this.rules) {
             Matcher matcher = rule.regex.matcher(this.cs);
             matcher.useTransparentBounds(true); // Allow lookaheads and lookbehinds in the patterns.
-            matcher.region(this.offset, length);
+            matcher.region(this.offset, this.end);
             if (matcher.lookingAt()) {
                 this.previousTokenOffset = this.offset;
                 this.offset              = matcher.end();
