@@ -69,7 +69,7 @@ class Mappings {
     public static <K, V> Mapping<K, V>
     mapping(final Object... keysAndValues) {
 
-        assert keysAndValues.length % 2 == 0;
+        assert keysAndValues.length % 2 == 0 : Arrays.deepToString(keysAndValues);
 
         return new Mapping<K, V>() {
 
