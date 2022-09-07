@@ -80,10 +80,11 @@ class ObjectUtil {
 
     /**
      * @return {@code Arrays.toString(o)} iff <var>o</var> is an array of primitives, {@code Arrays.deepToString(o)}
-     *         iff <var>o</var> is an array of objects, and otherwise {@code String.valueOf(o)}
+     *         iff <var>o</var> is an array of objects, and otherwise {@code String.valueOf(o)} (which includes
+     *         {@code "null"} for {@code null})
      */
     public static String
-    arrayToString(Object o) {
+    arrayToString(@Nullable Object o) {
 
         if (o instanceof boolean[]) return Arrays.toString((boolean[]) o);
         if (o instanceof byte[])    return Arrays.toString((byte[])    o);
