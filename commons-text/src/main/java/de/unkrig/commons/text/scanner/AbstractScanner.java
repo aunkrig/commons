@@ -107,14 +107,18 @@ class AbstractScanner<TT extends Enum<TT>> implements StringScanner<TT> {
     }
 
     @Override public AbstractScanner<TT>
-    setInput(CharSequence cs) {
-        this.cs                  = cs;
-        this.offset              = 0;
-        this.previousTokenOffset = -1;
-        return this;
-    }
+    setInput(CharSequence cs) { return this.setInput(cs, 0, cs.length()); }
 
-    @Override public int
+    @Override public AbstractScanner<TT>
+    setInput(CharSequence cs, int start, int end) {
+    	this.cs                  = cs;
+    	this.offset              = start;
+    	this.end                 = end;
+    	this.previousTokenOffset = -1;
+    	return this;
+	}
+
+	@Override public int
     getOffset() {
         return this.offset;
     }
@@ -160,6 +164,11 @@ class AbstractScanner<TT extends Enum<TT>> implements StringScanner<TT> {
      * The position within {@link #cs} of the next token to be scanned.
      */
     protected int offset;
+
+    /**
+     * The position of the the first character after the scannable region.
+     */
+    protected int end;
 
     /**
      * The position within {@link #cs} of the previously scanned token.
