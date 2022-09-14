@@ -197,8 +197,8 @@ class ResourceProcessings {
             @Override @Nullable public T
             process(String path, final URL location) throws IOException, InterruptedException {
 
-                // The special URL "file:-" designates standard input ("System.in"):
-                if ("file:-".equals(location.toString())) {
+                // The special URL "ResourceProcessings.STDIN_URL" designates standard input ("System.in"):
+                if (location.equals(ResourceProcessings.STDIN_URL)) {
                     byte[] input = InputStreams.readAll(System.in);
                     return delegateCp.process(
                         "-",                                                  // path
@@ -266,8 +266,8 @@ class ResourceProcessings {
      *   <li>Otherwise, construct a {@code file:} URL that designates the file with that pathname</li>
      * </ul>
      * <p>
-     *   The special string "-" is converted to "file:-". That URL cannot be opened; it must be checked with
-     *   {@code ""file:-".equals(location.toString())"}.
+     *   The special string "-" is converted to {@link #STDIN_URL}. That URL cannot be opened; it must be checked with
+     *   {@code "myUrl.equals(ResourceProcessings.STDIN_URL)"}.
      * </p>
      */
     public static URL
@@ -276,9 +276,22 @@ class ResourceProcessings {
             ResourceProcessings.LOOKS_LIKE_URL.matcher(filePathnameOrUrl).find()
             ? new URL(filePathnameOrUrl)
             : "-".equals(filePathnameOrUrl)
-            ? new URL("file", null /*host*/, "-" /*path*/)
+            ? ResourceProcessings.STDIN_URL
             : new File(filePathnameOrUrl).toURI().toURL()
         );
+    }
+
+    /**
+     * Many methods use this special URL as a representation for "standard input". However, that URL cannot be opened
+     * as usual; it must be checked with {@code "myUrl.equals(ResourceProcessings.STDIN_URL)"}.
+     */
+    public static final URL STDIN_URL = ResourceProcessings.stdinUrl();
+    private static final URL stdinUrl() {
+        try {
+            return new URL("file", null /*host*/, "-" /*path*/);
+        } catch (MalformedURLException mue) {
+            throw new ExceptionInInitializerError(mue);
+        }
     }
 
     // https://tools.ietf.org/html/rfc1738#section-5 says:
