@@ -26,6 +26,7 @@
 
 package de.unkrig.commons.file.resourceprocessing;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,6 +48,7 @@ import de.unkrig.commons.file.contentsprocessing.ContentsProcessor;
 import de.unkrig.commons.file.fileprocessing.FileProcessings;
 import de.unkrig.commons.file.fileprocessing.FileProcessings.DirectoryCombiner;
 import de.unkrig.commons.file.fileprocessing.FileProcessor;
+import de.unkrig.commons.io.InputStreams;
 import de.unkrig.commons.lang.AssertionUtil;
 import de.unkrig.commons.lang.protocol.Predicate;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
@@ -195,7 +197,24 @@ class ResourceProcessings {
             @Override @Nullable public T
             process(String path, final URL location) throws IOException, InterruptedException {
 
-                // Optimize processing for *files* (a opposed to other resources).
+                // The special URL "file:-" designates standard input ("System.in"):
+                if ("file:-".equals(location.toString())) {
+                    byte[] input = InputStreams.readAll(System.in);
+                    return delegateCp.process(
+                        "-",                                                  // path
+                        new ByteArrayInputStream(input),                      // inputStream
+                        new Date(),                                           // lastModifiedDate
+                        -1,                                                   // size
+                        -1,                                                   // crc32
+                        new ProducerWhichThrows<InputStream, IOException>() { // opener
+
+                            @Override @Nullable public InputStream
+                            produce() { return new ByteArrayInputStream(input); }
+                        }
+                    );
+                }
+
+                // Optimize processing for files.
                 if (delegateFp != null) {
                     File file = ResourceProcessings.isFile(location);
                     if (file != null) {
@@ -246,12 +265,18 @@ class ResourceProcessings {
      *   <li>Iff <var>filePathnameOrUrl</var> appears to be a URL, use it to construct that {@link URL}</li>
      *   <li>Otherwise, construct a {@code file:} URL that designates the file with that pathname</li>
      * </ul>
+     * <p>
+     *   The special string "-" is converted to "file:-". That URL cannot be opened; it must be checked with
+     *   {@code ""file:-".equals(location.toString())"}.
+     * </p>
      */
     public static URL
     toUrl(String filePathnameOrUrl) throws MalformedURLException {
         return (
             ResourceProcessings.LOOKS_LIKE_URL.matcher(filePathnameOrUrl).find()
             ? new URL(filePathnameOrUrl)
+            : "-".equals(filePathnameOrUrl)
+            ? new URL("file", null /*host*/, "-" /*path*/)
             : new File(filePathnameOrUrl).toURI().toURL()
         );
     }
