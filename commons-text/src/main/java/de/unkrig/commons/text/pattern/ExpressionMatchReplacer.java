@@ -281,7 +281,7 @@ class ExpressionMatchReplacer {
                         @Override public String
                         transform(Mapping<String, ?> variables) {
                             Object variableValue = variables.get(variableName);
-                            assert variableValue != null;
+                            assert variableValue != null : variableName;
                             return variableValue.toString();
                         }
 
@@ -323,7 +323,7 @@ class ExpressionMatchReplacer {
                     }
                 }
 
-                throw new ParseException("Invalid dollar sequence (\"$9\", \"$xxx\" or \"${expr}\"");
+                throw new ParseException("Invalid dollar sequence in replacement spec \"" + spec + "\" at offset " + idx);
             }
 
             if (spec.charAt(idx) == '\\') {
