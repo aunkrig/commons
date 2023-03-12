@@ -9,6 +9,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+<!--		<jdk18>C:/Program Files/Java/jdk1.8.0_45</jdk18>-->
+		<jdk18>C:/dev/Java/adopt_openjdk-8.0.292.10-hotspot</jdk18>
 	</properties>
 
 	<dependencies>
@@ -23,8 +25,7 @@
 			<artifactId>tools</artifactId>
 			<version>1.8.0</version>
 			<scope>system</scope>
-<!--			<systemPath>${jdk18}/lib/tools.jar</systemPath>-->
-			<systemPath>C:/dev/Java/adopt_openjdk-8.0.292.10-hotspot/lib/tools.jar</systemPath>
+			<systemPath>${jdk18}/lib/tools.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>de.unkrig.commons</groupId>
