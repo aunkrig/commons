@@ -370,6 +370,8 @@ class Glob implements Predicate<String> {
 
         int            idx;
         IncludeExclude includeExclude = new IncludeExclude();
+
+        // Process the *first* segment of the include/exclude pattern.
         if (pattern.startsWith("~")) {
             Glob glob = Glob.compileWithReplacement(
                 pattern.substring(1, (idx = Pattern2.findMeta(",~", pattern, 1))),
@@ -388,8 +390,9 @@ class Glob implements Predicate<String> {
             includeExclude.addInclude(glob, true);
         }
 
+        // Process the following segments of the include/exclude pattern.
         while (idx != pattern.length()) {
-            char c    =  pattern.charAt(idx++);
+            char c    = pattern.charAt(idx++); // Is either "," or "~".
             Glob glob = Glob.compileWithReplacement(
                 pattern.substring(idx, (idx = Pattern2.findMeta(",~", pattern, idx))),
                 flags
