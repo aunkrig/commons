@@ -159,8 +159,8 @@ class PipeTest {
         Random r = new Random(7);
         for (int off = 0; off < src.length;) off += pipe.write(src, off, Math.min(src.length - off, r.nextInt(100)));
 
-        long count = 0;
-        byte[] dst = new byte[n + 1000];
+        long   count = 0;
+        byte[] dst   = new byte[n + 1000];
         while (!pipe.isEmpty()) {
             count += pipe.read(dst, (int) count, (int) (dst.length - count));
         }

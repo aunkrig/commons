@@ -36,8 +36,8 @@ import de.unkrig.commons.nullanalysis.Nullable;
 /**
  * Parser for a "parametrized value" as defined in several HTTP-related RFCs.
  * <ul>
- *   <li><a href="https://tools.ietf.org/html/rfc2616#section-3.7">RFC2616, 3.7 Media Types</></li>
- *   <li><a href="https://tools.ietf.org/html/rfc6265#section-4.1">RFC6265, 4.1 Set-Cookie</></li>
+ *   <li><a href="https://tools.ietf.org/html/rfc2616#section-3.7">RFC2616, 3.7 Media Types</a></li>
+ *   <li><a href="https://tools.ietf.org/html/rfc6265#section-4.1">RFC6265, 4.1 Set-Cookie</a></li>
  * </ul>
  * <p>
  *   Examples:
