@@ -136,18 +136,18 @@ class ExpressionEvaluatorTest {
 
     @Test public void
     testLogicalOr() throws EvaluationException, ParseException {
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(Boolean.FALSE,                             "false || false");
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(Boolean.TRUE,                              "true || false");
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(Boolean.TRUE,                              "false || true");
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(Boolean.TRUE,                              "true || true");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(Boolean.FALSE, "false || false");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(Boolean.TRUE,  "true || false");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(Boolean.TRUE,  "false || true");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(Boolean.TRUE,  "true || true");
     }
 
     @Test public void
     testLogicalAnd() throws EvaluationException, ParseException {
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(Boolean.FALSE,                             "false && false");
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(Boolean.FALSE,                             "true && false");
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(Boolean.FALSE,                             "false && true");
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(Boolean.TRUE,                              "true && true");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(Boolean.FALSE, "false && false");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(Boolean.FALSE, "true && false");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(Boolean.FALSE, "false && true");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(Boolean.TRUE,  "true && true");
     }
 
     @Test public void
@@ -170,10 +170,10 @@ class ExpressionEvaluatorTest {
 
     @Test public void
     testShift() throws EvaluationException, ParseException {
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(65536,                                     "1 << 16");
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(7,                                         "448 >> 6");
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(-1,                                        "0xe0000000 >> 29");
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(7,                                         "0xe0000000 >>> 29");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(65536, "1 << 16");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(7,     "448 >> 6");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(-1,    "0xe0000000 >> 29");
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(7,     "0xe0000000 >>> 29");
     }
 
     @Test public void
@@ -270,9 +270,10 @@ class ExpressionEvaluatorTest {
 
     @Test public void
     testNewClass() throws EvaluationException, ParseException {
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                         "String",                NEW_CLASS_WITHOUT_KEYWORD, NEW_CLASS_WITHOUT_PARENTHESES);
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                         "String + String",       NEW_CLASS_WITHOUT_KEYWORD, NEW_CLASS_WITHOUT_PARENTHESES);
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(true,                       "String().isEmpty",      NEW_CLASS_WITHOUT_KEYWORD);
+        // SUPPRESS CHECKSTYLE LineLength:23
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",   "String",           NEW_CLASS_WITHOUT_KEYWORD, NEW_CLASS_WITHOUT_PARENTHESES);
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",   "String + String",  NEW_CLASS_WITHOUT_KEYWORD, NEW_CLASS_WITHOUT_PARENTHESES);
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(true, "String().isEmpty", NEW_CLASS_WITHOUT_KEYWORD);
         ExpressionEvaluatorTest.assertExpressionEvaluationFails(
             "Cannot retrieve nonstatic attribute 'isEmpty' in static context",
             "String.isEmpty"
@@ -291,12 +292,13 @@ class ExpressionEvaluatorTest {
             "Cannot invoke non-static method 'java.lang.String.toString()' in static context",
             "String.toString()"
         );
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                         "new String.toString()", NEW_CLASS_WITHOUT_PARENTHESES);
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                         "new String.toString",   NEW_CLASS_WITHOUT_PARENTHESES);
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("", "new String.toString()", NEW_CLASS_WITHOUT_PARENTHESES);
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("", "new String.toString",   NEW_CLASS_WITHOUT_PARENTHESES);
     }
 
     @Test public void
     testNewArray() throws EvaluationException, ParseException {
+        // SUPPRESS CHECKSTYLE LineLength:8
         ExpressionEvaluatorTest.assertExpressionEvaluatesTo(new String[2],                          "new String[2]");
         ExpressionEvaluatorTest.assertExpressionEvaluationFails("Argument is not an array",         "String[2]");
         ExpressionEvaluatorTest.assertExpressionEvaluatesTo(new String[2][3][][],                   "new String[2][3][][]");
@@ -315,6 +317,7 @@ class ExpressionEvaluatorTest {
 
     @Test public void
     testCast() throws Exception {
+        // SUPPRESS CHECKSTYLE LineLength:4
         ExpressionEvaluatorTest.assertExpressionEvaluatesTo("abc",                                     "(Object) \"abc\"");
         ExpressionEvaluatorTest.assertExpressionEvaluationFails(
             "Cannot cast 'java.lang.String' to 'java.util.Map'",
@@ -330,13 +333,9 @@ class ExpressionEvaluatorTest {
 
     @Test public void
     testMisc() throws Exception {
+        // SUPPRESS CHECKSTYLE LineLength:6
         ExpressionEvaluatorTest.assertExpressionEvaluatesTo("abc",                  "java.lang.String(\"abc\")", NEW_CLASS_WITHOUT_KEYWORD);
-        ExpressionEvaluatorTest.assertExpressionEvaluatesTo(
-            "",
-            "java.lang.String",
-            NEW_CLASS_WITHOUT_KEYWORD,
-            NEW_CLASS_WITHOUT_PARENTHESES
-        );
+        ExpressionEvaluatorTest.assertExpressionEvaluatesTo("",                     "java.lang.String", NEW_CLASS_WITHOUT_KEYWORD, NEW_CLASS_WITHOUT_PARENTHESES);
         ExpressionEvaluatorTest.assertExpressionEvaluatesTo(7,                      "7");
         ExpressionEvaluatorTest.assertExpressionEvaluatesTo(System.out,             "System.out");
         ExpressionEvaluatorTest.assertExpressionEvaluatesTo(System.out,             "java.lang.System.out");
@@ -352,6 +351,7 @@ class ExpressionEvaluatorTest {
 
     @Test public void
     testExpandAttribute() throws Exception {
+        // SUPPRESS CHECKSTYLE LineLength:6
         ExpressionEvaluatorTest.assertExpandedEquals("abc9def",                                          "abc#da.Time#def");
         ExpressionEvaluatorTest.assertExpandingParseException("'IDENTIFIER' expected instead of \".\"",  "abc#da..Time#def");
         ExpressionEvaluatorTest.assertExpandedEquals(
@@ -413,7 +413,10 @@ class ExpressionEvaluatorTest {
                 // Expect NO parse exception iff the given extensions are enabled (plus any number of unrelated
                 // extensions).
                 try {
-                    ExpressionEvaluatorTest.assertEquals2(expected, parser.parse().evaluate(ExpressionEvaluatorTest.VARIABLES));
+                    ExpressionEvaluatorTest.assertEquals2(
+                        expected,
+                        parser.parse().evaluate(ExpressionEvaluatorTest.VARIABLES)
+                    );
                 } catch (ParseException pe) {
                     throw ExceptionUtil.wrap(
                         extensions.isEmpty() ? "Parsing without extensions" : "Parsing with extensions " + extensions,
@@ -445,7 +448,9 @@ class ExpressionEvaluatorTest {
         }
 
         try {
-            new ExpressionEvaluator(ExpressionEvaluatorTest.VARIABLE_NAMES).evaluate(expression, ExpressionEvaluatorTest.VARIABLES);
+            new ExpressionEvaluator(
+                ExpressionEvaluatorTest.VARIABLE_NAMES
+            ).evaluate(expression, ExpressionEvaluatorTest.VARIABLES);
             Assert.fail("ParseException expected");
         } catch (ParseException pe) {
             ExpressionEvaluatorTest.assertEndsWith(expectedExceptionMessageSuffix, pe.getMessage());
@@ -465,7 +470,9 @@ class ExpressionEvaluatorTest {
         }
 
         try {
-            new ExpressionEvaluator(ExpressionEvaluatorTest.VARIABLE_NAMES).evaluate(expression, ExpressionEvaluatorTest.VARIABLES);
+            new ExpressionEvaluator(
+                ExpressionEvaluatorTest.VARIABLE_NAMES
+            ).evaluate(expression, ExpressionEvaluatorTest.VARIABLES);
             Assert.fail("Exception expected on evaluation");
         } catch (Exception e) {
             ExpressionEvaluatorTest.assertEndsWith(expectedExceptionMessageSuffix, e.getMessage());

@@ -80,7 +80,7 @@ class FindersTest {
         );
     }
 
-    static private void
+    private static void
     testPatternFinder(String expected, Pattern[] patterns, String[] in) {
 
         // Try "Finders.patternFinder()":

@@ -880,7 +880,11 @@ class ExpressionEvaluator {
                 result.add(f.getName());
             }
             for (Method m : clasS.getMethods()) {
-                if (m.getReturnType() == void.class || m.getParameterCount() > 0 || Modifier.isStatic(m.getModifiers()) ^ isStatic) continue;
+                if (
+                    m.getReturnType() == void.class
+                    || m.getParameterCount() > 0
+                    || Modifier.isStatic(m.getModifiers()) ^ isStatic
+                ) continue;
 
                 String mn = m.getName();
 

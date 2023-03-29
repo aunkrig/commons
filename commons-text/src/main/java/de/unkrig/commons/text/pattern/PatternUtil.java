@@ -371,10 +371,10 @@ class PatternUtil {
      */
     public static String[]
     constantPrefix(String regex) {
-        StringBuilder result = new StringBuilder();
-        int state       = 0;
-        int offset      = 0;
-        int beforeChar1 = -1, beforeChar2 = -1;
+        StringBuilder result      = new StringBuilder();
+        int           state       = 0;
+        int           offset      = 0;
+        int           beforeChar1 = -1, beforeChar2 = -1;
         INFIX:
         for (;; offset++) {
             char c = offset < regex.length() ? regex.charAt(offset) : 0;
@@ -467,7 +467,13 @@ class PatternUtil {
                 }
                 break;
             case 4: // Octal literal (after "\0")
-                if (Character.digit(c, 8) == -1) throw new PatternSyntaxException("Octal literal does not start with an ocatal digit", regex, offset);
+                if (Character.digit(c, 8) == -1) {
+                    throw new PatternSyntaxException(
+                        "Octal literal does not start with an ocatal digit",
+                        regex,
+                        offset
+                    );
+                }
                 state = 5;
                 break;
             case 5: // Octal literal (after "\0n")
@@ -497,27 +503,39 @@ class PatternUtil {
                     state = 8;
                 } else
                 {
-                    throw new PatternSyntaxException("Hex literal does not start with \"{\" or hex digit", regex, offset);
+                    throw new PatternSyntaxException(
+                        "Hex literal does not start with \"{\" or hex digit",
+                        regex,
+                        offset
+                    );
                 }
                 break;
             case 8: // 2-digit hex literal (after "\xh")
-                if (Character.digit(c, 16) == -1) throw new PatternSyntaxException("2-digit hex literal lacks second hex digit", regex, offset);
+                if (Character.digit(c, 16) == -1) {
+                    throw new PatternSyntaxException("2-digit hex literal lacks second hex digit", regex, offset);
+                }
                 result.append((char) Integer.parseInt(regex.substring(offset - 1, offset + 1), 16)); // \xhh
                 state = 0;
                 break;
-            case 9: // 4-digit hex literal (after "\ u")
+            case 9:  // 4-digit hex literal (after "\ u")
             case 10: // 4-digit hex literal (after "\ uh")
             case 11: // 4-digit hex literal (after "\ uhh")
-                if (Character.digit(c, 16) == -1) throw new PatternSyntaxException("4-digit hex literal lacks hex digit", regex, offset);
+                if (Character.digit(c, 16) == -1) {
+                    throw new PatternSyntaxException("4-digit hex literal lacks hex digit", regex, offset);
+                }
                 state++;
                 break;
             case 12: // 4-digit hex literal (after "\ uhhh")
-                if (Character.digit(c, 16) == -1) throw new PatternSyntaxException("4-digit hex literal lacks fourth hex digit", regex, offset);
+                if (Character.digit(c, 16) == -1) {
+                    throw new PatternSyntaxException("4-digit hex literal lacks fourth hex digit", regex, offset);
+                }
                 result.append((char) Integer.parseInt(regex.substring(offset - 3, offset + 1), 16)); // \ uhhhh
                 state = 0;
                 break;
             case 13: // multi-digit hex literal (after "\x{")
-                if (Character.digit(c, 16) == -1) throw new PatternSyntaxException("Multi-digit hex literal lacks first hex digit", regex, offset);
+                if (Character.digit(c, 16) == -1) {
+                    throw new PatternSyntaxException("Multi-digit hex literal lacks first hex digit", regex, offset);
+                }
                 state = 14;
                 break;
             case 14: // multi-digit hex literal (after "\x{h")
@@ -538,7 +556,13 @@ class PatternUtil {
                 }
                 break;
             case 15: // Control character (after "\c")
-                if (c == 0) throw new PatternSyntaxException("Control character missing control character literal", regex, offset);
+                if (c == 0) {
+                    throw new PatternSyntaxException(
+                        "Control character missing control character literal",
+                        regex,
+                        offset
+                    );
+                }
                 result.append((char) (c & 0x1f)); // \cx
                 state = 0;
                 break;

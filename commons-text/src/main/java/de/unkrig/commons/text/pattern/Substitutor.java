@@ -68,7 +68,7 @@ import de.unkrig.commons.text.pattern.Finders.MatchResult2;
  *             FunctionWhichThrows)} is allowed to throw; use {@link NoException} if your match replacer does not throw
  *             any (checked) exceptions
  */
-public
+public final
 class Substitutor<EX extends Throwable> implements TransformerWhichThrows<CharSequence, CharSequence, EX> {
 
 
@@ -85,7 +85,7 @@ class Substitutor<EX extends Throwable> implements TransformerWhichThrows<CharSe
     /**
      * Number of substitutions executed so far.
      */
-    private int substitutionCount = 0;
+    private int substitutionCount = 0; // SUPPRESS CHECKSTYLE ExplicitInitialization
 
     private
     Substitutor(
@@ -132,8 +132,8 @@ class Substitutor<EX extends Throwable> implements TransformerWhichThrows<CharSe
     }
 
     /**
-     * Equivalent with {@link #create(Pattern[], FunctionWhichThrows, int) create}<code>(new Pattern[] { </code><var>pattern</var><code> }, </code>
-     * <var>matchReplacer</var>{@code , }<var>lookBehindLimit</var>{@code )}.
+     * Equivalent with {@link #create(Pattern[], FunctionWhichThrows, int) create}<code>(new Pattern[] {
+     * </code><var>pattern</var><code> }, </code> <var>matchReplacer</var>{@code , }<var>lookBehindLimit</var>{@code )}.
      */
     public static <EX extends Throwable> Substitutor<EX>
     create(

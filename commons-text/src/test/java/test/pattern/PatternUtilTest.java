@@ -144,7 +144,14 @@ class PatternUtilTest extends TestCase {
 
                 @Override @Nullable public Void
                 run(Reader in, Writer out) throws IOException {
-                    PatternUtil.replaceAll(in, Pattern.compile("\\s*//.*$", Pattern.MULTILINE), "", out); // Strip C++-style comments.
+
+                    // Strip C++-style comments:
+                    PatternUtil.replaceAll(
+                        in,
+                        Pattern.compile("\\s*//.*$", Pattern.MULTILINE),
+                        "",
+                        out
+                    );
                     return null;
                 }
             }
@@ -158,14 +165,17 @@ class PatternUtilTest extends TestCase {
      */
     @Test public void
     test5() throws IOException {
-        Reader r = new InputStreamReader(new FileInputStream("src/test/java/" + this.getClass().getName().replace('.', '/') + ".java"), Charset.forName("UTF-8"));
+        Reader r = new InputStreamReader(
+            new FileInputStream("src/test/java/" + this.getClass().getName().replace('.', '/') + ".java"),
+            Charset.forName("UTF-8")
+        );
         try {
             char[] buffer = new char[300];
 
             StringBuilder            orig      = new StringBuilder();
             StringBuilder            patched   = new StringBuilder();
             StringBuilder            repatched = new StringBuilder();
-            Substitutor<NoException> patcher   = PatternUtil.substitutor(Pattern.compile("StringBuilder"), "STRING_" + "BUILDER");
+            Substitutor<NoException> patcher   = PatternUtil.substitutor(Pattern.compile("StringBuilder"), "STRING_" + "BUILDER"); // SUPPRESS CHECKSTYLE LineLength:1
             Substitutor<NoException> repatcher = PatternUtil.substitutor(Pattern.compile("ST" + "RING_BUILDER"), "StringBuilder");
             for (;;) {
                 int n = r.read(buffer);
@@ -287,7 +297,11 @@ class PatternUtilTest extends TestCase {
         // Then, test "Substitutor".
         {
             Substitutor<NoException> t = PatternUtil.substitutor(pattern, replacementString);
-            TestCase.assertEquals("PatternUtil.substitutor()", expected, t.transform(subject).toString() + t.transform(""));
+            TestCase.assertEquals(
+                "PatternUtil.substitutor()",
+                expected,
+                t.transform(subject).toString() + t.transform("")
+            );
         }
 
         // Test the "Substitutor" with a sequence of single-character strings.

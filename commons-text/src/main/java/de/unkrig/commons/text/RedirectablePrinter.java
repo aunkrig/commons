@@ -29,8 +29,8 @@ package de.unkrig.commons.text;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
- * A {@link Printer} that farwards all method calls to a <var>delegate</var> printer. The delegate printer is initially set
- * on construction, but can later be changed through {@link #setDelegate(Printer)}.
+ * A {@link Printer} that farwards all method calls to a <var>delegate</var> printer. The delegate printer is initially
+ * set on construction, but can later be changed through {@link #setDelegate(Printer)}.
  */
 public
 class RedirectablePrinter implements Printer {

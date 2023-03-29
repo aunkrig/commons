@@ -38,7 +38,7 @@ import de.unkrig.commons.lang.protocol.RunnableWhichThrows;
 /**
  * Finding "matches" of {@link Pattern}s in streams of characters.
  */
-public
+public final
 class Finders {
 
     /**
@@ -46,6 +46,8 @@ class Finders {
      * {@link Substitutor#Substitutor(Pattern[], FunctionWhichThrows, int)}.
      */
     public static final int DEFAULT_LOOKBEHIND_LIMIT = 10;
+
+    private Finders() {}
 
     /**
      * Equivalent with {@link #patternFinder(Pattern[], ConsumerWhichThrows, ConsumerWhichThrows, RunnableWhichThrows,

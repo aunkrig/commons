@@ -96,7 +96,7 @@ class ExpressionMatchReplacer {
      *   Example:
      * </p>
      * <pre>
-     *   Function<Matcher, String> matchReplacer = ExpressionMatchReplacer.parse("m.group.toUpperCase()");
+     *   Function&lt;Matcher, String> matchReplacer = ExpressionMatchReplacer.parse("m.group.toUpperCase()");
      *   ...
      *   Matcher matcher = ...;
      *   System.out.println(PatternUtil.replaceSome(matcher, matchReplacer));
@@ -104,7 +104,7 @@ class ExpressionMatchReplacer {
      * <p>
      *   If you want to use more variables than just the matcher, use {@link #parse(String, Mapping, Predicate)}
      *   instead.
-     * </var>
+     * </p>
      *
      * @param spec            The text to be parsed
      * @throws ParseException A problem occurred when the <var>spec</var> was parsed
@@ -195,6 +195,7 @@ class ExpressionMatchReplacer {
         };
     }
 
+    // SUPPRESS CHECKSTYLE LineLength:10
     /**
      * Creates a factory for creating match replacers from a set of variables.
      * Semantically identical with {@link #parse(String, Predicate)}, but implements a different syntax, downwards
@@ -323,7 +324,9 @@ class ExpressionMatchReplacer {
                     }
                 }
 
-                throw new ParseException("Invalid dollar sequence in replacement spec \"" + spec + "\" at offset " + idx);
+                throw new ParseException(
+                    "Invalid dollar sequence in replacement spec \"" + spec + "\" at offset " + idx
+                );
             }
 
             if (spec.charAt(idx) == '\\') {
@@ -339,7 +342,9 @@ class ExpressionMatchReplacer {
 
                         // Codepoint literal ("\x{h...h}").
                         int to = spec.indexOf('}', idx + 3);
-                        if (to == -1) throw new ParseException("Closing \"}\" missing from codepoint literal \"\\${h...h}\"");
+                        if (to == -1) {
+                            throw new ParseException("Closing \"}\" missing from codepoint literal \"\\${h...h}\"");
+                        }
                         String digits = spec.substring(idx + 3, to);
                         try {
                             int cp = Integer.parseInt(digits, 16);
@@ -488,9 +493,9 @@ class ExpressionMatchReplacer {
      *   // ...
      *
      *   // Creating the match replacer with the actual variable values is fast.
-     *   Function<Matcher, String> matchReplacer = ExpressionMatchReplacer.get(
+     *   Function&lt;Matcher, String> matchReplacer = ExpressionMatchReplacer.get(
      *       expression,
-     *       Mappings.<String, Object>mapping("prefix", "pre-") // <= pass the value for variable "prefix"
+     *       Mappings.&lt;String, Object>mapping("prefix", "pre-") // &lt;= pass the value for variable "prefix"
      *   );
      *
      *   // Now use the match replacer to substitute regex matches.

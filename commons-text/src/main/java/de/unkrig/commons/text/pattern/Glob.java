@@ -221,12 +221,13 @@ class Glob implements Predicate<String> {
      *   <li>If the <var>regex</var> matches the <var>subject</var>, then {@code true} is returned.</li>
      *   <li>
      *     Otherwise, if the <var>regex</var> matches a prefix of <var>subject</var>, and that prefix is followed by
-     *     {@code "/"} or {@code "!"}, then {@code true} is returned ("Parent dir match"). Effectively, a glob {@code "dir"} or {@code "dir/file.zip"}
-     *     matches all members and entries under {@code "dir"} resp. {@code "dir/file.zip"}.)
+     *     {@code "/"} or {@code "!"}, then {@code true} is returned ("Parent dir match"). Effectively, a glob {@code
+     *     "dir"} or {@code "dir/file.zip"} matches all members and entries under {@code "dir"} resp. {@code
+     *     "dir/file.zip"}.)
      *   </li>
      *   <li>
-     *     Otherwise, if the subject ends with {@code "!"} or {@code "/"}, and the <var>regex</var> could match the concatenation of
-     *     the <var>subject</var> and another string, then {@code true} is returned ("Prefix match").
+     *     Otherwise, if the subject ends with {@code "!"} or {@code "/"}, and the <var>regex</var> could match the
+     *     concatenation of the <var>subject</var> and another string, then {@code true} is returned ("Prefix match").
      *     <br>
      *     Example: The <var>subject</var> {@code "dir/"} is matched by <var>regex</var>s {@code "dir"},
      *     {@code "dir/"}, {@code "dir/anything"} and {@code "**.c"}, but not by <var>regex</var>s
@@ -241,8 +242,8 @@ class Glob implements Predicate<String> {
      *     <ul>
      *       <li>If <var>replacementString</var> is {@code null}, then the subject is returned.</li>
      *       <li>
-     *         Otherwise, the <var>replacementString</var> is returned, with {@code "$1"}, {@code "$2"}, ... replaced with the {@code
-     *         regex}'s "capturing groups" (see {@link Pattern}).
+     *         Otherwise, the <var>replacementString</var> is returned, with {@code "$1"}, {@code "$2"}, ... replaced
+     *         with the {@code regex}'s "capturing groups" (see {@link Pattern}).
      *       </li>
      *     </ul>
      *   </li>

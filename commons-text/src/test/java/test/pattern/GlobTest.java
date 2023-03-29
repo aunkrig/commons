@@ -42,7 +42,7 @@ class GlobTest {
     @Test public void
     testCompile() {
 
-        // SUPPRESS CHECKSTYLE L_PAREN__METH_INVOCATION:103
+        // SUPPRESS CHECKSTYLE L_PAREN__METH_INVOCATION|Whitespace:103
         Assert.assertTrue (Glob.compile("x", Pattern2.WILDCARD).matches("x"));
         Assert.assertFalse(Glob.compile("x", Pattern2.WILDCARD).matches("y"));
         Assert.assertTrue (Glob.compile("xxx", Pattern2.WILDCARD).matches("xxx"));
@@ -150,7 +150,7 @@ class GlobTest {
 
     @Test public void
     testAlternatives() {
-        // SUPPRESS CHECKSTYLE L_PAREN__METH_INVOCATION:25
+        // SUPPRESS CHECKSTYLE L_PAREN__METH_INVOCATION|Whitespace:25
         Assert.assertTrue (Glob.compile("x", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("x"));
         Assert.assertFalse(Glob.compile("x", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches("y"));
         Assert.assertTrue (Glob.compile("*", Pattern2.WILDCARD | Glob.INCLUDES_EXCLUDES).matches(""));

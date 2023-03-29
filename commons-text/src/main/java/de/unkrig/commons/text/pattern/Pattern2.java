@@ -45,11 +45,16 @@ class Pattern2 {
     /**
      * Modifies the pattern compilation as follows:
      * <p>
-     * The meaning of the "{@code *}" and "{@code ?}" metacharacters is now different, and "{@code .}" is no longer a metacharacter.
+     *   The meaning of the "{@code *}" and "{@code ?}" metacharacters is now different, and "{@code .}" is no longer a
+     *   metacharacter.
+     * </p>
      * <p>
-     * "{@code /}" is now a metacharacter, i.e. to include it literally in the pattern, it must be escaped with a backslash.
+     *   "{@code /}" is now a metacharacter, i.e. to include it literally in the pattern, it must be escaped with a
+     *   backslash.
+     * </p>
      * <p>
-     * The semantics of "{@code *}", "{@code ?}" and "{@code .}" are as follows:
+     *   The semantics of "{@code *}", "{@code ?}" and "{@code .}" are as follows:
+     * </p>
      * <table border="1">
      *   <tr align="left">
      *     <th bgcolor="#CCCCFF" align="left" id="construct">Construct</th>
