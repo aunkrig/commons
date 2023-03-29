@@ -372,8 +372,8 @@ class PatternUtil {
     public static String[]
     constantPrefix(String regex) {
         StringBuilder result = new StringBuilder();
-        int state = 0;
-        int offset = 0;
+        int state       = 0;
+        int offset      = 0;
         int beforeChar1 = -1, beforeChar2 = -1;
         INFIX:
         for (;; offset++) {

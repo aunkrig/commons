@@ -48,7 +48,7 @@ import de.unkrig.commons.lang.protocol.Producer;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
- * Executes multiple tasks asynchronously, but forwards their output to a delegate {@link OutputStream} <en>in the
+ * Executes multiple tasks asynchronously, but forwards their output to a delegate {@link OutputStream} <em>in the
  * order the tasks were submitted</em>, i.e. the last byte of output of one task appears <em>before</em> the output
  * of all subsequently submitted tasks.
  */
@@ -84,7 +84,7 @@ class ByteStreamSequentializer {
 
     /**
      * Data written to the <var>task</var>'s subject will be written to the {@link
-     * #ByteStreamSequentializer(OutputStream, ExecutorService) delegate} <em>after<em> all data written by the
+     * #ByteStreamSequentializer(OutputStream, ExecutorService) delegate} <em>after</em> all data written by the
      * previously submitted tasks, and <em>before</em> the data written by all tasks submitted afterwards.
      * <p>
      *   Notice that when a <var>tasks</var> submits another task (subtask), then the output of the subtask will

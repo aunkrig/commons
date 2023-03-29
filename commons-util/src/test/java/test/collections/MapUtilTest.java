@@ -256,7 +256,7 @@ class MapUtilTest {
 
     @Test public void
     testLazyMap() {
-        List<String> out = new ArrayList<>();
+        List<String>              out = new ArrayList<>();
         Function<Integer, String> vg1 = MapUtilTest.func("alpha", out);
         Function<Integer, String> vg2 = MapUtilTest.func("beta", out);
         Function<Integer, String> vg3 = MapUtilTest.func("gamma", out);

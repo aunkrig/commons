@@ -292,8 +292,8 @@ class PatternUtilTest extends TestCase {
 
         // Test the "Substitutor" with a sequence of single-character strings.
         {
-            Substitutor<NoException> t = PatternUtil.substitutor(pattern, replacementString);
-            StringBuilder sb = new StringBuilder();
+            Substitutor<NoException> t  = PatternUtil.substitutor(pattern, replacementString);
+            StringBuilder            sb = new StringBuilder();
             for (Character c : StringUtil.asIterable(subject)) sb.append(t.transform(new String(new char[] { c })));
             sb.append(t.transform(""));
             TestCase.assertEquals("PatternUtil.substitutor()", expected, sb.toString());

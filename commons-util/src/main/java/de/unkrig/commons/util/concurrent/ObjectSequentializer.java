@@ -42,7 +42,7 @@ import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
  * Executes multiple tasks asynchronously, but forwards their output to a delegate {@link Consumer} (or {@link
- * ConsumerWhichThrows}) <en>in the order the tasks were submitted</em>, i.e. the last subject written by one task
+ * ConsumerWhichThrows}) <em>in the order the tasks were submitted</em>, i.e. the last subject written by one task
  * appears <em>before</em> the output of all subsequently submitted tasks.
  *
  * @param <T>  The type of the objects that pose the "output" of the tasks

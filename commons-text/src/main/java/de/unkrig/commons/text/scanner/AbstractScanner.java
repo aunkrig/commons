@@ -111,14 +111,14 @@ class AbstractScanner<TT extends Enum<TT>> implements StringScanner<TT> {
 
     @Override public AbstractScanner<TT>
     setInput(CharSequence cs, int start, int end) {
-    	this.cs                  = cs;
-    	this.offset              = start;
-    	this.end                 = end;
-    	this.previousTokenOffset = -1;
-    	return this;
-	}
+        this.cs                  = cs;
+        this.offset              = start;
+        this.end                 = end;
+        this.previousTokenOffset = -1;
+        return this;
+    }
 
-	@Override public int
+    @Override public int
     getOffset() {
         return this.offset;
     }

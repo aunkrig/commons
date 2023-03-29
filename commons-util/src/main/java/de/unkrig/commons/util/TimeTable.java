@@ -570,6 +570,7 @@ class TimeTable {
          * <pre>
          * weekday :=
          *     'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
+         * </pre>
          */
         private int
         scanWeekday() throws ParseException {

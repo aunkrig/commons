@@ -399,6 +399,7 @@ class PrintfFormatter extends Formatter {
      *         <li>The throwable's message</li>
      *         <li>Another line break</li>
      *         <li>The throwable's stack trace (without the trailing line break)</li>
+     *       </ul>
      *     </td>
      *     <td>
      *       <code>

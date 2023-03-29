@@ -44,14 +44,14 @@ import de.unkrig.commons.nullanalysis.Nullable;
 public final
 class Characters {
 
-	private static final int JRE = Characters.getJreVersion();
-	private static int getJreVersion() {
-		String s = System.getProperty("java.specification.version");
-		if (s.startsWith("1.")) s = s.substring(2);
-		return Integer.parseInt(s);
-	}
+    private static final int JRE = Characters.getJreVersion();
+    private static int getJreVersion() {
+        String s = System.getProperty("java.specification.version");
+        if (s.startsWith("1.")) s = s.substring(2);
+        return Integer.parseInt(s);
+    }
 
-	private Characters() {}
+    private Characters() {}
 
     private abstract static
     class IntegerPredicate implements Predicate<Integer> {
@@ -801,7 +801,7 @@ class Characters {
     public static boolean
     isUnicodeWord(int codePoint) {
 
-    	// Source: java.util.regex.CharPredicates.WORD()
+        // Source: java.util.regex.CharPredicates.WORD()
 
         int type = Character.getType(codePoint);
         return (
@@ -818,13 +818,13 @@ class Characters {
 //            || type == Character.LETTER_NUMBER          // 10
             || (
                 type == Character.OTHER_SYMBOL && (       // 28
-            		(codePoint >= 0x24b6 && codePoint <= 0x24e9)  // <= This logic dictated by the regex 15 regression tests
-            		|| (Characters.JRE > 8 && (
-        				(codePoint >= 0x1f130 && codePoint <= 0x1f149)
-        				|| (codePoint >= 0x1f150 && codePoint <= 0x1f169)
-        				|| (codePoint >= 0x1f170 && codePoint <= 0x1f189)
-        			))
-            	)
+                    (codePoint >= 0x24b6 && codePoint <= 0x24e9)  // <= This logic dictated by the regex 15 regression tests
+                    || (Characters.JRE > 8 && (
+                        (codePoint >= 0x1f130 && codePoint <= 0x1f149)
+                        || (codePoint >= 0x1f150 && codePoint <= 0x1f169)
+                        || (codePoint >= 0x1f170 && codePoint <= 0x1f189)
+                    ))
+                )
             )
             || type == Character.CONNECTOR_PUNCTUATION    // 23
             || codePoint == 0x200C || codePoint == 0x200D // JOIN CONTROL

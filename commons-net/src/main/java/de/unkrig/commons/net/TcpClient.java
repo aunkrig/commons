@@ -81,11 +81,11 @@ class TcpClient implements Closeable {
     TcpClient(InetAddress address, int port) throws IOException {
 
         try {
-			this.socket = new Socket(address, port);
-		} catch (IOException ioe) {
-			throw ExceptionUtil.wrap(address + ":" + port, ioe);
-		}
-		LOGGER.fine("Connected to " + this.socket.getRemoteSocketAddress());
+            this.socket = new Socket(address, port);
+        } catch (IOException ioe) {
+            throw ExceptionUtil.wrap(address + ":" + port, ioe);
+        }
+        LOGGER.fine("Connected to " + this.socket.getRemoteSocketAddress());
 
         InputStream  in  = this.socket.getInputStream();
         OutputStream out = this.socket.getOutputStream();

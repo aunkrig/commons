@@ -85,11 +85,11 @@ class ConcurrentUtil {
      *   <dd>
      *     Runs the <var>delegate</var>
      *   </dd>
-     *   <dt>(<var>n</var> + 1)th and all following runs:</var>
+     *   <dt>(<var>n</var> + 1)th and all following runs:</dt>
      *   <dd>
      *     Throws an {@link IllegalStateException}
      *   </dd>
-     * <dl>
+     * </dl>
      * The returned {@link Runnable} can be run from any thread.
      */
     public static Runnable
@@ -120,11 +120,11 @@ class ConcurrentUtil {
      *     Invokes the <var>delegate</var> with the previously collected subjects, in the same order as the
      *     <var>n</var> invocations.
      *   </dd>
-     *   <dt>(<var>n</var> + 1)th and all following invocations:</var>
+     *   <dt>(<var>n</var> + 1)th and all following invocations:</dt>
      *   <dd>
      *     Throws an {@link IllegalStateException}
      *   </dd>
-     * <dl>
+     * </dl>
      * The returned {@link Consumer} can be invoked from any thread.
      */
     public static <T> Consumer<T>

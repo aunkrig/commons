@@ -177,7 +177,7 @@ class ExpressionEvaluator {
      */
     public Expression
     parsePart(CharSequence spec, int[] offset) throws ParseException {
-    	return this.parsePart(spec, offset, spec.length());
+        return this.parsePart(spec, offset, spec.length());
     }
 
     /**
@@ -194,10 +194,10 @@ class ExpressionEvaluator {
      * @see Parser            The expression syntax
      */
     public Expression
-	parsePart(CharSequence spec, int[] offset, int end) throws ParseException {
+    parsePart(CharSequence spec, int[] offset, int end) throws ParseException {
 
-    	assert end <= spec.length();
-    	assert end > offset[0];
+        assert end <= spec.length();
+        assert end > offset[0];
 
         StringScanner<TokenType> scanner = Scanner.stringScanner().setInput(spec, offset[0], end);
 
@@ -873,8 +873,8 @@ class ExpressionEvaluator {
         case "_properties":
         case "_staticAttributes":
         case "_staticProperties":
-            boolean isStatic = attributeName.startsWith("_static");
-            List<String> result = new ArrayList<String>();
+            boolean      isStatic = attributeName.startsWith("_static");
+            List<String> result   = new ArrayList<String>();
             for (Field f : clasS.getFields()) {
                 if (Modifier.isStatic(f.getModifiers()) ^ isStatic) continue;
                 result.add(f.getName());

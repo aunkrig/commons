@@ -150,8 +150,8 @@ class SubstitutorTest {
         Pattern                              pattern       = Pattern.compile("A{3,5}");
         Function<MatchResult2, CharSequence> matchReplacer = Functions.<MatchResult2, CharSequence>constant("*");
 
-        Substitutor<NoException> s  = Substitutor.create(pattern, matchReplacer);
-        StringBuilder             out = new StringBuilder();
+        Substitutor<NoException> s   = Substitutor.create(pattern, matchReplacer);
+        StringBuilder            out = new StringBuilder();
 
         out.append(s.transform(" AA "));
         Assert.assertEquals(" AA ", out.toString());

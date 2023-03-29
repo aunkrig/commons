@@ -74,7 +74,7 @@ class MavenUtil {
             p.load(is);
             is.close();
         } finally {
-            try { is.close(); } catch (Exception e ) {}
+            try { is.close(); } catch (Exception e) {}
         }
 
         String version = p.getProperty("version");
