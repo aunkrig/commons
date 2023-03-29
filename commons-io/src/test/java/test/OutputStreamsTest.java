@@ -142,7 +142,8 @@ class OutputStreamsTest {
 
     @Test public void
     testOverwriteFilesDiffer() throws Exception {
-        byte[] data = OutputStreamsTest.randomData(100), data2 = OutputStreamsTest.randomData(20), data3 = OutputStreamsTest.randomData(30);
+        byte[] data  = OutputStreamsTest.randomData(100);
+        byte[] data2 = OutputStreamsTest.randomData(20), data3 = OutputStreamsTest.randomData(30);
         OutputStreamsTest.writeToFile(OutputStreamsTest.file, data, data2);
         OutputStreamsTest.overwrite(OutputStreamsTest.file, data, data3);
         OutputStreamsTest.assertFileContents(OutputStreamsTest.file, data, data3);
@@ -150,7 +151,8 @@ class OutputStreamsTest {
 
     @Test public void
     testOverwriteFilesDiffer2() throws Exception {
-        byte[] data = OutputStreamsTest.randomData(100), data2 = OutputStreamsTest.randomData(20), data3 = OutputStreamsTest.randomData(30);
+        byte[] data  = OutputStreamsTest.randomData(100);
+        byte[] data2 = OutputStreamsTest.randomData(20), data3 = OutputStreamsTest.randomData(30);
         OutputStreamsTest.writeToFile(OutputStreamsTest.file, OutputStreamsTest.cat(data, data2));
         OutputStreamsTest.overwrite(OutputStreamsTest.file, OutputStreamsTest.cat(data, data3));
         OutputStreamsTest.assertFileContents(OutputStreamsTest.file, data, data3);
@@ -200,7 +202,10 @@ class OutputStreamsTest {
                 } catch (EOFException eofe) {
                     int x = 0;
                     for (byte[] ba2 : expected) x += ba2.length;
-                    throw new AssertionError("File \"" + file + "\" shorter (" + file.length() + ") than expected (" + x + ")", eofe);
+                    throw new AssertionError(
+                        "File \"" + file + "\" shorter (" + file.length() + ") than expected (" + x + ")",
+                        eofe
+                    );
                 }
                 Assert.assertArrayEquals(ba, buf);
             }

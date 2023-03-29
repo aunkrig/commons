@@ -84,7 +84,9 @@ class EventCounter {
                 tmp2.addAll(tmp.entrySet());
                 Collections.sort(
                     tmp2,
-                    Comparators.keyComparator(Comparators.nullSafeComparator(Comparators.<String>naturalOrderComparator()))
+                    Comparators.keyComparator(
+                        Comparators.nullSafeComparator(Comparators.<String>naturalOrderComparator())
+                    )
                 );
 
                 this.events       = tmp;

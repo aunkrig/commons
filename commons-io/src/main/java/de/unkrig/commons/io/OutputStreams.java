@@ -441,8 +441,12 @@ class OutputStreams {
     updatesChecksum(final Checksum checksum) {
 
         return new OutputStream() {
-            @Override public void                          write(int b)                      { checksum.update(b); }
-            @NotNullByDefault(false) @Override public void write(byte[] b, int off, int len) { checksum.update(b, off, len); }
+
+            @Override public void
+            write(int b) { checksum.update(b); }
+
+            @NotNullByDefault(false) @Override public void
+            write(byte[] b, int off, int len) { checksum.update(b, off, len); }
         };
     }
 
@@ -527,13 +531,13 @@ class OutputStreams {
             /**
              * After this has changed to non-null, "is", "readBuffer" and "pos" are no longer used.
              */
-            @Nullable OutputStream os = null;
+            @Nullable OutputStream os;
 
             byte[] readBuffer = new byte[4096];
-            long   pos        = 0; // Position of first unread byte in this.is
+            long   pos; // Position of first unread byte in this.is
 
             @Override public void
-            write(int b) throws IOException { this.write(new byte[] { (byte) b}); }
+            write(int b) throws IOException { this.write(new byte[] { (byte) b }); }
 
             @Override @NotNullByDefault(false) public void
             write(byte[] b, int off, int len) throws IOException {
@@ -564,10 +568,10 @@ class OutputStreams {
                         return;
                     }
 
-                    this.pos  += n;
-                    off2 += n;
-                    off += n;
-                    len -= n;
+                    this.pos += n;
+                    off2     += n;
+                    off      += n;
+                    len      -= n;
                 }
             }
 
@@ -582,8 +586,14 @@ class OutputStreams {
                 if (this.os != null) {
                     is.close();
                     @SuppressWarnings("null") @NotNull OutputStream os2 = this.os; os2.close();
-                    if (!file.delete()) throw new IOException("Could not delete original file \"" + file + "\"");
-                    if (!newFile.renameTo(file)) throw new IOException("Could not rename new file \"" + newFile + "\" to original file \"" + file + "\"");
+                    if (!file.delete()) {
+                        throw new IOException("Could not delete original file \"" + file + "\"");
+                    }
+                    if (!newFile.renameTo(file)) {
+                        throw new IOException(
+                            "Could not rename new file \"" + newFile + "\" to original file \"" + file + "\""
+                        );
+                    }
                     return;
                 }
 
@@ -599,13 +609,19 @@ class OutputStreams {
                 this.switchToFos();
                 @SuppressWarnings("null") @NotNull OutputStream os2 = this.os; os2.close();
 
-                if (!file.delete()) throw new IOException("Could not delete original file \"" + file + "\"");
-                if (!newFile.renameTo(file)) throw new IOException("Could not rename new file \"" + newFile + "\" to original file \"" + file + "\"");
+                if (!file.delete()) {
+                    throw new IOException("Could not delete original file \"" + file + "\"");
+                }
+                if (!newFile.renameTo(file)) {
+                    throw new IOException(
+                        "Could not rename new file \"" + newFile + "\" to original file \"" + file + "\""
+                    );
+                }
             }
 
             private void
             switchToFos() throws IOException {
-                OutputStream os2 = this.os = new FileOutputStream(newFile);
+                OutputStream os2 = (this.os = new FileOutputStream(newFile));
                 is.reset();
                 if (IoUtil.copy(is, os2, this.pos) != this.pos) throw new EOFException();
                 is.close();

@@ -60,8 +60,11 @@ class ConsumingWriter extends Writer {
         this.consumer = consumer;
     }
 
-    @NotNullByDefault(false) @Override public void write(char[] cbuf, int off, int len) throws IOException { this.append(new Segment(cbuf, off, len)); }
-    @NotNullByDefault(false) @Override public void write(String str, int off, int len)  throws IOException { this.append(str, off, len);               }
+    @NotNullByDefault(false) @Override public void
+    write(char[] cbuf, int off, int len) throws IOException { this.append(new Segment(cbuf, off, len)); }
+
+    @NotNullByDefault(false) @Override public void
+    write(String str, int off, int len) throws IOException { this.append(str, off, len); }
 
     @Override public void
     flush() throws IOException { this.consumer.consume(""); }
