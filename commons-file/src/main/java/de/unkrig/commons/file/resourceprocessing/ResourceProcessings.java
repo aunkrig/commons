@@ -286,7 +286,8 @@ class ResourceProcessings {
      * as usual; it must be checked with {@code "myUrl.equals(ResourceProcessings.STDIN_URL)"}.
      */
     public static final URL STDIN_URL = ResourceProcessings.stdinUrl();
-    private static final URL stdinUrl() {
+    private static URL
+    stdinUrl() {
         try {
             return new URL("file", null /*host*/, "-" /*path*/);
         } catch (MalformedURLException mue) {

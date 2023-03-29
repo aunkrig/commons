@@ -89,7 +89,9 @@ class TarArchiveFormat extends AbstractArchiveFormat {
                 TarArchiveFormat.DEFAULT_LONG_FILE_MODE
             );
             try {
-                TarArchiveFormat.longFileMode = (Integer) TarArchiveOutputStream.class.getField("LONGFILE_" + lfm).get(null);
+                TarArchiveFormat.longFileMode = (Integer) (
+                    TarArchiveOutputStream.class.getField("LONGFILE_" + lfm).get(null)
+                );
             } catch (NoSuchFieldException e) {
                 throw new IllegalArgumentException(
                     "System property \""

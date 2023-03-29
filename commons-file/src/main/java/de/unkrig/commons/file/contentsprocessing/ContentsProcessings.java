@@ -179,8 +179,8 @@ class ContentsProcessings {
     }
 
     /**
-     * Combines the results of {@link ContentsProcessor#process(String, InputStream, Date, long, long, ProducerWhichThrows)}
-     * for all archive entries into one object.
+     * Combines the results of {@link ContentsProcessor#process(String, InputStream, Date, long, long,
+     * ProducerWhichThrows)} for all archive entries into one object.
      *
      * @param <T> The return type of {@link ContentsProcessor#process(String, InputStream, Date, long, long,
      *            ProducerWhichThrows)}
@@ -484,14 +484,38 @@ class ContentsProcessings {
      *   Examples:
      * </p>
      * <table border="1">
-     *   <tr><td>{@code "*.c"}</td>               <td>{@code "foo.c", "bar.c"}</td>                                             </tr>
-     *   <tr><td>{@code "C:/dir/*"}</td>          <td>{@code "C:/dir/file"}</td>                                                </tr>
-     *   <tr><td>{@code "C:/dir/**"}</td>         <td>{@code "C:/dir/file" "C:/dir/subdir/file"}</td>                           </tr>
-     *   <tr><td>{@code "C:/dir/*}{@code /*"}</td><td>{@code "C:/dir/subdir/file"}</td>                                         </tr>
-     *   <tr><td>{@code "C:/dir**"}</td>          <td>{@code "C:/dir/file" "C:/dir/subdir/file"}</td>                           </tr>
-     *   <tr><td>{@code "C:/file.zip!*"}</td>     <td>{@code "C:/file.zip!file"}</td>                                           </tr>
-     *   <tr><td>{@code "C:/file.gz"}</td>        <td>{@code "C:/file.gz%"}</td>                                                </tr>
-     *   <tr><td>{@code "C:/***file"}</td>        <td>{@code "C:/file" "C:/file.zip!file" "C:/file.tgz/file" "C:/file.gz%"}</td></tr>
+     *   <tr>
+     *     <td>{@code "*.c"}</td>
+     *     <td>{@code "foo.c", "bar.c"}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code "C:/dir/*"}</td>
+     *     <td>{@code "C:/dir/file"}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code "C:/dir/**"}</td>
+     *     <td>{@code "C:/dir/file" "C:/dir/subdir/file"}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code "C:/dir/*}{@code /*"}</td>
+     *     <td>{@code "C:/dir/subdir/file"}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code "C:/dir**"}</td>
+     *     <td>{@code "C:/dir/file" "C:/dir/subdir/file"}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code "C:/file.zip!*"}</td>
+     *     <td>{@code "C:/file.zip!file"}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code "C:/file.gz"}</td>
+     *     <td>{@code "C:/file.gz%"}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code "C:/***file"}</td>
+     *     <td>{@code "C:/file" "C:/file.zip!file" "C:/file.tgz/file" "C:/file.gz%"}</td>
+     *   </tr>
      * </table>
      */
     public static void
@@ -513,13 +537,13 @@ class ContentsProcessings {
             ExceptionHandler.<IOException>defaultHandler()       // exceptionHandler
         );
         fp = FileProcessings.directoryTreeProcessor(
-            pathPredicate,                                                                    // pathPredicate
-            fp,//new SelectiveFileProcessor<Void>(pathPredicate, fp, FileProcessings.<Void>nop()), // regularFileProcessor
-            Collator.getInstance(),                                                           // directoryMemberNameComparator
-            FileProcessings.<Void>nopDirectoryCombiner(),                                     // directoryCombiner
-            false,                                                                            // includeDirs
-            new SquadExecutor<Void>(ConcurrentUtil.SEQUENTIAL_EXECUTOR_SERVICE),              // squadExecutor
-            ExceptionHandler.<IOException>defaultHandler()                                    // exceptionHandler
+            pathPredicate,                                                       // pathPredicate
+            fp,                                                                  // regularFileProcessor
+            Collator.getInstance(),                                              // directoryMemberNameComparator
+            FileProcessings.<Void>nopDirectoryCombiner(),                        // directoryCombiner
+            false,                                                               // includeDirs
+            new SquadExecutor<Void>(ConcurrentUtil.SEQUENTIAL_EXECUTOR_SERVICE), // squadExecutor
+            ExceptionHandler.<IOException>defaultHandler()                       // exceptionHandler
         );
 
         if (sf != null) {

@@ -118,10 +118,20 @@ class ArchiveFormatFactory {
                             if (prev == af) {
                                 ;
                             } else
-                            if (prev.getClass().getName().startsWith("de.unkrig.commons.file.org.apache.commons.compress.archivers.")) {
+                            if (
+                                prev
+                                .getClass()
+                                .getName()
+                                .startsWith("de.unkrig.commons.file.org.apache.commons.compress.archivers.")
+                            ) {
                                 ;
                             } else
-                            if (af.getClass().getName().startsWith("de.unkrig.commons.file.org.apache.commons.compress.archivers.")) {
+                            if (
+                                af
+                                .getClass()
+                                .getName()
+                                .startsWith("de.unkrig.commons.file.org.apache.commons.compress.archivers.")
+                            ) {
                                 continue;
                             } else
                             {
@@ -243,6 +253,8 @@ class ArchiveFormatFactory {
 
     /**
      * @return The {@link ArchiveFormat} corresponding with the <var>archiveOutputStream</var>
+     *
+     * @deprecated
      */
     @Deprecated public static ArchiveFormat
     forArchiveOutputStream(ArchiveOutputStream archiveOutputStream) {
@@ -250,8 +262,10 @@ class ArchiveFormatFactory {
             return ((ArchiveOutputStream2) archiveOutputStream).getArchiveFormat();
         }
 
-        String packageName = archiveOutputStream.getClass().getPackage().getName();
-        ArchiveFormat af = ArchiveFormatFactory.ALL_ARCHIVE_FORMATS.get(packageName.substring(packageName.lastIndexOf('.') + 1));
+        String        packageName = archiveOutputStream.getClass().getPackage().getName();
+        ArchiveFormat af          = ArchiveFormatFactory.ALL_ARCHIVE_FORMATS.get(
+            packageName.substring(packageName.lastIndexOf('.') + 1)
+        );
         assert af != null : archiveOutputStream + ": " + packageName;
         return af;
     }

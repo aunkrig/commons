@@ -647,9 +647,9 @@ class FileProcessings {
      */
     @Nullable public static File
     starterFile(String regex) {
-        String[] sa = PatternUtil.constantPrefix(regex);
-        String prefix  = sa[0];
-        String suffix  = sa[1];
+        String[] sa     = PatternUtil.constantPrefix(regex);
+        String   prefix = sa[0];
+        String   suffix = sa[1];
 
         // Iff the prefix contains a "!", then the text before the "!" is the file name.
         {
@@ -676,11 +676,26 @@ class FileProcessings {
      *   Examples:
      * </p>
      * <table border="1">
-     *   <tr><td>{@code "*.c"}</td>               <td>{@code "foo.c", "bar.c"}</td>                                           </tr>
-     *   <tr><td>{@code "C:/dir/*"}</td>          <td>{@code "C:/dir/file" "C:/dir/subdir"}</td>                              </tr>
-     *   <tr><td>{@code "C:/dir/**"}</td>         <td>{@code "C:/dir/file" "C:/dir/subdir" "C:/dir/subdir/file"}</td>         </tr>
-     *   <tr><td>{@code "C:/dir/*}{@code /*"}</td><td>{@code "C:/dir/subdir/file"}</td>                                       </tr>
-     *   <tr><td>{@code "C:/dir**"}</td>          <td>{@code "C:/dir" "C:/dir/file" "C:/dir/subdir" "C:/dir/subdir/file"}</td></tr>
+     *   <tr>
+     *     <td>{@code "*.c"}</td>
+     *     <td>{@code "foo.c", "bar.c"}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code "C:/dir/*"}</td>
+     *     <td>{@code "C:/dir/file" "C:/dir/subdir"}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code "C:/dir/**"}</td>
+     *     <td>{@code "C:/dir/file" "C:/dir/subdir" "C:/dir/subdir/file"}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code "C:/dir/*}{@code /*"}</td>
+     *     <td>{@code "C:/dir/subdir/file"}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code "C:/dir**"}</td>
+     *     <td>{@code "C:/dir" "C:/dir/file" "C:/dir/subdir" "C:/dir/subdir/file"}</td>
+     *   </tr>
      * </table>
      */
     public static void
@@ -690,7 +705,7 @@ class FileProcessings {
 
         if (sf != null) {
             Predicate<String> pathPredicate = Glob.compileRegex(pattern);
-            FileProcessings.directoryTreeProcessor(
+            FileProcessings.directoryTreeProcessor( // SUPPRESS CHECKSTYLE LineLength:6
                 pathPredicate,                                                                    // pathPredicate
                 new SelectiveFileProcessor<Void>(pathPredicate, fp, FileProcessings.<Void>nop()), // regularFileProcessor
                 Collator.getInstance(),                                                           // directoryMemberNameComparator

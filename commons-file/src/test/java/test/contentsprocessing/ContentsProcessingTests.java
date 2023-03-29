@@ -54,7 +54,7 @@ import de.unkrig.commons.text.pattern.Pattern2;
 import test.fileprocessing.Files;
 
 /**
- * Tests for the {@code de.unkrig.commons.file.fileprocessing' package.
+ * Tests for the {@code de.unkrig.commons.file.fileprocessing} package.
  */
 public
 class ContentsProcessingTests {

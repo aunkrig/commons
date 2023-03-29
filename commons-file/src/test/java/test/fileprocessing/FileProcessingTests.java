@@ -57,7 +57,7 @@ import de.unkrig.commons.util.concurrent.ConcurrentUtil;
 import de.unkrig.commons.util.concurrent.SquadExecutor;
 
 /**
- * Tests for the {@code de.unkrig.commons.file.fileprocessing' package.
+ * Tests for the {@code de.unkrig.commons.file.fileprocessing} package.
  */
 public
 class FileProcessingTests {
