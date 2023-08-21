@@ -39,9 +39,6 @@
 		<name>Arno Unkrig</name>
 		<url>http://unkrig.de</url>
 	</organization>
-	<scm>
-		<url>https://svn.code.sf.net/p/loggifier/code</url>
-	</scm>
 	<parent>
 		<groupId>de.unkrig.commons</groupId>
 		<artifactId>commons-parent</artifactId>
