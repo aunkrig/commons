@@ -400,7 +400,7 @@ class CommandLineOptions {
         }
 
         /**
-         * Parses tokens on the <var>ss</var> that map to options of the <var>target</var>.
+         * Parses tokens on the <var>ss</var> that map to options of the <var>target</var> and are not "--" nor "-".
          *
          * @return                            Whether the next token(s) on <var>ss</var> were parsed as an option of
          *                                    the <var>target</var>
@@ -471,8 +471,8 @@ class CommandLineOptions {
         }
 
         /**
-         * Parses an option of the <var>target</var> iff the next token on the <var>ss</var> maps to an option of the
-         * <var>target</var>.
+         * Parses an option of the <var>target</var> iff the next token on the <var>ss</var> is not "--" nor "-", and
+         * maps to an option of the <var>target</var>.
          *
          * @return                            Whether the next token(s) on <var>ss</var> were parsed as an option of the
          *                                    <var>target</var>
@@ -738,18 +738,6 @@ class CommandLineOptions {
                 return result;
             }
 
-            // Special case: Target type "java.util.Pattern".
-            if (targetType == Pattern.class) {
-
-                // Use "Pattern2", so that the Pattern2.WILDCARD flag can also be used.
-                return Pattern2.compile(ss.read(), CommandLineOptions.getRegexFlags(annotations));
-            }
-
-            // Special case: Target type "de.unkrig.commons.text.pattern.Glob".
-            if (targetType == Glob.class) {
-                return Glob.compile(ss.read(), CommandLineOptions.getRegexFlags(annotations));
-            }
-
             // Special case: Target type is a Java bean.
             Constructor<?>[] cs = targetType.getConstructors();
             if (cs.length == 1 && cs[0].getParameterTypes().length == 0) {
@@ -763,12 +751,29 @@ class CommandLineOptions {
 
                 // Invoke as many setter methods on the bean as possible.
                 new Parser<EX>(targetType).parseOptions(ss, bean);
+                ss.peekRead("--");
 
                 return bean;
             }
 
+            // At this point, the target type is "primitive", i.e. it maps to exactly ONE command line arg.
+            if (ss.peek(CommandLineOptions.REGEX_OPTION)) throw new UnrecognizedOption(ss.peek());
+
+            // Special case: Target type "java.util.Pattern".
+            if (targetType == Pattern.class) {
+
+                // Use "Pattern2", so that the Pattern2.WILDCARD flag can also be used.
+                return Pattern2.compile(ss.read(), CommandLineOptions.getRegexFlags(annotations));
+            }
+
+            // Special case: Target type "de.unkrig.commons.text.pattern.Glob".
+            if (targetType == Glob.class) {
+                return Glob.compile(ss.read(), CommandLineOptions.getRegexFlags(annotations));
+            }
+
             // Special case: Target type "java.net.InetAddress".
             if (targetType == InetAddress.class) {
+
                 String host = ss.read();
                 if ("any".equals(host)) return null;
                 try {
