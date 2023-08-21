@@ -43,11 +43,11 @@ import org.junit.Test;
 
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.util.CommandLineOptionException;
-import de.unkrig.commons.util.CommandLineOptionException.ArgumentConversionFailed;
 import de.unkrig.commons.util.CommandLineOptionException.ConflictingOptions;
 import de.unkrig.commons.util.CommandLineOptionException.DuplicateOption;
 import de.unkrig.commons.util.CommandLineOptionException.RequiredOptionGroupMissing;
 import de.unkrig.commons.util.CommandLineOptionException.RequiredOptionMissing;
+import de.unkrig.commons.util.CommandLineOptionException.UnrecognizedOption;
 import de.unkrig.commons.util.CommandLineOptions;
 import de.unkrig.commons.util.annotation.CommandLineOption;
 import de.unkrig.commons.util.annotation.CommandLineOptionGroup;
@@ -151,22 +151,15 @@ class CommandLineOptionsTest {
         }
     }
 
-    @Test public void
+    @Test(expected = UnrecognizedOption.class) public void
     test4() throws CommandLineOptionException {
-        try {
-            Assert.assertArrayEquals(
-                new String[0],
-                CommandLineOptions.parse(new String[] { "-bar1", "11", "-bar2", "22", "222", "-ff", }, new Foo1())
-            );
-            Assert.fail("Exception");
-        } catch (ArgumentConversionFailed acf) {
-            Assert.assertEquals(
-                "Converting option argument \"-ff\" to \"int\": Cannot convert \"-ff\" to int",
-                acf.getMessage()
-            );
-            Assert.assertEquals("-ff", acf.getArgument());
-            Assert.assertEquals(int.class, acf.getTargetType());
-        }
+        Assert.assertArrayEquals(
+            new String[0],
+            CommandLineOptions.parse(new String[] {
+                "-bar1", "11",
+                "-bar2", "22", "222", "-ff", // The third argument to "-bar2" lloks like an option => UnrecognizedOption exception
+            }, new Foo1())
+        );
     }
 
     @Test public void
@@ -407,5 +400,88 @@ class CommandLineOptionsTest {
         @CommandLineOption(group = ExactlyOne.class) public void                      clo1()  {}
         @CommandLineOption(group = ZeroOrOne.class) public void                       clo01() {}
         @CommandLineOption(group = { ExactlyOne.class, ZeroOrOne.class }) public void combo() {}
+    }
+
+    @Test public void
+    testInvalidOption1() throws CommandLineOptionException {
+        // SUPPRESS CHECKSTYLE LineLength:2
+        Assert.assertArrayEquals(new String[] {},        CommandLineOptions.parse(new String[] { "--foo"        }, new Foo11()));
+        Assert.assertArrayEquals(new String[] { "FOO" }, CommandLineOptions.parse(new String[] { "--foo", "FOO" }, new Foo11()));
+    }
+    @Test(expected = UnrecognizedOption.class) public void
+    testInvalidOption2() throws CommandLineOptionException {
+        CommandLineOptions.parse(new String[] { "--foo", "--unknown" }, new Foo11());
+    }
+    public static
+    class Foo11 {
+        @CommandLineOption public void setFoo() {}
+    }
+
+    @Test public void
+    testInvalidBeanOption1() throws CommandLineOptionException {
+        Foo12 foo12 = new Foo12();
+        Assert.assertArrayEquals(new String[] { "FOO" }, CommandLineOptions.parse(new String[] {
+            "--bean1",
+            /**/"--value", "value",
+            /**/"3",
+            "--value", "value",
+            "FOO",
+        }, foo12));
+        { Bean12 b1 = foo12.bean1; Assert.assertNotNull(b1); Assert.assertEquals("value", b1.value); }
+        Assert.assertNull(foo12.bean2);
+        Assert.assertEquals(3, foo12.intValue);
+        Assert.assertEquals("value", foo12.value);
+    }
+    @Test public void
+    testInvalidBeanOption2() throws CommandLineOptionException {
+        Foo12 foo12 = new Foo12();
+        Assert.assertArrayEquals(new String[] { "FOO" }, CommandLineOptions.parse(new String[] {
+            "--bean2",
+            /**/"--value", "value",
+            "--", // <== To resolve the ambiguity between the two "--value" options
+            "--value", "value",
+            "FOO",
+        }, foo12));
+        Assert.assertNull(foo12.bean1);
+        { Bean12 b2 = foo12.bean2; Assert.assertNotNull(b2); Assert.assertEquals("value", b2.value); }
+        Assert.assertEquals(-1, foo12.intValue);
+        Assert.assertEquals("value", foo12.value);
+    }
+    @Test(expected = UnrecognizedOption.class) public void
+    testInvalidBeanOption3() throws CommandLineOptionException {
+        CommandLineOptions.parse(new String[] {
+            "--bean1",
+            /**/"--property1", "value",
+            /**/"--typo", "value", // "--typo" is neither an option of Foo12 nor of Bean12 => UnrecognizedOption
+            /**/"3",
+            "--value", "value",
+            "FOO",
+        }, new Foo12());
+    }
+    @Test public void
+    testInvalidBeanOption4() throws CommandLineOptionException {
+        Foo12 foo12 = new Foo12();
+        Assert.assertArrayEquals(new String[] { "FOO" }, CommandLineOptions.parse(new String[] {
+            "--bean2",
+            "FOO",
+        }, foo12));
+        Assert.assertNull(foo12.bean1);
+        { Bean12 b2 = foo12.bean2; Assert.assertNotNull(b2); Assert.assertNull(b2.value); }
+        Assert.assertEquals(-1, foo12.intValue);
+        Assert.assertNull(foo12.value);
+    }
+    public static
+    class Foo12 {
+        @Nullable public Bean12 bean1, bean2;
+        public int              intValue = -1;
+        @Nullable public String value;
+        @CommandLineOption public void setBean1(Bean12 bean1, int value) { this.bean1 = bean1; this.intValue = value; }
+        @CommandLineOption public void setBean2(Bean12 bean2)            { this.bean2 = bean2;                        }
+        @CommandLineOption public void setValue(String value)            { this.value   = value;                      }
+    }
+    public static
+    class Bean12 {
+        @Nullable public String value;
+        @CommandLineOption public void setValue(String value) { this.value = value; }
     }
 }
