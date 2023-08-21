@@ -665,7 +665,7 @@ class FileTransformations {
     /**
      * Transforms a set of files based on an array of strings, similar to many UNIX&trade; command line tools.
      * <p>
-     *   If {@code args.length == 1}, then the file or directory {@code args[0]} is transformed in-place.
+     *   If {@code args.length == 1}, then the file {@code args[0]} is transformed in-place.
      * </p>
      * <p>
      *   If {@code args.length == 2} and {@code args[1]} is not an existing directory, then the file {@code args[0]} is
@@ -754,6 +754,11 @@ class FileTransformations {
         }
     }
 
+    /**
+     * Invokes the given <var>fileTransformer</var>.
+     *
+     * @see FileTransformer#transform(String, File, File, FileTransformer.Mode)
+     */
     private static void
     transformOneFile(
         File                          in,
