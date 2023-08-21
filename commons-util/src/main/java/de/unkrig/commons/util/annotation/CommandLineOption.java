@@ -37,6 +37,8 @@ import de.unkrig.commons.util.CommandLineOptions;
 /**
  * Indicates that the annotated method maps to a "command line option".
  *
+ * @see CommandLineOption#name()
+ * @see CommandLineOption#cardinality()
  * @see CommandLineOptions#getMethodForOption(String, Class) The algorithm that determines the command line option(s)
  *                                                           for this method
  */
