@@ -48,7 +48,6 @@ import de.unkrig.commons.file.contentsprocessing.ContentsProcessings;
 import de.unkrig.commons.file.contentsprocessing.ContentsProcessor;
 import de.unkrig.commons.io.InputStreams;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
-import de.unkrig.commons.nullanalysis.NotNullByDefault;
 import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.text.pattern.Pattern2;
 import test.fileprocessing.Files;
@@ -101,7 +100,7 @@ class ContentsProcessingTests {
         final List<String>      result = new ArrayList<String>();
         ContentsProcessor<Void> cp     = new ContentsProcessor<Void>() {
 
-            @NotNullByDefault @Override @Nullable public Void
+            @Override @Nullable public Void
             process(
                 String                                                            path,
                 InputStream                                                       inputStream,
