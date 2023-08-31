@@ -32,6 +32,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Comparator;
 import java.util.Date;
 
@@ -752,6 +753,180 @@ class FileTransformations {
                 );
             }
         }
+    }
+
+    /**
+     * Similar to {@link #transform(String[], FileTransformer,
+     * de.unkrig.commons.file.filetransformation.FileTransformer.Mode, ExceptionHandler)}, but treats the special file
+     * name {@code "-"} as STDIN resp. STDOUT.
+     * <p>
+     *   If {@code args.length == 0}, then transform STDIN to STDOUT.
+     * </p>
+     * <p>
+     *   If {@code args.length == 1}, then
+     *   <ul>
+     *     <li>Iff {@code args[0].equals("-")}, then transform STDIN to STDOUT.</li>
+     *     <li>Otherwise, iff {@code unixMode == true}, then transform the file {@code args[0]} to STDOUT.</li>
+     *     <li>Otherwise, transform the file {@code args[0]} in-place.
+     *   </ul>
+     * </p>
+     * <p>
+     *   If {@code args.length == 2}, then
+     *   <ul>
+     *     <li>Iff {@code args[0].equals("-")} and {@code args[1].equals("-")}, then transform STDIN to STDOUT.</li>
+     *     <li>Otherwise, iff only {@code args[0].equals("-")}, then transform STDIN to the file {@code args[1]}.</li>
+     *     <li>Otherwise, iff only {@code args[1].equals("-")}, then transform the file {@code args[0]} to STDOUT.</li>
+     *     <li>
+     *       Otherwise, iff {@code arsg[1]} is an existing directory, then transform the file {@code args[0]} to a new
+     *       file with the same name in that directory.
+     *     </li>
+     *     <li>Otherwise, transform the file {@code args[0]} to the file {@code args[1]}.</li>
+     *   </ul>
+     * </p>
+     * <p>
+     *   If {@code args.length >= 2}, then
+     *   <ul>
+     *     <li>
+     *       Iff {@code args[args.length - 1].equals("-")}, then transform the files {@code args[0]} ... {@code
+     *       args[args.length - 2]} to STDOUT.
+     *     </li>
+     *     <li>
+     *       Otherwise, iff {@code args[args.length - 1]} is an existing directory, then transform the files {@code
+     *       args[0]} ... {@code args[args.length - 2]} to files with the same names in that directory.
+     *     <li>
+     *   </ul>
+     *   Any of {@code args[0]} ... {@code args[args.length - 2]} may equal {@code "-"}, in that case STDIN is used
+     *   instead of a file.
+     * </p>
+     *
+     * @param mode                See {@link FileTransformer#transform(String, File, File,
+     *                            de.unkrig.commons.file.filetransformation.FileTransformer.Mode)}; only relevant if a
+     *                            <em>file</em> is transformed in-place, or into another <em>file</em>
+     * @param unixMode            Controls the special case {@code args.length == 1}; see above
+     * @param fileTransformer     Used for file-to-file transformations
+     * @param contentsTransformer Used for transformations STDIN-to-file, file-to-STDOUT and STDIN-to-STDOUT
+     * @param exceptionHandler    If a transformation throws an {@link IOException} or a {@link RuntimeException}, then
+     *                            {@link ExceptionHandler#handle(String, Exception)} resp. {@link
+     *                            ExceptionHandler#handle(String, RuntimeException)} is called. Iff that call
+     *                            completes normally, then processing continues with the next item.
+     * @throws IOException        {@code args.length > 2} and {@code args[args.length - 1]} is not an existing directory
+     */
+    public static void
+    transform(
+		String[]                      args,
+		boolean                       unixMode,
+		FileTransformer               fileTransformer,
+		ContentsTransformer           contentsTransformer,
+		FileTransformer.Mode          mode,
+		ExceptionHandler<IOException> exceptionHandler
+	) throws IOException {
+
+    	if (args.length == 0) {
+    		contentsTransformer.transform("-", System.in, System.out);
+    	} else
+		if (args.length == 1) {
+			if ("-".equals(args[0])) {
+				contentsTransformer.transform("-", System.in, System.out);
+			} else
+			if (unixMode) {
+				try (InputStream is = new FileInputStream(new File(args[0]))) {
+					contentsTransformer.transform(args[0], is, System.out);
+				}
+			} else
+			{
+
+    			// In-place transformation.
+    			File file = new File(args[0]);
+    			FileTransformations.transformOneFile(
+					file,             // in
+					file,             // out
+					fileTransformer,
+					mode,
+					exceptionHandler
+				);
+			}
+		} else
+		if (args.length == 2) {
+			if ("-".equals(args[0]) && "-".equals(args[1])) {
+				contentsTransformer.transform("-", System.in, System.out);
+			} else
+			if ("-".equals(args[0])) {
+				try (OutputStream os = new FileOutputStream(new File(args[1]))) {
+					contentsTransformer.transform("-", System.in, os);
+				}
+			} else
+			if ("-".equals(args[1])) {
+				try (InputStream is = new FileInputStream(new File(args[0]))) {
+					contentsTransformer.transform(args[0], is, System.out);
+				}
+			} else
+			{
+				File in  = new File(args[0]);
+				File out = new File(args[1]);
+
+				if (out.isDirectory()) {
+
+					// Transform file into directory.
+					FileTransformations.transformOneFile(
+						in,
+						new File(out, in.getName()),
+						fileTransformer,
+						mode,
+						exceptionHandler
+					);
+				} else {
+
+					// Transform one file to into another file.
+					FileTransformations.transformOneFile(
+						in,
+						out,
+						fileTransformer,
+						mode,
+						exceptionHandler
+					);
+				}
+			}
+		} else
+		{
+
+			// args.length >= 2
+			if ("-".equals(args[args.length - 1])) {
+
+				// Transform files to STDOUT.
+				for (int i = 0; i < args.length - 1; i++) {
+					if ("-".equals(args[i])) {
+						contentsTransformer.transform("-", System.in, System.out);
+					} else {
+						try (InputStream is = new FileInputStream(new File(args[i]))) {
+							contentsTransformer.transform(args[i], is, System.out);
+						}
+					}
+				}
+			} else {
+
+				// Transform files into output directory.
+				File outputDirectory = new File(args[args.length - 1]);
+				if (!outputDirectory.isDirectory()) {
+					throw new IOException("Output directory '" + outputDirectory + "' does not exist");
+				}
+				for (int i = 0; i < args.length - 1; i++) {
+					if ("-".equals(args[i])) {
+						try (OutputStream os = new FileOutputStream(new File(args[i]))) {
+							contentsTransformer.transform("-", System.in, os);
+						}
+					} else {
+						File in = new File(args[i]);
+						FileTransformations.transformOneFile(
+							in,
+							new File(outputDirectory, in.getName()),
+							fileTransformer,
+							mode,
+							exceptionHandler
+						);
+					}
+				}
+			}
+		}
     }
 
     /**
