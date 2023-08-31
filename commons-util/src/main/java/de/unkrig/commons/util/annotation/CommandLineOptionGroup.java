@@ -35,6 +35,28 @@ import de.unkrig.commons.util.CommandLineOptions;
 
 /**
  * Indicates that the annotated class or interfaces represents a "command line option group".
+ * <p>
+ *   The {@link CommandLineOption#group() group} attribute of {@link CommandLineOption} associates command line options
+ *   with groups.
+ * </p>
+ * <p>
+ *   The {@link #cardinality() cardinality} attribute of the group dictates how many of the command line options of the
+ *   group may appear.
+ * </p>
+ * <p>
+ *   Example:<br>If exactly one of the command line options "--red", "--green" and "--blue" is required, then these
+ *   must form a group:
+ * </p>
+ * <pre>
+ *   public class Main {
+ *       // ...
+ *       &#64;CommandLineOption(group = ExactlyOneColor.class) void red()   { ... }
+ *       &#64;CommandLineOption(group = ExactlyOneColor.class) void green() { ... }
+ *       &#64;CommandLineOption(group = ExactlyOneColor.class) void blue()  { ... }
+ *       &#64;CommandLineOptionGroup(cardinality = EXACTLY_ONE} interface ExactlyOneColor {}
+ *       // ...
+ *   }
+ * </pre>
  *
  * @see CommandLineOptions#parse(String[], Object)
  */
