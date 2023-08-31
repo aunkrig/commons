@@ -38,7 +38,7 @@ public
 interface ContentsTransformer {
 
     /**
-     * Reads bytes from <var>is</var> (typically until end-of-input) and writes bytes to <var>os</var>. Closes neither
+     * Reads bytes from <var>is</var> (typically until end-of-input) and writes bytes to <var>os</var>. Closes none
      * of the two streams.
      *
      * @param path Designates the contents that is transformed
