@@ -70,8 +70,8 @@ import de.unkrig.commons.text.pattern.PatternUtil;
 import de.unkrig.commons.util.CommandLineOptionException.ArgumentConversionFailed;
 import de.unkrig.commons.util.CommandLineOptionException.ConflictingOptions;
 import de.unkrig.commons.util.CommandLineOptionException.DuplicateOption;
-import de.unkrig.commons.util.CommandLineOptionException.OptionProcessingException;
 import de.unkrig.commons.util.CommandLineOptionException.OptionArgumentMissing;
+import de.unkrig.commons.util.CommandLineOptionException.OptionProcessingException;
 import de.unkrig.commons.util.CommandLineOptionException.RequiredOptionGroupMissing;
 import de.unkrig.commons.util.CommandLineOptionException.RequiredOptionMissing;
 import de.unkrig.commons.util.CommandLineOptionException.UnrecognizedOption;
@@ -129,7 +129,7 @@ class CommandLineOptions {
      * <ul>
      *   <li>The <var>args</var> are exhausted</li>
      *   <li>The special arg {@code "--"} is reached (which is consumed)</li>
-     *   <li>The special arg {@code "-"} is reached (which is <em>not</em>consumed)</li>
+     *   <li>The special arg {@code "-"} is reached (which is <em>not</em> consumed)</li>
      *   <li>A "normal" command line arguments appears, i.e. one that does not start with "-"</li>
      * </ul>
      * <p>
