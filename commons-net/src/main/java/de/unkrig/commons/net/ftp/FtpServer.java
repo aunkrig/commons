@@ -46,6 +46,7 @@ class FtpServer implements RunnableWhichThrows<IOException>, Stoppable {
     enum CommandCode {
         // SUPPRESS CHECKSTYLE JavadocVariable
         USER, PASS, NOOP, RETR, CWD, PWD, QUIT, PORT, LIST, NLST, SYST, TYPE, PASV, MODE, STOR, DELE, RNFR, RNTO, MDTM,
+        SITE,
     }
 
     private TcpServer tcpServer;
