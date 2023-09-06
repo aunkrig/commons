@@ -37,6 +37,7 @@ import java.util.Formatter;
 import java.util.logging.Logger;
 
 import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
+import de.unkrig.commons.net.ftp.FtpException;
 import de.unkrig.commons.nullanalysis.Nullable;
 
 /**
@@ -50,17 +51,18 @@ class FileFtplett implements Ftplett {
         this.rootDirectory = rootDirectory.getCanonicalFile();
     }
 
-    @Override public boolean
+    @Override public void
+    login(String user, String password) {}
+
+	@Override public void
     changeWorkingDirectory(@Nullable String directoryName) throws IOException {
-        if (directoryName == null) {
+
+		if (directoryName == null) {
             this.currentWorkingDirectory = "/";
-            return true;
+        } else {
+	        if (!this.toFile(directoryName).isDirectory()) throw new FtpException(550, "Requested action not taken");
+	        this.currentWorkingDirectory = directoryName;
         }
-        if (!this.toFile(directoryName).isDirectory()) {
-            return false;
-        }
-        this.currentWorkingDirectory = directoryName;
-        return true;
     }
 
     @Override public String
@@ -68,10 +70,10 @@ class FileFtplett implements Ftplett {
         return this.currentWorkingDirectory;
     }
 
-    @Override @Nullable public InputStream
+    @Override public InputStream
     retrieve(String fileName) throws IOException {
         File file = this.toFile(fileName);
-        if (!file.isFile()) return null;
+        if (!file.isFile()) throw new FtpException(550, "The system cannot find the file specified.");
         return new FileInputStream(file);
     }
 
@@ -81,7 +83,7 @@ class FileFtplett implements Ftplett {
         return new FileOutputStream(file);
     }
 
-    @Override public boolean
+    @Override public void
     list(@Nullable String name, ConsumerWhichThrows<String, IOException> out) throws IOException {
         final File file = this.toFile(name);
 
@@ -92,12 +94,11 @@ class FileFtplett implements Ftplett {
             for (File member : file.listFiles()) FileFtplett.list(member, out);
         } else
         {
-            return false;
+            throw new IOException("File or directory \"" + name + "\" does not exist");
         }
-        return true;
     }
 
-    @Override public boolean
+    @Override public void
     nameList(@Nullable String name, ConsumerWhichThrows<String, IOException> out) throws IOException {
         final File file = this.toFile(name);
 
@@ -108,25 +109,25 @@ class FileFtplett implements Ftplett {
             for (File member : file.listFiles()) FileFtplett.nameList(member, out);
         } else
         {
-            return false;
+            throw new FtpException(550, "Fiel or directory \"" + name + "\" does not exist");
         }
-        return true;
     }
 
-    @Override public boolean
+    @Override public void
     delete(String resourceName) throws IOException {
-        return this.toFile(resourceName).delete();
+        if (!this.toFile(resourceName).delete()) throw new FtpException(550, "The system cannot delete the file specified.");
     }
 
-    @Override public boolean
+    @Override public void
     rename(String from, String to) throws IOException {
-        return this.toFile(from).renameTo(this.toFile(to));
+        if (!this.toFile(from).renameTo(this.toFile(to))) throw new FtpException(550, "The file cannot be renamed.");
     }
 
-    @Override @Nullable public Date
+    @Override public Date
     getModificationTime(String resourceName) throws IOException {
         long lm = this.toFile(resourceName).lastModified();
-        return lm == 0L ? null : new Date(lm);
+        if (lm == 0) throw new FtpException(550, "File or directory does not exist.");
+        return new Date(lm);
     }
 
     // CONFIGURATION

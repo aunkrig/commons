@@ -41,39 +41,39 @@ import de.unkrig.commons.nullanalysis.Nullable;
 public
 interface Ftplett {
 
+	void login(String user, String password);
+
     /**
      * @param directoryName {@code null} means change to some 'root' or 'home' directory
-     * @return              Whether the working directory could be changed to the given directory.
      */
-    boolean
+    void
     changeWorkingDirectory(@Nullable String directoryName) throws IOException;
 
     /**
      * @return The current working directory
      */
     String
-    getWorkingDirectory();
+    getWorkingDirectory() throws IOException;
 
     /**
      * @return An {@link InputStream} producing the contents of the resource, or {@code null} iff the resource cannot
      *         be accessed.
      */
-    @Nullable InputStream
+    InputStream
     retrieve(String resourceName) throws IOException;
 
     /**
      * @return An {@link OutputStream} to which the contents can be written, or {@code null} iff the resource cannot
      *         be accessed.
      */
-    @Nullable OutputStream
+    OutputStream
     store(String resourceName) throws IOException;
 
     /**
-     * @param name         The name of the directory or file to list, or {@code null} to list the current working
-     *                     directory
+     * @param name         {@code Null} means "current working or default directory"
      * @param lineConsumer Consumes the listing
      */
-    boolean
+    void
     list(@Nullable String name, ConsumerWhichThrows<String, IOException> lineConsumer) throws IOException;
 
     /**
@@ -81,24 +81,15 @@ interface Ftplett {
      *                     directory
      * @param lineConsumer Consumes the listing
      */
-    boolean
+    void
     nameList(@Nullable String name, ConsumerWhichThrows<String, IOException> lineConsumer) throws IOException;
 
-    /**
-     * @return Whether the resource was successfully deleted
-     */
-    boolean
+    void
     delete(String resourceName) throws IOException;
 
-    /**
-     * @return Whether the resource was successfully renamed
-     */
-    boolean
+    void
     rename(String from, String to) throws IOException;
 
-    /**
-     * @return {@code null} iff the modification time cannot be determined
-     */
-    @Nullable Date
+    Date
     getModificationTime(String resourceName) throws IOException;
 }
