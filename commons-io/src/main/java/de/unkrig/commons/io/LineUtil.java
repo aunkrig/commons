@@ -36,7 +36,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -54,18 +54,25 @@ import de.unkrig.commons.nullanalysis.Nullable;
 public final
 class LineUtil {
 
-    private static final Charset CHARSET_ISO_8859_1 = Charset.forName("ISO-8859-1");
-    private static final String  LINE_SEPARATOR     = System.getProperty("line.separator");
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     private
     LineUtil() {}
+
+    /**
+     * Produces lines from a UTF-8-encoded {@link InputStream}.
+     */
+    public static ProducerWhichThrows<String, IOException>
+    lineProducerUtf8(InputStream in) {
+    	return LineUtil.lineProducer(new InputStreamReader(in, StandardCharsets.UTF_8));
+    }
 
     /**
      * Produces lines from a ISO 8859-1-encoded {@link InputStream}.
      */
     public static ProducerWhichThrows<String, IOException>
     lineProducerISO8859_1(InputStream in) { // SUPPRESS CHECKSTYLE MethodName|AbbreviationAsWord
-        return LineUtil.lineProducer(new InputStreamReader(in, LineUtil.CHARSET_ISO_8859_1));
+        return LineUtil.lineProducer(new InputStreamReader(in, StandardCharsets.ISO_8859_1));
     }
 
     /**
@@ -238,11 +245,19 @@ class LineUtil {
     }
 
     /**
+     * Writes the consumed strings as lines to the UTF-8-encoded {@link OutputStream}.
+     */
+    public static ConsumerWhichThrows<String, IOException>
+    lineConsumerUtf8(OutputStream out) { // SUPPRESS CHECKSTYLE MethodName|AbbreviationAsWord
+    	return LineUtil.lineConsumer(new OutputStreamWriter(out, StandardCharsets.UTF_8));
+    }
+
+    /**
      * Writes the consumed strings as lines to the ISO 8859-1-encoded {@link OutputStream}.
      */
     public static ConsumerWhichThrows<String, IOException>
     lineConsumerISO8859_1(OutputStream out) { // SUPPRESS CHECKSTYLE MethodName|AbbreviationAsWord
-        return LineUtil.lineConsumer(new OutputStreamWriter(out, LineUtil.CHARSET_ISO_8859_1));
+        return LineUtil.lineConsumer(new OutputStreamWriter(out, StandardCharsets.ISO_8859_1));
     }
 
     /**
