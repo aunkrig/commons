@@ -39,8 +39,8 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.charset.Charset;
 import java.nio.charset.MalformedInputException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,10 +68,6 @@ public
 class HttpRequest extends HttpMessage {
 
     private static final Logger LOGGER = Logger.getLogger(HttpRequest.class.getName());
-
-    private static final Charset CHARSET_UTF_8 = Charset.forName("UTF-8");
-
-    private static final Charset CHARSET_ISO_8859_1 = Charset.forName("ISO-8859-1");
 
     private static final Pattern REQUEST_LINE_PATTERN = (
         Pattern.compile("(\\p{Alpha}+) ([^ ]+)(?: HTTP/(\\d+\\.\\d+))?")
@@ -406,9 +402,9 @@ class HttpRequest extends HttpMessage {
             PercentEncodingOutputStream peos = new PercentEncodingOutputStream(baos);
             for (;;) {
                 Entry<String, String> e = it.next();
-                new OutputStreamWriter(peos, CHARSET_UTF_8).write(e.getKey());
+                new OutputStreamWriter(peos, StandardCharsets.UTF_8).write(e.getKey());
                 peos.writeUnencoded('=');
-                new OutputStreamWriter(peos, CHARSET_UTF_8).write(e.getValue());
+                new OutputStreamWriter(peos, StandardCharsets.UTF_8).write(e.getValue());
                 if (!it.hasNext()) break;
                 peos.writeUnencoded('&');
             }
@@ -506,11 +502,11 @@ class HttpRequest extends HttpMessage {
 
             // According to https://tools.ietf.org/html/rfc3986#section-2.5, "... the data should first be encoded as
             // octets according to the UTF-8 character encoding".
-            return Readers.readAll(new InputStreamReader(is, CHARSET_UTF_8));
+            return Readers.readAll(new InputStreamReader(is, StandardCharsets.UTF_8));
         } catch (MalformedInputException mie) {
 
             // Bytes could not be UTF-8-decoded, so fall back to ISO 8859-1.
-            return Readers.readAll(new InputStreamReader(is, CHARSET_ISO_8859_1));
+            return Readers.readAll(new InputStreamReader(is, StandardCharsets.ISO_8859_1));
         }
     }
 
@@ -545,7 +541,7 @@ class HttpRequest extends HttpMessage {
             if (!"0.9".equals(this.httpVersion)) requestLine += " HTTP/" + this.httpVersion;
             LOGGER.fine(loggingPrefix + requestLine);
 
-            Writer w = new OutputStreamWriter(out, Charset.forName("ASCII"));
+            Writer w = new OutputStreamWriter(out, StandardCharsets.US_ASCII);
             w.write(requestLine + "\r\n");
             w.flush();
         }

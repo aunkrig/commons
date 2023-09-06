@@ -46,6 +46,7 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -817,7 +818,7 @@ class HttpMessage {
         }
         return DEFAULT_CHARSET;
     }
-    private static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
+    private static final Charset DEFAULT_CHARSET = StandardCharsets.ISO_8859_1;
 
     /**
      * Writes this message's headers and body to the given {@link OutputStream}. Also closes the {@link OutputStream}
@@ -961,7 +962,7 @@ class HttpMessage {
     private void
     writeHeaders(String loggingPrefix, OutputStream out) throws IOException {
 
-        Writer w = new OutputStreamWriter(out, Charset.forName("ASCII"));
+        Writer w = new OutputStreamWriter(out, StandardCharsets.US_ASCII);
 
         // Headers and blank line.
         for (MessageHeader header : this.getHeaders()) {
