@@ -26,16 +26,23 @@
 
 package de.unkrig.commons.net.ftp;
 
+import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.FilterInputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,6 +52,7 @@ import de.unkrig.commons.lang.protocol.ConsumerWhichThrows;
 import de.unkrig.commons.lang.protocol.ProducerWhichThrows;
 import de.unkrig.commons.net.ftp.FtpServer.CommandCode;
 import de.unkrig.commons.nullanalysis.Nullable;
+import de.unkrig.commons.util.collections.MapUtil;
 
 /**
  * An FTP client.
@@ -52,11 +60,48 @@ import de.unkrig.commons.nullanalysis.Nullable;
 public
 class FtpClient {
 
-    public
+	// Example:
+	// drwxr-x---  35 ftp      ftp          8192 Mar 11 22:14 ..
+	private static final Pattern
+	DIR_LINE_PATTERN = Pattern.compile("(..........) +\\d+ +(\\w+) +(\\w+) +(\\d+) (\\w\\w\\w) +(\\d+) +(?:(\\d+):(\\d+)|(\\d+)) +(.*)");
+
+	private static final Map<String, Integer>
+	MONTH_NAME_TO_INT = MapUtil.map(
+		"Jan", 1,
+		"Feb", 2,
+		"Mar", 3,
+		"Apr", 4,
+		"May", 5,
+		"Jun", 6,
+		"Jul", 7,
+		"Aug", 8,
+		"Sep", 9,
+		"Oct", 10,
+		"Nov", 11,
+		"Dec", 12
+	);
+
+	private static final Map<Integer, String>
+	INT_TO_MONTH_NAME = MapUtil.map(
+		1,  "Jan",
+		2,  "Feb",
+		3,  "Mar",
+		4,  "Apr",
+		5,  "May",
+		6,  "Jun",
+		7,  "Jul",
+		8,  "Aug",
+		9,  "Sep",
+		10, "Oct",
+		11, "Nov",
+		12, "Dec"
+	);
+
+	public
     FtpClient(InputStream controlIn, OutputStream controlOut, InetAddress controlLocalAddress)
     throws IOException {
-        this.controlIn           = LineUtil.lineProducerISO8859_1(controlIn);
-        this.controlOut          = LineUtil.lineConsumerISO8859_1(controlOut);
+        this.controlIn           = LineUtil.lineProducerUtf8(controlIn);
+        this.controlOut          = LineUtil.lineConsumerUtf8(controlOut);
         this.controlLocalAddress = controlLocalAddress;
 
         this.receiveReply();
@@ -75,11 +120,21 @@ class FtpClient {
     login(String user, String password) throws IOException {
 
         this.sendCommand(CommandCode.USER, user);
-        if (this.receiveReply(230, 331) == 331) {
+        if (this.receiveReply(230, 331).statusCode == 331) {
 
             this.sendCommand(CommandCode.PASS, password);
             this.receiveReply(230, 202);
         }
+    }
+    
+    /**
+     * Gets the remote working directory.
+     */
+    public String
+    getWorkingDirectory() throws IOException {
+    	
+    	this.sendCommand(CommandCode.PWD);
+    	return this.receiveReply(250, 257).text;
     }
 
     /**
@@ -93,11 +148,14 @@ class FtpClient {
     }
 
     /**
-     * Switches fro ACTIVE to PASSIVE mode.
+     * Switches from ACTIVE to PASSIVE mode.
      */
     public void
     passive() throws IOException {
-        ServerSocket adcss = this.activeDataConnectionServerSocket;
+
+    	LOGGER.fine("Switching to passive mode");
+
+    	ServerSocket adcss = this.activeDataConnectionServerSocket;
         if (adcss != null) {
             adcss.close();
             this.activeDataConnectionServerSocket = null;
@@ -121,10 +179,15 @@ class FtpClient {
     }
 
     /**
+     * Creates a new passive socket for an active data transfer on the given port.
+     * 
      * @param port Pass 0 to pick an ephemeral port.
      */
     public void
     active(int port) throws IOException {
+
+    	LOGGER.fine("Switching to active mode");
+
         {
             ServerSocket adcss = this.activeDataConnectionServerSocket;
             if (adcss != null) {
@@ -132,6 +195,7 @@ class FtpClient {
                 this.activeDataConnectionServerSocket = null;
             }
         }
+    	this.passiveDataRemoteSocketAddress = null;
 
         ServerSocket adcss = (
             this.activeDataConnectionServerSocket = new ServerSocket(port, 1, this.controlLocalAddress)
@@ -153,8 +217,38 @@ class FtpClient {
 
         this.dataTransferMode = DataTransferMode.ACTIVE;
     }
+    
+    /**
+     * Creates a remote resource, in {@link #active(int)} or {@link #passive()} data transfer mode.
+     * The caller is responsible for closing the returned {@link OutputStream}.
+     */
+    public OutputStream
+    store(String fileName) throws IOException {
+    	
+    	// Switch to BINARY mode.
+    	this.sendCommand(CommandCode.TYPE, "I");
+    	this.receiveReply(200);
+    	
+    	// Open the data connection for the retrieval.
+    	final Socket dataSocket = this.dataConnection();
+    	
+    	this.sendCommand(CommandCode.STOR, fileName);
+    	
+    	// Return an InputStream which automagically closes the data connection.
+    	return new FilterOutputStream(dataSocket.getOutputStream()) {
+    		
+    		@Override public void
+    		close() throws IOException {
+    			FtpClient.this.receiveReply(226, 250);
+    			LOGGER.fine("File storage complete, closing data connection");
+    			super.close();
+    			dataSocket.close();
+    		}
+    	};
+    }
 
     /**
+     * Retrieves the content of a remote resource, in {@link #active(int)} or {@link #passive()} data transfer mode.
      * The caller is responsible for closing the returned {@link InputStream}.
      */
     public InputStream
@@ -182,7 +276,191 @@ class FtpClient {
         };
     }
 
-    /**
+    public ProducerWhichThrows<String, IOException>
+    list(@Nullable String name) throws IOException {
+    	
+    	LOGGER.fine(name == null ? "Listing cwd" : "Listing dir \"" + name + "\"");
+
+    	// Switch to BINARY mode.
+    	this.sendCommand(CommandCode.TYPE, "I");
+    	this.receiveReply(200);
+    	
+    	// Open the data connection for the retrieval.
+    	final Socket dataSocket = this.dataConnection();
+    	
+    	this.sendCommand(CommandCode.LIST, name);
+    	
+    	BufferedReader br = new BufferedReader(new InputStreamReader(dataSocket.getInputStream(), StandardCharsets.US_ASCII));
+
+    	return new ProducerWhichThrows<String, IOException>() {
+
+    		int n;
+
+    		@Override @Nullable public String
+			produce() throws IOException {
+				String line = br.readLine();
+				if (line == null) {
+					LOGGER.fine("Listing complete after " + this.n + " entries");
+					br.close();
+					dataSocket.close();
+					FtpClient.this.receiveReply(226);
+					return null;
+				}
+				this.n++;
+				return line;
+			}
+		};
+    }
+    
+    public ProducerWhichThrows<String, IOException>
+    nlist(@Nullable String name) throws IOException {
+    	
+    	LOGGER.fine(name == null ? "Nlisting cwd" : "Nlisting dir \"" + name + "\"");
+    	
+    	// Switch to BINARY mode.
+    	this.sendCommand(CommandCode.TYPE, "I");
+    	this.receiveReply(200);
+    	
+    	// Open the data connection for the retrieval.
+    	final Socket dataSocket = this.dataConnection();
+    	
+    	this.sendCommand(CommandCode.NLST, name);
+    	
+    	BufferedReader br = new BufferedReader(new InputStreamReader(dataSocket.getInputStream(), StandardCharsets.US_ASCII));
+    	
+    	return new ProducerWhichThrows<String, IOException>() {
+    		
+    		int n;
+
+    		@Override @Nullable public String
+    		produce() throws IOException {
+    			String line = br.readLine();
+    			if (line == null) {
+    				LOGGER.fine("Listing complete after " + this.n + " entries");
+    				br.close();
+    				dataSocket.close();
+    				FtpClient.this.receiveReply(226);
+    				return null;
+    			}
+    			this.n++;
+    			return line;
+    		}
+    	};
+    }
+
+	public void
+	delete(String resourceName) throws IOException {
+		this.sendCommand(CommandCode.DELE, resourceName);
+		this.receiveReply(200);
+	}
+
+	public void
+	rename(String from, String to) throws IOException {
+		this.sendCommand(CommandCode.RNFR, from);
+		this.receiveReply(300);
+		this.sendCommand(CommandCode.RNTO, to);
+		this.receiveReply(200);
+	}
+
+	public static String
+	serializeDirEntry(DirEntry dirEntry) {
+
+		String ndel;
+		GregorianCalendar cal = new GregorianCalendar();
+		cal.setTime(dirEntry.mtime);
+
+		int currentYear = GregorianCalendar.from(ZonedDateTime.now()).get(GregorianCalendar.YEAR);
+
+		// Line example:
+		// drwxr-x---  35 ftp      ftp          8192 Mar 11 22:14 ..
+		// drwxr-x---  35 ftp      ftp          8192 Mar 11  2011 foo.txt
+		ndel = String.format(
+			"%crwxr-x---   1 %-8s %-8s %8d %s %2d %5s %s",
+			dirEntry.isDir ? 'd' : '-',
+			dirEntry.group.substring(0, Math.min(dirEntry.group.length(), 8)),
+			dirEntry.user.substring(0, Math.min(dirEntry.user.length(), 8)),
+			dirEntry.length,
+			FtpClient.INT_TO_MONTH_NAME.get(cal.get(GregorianCalendar.MONTH) + 1),
+			cal.get(GregorianCalendar.DAY_OF_MONTH),
+			(
+				cal.get(GregorianCalendar.YEAR) == currentYear
+				? String.format("%d:%02d", cal.get(GregorianCalendar.HOUR_OF_DAY), cal.get(GregorianCalendar.MINUTE))
+				: cal.get(GregorianCalendar.YEAR)
+			),
+			dirEntry.name
+		);
+		return ndel;
+	}
+
+    public static DirEntry
+    deserializeDirEntry(String line) throws IOException {
+
+        LOGGER.fine("Deserializing dir entry line \"" + line + "\"");
+
+    	Matcher m = DIR_LINE_PATTERN.matcher(line);
+		if (!m.matches()) throw new IOException("Unrecognized listing line format \"" + line + "\"");
+
+		String permissions = m.group(1);
+		String user        = m.group(2);
+		String group       = m.group(3);
+		String length      = m.group(4);
+		String monthName   = m.group(5);
+		String dayOfMonth  = m.group(6);
+		String hourOfDay   = m.group(7);
+		String minute      = m.group(8);
+		String year        = m.group(9);
+		String fileName    = m.group(10);
+		
+		int currentYear = GregorianCalendar.from(ZonedDateTime.now()).get(GregorianCalendar.YEAR);
+		return new DirEntry(
+			permissions.charAt(0) == 'd', // isDir
+			user,                         // user
+			group,                        // group
+			Long.parseLong(length),       // length
+			new GregorianCalendar(        // mtime
+				year == null ? currentYear : Integer.parseInt(year), // year
+				MONTH_NAME_TO_INT.get(monthName) - 1,                // month
+				Integer.parseInt(dayOfMonth),                        // dayOfMonth
+				hourOfDay == null ? 0 : Integer.parseInt(hourOfDay), // hourOfDay
+				minute == null ? 0 : Integer.parseInt(minute),       // minute
+				0                                                    // second
+			).getTime(),
+			fileName                      // fileName
+		);
+    }
+
+    public static
+    class DirEntry {
+    	public DirEntry(
+			boolean isDir,
+	    	String  user,
+	    	String  group,
+	    	long    length,
+	    	Date    mtime,
+	    	String  name
+		) {
+    		this.isDir  = isDir;
+        	this.user   = user;
+        	this.group  = group;
+        	this.length = length;
+        	this.mtime  = mtime;
+        	this.name   = name;
+    	}
+    	public final boolean isDir;
+    	public final String  user;
+    	public final String  group;
+    	public final long    length;
+    	public final Date    mtime;
+    	public final String  name;
+    }
+
+    public void
+    site(String s) throws IOException {
+        this.sendCommand(CommandCode.SITE, s);
+        this.receiveReply(220);
+    }
+
+        /**
      * Releases all resources associated with the connection to the FTP server, specifically an open data
      * connection.
      */
@@ -215,7 +493,7 @@ class FtpClient {
 
         @Override public String
         toString() {
-            return this.statusCode + " " + this.text;
+            return this.statusCode + this.text;
         }
     }
 
@@ -269,40 +547,42 @@ class FtpClient {
     }
 
     private void
-    sendCommand(CommandCode commandCode, String argument) throws IOException {
+    sendCommand(CommandCode commandCode, @Nullable String argument) throws IOException {
+    	
+        LOGGER.fine(">>> " + commandCode + (
+    		argument == null ? "" :
+			commandCode == CommandCode.PASS ? " ***" :
+			" " + argument
+		));
+        
         String line = commandCode + " " + argument;
-        LOGGER.fine(">>> " + line);
         this.controlOut.consume(line);
     }
 
     /**
-     * @return The text of the reply
+     * @param statusCode   The expected status code
+     * @return             The text of the reply
+     * @throws IOException Unexpected status code received
      */
     private String
     receiveReply(int statusCode) throws IOException {
         Reply reply = this.receiveReply();
         if (reply.statusCode == statusCode) return reply.text;
 
-        throw new IOException("Expected reply '" + reply + "'");
+        throw new FtpException(reply.statusCode, reply.text);
     }
 
     /**
      * @return One of the <var>statusCodes</var>
      */
-    private int
+    private Reply
     receiveReply(int... statusCodes) throws IOException {
         Reply reply = this.receiveReply();
         for (int statusCode : statusCodes) {
-            if (reply.statusCode == statusCode) return statusCode;
+            if (reply.statusCode == statusCode) return reply;
         }
 
-        throw new IOException(
-            "Expected reply with on of status codes "
-            + Arrays.toString(statusCodes)
-            + " instead of '"
-            + reply
-            + "'"
-        );
+        throw new FtpException(reply.statusCode, reply.text);
     }
 
     private Reply
@@ -315,7 +595,7 @@ class FtpClient {
                 LOGGER.fine("Socket end-of-input");
                 throw new EOFException();
             }
-            LOGGER.fine("Received reply '" + line + "'");
+            LOGGER.fine("<<< '" + line + "'");
 
             // Scan the reply line.
             Matcher matcher = Pattern.compile("(\\d\\d\\d)([ \\-])+(.*)").matcher(line);
@@ -323,17 +603,28 @@ class FtpClient {
                 throw new IOException("Invalid reply '" + line + "' received");
             }
             int    statusCode = Integer.parseInt(matcher.group(1));
+            String separator  = matcher.group(2);
             String statusText = matcher.group(3);
 
             // Handle multi-line reply.
-            if ("-".equals(matcher.group(2))) {
+			if ("-".equals(separator)) {
                 for (;;) {
                     line = this.controlIn.produce();
                     if (line == null) {
                         LOGGER.fine("Socket end-of-input in the middle of a multi-line reply");
                         throw new IOException("Socket end-of-input in the middle of a multi-line reply");
                     }
-                    if (line.startsWith(matcher.group(1))) break;
+                    LOGGER.fine("<<< '" + line + "'");
+                    if (line.startsWith(statusCode + " ")) {
+                    	statusText += "\n" + line.substring(4);
+                    	break;
+                    } else
+                	if (line.startsWith(statusCode + "-")) {
+                		statusText += "\n" + line.substring(4);
+                	} else
+                    {
+                    	statusText += "\n" + line;
+                    }
                 }
             }
 
