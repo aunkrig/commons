@@ -35,6 +35,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -62,7 +63,7 @@ class UrlConnections {
      *  Canonicalization and Text Defaults".
      *</p>
      */
-    public static final Charset HTTP_DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
+    public static final Charset HTTP_DEFAULT_CHARSET = StandardCharsets.ISO_8859_1;
 
     private
     UrlConnections() {}
@@ -186,7 +187,7 @@ class UrlConnections {
 
         InputStream errorStream = httpConn.getErrorStream();
         if (errorStream != null) {
-            sb.append(Readers.readAll(new InputStreamReader(errorStream, Charset.forName("ISO-8859-1"))));
+            sb.append(Readers.readAll(new InputStreamReader(errorStream, StandardCharsets.ISO_8859_1)));
         }
 
         return new IOException(sb.toString(), cause);
