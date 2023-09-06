@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,7 +92,7 @@ class ChunkedOutputStream extends FilterOutputStream {
     @Override public void
     close() throws IOException {
 
-        Writer w = new OutputStreamWriter(this.out, Charset.forName("ISO-8859-1"));
+        Writer w = new OutputStreamWriter(this.out, StandardCharsets.ISO_8859_1);
         {
             // Write "last chunk".
             w.write("0\r\n");
