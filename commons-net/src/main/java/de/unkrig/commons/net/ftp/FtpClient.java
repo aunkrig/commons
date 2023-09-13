@@ -280,6 +280,34 @@ class FtpClient {
         
     }
 
+    /**
+     * Like {@link #list(String)}, but, as an additional service, deserializes the received directory listing lines.
+     */
+    public ProducerWhichThrows<DirEntry, IOException>
+    listEntries(@Nullable String name) throws IOException {
+    	
+    	final ProducerWhichThrows<String, IOException> lineProducer = this.list(name);
+    	
+    	return new ProducerWhichThrows<DirEntry, IOException>() {
+
+			@Override @Nullable public DirEntry
+			produce() throws IOException {
+				
+				String line = lineProducer.produce();
+				if (line == null) return null;
+				
+				return FtpClient.deserializeDirEntry(line);
+			}
+		};
+    }
+
+    /**
+     * Lists a given remote directory or file. The returned producer produces directory listing lines, and after these
+     * {@code null}.
+     * <p>
+     *   Notice that the format of a listing is notoriously server-dependent.
+     * </p>
+     */
     public ProducerWhichThrows<String, IOException>
     list(@Nullable String name) throws IOException {
     	
@@ -311,7 +339,7 @@ class FtpClient {
 					FtpClient.this.receiveReply(226);
 					return null;
 				}
-    			LOGGER.fine("Received listing line #" + n + ": " + line);
+    			LOGGER.fine("Received listing line #" + this.n + ": " + line);
 				this.n++;
 				return line;
 			}
@@ -342,13 +370,13 @@ class FtpClient {
     		produce() throws IOException {
     			String line = br.readLine();
     			if (line == null) {
-    				LOGGER.fine("Listing complete after " + this.n + " entries");
+    				LOGGER.fine("Nlisting complete after " + this.n + " liness");
     				br.close();
     				dataSocket.close();
     				FtpClient.this.receiveReply(226);
     				return null;
     			}
-    			LOGGER.fine("Received nlisting line #" + n + ": " + line);
+    			LOGGER.fine("Received nlisting line #" + this.n + ": " + line);
     			this.n++;
     			return line;
     		}
