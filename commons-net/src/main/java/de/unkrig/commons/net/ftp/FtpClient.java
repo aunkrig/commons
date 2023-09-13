@@ -262,18 +262,22 @@ class FtpClient {
         final Socket dataSocket = this.dataConnection();
 
         this.sendCommand(CommandCode.RETR, fileName);
+        this.receiveRawReply(150);
 
         // Return an InputStream which automagically closes the data connection.
         return new FilterInputStream(dataSocket.getInputStream()) {
 
             @Override public void
             close() throws IOException {
-                FtpClient.this.receiveReply(226, 250);
                 LOGGER.fine("File retrieval complete, closing data connection");
+                
+                // Close data connection FIRST, THEN wait for 226 response.
                 super.close();
                 dataSocket.close();
+                FtpClient.this.receiveReply(226);
             }
         };
+        
     }
 
     public ProducerWhichThrows<String, IOException>
@@ -285,10 +289,11 @@ class FtpClient {
     	this.sendCommand(CommandCode.TYPE, "I");
     	this.receiveReply(200);
     	
-    	// Open the data connection for the retrieval.
+    	// Open the data connection for the dir listing.
     	final Socket dataSocket = this.dataConnection();
     	
     	this.sendCommand(CommandCode.LIST, name);
+    	this.receiveRawReply(150);
     	
     	BufferedReader br = new BufferedReader(new InputStreamReader(dataSocket.getInputStream(), StandardCharsets.US_ASCII));
 
@@ -300,12 +305,13 @@ class FtpClient {
 			produce() throws IOException {
 				String line = br.readLine();
 				if (line == null) {
-					LOGGER.fine("Listing complete after " + this.n + " entries");
+					LOGGER.fine("Listing complete after " + this.n + " lines");
 					br.close();
 					dataSocket.close();
 					FtpClient.this.receiveReply(226);
 					return null;
 				}
+    			LOGGER.fine("Received listing line #" + n + ": " + line);
 				this.n++;
 				return line;
 			}
@@ -342,6 +348,7 @@ class FtpClient {
     				FtpClient.this.receiveReply(226);
     				return null;
     			}
+    			LOGGER.fine("Received nlisting line #" + n + ": " + line);
     			this.n++;
     			return line;
     		}
@@ -457,7 +464,7 @@ class FtpClient {
     public void
     site(String s) throws IOException {
         this.sendCommand(CommandCode.SITE, s);
-        this.receiveReply(220);
+        this.receiveReply(220, 250);
     }
 
         /**
@@ -555,14 +562,13 @@ class FtpClient {
 			" " + argument
 		));
         
-        String line = commandCode + " " + argument;
-        this.controlOut.consume(line);
+        this.controlOut.consume(argument == null ? commandCode.toString() : commandCode + " " + argument);
     }
 
     /**
-     * @param statusCode   The expected status code
-     * @return             The text of the reply
-     * @throws IOException Unexpected status code received
+     * @param statusCode    The expected status code
+     * @return              The text of the reply
+     * @throws FtpException Unexpected status code received
      */
     private String
     receiveReply(int statusCode) throws IOException {
@@ -573,7 +579,9 @@ class FtpClient {
     }
 
     /**
-     * @return One of the <var>statusCodes</var>
+     * @param statusCodes   The expected status codes
+     * @return              One of the <var>statusCodes</var>
+     * @throws FtpException Unexpected status code received
      */
     private Reply
     receiveReply(int... statusCodes) throws IOException {
@@ -585,55 +593,77 @@ class FtpClient {
         throw new FtpException(reply.statusCode, reply.text);
     }
 
+    /**
+     * Receive replies until one has status code 200+.
+     */
     private Reply
     receiveReply() throws IOException {
         for (;;) {
 
-            // Read one reply line.
-            String line = this.controlIn.produce();
-            if (line == null) {
-                LOGGER.fine("Socket end-of-input");
-                throw new EOFException();
-            }
-            LOGGER.fine("<<< '" + line + "'");
-
-            // Scan the reply line.
-            Matcher matcher = Pattern.compile("(\\d\\d\\d)([ \\-])+(.*)").matcher(line);
-            if (!matcher.matches()) {
-                throw new IOException("Invalid reply '" + line + "' received");
-            }
-            int    statusCode = Integer.parseInt(matcher.group(1));
-            String separator  = matcher.group(2);
-            String statusText = matcher.group(3);
-
-            // Handle multi-line reply.
-			if ("-".equals(separator)) {
-                for (;;) {
-                    line = this.controlIn.produce();
-                    if (line == null) {
-                        LOGGER.fine("Socket end-of-input in the middle of a multi-line reply");
-                        throw new IOException("Socket end-of-input in the middle of a multi-line reply");
-                    }
-                    LOGGER.fine("<<< '" + line + "'");
-                    if (line.startsWith(statusCode + " ")) {
-                    	statusText += "\n" + line.substring(4);
-                    	break;
-                    } else
-                	if (line.startsWith(statusCode + "-")) {
-                		statusText += "\n" + line.substring(4);
-                	} else
-                    {
-                    	statusText += "\n" + line;
-                    }
-                }
-            }
+        	Reply reply = this.receiveRawReply();
 
             // Ignore 1XX replies.
-            if (statusCode >= 200) {
-
-                // Return the reply.
-                return new Reply(statusCode, statusText);
-            }
+            if (reply.statusCode >= 200) return reply;
         }
     }
+
+    /**
+     * Receive one reply (including 1xx status codes).
+     *
+     * @param statusCode    The expected status code
+     * @return              The text of the reply
+     * @throws FtpException Unexpected status code received
+     */
+    private String
+    receiveRawReply(int statusCode) throws IOException {
+        Reply reply = this.receiveRawReply();
+        if (reply.statusCode == statusCode) return reply.text;
+
+        throw new FtpException(reply.statusCode, reply.text);
+    }
+
+	private Reply
+	receiveRawReply() throws IOException {
+
+        // Read one reply line.
+        String line = this.controlIn.produce();
+        if (line == null) {
+            LOGGER.fine("Socket end-of-input");
+            throw new EOFException();
+        }
+        LOGGER.fine("<<< '" + line + "'");
+
+        // Scan the reply line.
+        Matcher matcher = Pattern.compile("(\\d\\d\\d)([ \\-])+(.*)").matcher(line);
+        if (!matcher.matches()) {
+            throw new IOException("Invalid reply '" + line + "' received");
+        }
+        int    statusCode = Integer.parseInt(matcher.group(1));
+        String separator  = matcher.group(2);
+        String statusText = matcher.group(3);
+
+        // Handle multi-line reply.
+		if ("-".equals(separator)) {
+            for (;;) {
+                line = this.controlIn.produce();
+                if (line == null) {
+                    LOGGER.fine("Socket end-of-input in the middle of a multi-line reply");
+                    throw new IOException("Socket end-of-input in the middle of a multi-line reply");
+                }
+                LOGGER.fine("<<< '" + line + "'");
+                if (line.startsWith(statusCode + " ")) {
+                	statusText += "\n" + line.substring(4);
+                	break;
+                } else
+            	if (line.startsWith(statusCode + "-")) {
+            		statusText += "\n" + line.substring(4);
+            	} else
+                {
+                	statusText += "\n" + line;
+                }
+            }
+        }
+		
+        return new Reply(statusCode, statusText);
+	}
 }

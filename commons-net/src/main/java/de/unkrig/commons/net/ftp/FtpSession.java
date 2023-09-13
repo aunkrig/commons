@@ -252,10 +252,9 @@ class FtpSession implements RunnableWhichThrows<IOException> {
 	
 	                case PASV:
 	                    {
-	                        ServerSocket pdcss = this.passiveDataConnectionServerSocket;
-	                        if (pdcss == null) {
-	                            pdcss = (this.passiveDataConnectionServerSocket = new ServerSocket(0, 1));
-	                        }
+	                    	assert this.passiveDataConnectionServerSocket == null;
+	                        ServerSocket pdcss = (this.passiveDataConnectionServerSocket = new ServerSocket(0, 1));
+
 	                        InetSocketAddress localSocketAddress = (InetSocketAddress) pdcss.getLocalSocketAddress();
 	                        byte[]            address            = this.interfacE.getAddress();
 	                        int               port               = localSocketAddress.getPort();
@@ -328,6 +327,7 @@ class FtpSession implements RunnableWhichThrows<IOException> {
             		
             		// Don't terminate the processing loop on FtpExceptions. These are "soft errors" which indicate
             		// that an operation was unsuccessful, but the session can continue.
+                    LOGGER.fine("FtpException");
             		this.sendReply(fe.getStatusCode() + " " + fe.getMessage());
             	}
             }
@@ -374,18 +374,21 @@ class FtpSession implements RunnableWhichThrows<IOException> {
             assert pdcss != null;
             LOGGER.fine("Accepting data connection on '" + pdcss.getLocalSocketAddress() + "'");
             dataSocket = pdcss.accept();
+            pdcss.close();
+            this.passiveDataConnectionServerSocket = null;
+            this.sendReply("150 File status okay; about to open data connection.");
         } else {
             InetSocketAddress adrsa = this.activeDataRemoteSocketAddress;
             assert adrsa != null;
             LOGGER.fine("Creating data connection to '" + adrsa + "'");
             dataSocket = new Socket(adrsa.getAddress(), adrsa.getPort());
+            this.sendReply("125 Data connection created; Transfer starting.");
         }
 
         if (this.transmissionMode != TransmissionMode.STREAM) { // TODO Transmission modes other than STREAM
             throw new IOException("Transmission mode '" + this.transmissionMode + "' NYI");
         }
 
-        this.sendReply("125 Data connection created; Transfer starting.");
         try {
 
             // Execute the action on the data connection.
@@ -448,7 +451,7 @@ class FtpSession implements RunnableWhichThrows<IOException> {
             } catch (IllegalArgumentException iae) {
             	;
             }
-            this.sendReply("500 '" + code + "': command not understood.");
+            this.sendReply("500 '" + code + " " + argument + "': command not understood.");
         }
     }
 
