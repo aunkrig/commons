@@ -809,45 +809,47 @@ class CommandLineOptions {
     }
 
     /**
-     * Determines the method of {@code target.getClass()} that is applicable for the given <var>optionName</var>. The
+     * Determines the method of <var>targetClass</var> that is applicable for the given <var>optionName</var>. The
      * rules for matching are as follows:
      * <ul>
      *   <li>The method must be annotated with {@link CommandLineOption @CommandLineOption}.</li>
      *   <li>
-     *     If that annotation has the "{@code name}" element:
+     *     If that annotation has the {@link CommandLineOption#name() name} element:
      *     <ul>
      *       <li>
-     *         If the {@code name} value starts with "-":
+     *         If the {@link CommandLineOption#name() name} value starts with "-":
      *         <ul>
      *           <li>
-     *             The <var>optionName</var> equals the {@code name} value.
+     *             The <var>optionName</var> equals the {@link CommandLineOption#name() name} value.
      *           </li>
      *         </ul>
      *       </li>
      *       <li>
-     *         Otherwise, if the {@code name} value does not start with "-":
+     *         Otherwise:
      *         <ul>
      *           <li>
-     *             The <var>optionName</var> equals {@code "-"+name} or {@code "--"+name}
+     *             The <var>optionName</var> equals {@code "-"+}{@link CommandLineOption#name() name} or {@code
+     *             "--"+}{@link CommandLineOption#name() name}
      *           </li>
      *         </ul>
      *       </li>
      *     </ul>
-     *     Example:
+     *     <b>Example:</b>
      *     <br />
      *     <code>@CommandLineOption(name = { "alpha", "-beta" }) public void method() { ...</code>
      *     <br />
      *     matches if <var>optionName</var> is {@code "-alpha"}, {@code "--alpha"} and {@code "-beta"}.
      *   </li>
      *   <li>
-     *     Otherwise, if that annotation does not have the "{@code name}" element:
+     *     Otherwise:
      *     <ul>
      *       <li>
      *         The method name, with an optional "set" or "add" prefix removed, then converted to {@link
      *         Phrase#toLowerCaseHyphenated() lower-case-hyphenated}, then prefixed with "-" and "--", equals the
      *         <var>optionName</var>.
      *         <br />
-     *         Example: Method name "setFooBar()" matches if <var>optionName</var> is "-foo-bar" or "--foo-bar".
+     *         <b>Example:</b> Method name "setFooBar" matches if <var>optionName</var> is {@code "-foo-bar"} or {@code
+     *         "--foo-bar"}.
      *       </li>
      *     </ul>
      *   </li>
