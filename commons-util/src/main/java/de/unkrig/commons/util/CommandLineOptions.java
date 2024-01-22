@@ -93,7 +93,7 @@ class CommandLineOptions {
     /**
      * Detects a "command line option", i.e. a "-" followed by at least one character.
      */
-    private static final Pattern REGEX_OPTION = Pattern.compile("-.+");
+    private static final Pattern REGEX_OPTION = Pattern.compile("-\\S.*");
 
     /**
      * Detects a "compact command lime option", like "-lar" for the UNIX "ls" command.
