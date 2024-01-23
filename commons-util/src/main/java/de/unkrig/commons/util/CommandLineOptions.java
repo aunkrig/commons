@@ -93,7 +93,7 @@ class CommandLineOptions {
     /**
      * Detects a "command line option", i.e. a "-" followed by at least one character.
      */
-    private static final Pattern REGEX_OPTION = Pattern.compile("-\\S.*");
+    private static final Pattern REGEX_OPTION = Pattern.compile("--?\\w[\\w\\-]*");
 
     /**
      * Detects a "compact command lime option", like "-lar" for the UNIX "ls" command.
@@ -757,7 +757,12 @@ class CommandLineOptions {
             }
 
             // At this point, the target type is "primitive", i.e. it maps to exactly ONE command line arg.
-            if (ss.peek(CommandLineOptions.REGEX_OPTION)) throw new UnrecognizedOption(ss.peek());
+
+            // If the argument "looks like an option", then the user most probably forgot to provide the argument.
+            // The workaround is to put "--" right before the argument.
+            if (!ss.peekRead("--") && ss.peek(CommandLineOptions.REGEX_OPTION)) {
+            	throw new UnexpectedElementException(ss.peek());
+            }
 
             // Special case: Target type "java.util.Pattern".
             if (targetType == Pattern.class) {

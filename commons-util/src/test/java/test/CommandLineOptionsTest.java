@@ -45,6 +45,7 @@ import de.unkrig.commons.nullanalysis.Nullable;
 import de.unkrig.commons.util.CommandLineOptionException;
 import de.unkrig.commons.util.CommandLineOptionException.ConflictingOptions;
 import de.unkrig.commons.util.CommandLineOptionException.DuplicateOption;
+import de.unkrig.commons.util.CommandLineOptionException.OptionArgumentMissing;
 import de.unkrig.commons.util.CommandLineOptionException.RequiredOptionGroupMissing;
 import de.unkrig.commons.util.CommandLineOptionException.RequiredOptionMissing;
 import de.unkrig.commons.util.CommandLineOptionException.UnrecognizedOption;
@@ -151,13 +152,13 @@ class CommandLineOptionsTest {
         }
     }
 
-    @Test(expected = UnrecognizedOption.class) public void
+    @Test(expected = OptionArgumentMissing.class) public void
     test4() throws CommandLineOptionException {
         Assert.assertArrayEquals(
             new String[0],
             CommandLineOptions.parse(new String[] {
                 "-bar1", "11",
-                "-bar2", "22", "222", "-ff", // The third argument to "-bar2" lloks like an option => UnrecognizedOption exception
+                "-bar2", "22", "222", "-ff", // The third argument to "-bar2" lloks like an option => OptionArgumentMissing exception
             }, new Foo1())
         );
     }
@@ -447,7 +448,7 @@ class CommandLineOptionsTest {
         Assert.assertEquals(-1, foo12.intValue);
         Assert.assertEquals("value", foo12.value);
     }
-    @Test(expected = UnrecognizedOption.class) public void
+    @Test(expected = OptionArgumentMissing.class) public void
     testInvalidBeanOption3() throws CommandLineOptionException {
         CommandLineOptions.parse(new String[] {
             "--bean1",
@@ -483,5 +484,65 @@ class CommandLineOptionsTest {
     class Bean12 {
         @Nullable public String value;
         @CommandLineOption public void setValue(String value) { this.value = value; }
+    }
+
+    // -----------------------------------------------
+
+    @Test(expected = OptionArgumentMissing.class) public void
+    testOptionArgumentThatLooksLikeAnOption1() throws CommandLineOptionException {
+    	// "-value1" is not acceptable as an option argument because it looks too much like a following option.
+    	Assert.assertEquals(0, CommandLineOptions.parse(new String[] {
+			"--property1", "-value1",
+    	}, new Bean1()).length);
+    }
+    @Test public void
+    testOptionArgumentThatLooksLikeAnOption2() throws CommandLineOptionException {
+    	// "-value1" is acceptable as an option argument iff it is preceded with "--".
+    	Bean1 b = new Bean1();
+		Assert.assertEquals(0, CommandLineOptions.parse(new String[] {
+            "--property1", "--", "-value1",
+        }, b).length);
+		Assert.assertEquals("-value1", b.property1);
+    }
+    public static
+    class Bean1 {
+    	@Nullable String property1;
+    	@CommandLineOption public void setProperty1(String  value) { this.property1 = value;}
+    }
+
+    // -----------------------------------------------
+
+    @Test(expected = OptionArgumentMissing.class) public void
+    testSuboptionArgumentThatLooksLikeAnOption1() throws CommandLineOptionException {
+    	// "-value" is not acceptable as an option argument because it looks too much like a following option.
+    	Assert.assertEquals(0, CommandLineOptions.parse(new String[] {
+			"--property2", "--suboption", "-value",
+			"--property3", "value3",
+    	}, new Bean2()).length);
+    }
+    @Test public void
+    testSuboptionArgumentThatLooksLikeAnOption2() throws CommandLineOptionException {
+    	// "-value" is acceptable as an option argument iff it is preceded with "--".
+    	Bean2 b = new Bean2();
+    	Assert.assertEquals(0, CommandLineOptions.parse(new String[] {
+			"--property2", "--suboption", "--", "-value",
+			"--property3", "value3",
+    	}, b).length);
+    	BarBean p2 = b.property2;
+		Assert.assertNotNull(p2);
+    	Assert.assertEquals("-value", p2.suboption);
+    	Assert.assertEquals("value3", b.property3);
+    }
+    public static
+    class Bean2 {
+		@Nullable BarBean property2;
+		@Nullable String  property3;
+    	@CommandLineOption public void setProperty2(BarBean value) { this.property2 = value; }
+    	@CommandLineOption public void setProperty3(String  value) { this.property3 = value;}
+    }
+    public static
+    class BarBean {
+    	@Nullable private String suboption;
+		@CommandLineOption public void setSuboption(String value) { this.suboption = value; }
     }
 }
