@@ -4,7 +4,7 @@
 
   <groupId>de.unkrig.commons</groupId>
   <artifactId>commons-parent</artifactId>
-  <version>1.2.19-SNAPSHOT</version>
+  <version>1.2.19</version>
   <packaging>pom</packaging>
 
   <name>commons-parent</name>
@@ -102,6 +102,7 @@
         </executions>
 
         <configuration>
+          <source>8</source>
           <author>false</author>
           <use>false</use>
           <version>false</version>
