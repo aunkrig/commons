@@ -274,11 +274,11 @@ class PatternUtilTest extends TestCase {
     testAppend() throws Exception, RuntimeException {
     	StringBuilder sb = new StringBuilder();
 		int count = PatternUtil.replaceSome(
-            new StringReader("line1\nline2\n"),                             // in
-            Pattern.compile("\\z"),                                         // pattern
-            PatternUtil.replacementStringMatchReplacer("\n#IS_STRIPPED\n"), // matchReplacer
-            sb,                                                             // out
-            8192                                                            // bufferCapacity
+            new StringReader("line1\nline2\n"),                                               // in
+            Pattern.compile("\\z"),                                                           // pattern
+            PatternUtil.<RuntimeException>replacementStringMatchReplacer("\n#IS_STRIPPED\n"), // matchReplacer
+            sb,                                                                               // out
+            8192                                                                              // bufferCapacity
         );
 		Assert.assertEquals(1, count);
 		Assert.assertEquals("line1\nline2\n\n#IS_STRIPPED\n", sb.toString());
