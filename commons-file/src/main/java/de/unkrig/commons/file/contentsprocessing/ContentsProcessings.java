@@ -478,7 +478,7 @@ class ContentsProcessings {
 
     /**
      * Expands the given <var>pattern</var> (which is typeically created with {@link Pattern2#compile(String, int)})
-     * to a set of contents, which are passed to the <var>fp</var>. Notice that directories, archives and compressed
+     * to a set of contents, which are passed to the <var>cp</var>. Notice that directories, archives and compressed
      * files are <em>not</em> contents.
      * <p>
      *   Examples:
