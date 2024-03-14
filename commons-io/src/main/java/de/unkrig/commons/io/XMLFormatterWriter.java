@@ -36,15 +36,15 @@ import de.unkrig.commons.nullanalysis.NotNullByDefault;
  * This {@link FilterWriter} scans the character stream for tags and inserts "artificial" line breaks as follows:
  * <dl>
  *   <dt>{@code <a><b}
- *   <dd>Wrap between '>' and '<' and indent
+ *   <dd>Wrap between '&gt;' and '&lt;' and indent
  *   <dt>{@code </a><b}
- *   <dd>Wrap between '>' and '<'
+ *   <dd>Wrap between '&gt;' and '&lt;'
  *   <dt>{@code <a/><b}
- *   <dd>Wrap between '>' and '<'
+ *   <dd>Wrap between '&gt;' and '&lt;'
  *   <dt>{@code </a></b}
- *   <dd>Wrap between '>' and '<' and unindent
+ *   <dd>Wrap between '&gt;' and '&lt;' and unindent
  *   <dt>{@code <a/></b}
- *   <dd>Wrap between '>' and '<' and unindent
+ *   <dd>Wrap between '&gt;' and '&lt;' and unindent
  * </dl>
  */
 @NotNullByDefault(false) public

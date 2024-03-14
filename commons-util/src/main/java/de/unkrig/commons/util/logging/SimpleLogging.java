@@ -163,7 +163,7 @@ class SimpleLogging {
      * Sets up the default configuration.
      * <ul>
      *   <li>
-     *     Messages with levels >= {@link Level#WARNING WARNING} are printed to STDERR.
+     *     Messages with levels &gt;= {@link Level#WARNING WARNING} are printed to STDERR.
      *   </li>
      *   <li>
      *     Messages with levels {@link Level#INFO INFO} are printed to STDOUT.

@@ -33,11 +33,11 @@ package de.unkrig.commons.lang.protocol;
  * <p>
  *   When using this type in a variable, parameter or field declaration, <b>never</b> write
  * </p>
- * <pre>PredicateWhichThrows&lt;<i>subject-type</i>, <i>thrown-exception</i>></pre>
+ * <pre>PredicateWhichThrows&lt;<i>subject-type</i>, <i>thrown-exception</i>&gt;</pre>
  * <p>
  *   , but always
  * </p>
- * <pre>PredicateWhichThrows&lt;? super <i>subject-type</i>, ? extends <i>thrown-exception</i>></pre>
+ * <pre>PredicateWhichThrows&lt;? super <i>subject-type</i>, ? extends <i>thrown-exception</i>&gt;</pre>
  * <p>
  *   .
  * </p>

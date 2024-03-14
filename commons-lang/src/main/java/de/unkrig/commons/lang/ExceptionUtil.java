@@ -295,7 +295,7 @@ class ExceptionUtil {
      * <pre>
      * import static de.unkrig.commons.lang.ExceptionUtil.throwUndeclared;
      *
-     * class MyIterator&lt;E> implements Iterator&lt;E> {
+     * class MyIterator&lt;E&gt; implements Iterator&lt;E&gt; {
      *
      *     public E next() {
      *         // ...

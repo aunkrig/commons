@@ -33,11 +33,11 @@ package de.unkrig.commons.lang.protocol;
  * <p>
  *   When using this type in a variable, parameter or field declaration, <b>never</b> write
  * </p>
- * <pre>Transformer&lt;<i>input-type</i>, <i>output-type</i>></pre>
+ * <pre>Transformer&lt;<i>input-type</i>, <i>output-type</i>&gt;</pre>
  * <p>
  *   , but always:
  * </p>
- * <pre>Transformer&lt;? super <i>input-type</i>, ? extends <i>output-type</i>></pre>
+ * <pre>Transformer&lt;? super <i>input-type</i>, ? extends <i>output-type</i>&gt;</pre>
  *
  * @param <I> The type of the input parameter of {@link #transform(Object)}
  * @param <O> The return type of {@link #transform(Object)}

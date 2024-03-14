@@ -273,7 +273,7 @@ class MapUtil {
 
     /**
      * Returns a {@link Map} that is composed of <var>map1</var> and <var>map2</var>, where <var>map1</var> takes
-     * precedence over <<var>map2</var>.
+     * precedence over <var>map2</var>.
      * <p>
      *   All modifying operations are directed to <var>map1</var>; <var>map2</var> is never modified.
      * </p>
@@ -282,11 +282,10 @@ class MapUtil {
     combine(final Map<K, V> map1, final Map<K, V> map2) {
         return new Map<K, V>() {
 
-            // SUPPRESS CHECKSTYLE LineLength:5
-            @Override public void                 clear()            { throw new UnsupportedOperationException("clear");    }
-            @Override public Set<K>               keySet()           { throw new UnsupportedOperationException("keySet");   }
-            @Override public V                    remove(Object key) { throw new UnsupportedOperationException("remove");   }
-            @Override public Collection<V>        values()           { throw new UnsupportedOperationException("values");   }
+            @Override public void          clear()            { throw new UnsupportedOperationException("clear");  }
+            @Override public Set<K>        keySet()           { throw new UnsupportedOperationException("keySet"); }
+            @Override public V             remove(Object key) { throw new UnsupportedOperationException("remove"); }
+            @Override public Collection<V> values()           { throw new UnsupportedOperationException("values"); }
 
             @Override public boolean
             containsKey(Object key) { return map1.containsKey(key) || map2.containsKey(key); }

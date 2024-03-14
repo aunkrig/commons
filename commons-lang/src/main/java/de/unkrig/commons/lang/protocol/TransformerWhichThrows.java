@@ -35,13 +35,13 @@ package de.unkrig.commons.lang.protocol;
  *    <i>input-type</i>,
  *    <i>output-type</i>,
  *    <i>thrown-exception</i>
- *></pre>
+ *&gt;</pre>
  * , but always
  * <pre>TransformerWhichThrows&lt;
  *    ? super <i>input-type</i>,
  *    ? extends <i>output-type</i>,
  *    ? extends <i>thrown-exception</i>
- *></pre>
+ *&gt;</pre>
  * .
  *
  * @param <I>  The type of the consumed subject

@@ -46,7 +46,7 @@ class Signature {
     /**
      * Converts a class descriptor / signature into strings like
      * <pre>
-     * List&lt;T extends java.lang.Exception></pre>
+     * List&lt;T extends java.lang.Exception&gt;</pre>
      * Notice that the result does not include the accessibility.
      */
     public static String
@@ -63,7 +63,7 @@ class Signature {
      * Converts an ASM method node into strings like
      * <pre>
      * meth(java.lang.String, java.util.Map)}
-     * &lt;T extends java.io.IOException> meth(T, double, java.lang.List&lt;T>)</pre>
+     * &lt;T extends java.io.IOException&gt; meth(T, double, java.lang.List&lt;T&gt;)</pre>
      * Notice that the result includes neither the return type nor the accessibility.
      */
     public static String
@@ -75,7 +75,7 @@ class Signature {
      * Converts a method descriptor / signature into strings like
      * <pre>
      * meth(java.lang.String, java.util.Map)
-     * &lt;T extends java.io.IOException>meth(T, double, java.lang.List&lt;T>)</pre>
+     * &lt;T extends java.io.IOException&gt;meth(T, double, java.lang.List&lt;T&gt;)</pre>
      * Notice that the result includes neither the return type nor the accessibility.
      */
     public static String

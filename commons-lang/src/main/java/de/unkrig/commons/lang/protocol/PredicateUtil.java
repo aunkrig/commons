@@ -411,9 +411,10 @@ class PredicateUtil {
     }
 
     /**
-     * @return A predicate that evaluates to "<var>min</var> {@code <=} <var>subject</var> <= <var>max</var>", or, if
-     *         <var>min</var> {@code >} <var>max</var>, to "<var>subject</var> {@code >=} <var>min</var> {@code ||}
-     *         <var>subject</var> {@code <=} <var>max</var>"
+     * @return A predicate that evaluates to
+     *         "<var>min</var> {@code <=} <var>subject</var> {@code <=} <var>max</var>",
+     *         or, if <var>min</var> {@code >} <var>max</var>, to
+     *         "<var>subject</var> {@code >=} <var>min</var> {@code ||} <var>subject</var> {@code <=} <var>max</var>"
      */
     public static <C extends Comparable<C>> Predicate<C>
     between(final C min, final C max) {

@@ -40,7 +40,7 @@ import de.unkrig.commons.util.logging.LogUtil;
 /**
  * A {@link Filter} that filters {@link LogRecord}s by an ".condition" property like
  * <pre>
- *   method == "foo" && message =~ ".*bla.*"
+ *   method == "foo" &amp;&amp; message =~ ".*bla.*"
  * </pre>
  * The following variables are supported:
  * <table border="1">

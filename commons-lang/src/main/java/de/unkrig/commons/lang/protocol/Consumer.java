@@ -36,11 +36,11 @@ package de.unkrig.commons.lang.protocol;
  * <p>
  *   When using this type in a variable, parameter or field declaration, <b>never</b> write:
  * </p>
- * <pre>Consumer&lt;<i>consumed-type</i>></pre>
+ * <pre>Consumer&lt;<i>consumed-type</i>&gt;</pre>
  * <p>
  *   , but always:
  * </p>
- * <pre>Consumer&lt;? super <i>consumed-type</i>></pre>
+ * <pre>Consumer&lt;? super <i>consumed-type</i>&gt;</pre>
  *
  * @param <T> The subject type
  */

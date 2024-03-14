@@ -40,7 +40,7 @@ import de.unkrig.commons.nullanalysis.Nullable;
  *    <i>input-type</i>,
  *    <i>output-type</i>,
  *    <i>thrown-exception</i>
- *></pre>
+ *&gt;</pre>
  * <p>
  *   , but always
  * </p>
@@ -48,7 +48,7 @@ import de.unkrig.commons.nullanalysis.Nullable;
  *    ? super <i>input-type</i>,
  *    ? extends <i>output-type</i>,
  *    ? extends <i>thrown-exception</i>
- *></pre>
+ *&gt;</pre>
  * <p>
  *   .
  * </p>

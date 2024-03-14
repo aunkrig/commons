@@ -36,11 +36,11 @@ package de.unkrig.commons.lang.protocol;
  * <p>
  *   When using this type in a variable, parameter or field declaration, <b>never</b> write:
  * </p>
- * <pre>Predicate&lt;<i>subject-type</i>></pre>
+ * <pre>Predicate&lt;<i>subject-type</i>&gt;</pre>
  * <p>
  *   , but always:
  * </p>
- * <pre>Predicate&lt;? super <i>subject-type</i>></pre>
+ * <pre>Predicate&lt;? super <i>subject-type</i>&gt;</pre>
  *
  * @param <T> The type of the <var>subject</var> parameter of the {@link #evaluate(Object)} method
  */

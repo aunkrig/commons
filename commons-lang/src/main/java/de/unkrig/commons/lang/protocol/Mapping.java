@@ -53,11 +53,11 @@ import de.unkrig.commons.nullanalysis.Nullable;
  * <p>
  *   When using this type in a variable, parameter or field declaration, <b>never</b> write:
  * </p>
- * <pre>Mapping&lt;<i>key-type</i>, <i>value-type</i>></pre>
+ * <pre>Mapping&lt;<i>key-type</i>, <i>value-type</i>&gt;</pre>
  * <p>
  *   , but always:
  * </p>
- * <pre>Mapping&lt;? super <i>key-type</i>, ? extends <i>value-type</i>></pre>
+ * <pre>Mapping&lt;? super <i>key-type</i>, ? extends <i>value-type</i>&gt;</pre>
  * <p>
  *   That way many type conversions are possible  which otherwise aren't.
  * </p>

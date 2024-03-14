@@ -33,11 +33,11 @@ package de.unkrig.commons.lang.protocol;
  * <p>
  *   When using this type in a variable, parameter or field declaration, <b>never</b> write:
  * </p>
- * <pre>ConsumerWhichThrows&lt;<i>consumed-type</i>, <i>thrown-exception</i>></pre>
+ * <pre>ConsumerWhichThrows&lt;<i>consumed-type</i>, <i>thrown-exception</i>&gt;</pre>
  * <p>
  *   , but always:
  * </p>
- * <pre>ConsumerWhichThrows&lt;? super <i>consumed-type</i>, ? extends <i>thrown-exception</i>></pre>
+ * <pre>ConsumerWhichThrows&lt;? super <i>consumed-type</i>, ? extends <i>thrown-exception</i>&gt;</pre>
  *
  * @param <T>  The type of the consumed subjects
  * @param <EX> The throwable type that {@link #consume(Object)} may throw; use {@link NoException} to indicate that

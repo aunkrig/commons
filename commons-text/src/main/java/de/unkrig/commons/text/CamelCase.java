@@ -46,9 +46,9 @@ class CamelCase {
      * <p>
      * Examples:
      * <table>
-     *   <tr><td>{@code "list", "length"}     </td><td>=></td><td>{@code "listLength"}     </td></tr>
-     *   <tr><td>{@code "My", "class"}        </td><td>=></td><td>{@code "MyClass"}        </td></tr>
-     *   <tr><td>{@code "oneTwo", "threeFour"}</td><td>=></td><td>{@code "oneTwoThreefour"}</td></tr>
+     *   <tr><td>{@code "list", "length"}     </td><td>=&gt;</td><td>{@code "listLength"}     </td></tr>
+     *   <tr><td>{@code "My", "class"}        </td><td>=&gt;</td><td>{@code "MyClass"}        </td></tr>
+     *   <tr><td>{@code "oneTwo", "threeFour"}</td><td>=&gt;</td><td>{@code "oneTwoThreefour"}</td></tr>
      * </table>
      *
      * @throws ArrayIndexOutOfBoundsException {@code strings.length} was zero

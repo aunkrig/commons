@@ -48,7 +48,7 @@ import de.unkrig.commons.nullanalysis.Nullable;
  *
  *     // ...
  *
- *     private static final MethodWrapper1<Character, Boolean, Integer, RuntimeException>
+ *     private static final MethodWrapper1&lt;Character, Boolean, Integer, RuntimeException&gt;
  *     CHARACTER__IS_ALPHABETIC = OptionalMethods.get1(
  *         Character.class,       // declaringClass
  *         "isAlphabetic",        // methodName
@@ -66,7 +66,7 @@ import de.unkrig.commons.nullanalysis.Nullable;
  *         }
  *
  *         // Alternatively, it is possible to check whether the wrapped method is available:
- *         if (CHARACTER__IS_ALPHABETIC.isAvailable() && CHARACTER__IS_ALPHABETIC.invoke(null, cp)) {
+ *         if (CHARACTER__IS_ALPHABETIC.isAvailable() &amp;&amp; CHARACTER__IS_ALPHABETIC.invoke(null, cp)) {
  *             // ...
  *         }
  *     }

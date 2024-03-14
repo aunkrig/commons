@@ -96,7 +96,7 @@ class ExpressionMatchReplacer {
      *   Example:
      * </p>
      * <pre>
-     *   Function&lt;Matcher, String> matchReplacer = ExpressionMatchReplacer.parse("m.group.toUpperCase()");
+     *   Function&lt;Matcher, String&gt; matchReplacer = ExpressionMatchReplacer.parse("m.group.toUpperCase()");
      *   ...
      *   Matcher matcher = ...;
      *   System.out.println(PatternUtil.replaceSome(matcher, matchReplacer));
@@ -144,7 +144,7 @@ class ExpressionMatchReplacer {
      *   Example:
      * </p>
      * <pre>
-     *   Function&lt;Matcher, String> matchReplacer = ExpressionMatchReplacer.parse(
+     *   Function&lt;Matcher, String&gt; matchReplacer = ExpressionMatchReplacer.parse(
      *       "prefix + new StringBuilder(m.group).reverse()",
      *       Mappings.mapping("prefix", "pre-"),
      *       "prefix"
@@ -218,9 +218,9 @@ class ExpressionMatchReplacer {
      * </p>
      * <pre>
      *     Pattern            pattern   = Pattern.compile("(155\\d{10})(?!\\d)");
-     *     Mapping&lt;String, ?> variables = Mappings.mapping("df", new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS"));
+     *     Mapping&lt;String, ?&gt; variables = Mappings.mapping("df", new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS"));
      *
-     *     final Transformer&lt;Mapping&lt;String, ?>, Function&lt;MatchResult, String>>
+     *     final Transformer&lt;Mapping&lt;String, ?&gt;, Function&lt;MatchResult, String&gt;&gt;
      *     matchReplacer = ExpressionMatchReplacer.parseExt(
      *         "${df.format(new java.util.Date(Long.parseLong(m.group(1))))}",
      *         Mappings.containsKeyPredicate(variables)
@@ -484,8 +484,8 @@ class ExpressionMatchReplacer {
      * <pre>
      *   // Parsing the expression is relatively slow.
      *   Expression expression = new ExpressionEvaluator(
-     *       "prefix",  // <= This is "our" variable
-     *       "m"        // <= Also declare variable "m", which will automatically be available
+     *       "prefix",  // &lt;= This is "our" variable
+     *       "m"        // &lt;= Also declare variable "m", which will automatically be available
      *   ).parse(
      *       "prefix + new StringBuilder(m.group).reverse()"
      *   );
@@ -493,9 +493,9 @@ class ExpressionMatchReplacer {
      *   // ...
      *
      *   // Creating the match replacer with the actual variable values is fast.
-     *   Function&lt;Matcher, String> matchReplacer = ExpressionMatchReplacer.get(
+     *   Function&lt;Matcher, String&gt; matchReplacer = ExpressionMatchReplacer.get(
      *       expression,
-     *       Mappings.&lt;String, Object>mapping("prefix", "pre-") // &lt;= pass the value for variable "prefix"
+     *       Mappings.&lt;String, Object&gt;mapping("prefix", "pre-") // &lt;= pass the value for variable "prefix"
      *   );
      *
      *   // Now use the match replacer to substitute regex matches.

@@ -36,11 +36,11 @@ import de.unkrig.commons.nullanalysis.Nullable;
  * <p>
  *   When using this type in a variable, parameter or field declaration, <b>never</b> write:
  * </p>
- * <pre>ProducerWhichThrows&lt;<i>product-type</i>, <i>thrown-exception</i>></pre>
+ * <pre>ProducerWhichThrows&lt;<i>product-type</i>, <i>thrown-exception</i>&gt;</pre>
  * <p>
  *   , but always:
  * </p>
- * <pre>ProducerWhichThrows&lt;? extends <i>product-type</i>, ? extends <i>thrown-exception</i>></pre>
+ * <pre>ProducerWhichThrows&lt;? extends <i>product-type</i>, ? extends <i>thrown-exception</i>&gt;</pre>
  *
  * @param <T>  The type of the products
  * @param <EX> The throwable type that {@link #produce()} may throw; use {@link NoException} to indicate that {@link

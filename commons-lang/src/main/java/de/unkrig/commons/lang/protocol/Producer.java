@@ -35,11 +35,11 @@ package de.unkrig.commons.lang.protocol;
  * <p>
  *   When using this type in a variable, parameter or field declaration, <b>never</b> write:
  * </p>
- * <pre>Producer&lt;<i>product-type</i>></pre>
+ * <pre>Producer&lt;<i>product-type</i>&gt;</pre>
  * <p>
  *   , but always:
  * </p>
- * <pre>Producer&lt;? extends <i>product-type</i>></pre>
+ * <pre>Producer&lt;? extends <i>product-type</i>&gt;</pre>
  *
  * @param <T> The type of the 'products'
  */

@@ -131,7 +131,7 @@ class Characters {
 
     /**
      * Evaluates whether a given code point lies in the POSIX character class "punct" (one of <code>! " # $ % &amp;
-     * ' ( ) * + , - . / : ; &lt; = > ? @ [ \ ] ^ _ ` { | } ~</code>).
+     * ' ( ) * + , - . / : ; &lt; = &gt; ? @ [ \ ] ^ _ ` { | } ~</code>).
      *
      * @see <a href="http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap07.html#tag_07_03_01">The Open
      *      Group Base Specifications Issue 7, section 7.3.1: LC_CTYPE</a>

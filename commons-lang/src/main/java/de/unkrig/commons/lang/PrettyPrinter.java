@@ -168,7 +168,7 @@ class PrettyPrinter {
 
     /**
      * Converts the <var>codePoint</var> into a JAVA char literal (e.g. {@code '\n'} or {@code 'A'}), or, iff the
-     * <var>codePoint</var> is supplementary (>= 64k), into a JAVA hexadecimal integer literal (e.g. {@code 0x10000}).
+     * <var>codePoint</var> is supplementary (&gt;= 64k), into a JAVA hexadecimal integer literal (e.g. {@code 0x10000}).
      */
     @Nullable public static String
     codePointToJavaLiteral(int codePoint) {

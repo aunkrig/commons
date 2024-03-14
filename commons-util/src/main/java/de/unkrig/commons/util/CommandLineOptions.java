@@ -141,7 +141,7 @@ class CommandLineOptions {
      *
      *       // ...
      *
-     *       // This one maps to "-font-size &lt;x>" and "--font-size &lt;x>".
+     *       // This one maps to "-font-size &lt;x&gt;" and "--font-size &lt;x&gt;".
      *       &#64;CommandLineOption public static void
      *       setFontSize(double size) { System.out.println("fontSize=" + size); }
      *
@@ -157,11 +157,12 @@ class CommandLineOptions {
      *       &#64;CommandLineOption(name = { "-beta", "--gamma" }) public static void
      *       method2() {}
      *
-     *       // This one maps to "-foo &lt;a> &lt;b> &lt;c>". (A single dashes may be used instead of the double dash.)
+     *       // This one maps to "-foo &lt;a&gt; &lt;b&gt; &lt;c&gt;". (A single dashes may be used instead of the
+     *       // double dash.)
      *       &#64;CommandLineOption public static void
      *       foo(int one, String two, java.util.Pattern three) {}
      *
-     *       // This one maps to "--person [ --name &lt;>name> ] [ --age &lt;age> ]". (Single dashes may be used
+     *       // This one maps to "--person [ --name &lt;&gt;name&gt; ] [ --age &lt;age&gt; ]". (Single dashes may be used
      *       // instead of the double dashes.)
      *       &#64;CommandLineOption public static void
      *       addPerson(Person p) {}

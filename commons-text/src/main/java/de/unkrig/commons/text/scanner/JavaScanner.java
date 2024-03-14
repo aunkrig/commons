@@ -67,7 +67,7 @@ class JavaScanner {
         CXX_COMMENT,
 
         /**
-         * Starts with {@code "/*"} and ends with <code>"&42;/"</code>.
+         * Starts with {@code "/*"} and ends with <code>"&#42;/"</code>.
          * <p>
          *   If the C comment spans multiple lines, the line breaks appear <b>exactly as in the input</b>, for
          *   example: <code>"/**\r * &#64;throws IOException\r\n &#42;/"</code>
@@ -152,11 +152,11 @@ class JavaScanner {
         /**
          * One of the Java "operators":
          * <pre>
-         *   >>>=
-         *   &lt;&lt;= >>= >>>
+         *   &gt;&gt;&gt;=
+         *   &lt;&lt;= &gt;&gt;= &gt;&gt;&gt;
          *   += -= *= /= &amp;= |= ^= %=
-         *   == &lt;= >= != &amp;&amp; || ++ -- &lt;&lt; >>
-         *   = > &lt; ! ~ ? :
+         *   == &lt;= &gt;= != &amp;&amp; || ++ -- &lt;&lt; &gt;&gt;
+         *   = &gt; &lt; ! ~ ? :
          *   + - * / &amp; | ^ %
          *   &#64;
          * </pre>

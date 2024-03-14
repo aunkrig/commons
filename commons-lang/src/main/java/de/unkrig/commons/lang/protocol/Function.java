@@ -33,11 +33,11 @@ package de.unkrig.commons.lang.protocol;
  * <p>
  *   When using this type in a variable, parameter or field declaration, <b>never</b> write
  * </p>
- * <pre>Function&lt;<i>input-type</i>, <i>output-type</i>></pre>
+ * <pre>Function&lt;<i>input-type</i>, <i>output-type</i>&gt;</pre>
  * <p>
  *   , but always
  * </p>
- * <pre>Function&lt;? super <i>input-type</i>, ? extends <i>output-type</i>></pre>
+ * <pre>Function&lt;? super <i>input-type</i>, ? extends <i>output-type</i>&gt;</pre>
  * <p>
  *   .
  * </p>

@@ -57,7 +57,7 @@ import de.unkrig.commons.text.scanner.ScannerUtil;
 /**
  * Parses an expression like
  * <pre>
- * s == "abc" && (c == 'b' || !b == true)
+ * s == "abc" &amp;&amp; (c == 'b' || !b == true)
  * </pre>
  *
  * Supported operators (in ascending priority) are:

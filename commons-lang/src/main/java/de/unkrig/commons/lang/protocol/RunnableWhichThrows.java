@@ -33,11 +33,11 @@ package de.unkrig.commons.lang.protocol;
  * <p>
  *   When using this type in a variable, parameter or field declaration, <b>never</b> write
  * </p>
- * <pre>RunnableWhichThrows&lt;<i>thrown-exception</i>></pre>
+ * <pre>RunnableWhichThrows&lt;<i>thrown-exception</i>&gt;</pre>
  * <p>
  *   , but always:
  * </p>
- * <pre>RunnableWhichThrows&lt;? extends <i>thrown-exception</i>></pre>
+ * <pre>RunnableWhichThrows&lt;? extends <i>thrown-exception</i>&gt;</pre>
  *
  * @param <EX> The throwable type that {@link #run()} may throw; use {@link NoException} to indicate that {@link
  *             #run()} does not declare any checked exceptions
