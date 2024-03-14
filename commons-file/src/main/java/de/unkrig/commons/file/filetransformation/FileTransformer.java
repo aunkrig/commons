@@ -117,7 +117,7 @@ interface FileTransformer {
      *     Mode.CHECK_AND_TRANSFORM}, then the method attempts to avoid unnecessary i/o and processing by first checking
      *     whether the file requires any modifications before applying them. (If this method throws an exception, then
      *     it must revert the file to its original state as far as is reasonably possible.)
-     *   /li>
+     *   </li>
      * </ul>
      *
      * @param  path             A text designating the input file; typically, but not necessarily identical with {@link
