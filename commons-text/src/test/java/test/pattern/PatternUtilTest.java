@@ -270,6 +270,27 @@ class PatternUtilTest extends TestCase {
         Assert.assertArrayEquals(new String[] { "\ud87d\uee51def", "" }, PatternUtil.constantPrefix("\\x{1f651}def"));
     }
 
+    @Test public void
+    testAppend() throws Exception, RuntimeException {
+    	StringBuilder sb = new StringBuilder();
+		int count = PatternUtil.replaceSome(
+            new StringReader("line1\nline2\n"),                             // in
+            Pattern.compile("\\z"),                                         // pattern
+            PatternUtil.replacementStringMatchReplacer("\n#IS_STRIPPED\n"), // matchReplacer
+            sb,                                                             // out
+            8192                                                            // bufferCapacity
+        );
+		Assert.assertEquals(1, count);
+		Assert.assertEquals("line1\nline2\n\n#IS_STRIPPED\n", sb.toString());
+
+		// Weird... Iff the subject strings ends with NL, then "$" matches TWICE: BEFORE the terminal NL, and AFTER
+		// the terminal NL. (JDK 8, 11, 17.)
+		Assert.assertEquals(
+			"line1\nline2\nline3SUFFIX\nSUFFIX",
+			Pattern.compile("$").matcher("line1\nline2\nline3\n").replaceAll("SUFFIX")
+		);
+    }
+
     // ---------------------------------------------------------------
 
     private static String
